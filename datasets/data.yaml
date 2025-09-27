@@ -1,0 +1,5 @@
+train: C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection\datasets\train
+val: C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection\datasets\val
+
+nc: 2
+names: ['real', 'fake']
