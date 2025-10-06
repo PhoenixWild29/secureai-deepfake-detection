@@ -1,0 +1,542 @@
+/**
+ * ProgressiveVideoUploader Component Styles
+ * Modern, accessible styling for the progressive video upload component
+ */
+
+/* ============================================================================
+   Main Container
+   ============================================================================ */
+
+.progressiveUploader {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* ============================================================================
+   Drag and Drop Zone
+   ============================================================================ */
+
+.dropZone {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #f9fafb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dropZone:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.dropZoneActive {
+  border-color: #3b82f6;
+  background-color: #dbeafe;
+  transform: scale(1.02);
+}
+
+.dropZoneReject {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.dropZoneDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dropZoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.dropZoneIcon {
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.dropZone:hover .dropZoneIcon {
+  color: #3b82f6;
+}
+
+.dropZoneActive .dropZoneIcon {
+  color: #3b82f6;
+  animation: bounce 0.6s ease-in-out;
+}
+
+.dropZoneText {
+  color: #374151;
+}
+
+.dropZoneText h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dropZoneText p {
+  margin: 4px 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.dropZoneSubtext {
+  font-size: 0.75rem !important;
+  color: #9ca3af !important;
+}
+
+/* ============================================================================
+   File Preview
+   ============================================================================ */
+
+.filePreview {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.fileInfo {
+  margin-bottom: 20px;
+}
+
+.fileInfo h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  word-break: break-word;
+}
+
+.fileInfo p {
+  margin: 4px 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.fileActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ============================================================================
+   Upload Progress
+   ============================================================================ */
+
+.uploadProgress {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.progressHeader h4 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  word-break: break-word;
+}
+
+.progressPercentage {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+.progressDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* ============================================================================
+   Duplicate Detection Result
+   ============================================================================ */
+
+.duplicateResult {
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f0fdf4;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.duplicateIcon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.duplicateContent {
+  flex: 1;
+}
+
+.duplicateContent h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.duplicateContent p {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+  color: #047857;
+}
+
+/* ============================================================================
+   Error State
+   ============================================================================ */
+
+.errorContainer {
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fef2f2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.errorIcon {
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.errorContent {
+  flex: 1;
+}
+
+.errorContent h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #991b1b;
+}
+
+.errorContent p {
+  margin: 0 0 12px 0;
+  font-size: 0.875rem;
+  color: #b91c1c;
+}
+
+/* ============================================================================
+   Upload Complete
+   ============================================================================ */
+
+.uploadComplete {
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #f0fdf4;
+  text-align: center;
+}
+
+.successIcon {
+  color: #10b981;
+  margin: 0 auto 16px auto;
+  width: 48px;
+  height: 48px;
+}
+
+.uploadComplete h4 {
+  margin: 0 0 8px 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.uploadComplete p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #047857;
+}
+
+/* ============================================================================
+   Processing State
+   ============================================================================ */
+
+.processing {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 40px 20px;
+  background-color: #ffffff;
+  text-align: center;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.processing p {
+  margin: 16px 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* ============================================================================
+   Buttons
+   ============================================================================ */
+
+.uploadButton,
+.viewResultsButton {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.uploadButton:hover,
+.viewResultsButton:hover {
+  background-color: #2563eb;
+}
+
+.uploadButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: #4b5563;
+}
+
+.retryButton {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: #d97706;
+}
+
+.retryButton:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   Spinner Animation
+   ============================================================================ */
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .progressiveUploader {
+    padding: 16px;
+  }
+  
+  .dropZone {
+    padding: 30px 16px;
+  }
+  
+  .filePreview,
+  .uploadProgress,
+  .duplicateResult,
+  .errorContainer,
+  .uploadComplete,
+  .processing {
+    padding: 16px;
+  }
+  
+  .fileActions {
+    flex-direction: column;
+  }
+  
+  .progressDetails {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .progressHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .dropZone,
+  .dropZoneIcon,
+  .progressFill,
+  .spinner {
+    animation: none;
+    transition: none;
+  }
+}
+
+.dropZone:focus-visible,
+.uploadButton:focus-visible,
+.cancelButton:focus-visible,
+.retryButton:focus-visible,
+.viewResultsButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Dark Mode Support
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  .progressiveUploader {
+    color: #f9fafb;
+  }
+  
+  .dropZone {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .dropZone:hover {
+    background-color: #1e3a8a;
+  }
+  
+  .dropZoneActive {
+    background-color: #1e40af;
+  }
+  
+  .dropZoneText h3 {
+    color: #f9fafb;
+  }
+  
+  .filePreview,
+  .uploadProgress,
+  .processing {
+    background-color: #1f2937;
+    border-color: #374151;
+  }
+  
+  .progressBar {
+    background-color: #374151;
+  }
+}

@@ -1,0 +1,772 @@
+/**
+ * ProcessingStageVisualization CSS Module
+ * Styles for processing stage visualization with resource monitoring
+ */
+
+/* Main Container */
+.processingStageViz {
+  @apply w-full max-w-7xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700;
+}
+
+.processingStageVizHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.processingStageVizTitle {
+  @apply text-2xl font-bold text-gray-900 dark:text-white;
+}
+
+.processingStageVizSubtitle {
+  @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+}
+
+/* Status Indicator */
+.statusIndicator {
+  @apply flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.statusIndicatorProcessing {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.statusIndicatorCompleted {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.statusIndicatorFailed {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.statusIndicatorPending {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+.statusIndicatorCancelled {
+  @apply bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200;
+}
+
+.statusDot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.statusDotProcessing {
+  @apply bg-blue-500 animate-pulse;
+}
+
+.statusDotCompleted {
+  @apply bg-green-500;
+}
+
+.statusDotFailed {
+  @apply bg-red-500;
+}
+
+.statusDotPending {
+  @apply bg-yellow-500 animate-pulse;
+}
+
+.statusDotCancelled {
+  @apply bg-gray-500;
+}
+
+/* Overall Progress */
+.overallProgress {
+  @apply mb-6;
+}
+
+.overallProgressHeader {
+  @apply flex items-center justify-between mb-2;
+}
+
+.overallProgressTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.overallProgressPercentage {
+  @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+}
+
+.overallProgressBar {
+  @apply w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+}
+
+.overallProgressFill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out;
+}
+
+/* Processing Stages */
+.processingStages {
+  @apply mb-6;
+}
+
+.stagesHeader {
+  @apply flex items-center justify-between mb-4;
+}
+
+.stagesTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.stagesGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+.stageCard {
+  @apply p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out;
+}
+
+.stageCardActive {
+  @apply border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md;
+}
+
+.stageCardCompleted {
+  @apply border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20;
+}
+
+.stageCardError {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.stageCardSkipped {
+  @apply border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 opacity-60;
+}
+
+.stageCardPending {
+  @apply border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800;
+}
+
+.stageHeader {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.stageIcon {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm;
+}
+
+.stageIconBlue {
+  @apply bg-blue-500;
+}
+
+.stageIconGreen {
+  @apply bg-green-500;
+}
+
+.stageIconPurple {
+  @apply bg-purple-500;
+}
+
+.stageIconOrange {
+  @apply bg-orange-500;
+}
+
+.stageIconIndigo {
+  @apply bg-indigo-500;
+}
+
+.stageIconTeal {
+  @apply bg-teal-500;
+}
+
+.stageIconRed {
+  @apply bg-red-500;
+}
+
+.stageIconGray {
+  @apply bg-gray-500;
+}
+
+.stageInfo {
+  @apply flex-1 min-w-0;
+}
+
+.stageName {
+  @apply text-sm font-semibold text-gray-900 dark:text-white truncate;
+}
+
+.stageProgress {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.stageProgressBar {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-2;
+}
+
+.stageProgressFill {
+  @apply h-full rounded-full transition-all duration-500 ease-out;
+}
+
+.stageProgressFillBlue {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600;
+}
+
+.stageProgressFillGreen {
+  @apply bg-gradient-to-r from-green-500 to-green-600;
+}
+
+.stageProgressFillPurple {
+  @apply bg-gradient-to-r from-purple-500 to-purple-600;
+}
+
+.stageProgressFillOrange {
+  @apply bg-gradient-to-r from-orange-500 to-orange-600;
+}
+
+.stageProgressFillIndigo {
+  @apply bg-gradient-to-r from-indigo-500 to-indigo-600;
+}
+
+.stageProgressFillTeal {
+  @apply bg-gradient-to-r from-teal-500 to-teal-600;
+}
+
+.stageProgressFillRed {
+  @apply bg-gradient-to-r from-red-500 to-red-600;
+}
+
+.stageDescription {
+  @apply text-xs text-gray-600 dark:text-gray-400;
+}
+
+.stageStatus {
+  @apply flex items-center gap-1 mt-2;
+}
+
+.stageStatusDot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.stageStatusDotActive {
+  @apply bg-blue-500 animate-pulse;
+}
+
+.stageStatusDotCompleted {
+  @apply bg-green-500;
+}
+
+.stageStatusDotError {
+  @apply bg-red-500;
+}
+
+.stageStatusDotSkipped {
+  @apply bg-gray-400;
+}
+
+.stageStatusDotPending {
+  @apply bg-gray-300 dark:bg-gray-600;
+}
+
+.stageStatusText {
+  @apply text-xs text-gray-500 dark:text-gray-400 capitalize;
+}
+
+/* Resource Monitoring */
+.resourceMonitoring {
+  @apply mb-6;
+}
+
+.resourceHeader {
+  @apply flex items-center justify-between mb-4;
+}
+
+.resourceTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.resourceGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+.resourceCard {
+  @apply p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.resourceCardHeader {
+  @apply flex items-center gap-2 mb-3;
+}
+
+.resourceCardIcon {
+  @apply w-5 h-5 text-gray-500 dark:text-gray-400;
+}
+
+.resourceCardTitle {
+  @apply text-sm font-semibold text-gray-900 dark:text-white;
+}
+
+.resourceCardValue {
+  @apply text-2xl font-bold text-gray-900 dark:text-white mb-1;
+}
+
+.resourceCardLabel {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.resourceCardProgress {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-2;
+}
+
+.resourceCardProgressFill {
+  @apply h-full rounded-full transition-all duration-500 ease-out;
+}
+
+.resourceCardProgressFillBlue {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600;
+}
+
+.resourceCardProgressFillGreen {
+  @apply bg-gradient-to-r from-green-500 to-green-600;
+}
+
+.resourceCardProgressFillOrange {
+  @apply bg-gradient-to-r from-orange-500 to-orange-600;
+}
+
+.resourceCardProgressFillRed {
+  @apply bg-gradient-to-r from-red-500 to-red-600;
+}
+
+/* Worker Allocation */
+.workerAllocation {
+  @apply mb-6;
+}
+
+.workerHeader {
+  @apply flex items-center justify-between mb-4;
+}
+
+.workerTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.workerGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.workerCard {
+  @apply p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.workerCardActive {
+  @apply border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20;
+}
+
+.workerCardIdle {
+  @apply border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20;
+}
+
+.workerCardBusy {
+  @apply border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.workerCardOffline {
+  @apply border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800;
+}
+
+.workerCardError {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.workerHeader {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.workerIcon {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm;
+}
+
+.workerIconActive {
+  @apply bg-green-500;
+}
+
+.workerIconIdle {
+  @apply bg-yellow-500;
+}
+
+.workerIconBusy {
+  @apply bg-blue-500;
+}
+
+.workerIconOffline {
+  @apply bg-gray-500;
+}
+
+.workerIconError {
+  @apply bg-red-500;
+}
+
+.workerInfo {
+  @apply flex-1 min-w-0;
+}
+
+.workerName {
+  @apply text-sm font-semibold text-gray-900 dark:text-white truncate;
+}
+
+.workerStatus {
+  @apply text-xs text-gray-500 dark:text-gray-400 capitalize;
+}
+
+.workerCurrentTask {
+  @apply text-xs text-gray-600 dark:text-gray-400 mt-1 truncate;
+}
+
+.workerMetrics {
+  @apply grid grid-cols-2 gap-2 mt-3;
+}
+
+.workerMetric {
+  @apply text-center;
+}
+
+.workerMetricValue {
+  @apply text-sm font-semibold text-gray-900 dark:text-white;
+}
+
+.workerMetricLabel {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+/* GPU Utilization */
+.gpuUtilization {
+  @apply mb-6;
+}
+
+.gpuHeader {
+  @apply flex items-center justify-between mb-4;
+}
+
+.gpuTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.gpuGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.gpuCard {
+  @apply p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.gpuCardActive {
+  @apply border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20;
+}
+
+.gpuCardIdle {
+  @apply border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20;
+}
+
+.gpuCardBusy {
+  @apply border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.gpuCardOffline {
+  @apply border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800;
+}
+
+.gpuCardError {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.gpuHeader {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.gpuIcon {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm;
+}
+
+.gpuIconActive {
+  @apply bg-green-500;
+}
+
+.gpuIconIdle {
+  @apply bg-yellow-500;
+}
+
+.gpuIconBusy {
+  @apply bg-blue-500;
+}
+
+.gpuIconOffline {
+  @apply bg-gray-500;
+}
+
+.gpuIconError {
+  @apply bg-red-500;
+}
+
+.gpuInfo {
+  @apply flex-1 min-w-0;
+}
+
+.gpuName {
+  @apply text-sm font-semibold text-gray-900 dark:text-white truncate;
+}
+
+.gpuStatus {
+  @apply text-xs text-gray-500 dark:text-gray-400 capitalize;
+}
+
+.gpuCurrentTask {
+  @apply text-xs text-gray-600 dark:text-gray-400 mt-1 truncate;
+}
+
+.gpuMetrics {
+  @apply grid grid-cols-2 gap-2 mt-3;
+}
+
+.gpuMetric {
+  @apply text-center;
+}
+
+.gpuMetricValue {
+  @apply text-sm font-semibold text-gray-900 dark:text-white;
+}
+
+.gpuMetricLabel {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+.gpuUtilizationBar {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-2;
+}
+
+.gpuUtilizationFill {
+  @apply h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500 ease-out;
+}
+
+.gpuMemoryBar {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-2;
+}
+
+.gpuMemoryFill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out;
+}
+
+/* Queue Status */
+.queueStatus {
+  @apply mb-6;
+}
+
+.queueHeader {
+  @apply flex items-center justify-between mb-4;
+}
+
+.queueTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.queueCard {
+  @apply p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700;
+}
+
+.queueCardActive {
+  @apply border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20;
+}
+
+.queueCardPaused {
+  @apply border-yellow-300 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20;
+}
+
+.queueCardStopped {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.queueCardError {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.queueInfo {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-4 mb-4;
+}
+
+.queueInfoItem {
+  @apply text-center;
+}
+
+.queueInfoValue {
+  @apply text-xl font-bold text-gray-900 dark:text-white;
+}
+
+.queueInfoLabel {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.queueProgress {
+  @apply w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+}
+
+.queueProgressFill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out;
+}
+
+.queueDetails {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-4 mt-4;
+}
+
+.queueDetail {
+  @apply text-center;
+}
+
+.queueDetailValue {
+  @apply text-sm font-semibold text-gray-900 dark:text-white;
+}
+
+.queueDetailLabel {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
+
+/* Error States */
+.errorState {
+  @apply p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-6;
+}
+
+.errorIcon {
+  @apply w-8 h-8 text-red-600 dark:text-red-400 mb-3;
+}
+
+.errorTitle {
+  @apply text-lg font-semibold text-red-800 dark:text-red-200 mb-2;
+}
+
+.errorMessage {
+  @apply text-red-700 dark:text-red-300 mb-4;
+}
+
+.errorActions {
+  @apply flex gap-2;
+}
+
+.errorButton {
+  @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+
+.errorButtonPrimary {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+.errorButtonSecondary {
+  @apply bg-white text-red-600 border border-red-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+/* Loading States */
+.loadingState {
+  @apply p-6 text-center;
+}
+
+.loadingSpinner {
+  @apply w-8 h-8 border-4 border-gray-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin mx-auto mb-4;
+}
+
+.loadingText {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .processingStageViz {
+    @apply p-4;
+  }
+  
+  .stagesGrid {
+    @apply grid-cols-1;
+  }
+  
+  .resourceGrid {
+    @apply grid-cols-1;
+  }
+  
+  .workerGrid {
+    @apply grid-cols-1;
+  }
+  
+  .gpuGrid {
+    @apply grid-cols-1;
+  }
+  
+  .queueInfo {
+    @apply grid-cols-2;
+  }
+  
+  .queueDetails {
+    @apply grid-cols-1;
+  }
+}
+
+/* Dark Mode Specific */
+@media (prefers-color-scheme: dark) {
+  .processingStageViz {
+    @apply bg-gray-900 border-gray-700;
+  }
+  
+  .stageCard,
+  .resourceCard,
+  .workerCard,
+  .gpuCard,
+  .queueCard {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .stageCard,
+  .resourceCard,
+  .workerCard,
+  .gpuCard,
+  .queueCard {
+    @apply border-2;
+  }
+  
+  .stageProgressBar,
+  .resourceCardProgress,
+  .gpuUtilizationBar,
+  .gpuMemoryBar,
+  .queueProgress {
+    @apply border border-gray-400;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .stageCard,
+  .resourceCard,
+  .workerCard,
+  .gpuCard,
+  .queueCard,
+  .stageProgressFill,
+  .resourceCardProgressFill,
+  .gpuUtilizationFill,
+  .gpuMemoryFill,
+  .queueProgressFill {
+    @apply transition-none;
+  }
+  
+  .statusDotProcessing,
+  .statusDotPending,
+  .stageStatusDotActive {
+    @apply animate-none;
+  }
+  
+  .loadingSpinner {
+    @apply animate-none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .processingStageViz {
+    @apply shadow-none border border-gray-300;
+  }
+  
+  .errorActions {
+    @apply hidden;
+  }
+  
+  .stageCard,
+  .resourceCard,
+  .workerCard,
+  .gpuCard,
+  .queueCard {
+    @apply break-inside-avoid;
+  }
+}

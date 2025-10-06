@@ -1,0 +1,446 @@
+/**
+ * Dashboard-specific styles for SecureAI DeepFake Detection System
+ * Provides enhanced styling for dashboard components and layouts
+ */
+
+/* Dashboard Overview Styles */
+.dashboard-overview {
+  @apply min-h-screen bg-background;
+}
+
+.dashboard-overview .dashboard-header {
+  @apply border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
+}
+
+.dashboard-overview .dashboard-content {
+  @apply flex-1 space-y-6 p-6;
+}
+
+/* Real-time Status Indicators */
+.status-indicator {
+  @apply inline-flex items-center gap-2 text-sm;
+}
+
+.status-indicator.online {
+  @apply text-green-600;
+}
+
+.status-indicator.offline {
+  @apply text-red-600;
+}
+
+.status-indicator.warning {
+  @apply text-yellow-600;
+}
+
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.status-dot.online {
+  @apply bg-green-500 animate-pulse;
+}
+
+.status-dot.offline {
+  @apply bg-red-500;
+}
+
+.status-dot.warning {
+  @apply bg-yellow-500;
+}
+
+/* Analysis Summary List Styles */
+.analysis-summary-list {
+  @apply space-y-4;
+}
+
+.analysis-summary-item {
+  @apply p-4 border rounded-lg hover:bg-muted/50 transition-all duration-200 cursor-pointer;
+}
+
+.analysis-summary-item:hover {
+  @apply shadow-sm border-muted-foreground/20;
+}
+
+.analysis-summary-item.processing {
+  @apply border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20;
+}
+
+.analysis-summary-item.completed {
+  @apply border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20;
+}
+
+.analysis-summary-item.failed {
+  @apply border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-950/20;
+}
+
+/* Progress Indicators */
+.progress-indicator {
+  @apply flex items-center gap-2 text-sm text-muted-foreground;
+}
+
+.progress-bar {
+  @apply w-full bg-muted rounded-full h-2;
+}
+
+.progress-bar-fill {
+  @apply bg-primary h-2 rounded-full transition-all duration-300 ease-out;
+}
+
+.progress-bar-fill.uploading {
+  @apply bg-blue-500;
+}
+
+.progress-bar-fill.processing {
+  @apply bg-yellow-500;
+}
+
+.progress-bar-fill.analyzing {
+  @apply bg-green-500;
+}
+
+.progress-bar-fill.error {
+  @apply bg-red-500;
+}
+
+/* Upload Area Styles */
+.upload-area {
+  @apply relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200;
+}
+
+.upload-area.drag-over {
+  @apply border-primary bg-primary/5;
+}
+
+.upload-area.uploading {
+  @apply pointer-events-none opacity-75;
+}
+
+.upload-area.error {
+  @apply border-red-300 bg-red-50/50 dark:border-red-800 dark:bg-red-950/20;
+}
+
+.upload-area.success {
+  @apply border-green-300 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20;
+}
+
+/* Performance Metrics Styles */
+.performance-metrics {
+  @apply grid gap-4;
+}
+
+.performance-metrics.grid-2 {
+  @apply grid-cols-2;
+}
+
+.performance-metrics.grid-3 {
+  @apply grid-cols-3;
+}
+
+.performance-metrics.grid-4 {
+  @apply grid-cols-4;
+}
+
+@media (max-width: 768px) {
+  .performance-metrics.grid-2,
+  .performance-metrics.grid-3,
+  .performance-metrics.grid-4 {
+    @apply grid-cols-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .performance-metrics.grid-2,
+  .performance-metrics.grid-3,
+  .performance-metrics.grid-4 {
+    @apply grid-cols-1;
+  }
+}
+
+.metric-card {
+  @apply flex flex-col items-center text-center p-4 bg-muted/50 rounded-lg;
+}
+
+.metric-card.positive {
+  @apply bg-green-50/50 dark:bg-green-950/20;
+}
+
+.metric-card.negative {
+  @apply bg-red-50/50 dark:bg-red-950/20;
+}
+
+.metric-card.neutral {
+  @apply bg-blue-50/50 dark:bg-blue-950/20;
+}
+
+.metric-value {
+  @apply text-2xl font-bold mb-1;
+}
+
+.metric-title {
+  @apply text-sm font-medium text-foreground mb-1;
+}
+
+.metric-description {
+  @apply text-xs text-muted-foreground;
+}
+
+/* Quick Access Navigation Styles */
+.quick-access-nav {
+  @apply space-y-4;
+}
+
+.quick-access-primary {
+  @apply space-y-2;
+}
+
+.quick-access-regular {
+  @apply grid grid-cols-1 gap-2;
+}
+
+.quick-access-item {
+  @apply w-full justify-start h-auto transition-all duration-200;
+}
+
+.quick-access-item:hover {
+  @apply shadow-sm;
+}
+
+.quick-access-item.primary {
+  @apply p-4;
+}
+
+.quick-access-item.regular {
+  @apply p-3;
+}
+
+/* WebSocket Connection Styles */
+.websocket-status {
+  @apply flex items-center gap-2 text-sm;
+}
+
+.websocket-status.connected {
+  @apply text-green-600;
+}
+
+.websocket-status.connecting {
+  @apply text-yellow-600;
+}
+
+.websocket-status.disconnected {
+  @apply text-red-600;
+}
+
+.websocket-status.error {
+  @apply text-red-600;
+}
+
+/* Loading States */
+.loading-skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+.loading-skeleton.text {
+  @apply h-4;
+}
+
+.loading-skeleton.title {
+  @apply h-6;
+}
+
+.loading-skeleton.button {
+  @apply h-10;
+}
+
+.loading-skeleton.card {
+  @apply h-32;
+}
+
+/* Error States */
+.error-state {
+  @apply flex flex-col items-center justify-center py-8 text-center;
+}
+
+.error-icon {
+  @apply h-12 w-12 text-red-500 mb-4;
+}
+
+.error-title {
+  @apply text-lg font-semibold text-red-600 mb-2;
+}
+
+.error-description {
+  @apply text-sm text-muted-foreground mb-4;
+}
+
+/* Empty States */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-8 text-center;
+}
+
+.empty-icon {
+  @apply h-12 w-12 text-muted-foreground mb-4;
+}
+
+.empty-title {
+  @apply text-lg font-semibold text-muted-foreground mb-2;
+}
+
+.empty-description {
+  @apply text-sm text-muted-foreground mb-4;
+}
+
+/* Animation Classes */
+.fade-in {
+  @apply animate-in fade-in duration-300;
+}
+
+.slide-in {
+  @apply animate-in slide-in-from-bottom-4 duration-300;
+}
+
+.scale-in {
+  @apply animate-in zoom-in-95 duration-200;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dashboard-overview .dashboard-content {
+    @apply p-4;
+  }
+  
+  .analysis-summary-item {
+    @apply p-3;
+  }
+  
+  .upload-area {
+    @apply p-6;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-overview .dashboard-content {
+    @apply p-3 space-y-4;
+  }
+  
+  .analysis-summary-item {
+    @apply p-2 text-sm;
+  }
+  
+  .upload-area {
+    @apply p-4;
+  }
+  
+  .metric-card {
+    @apply p-3;
+  }
+  
+  .metric-value {
+    @apply text-xl;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-overview .dashboard-content {
+    @apply p-2 space-y-3;
+  }
+  
+  .analysis-summary-item {
+    @apply p-2 text-xs;
+  }
+  
+  .upload-area {
+    @apply p-3;
+  }
+  
+  .metric-card {
+    @apply p-2;
+  }
+  
+  .metric-value {
+    @apply text-lg;
+  }
+}
+
+/* Dark Mode Adjustments */
+@media (prefers-color-scheme: dark) {
+  .analysis-summary-item.processing {
+    @apply border-blue-700 bg-blue-950/30;
+  }
+  
+  .analysis-summary-item.completed {
+    @apply border-green-700 bg-green-950/30;
+  }
+  
+  .analysis-summary-item.failed {
+    @apply border-red-700 bg-red-950/30;
+  }
+  
+  .upload-area.drag-over {
+    @apply border-primary bg-primary/10;
+  }
+  
+  .upload-area.error {
+    @apply border-red-700 bg-red-950/30;
+  }
+  
+  .upload-area.success {
+    @apply border-green-700 bg-green-950/30;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .dashboard-overview {
+    @apply bg-white;
+  }
+  
+  .dashboard-overview .dashboard-content {
+    @apply p-0 space-y-4;
+  }
+  
+  .quick-access-nav,
+  .websocket-status {
+    @apply hidden;
+  }
+  
+  .analysis-summary-item {
+    @apply border border-gray-300 bg-white shadow-none;
+  }
+  
+  .metric-card {
+    @apply border border-gray-300 bg-white;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .analysis-summary-item {
+    @apply border-2;
+  }
+  
+  .upload-area {
+    @apply border-2;
+  }
+  
+  .metric-card {
+    @apply border border-foreground;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .slide-in,
+  .scale-in {
+    @apply animate-none;
+  }
+  
+  .status-dot.online {
+    @apply animate-none;
+  }
+  
+  .progress-bar-fill {
+    @apply transition-none;
+  }
+}

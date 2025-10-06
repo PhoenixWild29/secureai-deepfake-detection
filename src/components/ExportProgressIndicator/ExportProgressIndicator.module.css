@@ -1,0 +1,382 @@
+/**
+ * ExportProgressIndicator Component Styles
+ * Work Order #39 - Multi-Format Export Capabilities
+ */
+
+.exportProgressIndicator {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.progressHeader h3 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  color: #718096;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.expandButton:hover {
+  background: #edf2f7;
+  color: #4a5568;
+}
+
+.progressContent {
+  padding: 1rem;
+}
+
+/* Progress Bar Styles */
+.progressBarContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: #edf2f7;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: #667eea;
+  border-radius: 4px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  position: relative;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressText {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a5568;
+  min-width: 3rem;
+  text-align: right;
+}
+
+/* Status Info Styles */
+.statusInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.statusIcon {
+  font-size: 1.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7fafc;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.statusContent {
+  flex: 1;
+}
+
+.statusMessage {
+  color: #2d3748;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.timeRemaining {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+/* Action Buttons Styles */
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #feb2b2;
+  border-color: #fc8181;
+}
+
+.downloadButton {
+  padding: 0.5rem 1rem;
+  background: #c6f6d5;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.downloadButton:hover {
+  background: #9ae6b4;
+  border-color: #68d391;
+}
+
+.retryButton {
+  padding: 0.5rem 1rem;
+  background: #bee3f8;
+  color: #2a4365;
+  border: 1px solid #90cdf4;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retryButton:hover {
+  background: #90cdf4;
+  border-color: #63b3ed;
+}
+
+/* Error Details Styles */
+.errorDetails {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fed7d7;
+  border: 1px solid #feb2b2;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.errorIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.errorContent h4 {
+  margin: 0 0 0.25rem 0;
+  color: #c53030;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.errorContent p {
+  margin: 0;
+  color: #e53e3e;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Logs Styles */
+.logsContainer {
+  margin-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.logsHeader h4 {
+  margin: 0 0 0.75rem 0;
+  color: #2d3748;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.logsList {
+  max-height: 200px;
+  overflow-y: auto;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.logEntry {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.25rem 0;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.logEntry:last-child {
+  border-bottom: none;
+}
+
+.logEntry.info {
+  color: #4a5568;
+}
+
+.logEntry.error {
+  color: #c53030;
+}
+
+.logTimestamp {
+  color: #718096;
+  font-family: monospace;
+  min-width: 4rem;
+  flex-shrink: 0;
+}
+
+.logMessage {
+  flex: 1;
+  word-break: break-word;
+}
+
+/* Export ID Styles */
+.exportId {
+  padding: 0.75rem 1rem;
+  background: #f7fafc;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.75rem;
+  color: #718096;
+  font-family: monospace;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .progressBarContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .progressText {
+    text-align: center;
+    min-width: auto;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .cancelButton,
+  .downloadButton,
+  .retryButton {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .statusInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+/* Animation for completed state */
+.exportProgressIndicator.completed .progressFill {
+  animation: completionPulse 0.6s ease-in-out;
+}
+
+@keyframes completionPulse {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.2);
+  }
+}
+
+/* Focus styles for accessibility */
+.expandButton:focus,
+.cancelButton:focus,
+.downloadButton:focus,
+.retryButton:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .progressBar {
+    border: 1px solid #4a5568;
+  }
+  
+  .statusIcon {
+    border-width: 2px;
+  }
+  
+  .logsList {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .progressFill::after {
+    animation: none;
+  }
+  
+  .progressFill {
+    transition: none;
+  }
+  
+  .exportProgressIndicator.completed .progressFill {
+    animation: none;
+  }
+}

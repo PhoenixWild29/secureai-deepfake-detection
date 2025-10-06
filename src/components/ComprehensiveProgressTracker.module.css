@@ -1,0 +1,619 @@
+/**
+ * ComprehensiveProgressTracker CSS Module
+ * Styles for progress tracking components with animations and responsive design
+ */
+
+/* Main Progress Tracker Container */
+.progressTracker {
+  @apply w-full max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700;
+}
+
+.progressTrackerHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.progressTrackerTitle {
+  @apply text-2xl font-bold text-gray-900 dark:text-white;
+}
+
+.progressTrackerSubtitle {
+  @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+}
+
+/* Connection Status */
+.connectionStatus {
+  @apply flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.connectionStatusConnected {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.connectionStatusDisconnected {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.connectionStatusConnecting {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+.connectionStatusError {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.connectionDot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.connectionDotConnected {
+  @apply bg-green-500 animate-pulse;
+}
+
+.connectionDotDisconnected {
+  @apply bg-red-500;
+}
+
+.connectionDotConnecting {
+  @apply bg-yellow-500 animate-pulse;
+}
+
+.connectionDotError {
+  @apply bg-red-500;
+}
+
+/* Overall Progress */
+.overallProgress {
+  @apply mb-6;
+}
+
+.overallProgressHeader {
+  @apply flex items-center justify-between mb-2;
+}
+
+.overallProgressTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.overallProgressPercentage {
+  @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+}
+
+.overallProgressBar {
+  @apply w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+}
+
+.overallProgressFill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out;
+}
+
+/* Timeline Display */
+.timelineDisplay {
+  @apply mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg;
+}
+
+.timelineHeader {
+  @apply flex items-center justify-between mb-3;
+}
+
+.timelineTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.timelineStats {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+.timelineStat {
+  @apply text-center;
+}
+
+.timelineStatValue {
+  @apply text-xl font-bold text-gray-900 dark:text-white;
+}
+
+.timelineStatLabel {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.timelineStatUnit {
+  @apply text-xs text-gray-400 dark:text-gray-500;
+}
+
+/* Stage Indicators */
+.stageGroup {
+  @apply mb-6;
+}
+
+.stageList {
+  @apply space-y-4;
+}
+
+.stageIndicator {
+  @apply flex items-start gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out;
+}
+
+.stageIndicatorClickable {
+  @apply cursor-pointer hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600;
+}
+
+.stageIndicatorClickable:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.stageIndicatorActive {
+  @apply border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.stageIndicatorCompleted {
+  @apply border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20;
+}
+
+.stageIndicatorError {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.stageIndicatorSkipped {
+  @apply border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800;
+}
+
+.stageIconContainer {
+  @apply relative flex-shrink-0;
+}
+
+.stageIcon {
+  @apply w-6 h-6 text-gray-500 dark:text-gray-400;
+}
+
+.stageIndicatorActive .stageIcon {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+.stageIndicatorCompleted .stageIcon {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.stageIndicatorError .stageIcon {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.activeIndicator {
+  @apply absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full;
+}
+
+.pulse {
+  @apply absolute inset-0 bg-blue-500 rounded-full animate-ping;
+}
+
+.stageContent {
+  @apply flex-1 min-w-0;
+}
+
+.stageHeader {
+  @apply flex items-center justify-between mb-2;
+}
+
+.stageName {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.stageProgress {
+  @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+}
+
+.progressBarContainer {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-2;
+}
+
+.progressBar {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out;
+}
+
+.stageIndicatorCompleted .progressBar {
+  @apply bg-gradient-to-r from-green-500 to-green-600;
+}
+
+.stageIndicatorError .progressBar {
+  @apply bg-gradient-to-r from-red-500 to-red-600;
+}
+
+.stageDescription {
+  @apply text-sm text-gray-600 dark:text-gray-400;
+}
+
+.stageDetails {
+  @apply mt-3 pt-3 border-t border-gray-200 dark:border-gray-700;
+}
+
+.durationInfo {
+  @apply flex items-center justify-between text-sm;
+}
+
+.durationLabel {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.durationValue {
+  @apply font-medium text-gray-900 dark:text-white;
+}
+
+.stageStatusIndicator {
+  @apply flex-shrink-0 ml-2;
+}
+
+.statusDot {
+  @apply w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600;
+}
+
+.stageIndicatorActive .statusDot {
+  @apply bg-blue-500 animate-pulse;
+}
+
+.stageIndicatorCompleted .statusDot {
+  @apply bg-green-500;
+}
+
+.stageIndicatorError .statusDot {
+  @apply bg-red-500;
+}
+
+.stageConnector {
+  @apply flex items-center justify-center py-2;
+}
+
+.connectorLine {
+  @apply w-px h-8 bg-gray-300 dark:bg-gray-600;
+}
+
+.connectorDot {
+  @apply w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full -ml-1;
+}
+
+/* Frame Progress Display */
+.frameProgressDisplay {
+  @apply mb-6;
+}
+
+.frameStats {
+  @apply p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4;
+}
+
+.statsHeader {
+  @apply flex items-center justify-between mb-3;
+}
+
+.statsTitle {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.collapseButton {
+  @apply p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.collapseIcon {
+  @apply w-5 h-5;
+}
+
+.statsGrid {
+  @apply grid grid-cols-2 md:grid-cols-5 gap-4 mb-3;
+}
+
+.statItem {
+  @apply text-center;
+}
+
+.statValue {
+  @apply text-xl font-bold text-gray-900 dark:text-white;
+}
+
+.statLabel {
+  @apply text-sm text-gray-500 dark:text-gray-400;
+}
+
+.frameProgressBar {
+  @apply w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
+}
+
+.frameProgressFill {
+  @apply h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500 ease-out;
+}
+
+.frameList {
+  @apply space-y-2;
+}
+
+.frameItem {
+  @apply p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 transition-all duration-200 ease-in-out;
+}
+
+.frameItemClickable {
+  @apply cursor-pointer hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600;
+}
+
+.frameItemClickable:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.frameItemCompleted {
+  @apply border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20;
+}
+
+.frameItemProcessing {
+  @apply border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.frameItemError {
+  @apply border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20;
+}
+
+.frameItemPending {
+  @apply border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800;
+}
+
+.frameHeader {
+  @apply flex items-center gap-3 mb-2;
+}
+
+.frameIconContainer {
+  @apply flex-shrink-0;
+}
+
+.frameIcon {
+  @apply w-5 h-5 text-gray-500 dark:text-gray-400;
+}
+
+.frameItemCompleted .frameIcon {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.frameItemProcessing .frameIcon {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+.frameItemError .frameIcon {
+  @apply text-red-600 dark:text-red-400;
+}
+
+.frameInfo {
+  @apply flex-1 min-w-0;
+}
+
+.frameIndex {
+  @apply text-sm font-medium text-gray-900 dark:text-white;
+}
+
+.frameStatus {
+  @apply text-xs text-gray-500 dark:text-gray-400 ml-2;
+}
+
+.frameProgress {
+  @apply flex-shrink-0;
+}
+
+.frameProgressText {
+  @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+}
+
+.expandButton {
+  @apply p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.expandIcon {
+  @apply w-4 h-4;
+}
+
+.frameItemProgressBar {
+  @apply w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-2;
+}
+
+.frameItemProgressFill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300 ease-out;
+}
+
+.frameItemCompleted .frameItemProgressFill {
+  @apply bg-gradient-to-r from-green-500 to-green-600;
+}
+
+.frameItemError .frameItemProgressFill {
+  @apply bg-gradient-to-r from-red-500 to-red-600;
+}
+
+.frameDetails {
+  @apply mt-3 pt-3 border-t border-gray-200 dark:border-gray-700;
+}
+
+.frameMetadata {
+  @apply grid grid-cols-2 gap-2 mb-3;
+}
+
+.metadataItem {
+  @apply flex items-center justify-between text-sm;
+}
+
+.metadataLabel {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+.metadataValue {
+  @apply font-medium text-gray-900 dark:text-white;
+}
+
+.frameError {
+  @apply p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg;
+}
+
+.errorHeader {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.errorIcon {
+  @apply w-4 h-4 text-red-600 dark:text-red-400;
+}
+
+.errorCode {
+  @apply text-sm font-medium text-red-800 dark:text-red-200;
+}
+
+.errorMessage {
+  @apply text-sm text-red-700 dark:text-red-300 mb-2;
+}
+
+.recoveryActions {
+  @apply text-sm;
+}
+
+.recoveryLabel {
+  @apply font-medium text-red-800 dark:text-red-200;
+}
+
+.recoveryList {
+  @apply list-disc list-inside mt-1 space-y-1;
+}
+
+.recoveryItem {
+  @apply text-red-700 dark:text-red-300;
+}
+
+.showMoreIndicator {
+  @apply text-center py-2;
+}
+
+.showMoreText {
+  @apply text-sm text-gray-500 dark:text-gray-400 italic;
+}
+
+/* Error States */
+.errorState {
+  @apply p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg;
+}
+
+.errorIcon {
+  @apply w-8 h-8 text-red-600 dark:text-red-400 mb-3;
+}
+
+.errorTitle {
+  @apply text-lg font-semibold text-red-800 dark:text-red-200 mb-2;
+}
+
+.errorMessage {
+  @apply text-red-700 dark:text-red-300 mb-4;
+}
+
+.errorActions {
+  @apply flex gap-2;
+}
+
+.errorButton {
+  @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
+}
+
+.errorButtonPrimary {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+.errorButtonSecondary {
+  @apply bg-white text-red-600 border border-red-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+/* Loading States */
+.loadingState {
+  @apply p-6 text-center;
+}
+
+.loadingSpinner {
+  @apply w-8 h-8 border-4 border-gray-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin mx-auto mb-4;
+}
+
+.loadingText {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .progressTracker {
+    @apply p-4;
+  }
+  
+  .timelineStats {
+    @apply grid-cols-2 gap-2;
+  }
+  
+  .statsGrid {
+    @apply grid-cols-3 gap-2;
+  }
+  
+  .stageIndicator {
+    @apply flex-col gap-2;
+  }
+  
+  .stageIconContainer {
+    @apply self-start;
+  }
+  
+  .frameMetadata {
+    @apply grid-cols-1 gap-1;
+  }
+}
+
+/* Dark Mode Specific */
+@media (prefers-color-scheme: dark) {
+  .progressTracker {
+    @apply bg-gray-900 border-gray-700;
+  }
+  
+  .stageIndicator {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .frameItem {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .stageIndicator {
+    @apply border-2;
+  }
+  
+  .frameItem {
+    @apply border-2;
+  }
+  
+  .progressBar {
+    @apply border border-gray-400;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .progressBar,
+  .frameItemProgressFill,
+  .frameProgressFill,
+  .stageIndicator,
+  .frameItem {
+    @apply transition-none;
+  }
+  
+  .pulse,
+  .loadingSpinner {
+    @apply animate-none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .progressTracker {
+    @apply shadow-none border border-gray-300;
+  }
+  
+  .collapseButton,
+  .expandButton,
+  .errorActions {
+    @apply hidden;
+  }
+  
+  .stageIndicator,
+  .frameItem {
+    @apply break-inside-avoid;
+  }
+}
