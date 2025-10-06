@@ -1,0 +1,1120 @@
+/**
+ * Notification Center Styles
+ * CSS module for notification management system
+ */
+
+/* Main Notification Center */
+.notificationCenter {
+  @apply bg-white rounded-lg shadow-xl border border-gray-200;
+  width: 400px;
+  max-width: 90vw;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.notificationCenterHeader {
+  @apply flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg;
+}
+
+.notificationCenterTitle {
+  @apply flex items-center space-x-2;
+}
+
+.notificationCenterIcon {
+  @apply w-5 h-5 text-gray-600;
+}
+
+.notificationCenterTitleText {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.notificationCenterBadge {
+  @apply ml-2;
+}
+
+.notificationCenterActions {
+  @apply flex items-center space-x-2;
+}
+
+.notificationCenterActionButton {
+  @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
+}
+
+.notificationCenterActionIcon {
+  @apply w-4 h-4;
+}
+
+.notificationCenterStatus {
+  @apply flex items-center space-x-1 px-2 py-1 rounded text-xs font-medium;
+}
+
+.notificationCenterStatusConnected {
+  @apply bg-green-100 text-green-800;
+}
+
+.notificationCenterStatusDisconnected {
+  @apply bg-red-100 text-red-800;
+}
+
+.notificationCenterStatusIndicator {
+  @apply w-2 h-2 rounded-full;
+}
+
+.notificationCenterStatusConnected .notificationCenterStatusIndicator {
+  @apply bg-green-500;
+}
+
+.notificationCenterStatusDisconnected .notificationCenterStatusIndicator {
+  @apply bg-red-500;
+}
+
+.notificationCenterStatusText {
+  @apply text-xs;
+}
+
+/* Error State */
+.notificationCenterError {
+  @apply flex items-center space-x-3 p-4 bg-red-50 border-b border-red-200;
+}
+
+.notificationCenterErrorIcon {
+  @apply w-5 h-5 text-red-500 flex-shrink-0;
+}
+
+.notificationCenterErrorContent {
+  @apply flex-1;
+}
+
+.notificationCenterErrorTitle {
+  @apply font-medium text-red-900;
+}
+
+.notificationCenterErrorMessage {
+  @apply text-sm text-red-700;
+}
+
+.notificationCenterErrorRetry {
+  @apply px-3 py-1 text-sm font-medium text-red-700 bg-red-100 border border-red-200 rounded hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Content */
+.notificationCenterContent {
+  @apply overflow-hidden;
+}
+
+.notificationCenterTabs {
+  @apply flex border-b border-gray-200 bg-white;
+}
+
+.notificationCenterTab {
+  @apply flex items-center space-x-2 px-4 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors relative;
+}
+
+.notificationCenterTabActive {
+  @apply text-blue-600 border-blue-500;
+}
+
+.notificationCenterTabIcon {
+  @apply w-4 h-4;
+}
+
+.notificationCenterTabLabel {
+  @apply whitespace-nowrap;
+}
+
+.notificationCenterTabBadge {
+  @apply px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded-full;
+}
+
+.notificationCenterTabContent {
+  @apply overflow-y-auto;
+}
+
+/* Notification List */
+.notificationCenterNotificationList {
+  @apply h-full;
+}
+
+.notificationCenterPreferences {
+  @apply h-full;
+}
+
+.notificationCenterStats {
+  @apply p-4 space-y-4;
+}
+
+.notificationCenterStatsTitle {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.notificationCenterStatsGrid {
+  @apply grid grid-cols-2 gap-4;
+}
+
+.notificationCenterStat {
+  @apply text-center p-3 bg-gray-50 rounded-lg;
+}
+
+.notificationCenterStatValue {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.notificationCenterStatLabel {
+  @apply text-sm text-gray-600;
+}
+
+.notificationCenterStatsActions {
+  @apply flex flex-col space-y-2;
+}
+
+.notificationCenterStatsAction {
+  @apply px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.notificationCenterStatsActionDanger {
+  @apply text-red-700 border-red-300 hover:bg-red-50 focus:ring-red-500;
+}
+
+/* Footer */
+.notificationCenterFooter {
+  @apply flex items-center justify-between p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg text-sm text-gray-600;
+}
+
+.notificationCenterFooterLabel {
+  @apply font-medium;
+}
+
+.notificationCenterFooterActions {
+  @apply flex items-center space-x-2;
+}
+
+.notificationCenterFooterAction {
+  @apply flex items-center space-x-1 px-2 py-1 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.notificationCenterFooterActionIcon {
+  @apply w-3 h-3;
+}
+
+/* Notification Badge */
+.notificationBadge {
+  @apply relative inline-flex items-center;
+}
+
+.notificationBadgeIcon {
+  @apply w-5 h-5 text-gray-600;
+}
+
+.notificationBadgeCount {
+  @apply absolute -top-1 -right-1 flex items-center justify-center text-xs font-bold text-white rounded-full;
+}
+
+.badgeSmall {
+  @apply w-4 h-4 text-xs;
+}
+
+.badgeMedium {
+  @apply w-5 h-5 text-xs;
+}
+
+.badgeLarge {
+  @apply w-6 h-6 text-sm;
+}
+
+.badgeRed {
+  @apply bg-red-500;
+}
+
+.badgeBlue {
+  @apply bg-blue-500;
+}
+
+.badgeGreen {
+  @apply bg-green-500;
+}
+
+.badgeYellow {
+  @apply bg-yellow-500;
+}
+
+.badgePurple {
+  @apply bg-purple-500;
+}
+
+.badgePulsing {
+  @apply animate-pulse;
+}
+
+/* Notification List */
+.notificationList {
+  @apply flex flex-col h-full;
+}
+
+.notificationListHeader {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.notificationListTitle {
+  @apply flex items-center space-x-2;
+}
+
+.notificationListTitleText {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.notificationListCount {
+  @apply px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full;
+}
+
+.notificationListActions {
+  @apply flex items-center space-x-2;
+}
+
+.notificationListActionButton {
+  @apply flex items-center space-x-1 px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
+}
+
+.notificationListActionButtonActive {
+  @apply bg-blue-50 text-blue-700 border-blue-300;
+}
+
+.notificationListActionIcon {
+  @apply w-4 h-4;
+}
+
+.notificationListActionText {
+  @apply whitespace-nowrap;
+}
+
+.notificationListActionBadge {
+  @apply px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full;
+}
+
+.notificationListSearch {
+  @apply relative p-4 border-b border-gray-200;
+}
+
+.notificationListSearchIcon {
+  @apply absolute left-6 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400;
+}
+
+.notificationListSearchInput {
+  @apply w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500;
+}
+
+.notificationListFilters {
+  @apply p-4 border-b border-gray-200 bg-gray-50 space-y-4;
+}
+
+.notificationListFilterGroup {
+  @apply space-y-2;
+}
+
+.notificationListFilterLabel {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.notificationListFilterOptions {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.notificationListFilterOption {
+  @apply flex items-center space-x-2 cursor-pointer;
+}
+
+.notificationListFilterCheckbox {
+  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+}
+
+.notificationListFilterOptionText {
+  @apply text-sm text-gray-700;
+}
+
+.notificationListFilterSort {
+  @apply flex items-center space-x-2;
+}
+
+.notificationListFilterSelect {
+  @apply flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500;
+}
+
+.notificationListFilterSortButton {
+  @apply p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.notificationListFilterSortIcon {
+  @apply w-4 h-4;
+}
+
+.notificationListLoading {
+  @apply flex flex-col items-center justify-center py-12;
+}
+
+.notificationListLoadingSpinner {
+  @apply w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin;
+}
+
+.notificationListLoadingText {
+  @apply mt-3 text-sm text-gray-600;
+}
+
+.notificationListContent {
+  @apply flex-1 overflow-y-auto;
+}
+
+.notificationListEmpty {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.notificationListEmptyIcon {
+  @apply w-12 h-12 text-gray-400 mb-4;
+}
+
+.notificationListEmptyTitle {
+  @apply text-lg font-medium text-gray-900 mb-2;
+}
+
+.notificationListEmptyText {
+  @apply text-gray-600;
+}
+
+.notificationListItems {
+  @apply space-y-2 p-4;
+}
+
+.notificationListItem {
+  @apply border border-gray-200 rounded-lg;
+}
+
+/* Notification Item */
+.notificationItem {
+  @apply border border-gray-200 rounded-lg overflow-hidden transition-colors cursor-pointer;
+}
+
+.notificationItemRead {
+  @apply bg-gray-50;
+}
+
+.notificationItemUnread {
+  @apply bg-white border-l-4 border-l-blue-500;
+}
+
+.notificationItemCritical {
+  @apply border-l-red-500;
+}
+
+.notificationItemHigh {
+  @apply border-l-orange-500;
+}
+
+.notificationItemMedium {
+  @apply border-l-yellow-500;
+}
+
+.notificationItemLow {
+  @apply border-l-green-500;
+}
+
+.notificationItemPriorityUrgent {
+  @apply bg-red-50;
+}
+
+.notificationItemPriorityHigh {
+  @apply bg-orange-50;
+}
+
+.notificationItemPriorityNormal {
+  @apply bg-white;
+}
+
+.notificationItemPriorityLow {
+  @apply bg-green-50;
+}
+
+.notificationItemMain {
+  @apply flex items-start space-x-3 p-4;
+}
+
+.notificationItemIcon {
+  @apply flex-shrink-0;
+}
+
+.notificationItemSeverityIconCritical {
+  @apply w-5 h-5 text-red-500;
+}
+
+.notificationItemSeverityIconHigh {
+  @apply w-5 h-5 text-orange-500;
+}
+
+.notificationItemSeverityIconMedium {
+  @apply w-5 h-5 text-yellow-500;
+}
+
+.notificationItemSeverityIconLow {
+  @apply w-5 h-5 text-green-500;
+}
+
+.notificationItemContent {
+  @apply flex-1 min-w-0;
+}
+
+.notificationItemHeader {
+  @apply flex items-start justify-between mb-2;
+}
+
+.notificationItemTitle {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.notificationItemMeta {
+  @apply flex items-center space-x-4 text-xs text-gray-500;
+}
+
+.notificationItemTimestamp {
+  @apply flex items-center space-x-1;
+}
+
+.notificationItemTimestampIcon {
+  @apply w-3 h-3;
+}
+
+.notificationItemTimestampText {
+  @apply font-mono;
+}
+
+.notificationItemBadges {
+  @apply flex items-center space-x-1;
+}
+
+.notificationItemBadge {
+  @apply px-1.5 py-0.5 text-xs font-medium rounded;
+}
+
+.notificationItemBadgeSeverity {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.notificationItemBadgePriority {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.notificationItemBadgeCategory {
+  @apply bg-green-100 text-green-800;
+}
+
+.notificationItemMessage {
+  @apply text-sm text-gray-700 mb-2;
+}
+
+.notificationItemEntity {
+  @apply flex items-center space-x-2 text-xs text-gray-600;
+}
+
+.notificationItemEntityLabel {
+  @apply font-medium;
+}
+
+.notificationItemEntityType {
+  @apply px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded;
+}
+
+.notificationItemEntityId {
+  @apply font-mono;
+}
+
+.notificationItemExpandButton {
+  @apply flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded;
+}
+
+.notificationItemExpandIcon {
+  @apply w-3 h-3;
+}
+
+.notificationItemExpandText {
+  @apply font-medium;
+}
+
+.notificationItemStatus {
+  @apply flex items-center space-x-1;
+}
+
+.notificationItemUnreadIndicator {
+  @apply w-2 h-2 bg-blue-500 rounded-full;
+}
+
+.notificationItemDismissedIcon {
+  @apply w-4 h-4 text-gray-400;
+}
+
+.notificationItemDetails {
+  @apply px-4 pb-4 border-t border-gray-200 bg-gray-50 space-y-3;
+}
+
+.notificationItemDescription {
+  @apply space-y-2;
+}
+
+.notificationItemDescriptionTitle {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.notificationItemDescriptionText {
+  @apply text-sm text-gray-700;
+}
+
+.notificationItemData {
+  @apply space-y-2;
+}
+
+.notificationItemDataTitle {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.notificationItemDataContent {
+  @apply overflow-x-auto;
+}
+
+.notificationItemDataPre {
+  @apply text-xs text-gray-700 bg-white p-3 rounded border font-mono;
+}
+
+.notificationItemActions {
+  @apply space-y-2;
+}
+
+.notificationItemActionsTitle {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.notificationItemActionsList {
+  @apply flex flex-wrap gap-2;
+}
+
+.notificationItemActionButton {
+  @apply flex items-center space-x-2 px-3 py-1.5 text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.notificationItemActionButtonPrimary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.notificationItemActionButtonSecondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+.notificationItemActionButtonDanger {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.notificationItemActionButtonSuccess {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.notificationItemActionButtonWarning {
+  @apply bg-yellow-600 text-white hover:bg-yellow-700;
+}
+
+.notificationItemActionSpinner {
+  @apply w-3 h-3 border border-white border-t-transparent rounded-full animate-spin;
+}
+
+.notificationItemActionIcon {
+  @apply w-3 h-3;
+}
+
+.notificationItemActionLabel {
+  @apply whitespace-nowrap;
+}
+
+.notificationItemActionExternalIcon {
+  @apply w-3 h-3;
+}
+
+.notificationItemQuickActions {
+  @apply flex items-center space-x-1 p-2 bg-gray-100 border-t border-gray-200;
+}
+
+.notificationItemQuickAction {
+  @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
+}
+
+.notificationItemQuickActionIcon {
+  @apply w-4 h-4;
+}
+
+/* Notification Preferences */
+.notificationPreferences {
+  @apply space-y-4;
+}
+
+.preferencesHeader {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.preferencesTitle {
+  @apply flex items-center space-x-2;
+}
+
+.preferencesTitleIcon {
+  @apply w-5 h-5 text-gray-600;
+}
+
+.preferencesTitleText {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.preferencesActions {
+  @apply flex items-center space-x-2;
+}
+
+.preferencesActionButton {
+  @apply px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.preferencesActionButtonPrimary {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-700;
+}
+
+.preferencesActionSpinner {
+  @apply w-4 h-4 animate-spin;
+}
+
+.preferencesSection {
+  @apply border-b border-gray-200;
+}
+
+.preferencesSectionHeader {
+  @apply w-full flex items-center justify-between p-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors;
+}
+
+.preferencesSectionTitle {
+  @apply flex items-center space-x-2;
+}
+
+.preferencesSectionIcon {
+  @apply w-5 h-5 text-gray-600;
+}
+
+.preferencesSectionTitleText {
+  @apply text-base font-medium text-gray-900;
+}
+
+.preferencesSectionExpandIcon {
+  @apply w-4 h-4 text-gray-500;
+}
+
+.preferencesSectionContent {
+  @apply px-4 pb-4;
+}
+
+.preferencesGlobalSettings {
+  @apply space-y-3;
+}
+
+.preferencesGlobalSetting {
+  @apply flex items-center space-x-3;
+}
+
+.preferencesGlobalCheckbox {
+  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+}
+
+.preferencesGlobalLabel {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.preferencesGlobalSelect {
+  @apply px-3 py-1.5 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500;
+}
+
+.preferencesGlobalInput {
+  @apply w-20 px-3 py-1.5 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500;
+}
+
+.preferencesDeliveryMethods {
+  @apply space-y-4;
+}
+
+.preferencesDeliveryMethod {
+  @apply border border-gray-200 rounded-lg p-4;
+}
+
+.preferencesDeliveryMethodHeader {
+  @apply flex items-center justify-between;
+}
+
+.preferencesDeliveryMethodIcon {
+  @apply w-5 h-5 text-gray-600;
+}
+
+.preferencesDeliveryMethodTitle {
+  @apply text-base font-medium text-gray-900;
+}
+
+.preferencesDeliveryMethodToggle {
+  @apply relative inline-flex items-center;
+}
+
+.preferencesDeliveryMethodCheckbox {
+  @apply sr-only;
+}
+
+.preferencesDeliveryMethodToggleSlider {
+  @apply w-11 h-6 bg-gray-200 rounded-full relative transition-colors;
+}
+
+.preferencesDeliveryMethodToggleSlider::before {
+  @apply absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform;
+  content: '';
+}
+
+.preferencesDeliveryMethodCheckbox:checked + .preferencesDeliveryMethodToggleSlider {
+  @apply bg-blue-600;
+}
+
+.preferencesDeliveryMethodCheckbox:checked + .preferencesDeliveryMethodToggleSlider::before {
+  @apply transform translate-x-5;
+}
+
+.preferencesDeliveryMethodConfig {
+  @apply mt-3;
+}
+
+.preferencesDeliveryMethodDescription {
+  @apply text-sm text-gray-600;
+}
+
+.preferencesNotificationTypes {
+  @apply space-y-3;
+}
+
+.preferencesNotificationType {
+  @apply border border-gray-200 rounded-lg p-4;
+}
+
+.preferencesNotificationTypeHeader {
+  @apply flex items-center justify-between;
+}
+
+.preferencesNotificationTypeTitle {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.preferencesNotificationTypeToggle {
+  @apply relative inline-flex items-center;
+}
+
+.preferencesNotificationTypeCheckbox {
+  @apply sr-only;
+}
+
+.preferencesNotificationTypeToggleSlider {
+  @apply w-9 h-5 bg-gray-200 rounded-full relative transition-colors;
+}
+
+.preferencesNotificationTypeToggleSlider::before {
+  @apply absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform;
+  content: '';
+}
+
+.preferencesNotificationTypeCheckbox:checked + .preferencesNotificationTypeToggleSlider {
+  @apply bg-blue-600;
+}
+
+.preferencesNotificationTypeCheckbox:checked + .preferencesNotificationTypeToggleSlider::before {
+  @apply transform translate-x-4;
+}
+
+.preferencesNotificationTypeConfig {
+  @apply mt-3;
+}
+
+.preferencesNotificationTypeSettings {
+  @apply space-y-3;
+}
+
+.preferencesNotificationTypeSetting {
+  @apply space-y-1;
+}
+
+.preferencesNotificationTypeSettingLabel {
+  @apply block text-xs font-medium text-gray-700;
+}
+
+.preferencesNotificationTypeSelect {
+  @apply w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500;
+}
+
+.preferencesNotificationTypeDeliveryMethods {
+  @apply space-y-2;
+}
+
+.preferencesNotificationTypeDeliveryOptions {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.preferencesNotificationTypeDeliveryOption {
+  @apply flex items-center space-x-2;
+}
+
+.preferencesNotificationTypeDeliveryCheckbox {
+  @apply w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+}
+
+.preferencesNotificationTypeDeliveryLabel {
+  @apply text-xs text-gray-700;
+}
+
+.preferencesAdvancedSettings {
+  @apply space-y-3;
+}
+
+.preferencesAdvancedDescription {
+  @apply text-sm text-gray-600;
+}
+
+.preferencesPriorityUrgent {
+  @apply bg-red-100 text-red-800;
+}
+
+.preferencesPriorityHigh {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.preferencesPriorityNormal {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.preferencesPriorityLow {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .notificationCenter {
+    @apply w-full max-w-none top-0 right-0 rounded-none;
+  }
+
+  .notificationListFilterOptions {
+    @apply grid-cols-1;
+  }
+
+  .notificationCenterStatsGrid {
+    @apply grid-cols-1;
+  }
+
+  .notificationCenterStatsActions {
+    @apply flex-row flex-wrap;
+  }
+
+  .preferencesNotificationTypeDeliveryOptions {
+    @apply grid-cols-1;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .notificationCenter {
+    @apply bg-gray-900 border-gray-700;
+  }
+
+  .notificationCenterHeader {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .notificationCenterTitleText {
+    @apply text-gray-100;
+  }
+
+  .notificationCenterActionButton {
+    @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+  }
+
+  .notificationCenterStatusConnected {
+    @apply bg-green-900 text-green-200;
+  }
+
+  .notificationCenterStatusDisconnected {
+    @apply bg-red-900 text-red-200;
+  }
+
+  .notificationCenterTab {
+    @apply text-gray-400 hover:text-gray-200;
+  }
+
+  .notificationCenterTabActive {
+    @apply text-blue-400;
+  }
+
+  .notificationCenterFooter {
+    @apply bg-gray-800 border-gray-700 text-gray-400;
+  }
+
+  .notificationCenterFooterAction {
+    @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+  }
+
+  .notificationItem {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .notificationItemRead {
+    @apply bg-gray-800;
+  }
+
+  .notificationItemUnread {
+    @apply bg-gray-900;
+  }
+
+  .notificationItemTitle {
+    @apply text-gray-100;
+  }
+
+  .notificationItemMessage {
+    @apply text-gray-300;
+  }
+
+  .notificationItemDetails {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .notificationItemDescriptionTitle {
+    @apply text-gray-100;
+  }
+
+  .notificationItemDescriptionText {
+    @apply text-gray-300;
+  }
+
+  .notificationItemActionsTitle {
+    @apply text-gray-100;
+  }
+
+  .notificationItemQuickActions {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .notificationItemQuickAction {
+    @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+  }
+
+  .notificationListHeader {
+    @apply border-gray-700;
+  }
+
+  .notificationListTitleText {
+    @apply text-gray-100;
+  }
+
+  .notificationListActionButton {
+    @apply bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700;
+  }
+
+  .notificationListSearch {
+    @apply border-gray-700;
+  }
+
+  .notificationListSearchInput {
+    @apply bg-gray-800 border-gray-600 text-gray-100;
+  }
+
+  .notificationListFilters {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .notificationListFilterLabel {
+    @apply text-gray-300;
+  }
+
+  .notificationListFilterOptionText {
+    @apply text-gray-300;
+  }
+
+  .notificationListFilterSelect {
+    @apply bg-gray-800 border-gray-600 text-gray-100;
+  }
+
+  .notificationListEmptyTitle {
+    @apply text-gray-100;
+  }
+
+  .notificationListEmptyText {
+    @apply text-gray-400;
+  }
+
+  .notificationPreferences {
+    @apply bg-gray-900;
+  }
+
+  .preferencesHeader {
+    @apply border-gray-700;
+  }
+
+  .preferencesTitleText {
+    @apply text-gray-100;
+  }
+
+  .preferencesActionButton {
+    @apply bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700;
+  }
+
+  .preferencesSectionHeader {
+    @apply hover:bg-gray-800;
+  }
+
+  .preferencesSectionTitleText {
+    @apply text-gray-100;
+  }
+
+  .preferencesGlobalLabel {
+    @apply text-gray-300;
+  }
+
+  .preferencesGlobalSelect {
+    @apply bg-gray-800 border-gray-600 text-gray-100;
+  }
+
+  .preferencesGlobalInput {
+    @apply bg-gray-800 border-gray-600 text-gray-100;
+  }
+
+  .preferencesDeliveryMethod {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .preferencesDeliveryMethodTitle {
+    @apply text-gray-100;
+  }
+
+  .preferencesDeliveryMethodDescription {
+    @apply text-gray-400;
+  }
+
+  .preferencesNotificationType {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .preferencesNotificationTypeTitle {
+    @apply text-gray-100;
+  }
+
+  .preferencesNotificationTypeSettingLabel {
+    @apply text-gray-300;
+  }
+
+  .preferencesNotificationTypeSelect {
+    @apply bg-gray-800 border-gray-600 text-gray-100;
+  }
+
+  .preferencesNotificationTypeDeliveryLabel {
+    @apply text-gray-300;
+  }
+
+  .preferencesAdvancedDescription {
+    @apply text-gray-400;
+  }
+}

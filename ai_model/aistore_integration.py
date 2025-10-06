@@ -29,9 +29,9 @@ class AIStoreManager:
         try:
             self.client = ais.Client(endpoint)
             self.bucket = self.client.bucket(bucket_name)
-            print(f"✅ Connected to AIStore at {endpoint}")
+            print(f"[OK] Connected to AIStore at {endpoint}")
         except Exception as e:
-            print(f"⚠️  AIStore not available: {e}")
+            print(f"[WARNING] AIStore not available: {e}")
             print("   Running in local storage mode only")
 
     def is_available(self) -> bool:

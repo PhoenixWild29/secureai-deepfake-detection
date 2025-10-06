@@ -1,0 +1,20 @@
+.exportPreviewMode { padding: 1.5rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); height: 100%; }
+.previewHeader { text-align: center; margin-bottom: 2rem; }
+.previewHeader h2 { margin: 0 0 0.5rem 0; font-size: 2rem; color: #1e293b; }
+.previewHeader p { margin: 0; color: #64748b; }
+.previewLayout { display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; height: calc(100% - 150px); }
+.optionsColumn { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); }
+.previewColumn { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); overflow: hidden; }
+.exportOptions h3 { margin: 0 0 1rem 0; color: #374151; }
+.formatSelection { margin-bottom: 1rem; }
+.formatSelection label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.formatSelect { width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; }
+.inclusionOptions { margin-bottom: 1.5rem; }
+.checkboxLabel { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.checkbox { width: 16px; height: 16px; }
+.exportButton { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.exportButton:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3); }
+.previewContent h3 { margin: 0 0 1rem 0; color: #374151; }
+.previewText { background: #f8fafc; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.875rem; overflow: auto; max-height: 400px; }
+.noPreview { text-align: center; padding: 2rem; color: #64748b; }
+.noPreviewIcon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }

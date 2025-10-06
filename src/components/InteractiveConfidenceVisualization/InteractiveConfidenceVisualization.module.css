@@ -1,0 +1,557 @@
+/**
+ * InteractiveConfidenceVisualization Component Styles
+ * Comprehensive styling for interactive confidence charts and analytics
+ */
+
+/* ============================================================================
+   Main Container
+   ============================================================================ */
+
+.interactiveConfidenceVisualization {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* ============================================================================
+   Header Controls
+   ============================================================================ */
+
+.headerControls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* ============================================================================
+   Chart Mode Selector
+   ============================================================================ */
+
+.chartModeSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.chartModeSelector label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.modeButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modeButton {
+  padding: 8px 16px;
+  border: 2px solid #d1d5db;
+  background: #ffffff;
+  color: #6b7280;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.modeButton:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.modeButton.active {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================================================
+   Trend Analysis Controls
+   ============================================================================ */
+
+.trendAnalysisControls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.trendParameters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-left: 24px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.trendParameters label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.numberInput {
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.numberInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================================
+   View Settings
+   ============================================================================ */
+
+.viewSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.viewSettings h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.settingGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+/* ============================================================================
+   Export Controls
+   ============================================================================ */
+
+.exportControls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.exportControls h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.exportButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exportButton {
+  padding: 8px 16px;
+  border: 2px solid #10b981;
+  background: #ffffff;
+  color: #10b981;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exportButton:hover {
+  background: #10b981;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+/* ============================================================================
+   Chart Container
+   ============================================================================ */
+
+.chartContainer {
+  position: relative;
+  flex: 1;
+  min-height: 400px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.chartCanvas {
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  position: relative;
+}
+
+.chartLoadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+/* ============================================================================
+   Loading States
+   ============================================================================ */
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingMessage {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Error States
+   ============================================================================ */
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  background: #fef2f2;
+  border-radius: 12px;
+  border: 1px solid #fecaca;
+}
+
+.errorIcon {
+  font-size: 48px;
+  opacity: 0.6;
+}
+
+.errorContainer h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.errorContainer p {
+  margin: 0;
+  font-size: 14px;
+  color: #7f1d1d;
+  text-align: center;
+  max-width: 300px;
+}
+
+/* ============================================================================
+   Data Point Info
+   ============================================================================ */
+
+.dataPointInfo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+  min-width: 200px;
+  backdrop-filter: blur(8px);
+}
+
+.dataPointInfo h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f3f4f6;
+}
+
+.dataPointDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dataPointDetails div {
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dataPointDetails strong {
+  color: #d1d5db;
+  font-weight: 500;
+}
+
+.dataPointDetails span {
+  color: #ffffff;
+  font-weight: 400;
+}
+
+/* ============================================================================
+   Selected Frames Summary
+   ============================================================================ */
+
+.selectedFramesSummary {
+  padding: 16px 20px;
+  background: #f0f9ff;
+  border-top: 1px solid #bae6fd;
+}
+
+.selectedFramesSummary h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.selectedFramesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selectedFrame {
+  padding: 4px 12px;
+  background: #3b82f6;
+  color: #ffffff;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.moreFrames {
+  padding: 4px 12px;
+  background: #6b7280;
+  color: #ffffff;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Debug Information
+   ============================================================================ */
+
+.debugInfo {
+  padding: 8px 20px;
+  background: #f3f4f6;
+  border-top: 1px solid #d1d5db;
+  font-size: 11px;
+  color: #6b7280;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .headerControls {
+    padding: 16px;
+  }
+  
+  .controlsRow {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .chartModeSelector,
+  .trendAnalysisControls,
+  .viewSettings,
+  .exportControls {
+    min-width: 100%;
+  }
+  
+  .modeButtons {
+    justify-content: center;
+  }
+  
+  .exportButtons {
+    justify-content: center;
+  }
+  
+  .dataPointInfo {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 16px;
+    width: calc(100% - 32px);
+  }
+}
+
+@media (max-width: 480px) {
+  .interactiveConfidenceVisualization {
+    border-radius: 8px;
+  }
+  
+  .headerControls {
+    padding: 12px;
+  }
+  
+  .modeButton,
+  .exportButton {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  
+  .chartContainer {
+    min-height: 300px;
+  }
+  
+  .loadingContainer,
+  .errorContainer {
+    height: 300px;
+  }
+}
+
+/* ============================================================================
+   Animation and Transitions
+   ============================================================================ */
+
+.interactiveConfidenceVisualization * {
+  transition: all 0.2s ease;
+}
+
+.modeButton,
+.exportButton {
+  transform: translateY(0);
+}
+
+.modeButton:hover,
+.exportButton:hover {
+  transform: translateY(-1px);
+}
+
+.modeButton:active,
+.exportButton:active {
+  transform: translateY(0);
+}
+
+/* ============================================================================
+   Accessibility
+   ============================================================================ */
+
+.modeButton:focus,
+.exportButton:focus,
+.checkbox:focus,
+.numberInput:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.modeButton:focus-visible,
+.exportButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+
+@media print {
+  .interactiveConfidenceVisualization {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .headerControls {
+    display: none;
+  }
+  
+  .dataPointInfo,
+  .selectedFramesSummary,
+  .debugInfo {
+    display: none;
+  }
+  
+  .chartContainer {
+    min-height: 300px;
+  }
+}
