@@ -1,0 +1,32 @@
+{
+  "name": "Compliance Officers",
+  "description": "Regulatory compliance specialists and auditors",
+  "test_scenarios": [
+    "gdpr_compliance",
+    "sox_compliance",
+    "hipaa_compliance",
+    "audit_trail_validation",
+    "regulatory_reporting",
+    "risk_management"
+  ],
+  "success_criteria": {
+    "regulatory_compliance": {
+      "min": 0.95,
+      "target": 1.00
+    },
+    "audit_trail_coverage": {
+      "min": 0.90,
+      "target": 0.95
+    },
+    "risk_management": {
+      "min": 0.85,
+      "target": 0.90
+    }
+  },
+  "test_data_requirements": {
+    "eu_citizen_data": 10,
+    "financial_communications": 8,
+    "healthcare_content": 6,
+    "mixed_sensitivity_data": 12
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "Content Moderators",
+  "description": "Content review specialists and community managers",
+  "test_scenarios": [
+    "misinformation_detection",
+    "harmful_content",
+    "platform_policies",
+    "bulk_operations",
+    "real_time_moderation",
+    "user_safety"
+  ],
+  "success_criteria": {
+    "detection_accuracy": {
+      "min": 0.85,
+      "target": 0.90
+    },
+    "processing_speed": {
+      "max": 30,
+      "target": 20
+    },
+    "user_experience": {
+      "min": 0.85,
+      "target": 0.90
+    },
+    "safety_features": {
+      "min": 0.90,
+      "target": 0.95
+    }
+  },
+  "test_data_requirements": {
+    "misinformation_content": 25,
+    "harmful_content": 20,
+    "platform_specific": 30,
+    "bulk_content": 500
+  }
+}

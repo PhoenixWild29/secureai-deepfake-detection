@@ -444,3 +444,4 @@ export default function AnalyticsDashboard({ className }: AnalyticsDashboardProp
     </DashboardLayout>
   );
 }
+
