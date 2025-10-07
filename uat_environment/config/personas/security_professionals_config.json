@@ -1,0 +1,36 @@
+{
+  "name": "Security Professionals",
+  "description": "Security analysts, incident responders, and forensic experts",
+  "test_scenarios": [
+    "executive_impersonation",
+    "zero_day_attack",
+    "multi_vector_campaign",
+    "incident_response",
+    "forensic_analysis",
+    "system_security"
+  ],
+  "success_criteria": {
+    "detection_accuracy": {
+      "min": 0.95,
+      "target": 0.98
+    },
+    "false_positive_rate": {
+      "max": 0.02,
+      "target": 0.01
+    },
+    "processing_speed": {
+      "max": 30,
+      "target": 15
+    },
+    "audit_trail_quality": {
+      "min": 0.90,
+      "target": 0.95
+    }
+  },
+  "test_data_requirements": {
+    "executive_videos": 15,
+    "zero_day_samples": 10,
+    "campaign_videos": 20,
+    "sensitive_content": 8
+  }
+}
