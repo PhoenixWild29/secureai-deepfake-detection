@@ -1,438 +1,506 @@
 #!/usr/bin/env python3
 """
-Enhanced DeepFake Detection Model
-Combines multiple SOTA techniques from reviewed GitHub repositories:
-- LAA-Net (Localized Artifact Attention) for quality-agnostic detection
-- CLIP-based approaches for generalizable detection
-- Multi-modal fusion for robust analysis
-- Diffusion model awareness for 2025 threats
+Enhanced DeepFake Detection Model - Priority 1 MVP Implementation
+Combines CLIP zero-shot detection and LAA-Net for robust ensemble detection.
+
+This implementation focuses on:
+1. CLIP zero-shot detection - Highly generalizable, excellent for modern diffusion-based deepfakes
+2. LAA-Net - Quality-agnostic artifact attention model (CVPR 2024)
+
+The ensemble fuses their predictions for robust detection.
 """
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torchvision import models, transforms
 import cv2
-import numpy as np
+import torch
+import open_clip
 from PIL import Image
-import hashlib
-import time
+import numpy as np
 import os
-from typing import Dict, List, Tuple, Optional
+import sys
+from typing import Dict, List, Optional, Tuple, Any
 import warnings
 warnings.filterwarnings('ignore')
 
-class LAABlock(nn.Module):
-    """
-    Localized Artifact Attention Block (inspired by LAA-Net)
-    Focuses on local artifacts that are quality-agnostic
-    """
-    def __init__(self, in_channels: int, reduction: int = 16):
-        super(LAABlock, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.max_pool = nn.AdaptiveMaxPool2d(1)
+# Try to import LAA-Net components (will be available after submodule setup)
+try:
+    # Adjust these imports based on actual LAA-Net structure
+    # Example paths (to be updated after submodule setup):
+    # sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'external', 'LAA-Net'))
+    # from models import LAANet  # Replace with actual import
+    # from utils.face_utils import preprocess_face  # Replace with actual import
+    LAA_NET_AVAILABLE = False
+except ImportError:
+    LAA_NET_AVAILABLE = False
 
-        self.fc = nn.Sequential(
-            nn.Conv2d(in_channels, in_channels // reduction, 1, bias=False),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(in_channels // reduction, in_channels, 1, bias=False)
-        )
+# Face detection fallback
+try:
+    from mtcnn import MTCNN
+    MTCNN_AVAILABLE = True
+except ImportError:
+    MTCNN_AVAILABLE = False
+    print("Warning: MTCNN not available. Face detection will use OpenCV Haar cascades.")
 
-        self.sigmoid = nn.Sigmoid()
 
-        # Local attention mechanism
-        self.local_conv = nn.Conv2d(in_channels, in_channels, 3, padding=1, groups=in_channels, bias=False)
-
-    def forward(self, x):
-        # Global attention
-        avg_out = self.fc(self.avg_pool(x))
-        max_out = self.fc(self.max_pool(x))
-        global_attn = avg_out + max_out
-
-        # Local attention
-        local_attn = self.local_conv(x)
-
-        # Combine attentions
-        attn = self.sigmoid(global_attn + local_attn)
-        return x * attn
-
-class QualityAgnosticDetector(nn.Module):
-    """
-    Quality-agnostic detector inspired by LAA-Net
-    Handles varying video quality and compression artifacts
-    """
-    def __init__(self, num_classes: int = 2):
-        super(QualityAgnosticDetector, self).__init__()
-
-        # Use EfficientNet as backbone (good for various quality inputs)
-        self.backbone = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
-
-        # Get number of features before classifier
-        num_features = self.backbone.classifier[1].in_features
-
-        # Replace classifier with identity to get features
-        self.backbone.classifier = nn.Sequential(
-            nn.Dropout(p=0.2, inplace=True),
-            nn.Identity()
-        )
-
-        # LAA blocks for quality-agnostic attention
-        self.laa1 = LAABlock(num_features)
-        self.laa2 = LAABlock(num_features)
-
-        # Final classification head
-        self.classifier = nn.Sequential(
-            nn.Linear(num_features, 512),
-            nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(512, num_classes)
-        )
-
-        # Auxiliary heads for multi-task learning
-        self.artifact_detector = nn.Linear(num_features, 1)  # Detect manipulation artifacts
-        self.quality_estimator = nn.Linear(num_features, 1)  # Estimate video quality
-
-    def forward(self, x):
-        # Extract features using EfficientNet
-        features = self.backbone(x)  # This should be [batch, num_features]
-
-        # Ensure features is 2D: [batch, features]
-        if features.dim() > 2:
-            features = torch.flatten(features, start_dim=1)
-
-        # Apply LAA blocks (reshape to spatial dimensions for attention)
-        b, c = features.shape
-        spatial_features = features.view(b, c, 1, 1)  # [batch, channels, 1, 1]
-
-        spatial_features = self.laa1(spatial_features)
-        spatial_features = self.laa2(spatial_features)
-
-        # Flatten back to feature vector
-        features = spatial_features.view(b, c)
-
-        # Classification
-        logits = self.classifier(features)
-
-        # Auxiliary predictions
-        artifact_score = torch.sigmoid(self.artifact_detector(features))
-        quality_score = torch.sigmoid(self.quality_estimator(features))
-
-        return logits, artifact_score, quality_score
-
-class CLIPBasedDetector(nn.Module):
-    """
-    CLIP-based detector inspired by LNCLIP-DF
-    Uses pre-trained CLIP for generalizable detection
-    """
-    def __init__(self):
-        super(CLIPBasedDetector, self).__init__()
-        self.clip_available = False
-        try:
-            import clip
-            self.clip = clip  # Store reference to clip module
-            self.clip_model, self.preprocess = clip.load("ViT-B/32")
-            self.text_features = None
-            self.clip_available = True
-            self._prepare_text_features()
-        except ImportError:
-            print("CLIP not available, falling back to CNN-based approach")
-            self.clip = None
-            self.clip_model = None
-
-        # Fallback CNN if CLIP unavailable
-        if self.clip_model is None:
-            self.fallback_cnn = models.resnet50(pretrained=True)
-            self.fallback_cnn.fc = nn.Linear(2048, 2)
-
-    def _prepare_text_features(self):
-        """Prepare text features for deepfake detection prompts"""
-        if not self.clip_available or self.clip is None or self.clip_model is None:
-            return
-
-        prompts = [
-            "a real photograph of a person",
-            "a fake manipulated image of a person",
-            "authentic human face",
-            "synthetically generated face",
-            "real video frame",
-            "deepfake manipulated video frame",
-            "genuine facial expression",
-            "artificial facial manipulation"
-        ]
-
-        try:
-            text_tokens = self.clip.tokenize(prompts).to(next(self.clip_model.parameters()).device)
-            with torch.no_grad():
-                self.text_features = self.clip_model.encode_text(text_tokens)
-                self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
-        except Exception as e:
-            print(f"Failed to prepare CLIP text features: {e}")
-            self.text_features = None
-
-    def forward(self, image):
-        if self.clip_model is not None and self.text_features is not None:
-            # CLIP-based detection
-            image_features = self.clip_model.encode_image(image)
-            image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-
-            # Compute similarities with text prompts
-            similarities = (image_features @ self.text_features.T)
-
-            # Convert to binary classification (real vs fake)
-            real_score = similarities[:, [0, 2, 4]].mean(dim=1)  # Real prompts
-            fake_score = similarities[:, [1, 3, 5]].mean(dim=1)  # Fake prompts
-
-            logits = torch.stack([real_score, fake_score], dim=1)
-            return logits
+class FaceDetector:
+    """Face detection and cropping utility for LAA-Net preprocessing."""
+    
+    def __init__(self, method: str = 'auto'):
+        """
+        Initialize face detector.
+        
+        Args:
+            method: 'mtcnn', 'haar', or 'auto' (tries MTCNN first, falls back to Haar)
+        """
+        self.method = method
+        self.mtcnn = None
+        self.haar_cascade = None
+        
+        if method in ['auto', 'mtcnn'] and MTCNN_AVAILABLE:
+            try:
+                self.mtcnn = MTCNN()
+                self.method = 'mtcnn'
+            except Exception as e:
+                print(f"Warning: MTCNN initialization failed: {e}. Falling back to Haar.")
+                self.method = 'haar'
+        
+        if self.method == 'haar' or (method == 'auto' and self.mtcnn is None):
+            cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            if os.path.exists(cascade_path):
+                self.haar_cascade = cv2.CascadeClassifier(cascade_path)
+                self.method = 'haar'
+            else:
+                print("Warning: Haar cascade not found. Face detection may fail.")
+    
+    def detect_face(self, image: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
+        """
+        Detect face in image and return bounding box.
+        
+        Args:
+            image: Input image as numpy array (RGB or BGR)
+            
+        Returns:
+            (x, y, w, h) bounding box or None if no face detected
+        """
+        if image is None or image.size == 0:
+            return None
+        
+        # Convert to RGB if needed
+        if len(image.shape) == 3 and image.shape[2] == 3:
+            # Assume BGR if using OpenCV, convert to RGB for MTCNN
+            if self.method == 'mtcnn' and self.mtcnn is not None:
+                image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) if image.dtype == np.uint8 else image
+            else:
+                image_rgb = image
         else:
-            # Fallback to CNN
-            return self.fallback_cnn(image)
+            image_rgb = image
+        
+        if self.method == 'mtcnn' and self.mtcnn is not None:
+            try:
+                results = self.mtcnn.detect_faces(image_rgb)
+                if results and len(results) > 0:
+                    # Get the largest face
+                    largest_face = max(results, key=lambda x: x['box'][2] * x['box'][3])
+                    x, y, w, h = largest_face['box']
+                    return (x, y, w, h)
+            except Exception as e:
+                print(f"MTCNN detection error: {e}")
+        
+        if self.method == 'haar' and self.haar_cascade is not None:
+            try:
+                # Convert to grayscale for Haar
+                if len(image_rgb.shape) == 3:
+                    gray = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2GRAY) if image_rgb.shape[2] == 3 else cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                else:
+                    gray = image_rgb
+                
+                faces = self.haar_cascade.detectMultiScale(
+                    gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+                )
+                if len(faces) > 0:
+                    # Get the largest face
+                    largest_face = max(faces, key=lambda x: x[2] * x[3])
+                    x, y, w, h = largest_face
+                    return (x, y, w, h)
+            except Exception as e:
+                print(f"Haar detection error: {e}")
+        
+        return None
+    
+    def crop_face(self, image: np.ndarray, bbox: Optional[Tuple[int, int, int, int]] = None, 
+                  target_size: Tuple[int, int] = (224, 224), padding: float = 0.2) -> Optional[np.ndarray]:
+        """
+        Crop and resize face from image.
+        
+        Args:
+            image: Input image
+            bbox: Bounding box (x, y, w, h). If None, will detect face.
+            target_size: Target size (width, height)
+            padding: Padding factor around face (0.2 = 20% padding)
+            
+        Returns:
+            Cropped and resized face image or None
+        """
+        if bbox is None:
+            bbox = self.detect_face(image)
+            if bbox is None:
+                return None
+        
+        x, y, w, h = bbox
+        
+        # Add padding
+        pad_w = int(w * padding)
+        pad_h = int(h * padding)
+        x = max(0, x - pad_w)
+        y = max(0, y - pad_h)
+        w = min(image.shape[1] - x, w + 2 * pad_w)
+        h = min(image.shape[0] - y, h + 2 * pad_h)
+        
+        # Crop face
+        face_crop = image[y:y+h, x:x+w]
+        
+        if face_crop.size == 0:
+            return None
+        
+        # Resize to target size
+        face_resized = cv2.resize(face_crop, target_size, interpolation=cv2.INTER_LINEAR)
+        
+        return face_resized
 
-class DiffusionAwareDetector(nn.Module):
+
+class EnhancedDetector:
     """
-    Diffusion Model Aware Detector
-    Specialized for detecting DM-generated content (2025 threat landscape)
+    Enhanced ensemble detector combining CLIP zero-shot and LAA-Net.
+    
+    This is the Priority 1 MVP implementation focusing on two strong,
+    complementary components for effective deepfake detection.
     """
-    def __init__(self):
-        super(DiffusionAwareDetector, self).__init__()
-
-        # Multi-scale feature extraction
-        self.conv1 = nn.Conv2d(3, 64, 3, padding=1)
-        self.conv2 = nn.Conv2d(64, 128, 3, padding=1)
-        self.conv3 = nn.Conv2d(128, 256, 3, padding=1)
-
-        # Frequency domain analysis (common DM artifacts)
-        self.freq_conv = nn.Conv2d(256, 128, 1)
-
-        # Attention for artifact localization
-        self.attention = nn.MultiheadAttention(128, 8, batch_first=True)
-
-        # Classification head
-        self.classifier = nn.Sequential(
-            nn.AdaptiveAvgPool2d(1),
-            nn.Flatten(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(64, 2)
-        )
-
-    def forward(self, x):
-        # Multi-scale features
-        x1 = F.relu(self.conv1(x))
-        x2 = F.relu(self.conv2(x1))
-        x3 = F.relu(self.conv3(x2))
-
-        # Frequency analysis
-        freq_features = self.freq_conv(x3)
-
-        # Reshape for attention
-        b, c, h, w = freq_features.shape
-        freq_flat = freq_features.view(b, c, -1).permute(0, 2, 1)  # (batch, seq_len, features)
-
-        # Self-attention
-        attn_out, _ = self.attention(freq_flat, freq_flat, freq_flat)
-        attn_out = attn_out.permute(0, 2, 1).view(b, c, h, w)
-
-        # Classification
-        return self.classifier(attn_out)
-
-class EnsembleDetector:
-    """
-    Ensemble detector combining multiple approaches
-    Inspired by comprehensive detection frameworks
-    """
-    def __init__(self, device: str = 'cuda' if torch.cuda.is_available() else 'cpu'):
-        self.device = device
-
-        # Initialize detectors
-        self.quality_detector = QualityAgnosticDetector().to(device)
-        self.clip_detector = CLIPBasedDetector().to(device)
-        self.dm_detector = DiffusionAwareDetector().to(device)
-
-        # Ensemble weights (learned or fixed)
-        self.weights = {
-            'quality': 0.4,
-            'clip': 0.3,
-            'dm': 0.3
+    
+    def __init__(self, laa_weights_path: Optional[str] = None, 
+                 device: Optional[str] = None,
+                 clip_model_name: str = 'ViT-B-32',
+                 clip_pretrained: str = 'laion2b_s34b_b79k'):
+        """
+        Initialize the enhanced detector.
+        
+        Args:
+            laa_weights_path: Path to LAA-Net pre-trained weights (optional)
+            device: Device to use ('cuda', 'cpu', or None for auto-detect)
+            clip_model_name: CLIP model variant to use
+            clip_pretrained: CLIP pretrained weights identifier
+        """
+        self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Initializing EnhancedDetector on device: {self.device}")
+        
+        # Initialize face detector for LAA-Net preprocessing
+        self.face_detector = FaceDetector(method='auto')
+        
+        # === CLIP Zero-Shot Setup ===
+        print("Loading CLIP model...")
+        try:
+            self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
+                clip_model_name, pretrained=clip_pretrained
+            )
+            self.clip_model.to(self.device)
+            self.clip_model.eval()
+            
+            # Optimized prompts for real vs. fake detection
+            # Tuned for modern diffusion-based and traditional deepfakes
+            texts = [
+                "a real photograph of a human face taken by a camera",
+                "a fake, manipulated, or AI-generated deepfake face, possibly from diffusion models"
+            ]
+            self.text_tokens = open_clip.tokenize(texts).to(self.device)
+            with torch.no_grad():
+                self.text_features = self.clip_model.encode_text(self.text_tokens)
+                self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
+            
+            print("CLIP model loaded successfully.")
+        except Exception as e:
+            print(f"Error loading CLIP model: {e}")
+            raise
+        
+        # === LAA-Net Setup ===
+        self.laa_model = None
+        self.laa_available = False
+        
+        if LAA_NET_AVAILABLE and laa_weights_path and os.path.exists(laa_weights_path):
+            try:
+                print("Loading LAA-Net model...")
+                # TODO: Replace with actual LAA-Net loading code after submodule setup
+                # Example:
+                # from external.laa_net.models import LAANet
+                # self.laa_model = LAANet(...)
+                # self.laa_model.load_state_dict(torch.load(laa_weights_path, map_location=self.device))
+                # self.laa_model.to(self.device)
+                # self.laa_model.eval()
+                # self.laa_available = True
+                print("LAA-Net model loading will be implemented after submodule setup.")
+            except Exception as e:
+                print(f"Warning: Could not load LAA-Net model: {e}")
+                print("Continuing with CLIP-only detection.")
+        else:
+            if not LAA_NET_AVAILABLE:
+                print("LAA-Net not available (submodule not set up). Using CLIP-only detection.")
+            elif not laa_weights_path:
+                print("LAA-Net weights path not provided. Using CLIP-only detection.")
+            else:
+                print(f"LAA-Net weights not found at {laa_weights_path}. Using CLIP-only detection.")
+        
+        # LAA-Net preprocessing transform (placeholder - will use actual transform from LAA-Net)
+        # This should match LAA-Net's expected input format
+        self.laa_transform = None  # Will be set when LAA-Net is available
+    
+    def extract_frames(self, video_path: str, num_frames: int = 16) -> List[Image.Image]:
+        """
+        Extract evenly spaced frames from video.
+        
+        Args:
+            video_path: Path to video file
+            num_frames: Number of frames to extract
+            
+        Returns:
+            List of PIL Images
+        """
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            raise ValueError(f"Could not open video: {video_path}")
+        
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        if total_frames == 0:
+            cap.release()
+            raise ValueError("Invalid video path or empty video.")
+        
+        interval = max(1, total_frames // num_frames)
+        frames = []
+        count = 0
+        
+        while cap.isOpened() and len(frames) < num_frames:
+            ret, frame_bgr = cap.read()
+            if not ret:
+                break
+            if count % interval == 0:
+                frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+                frames.append(Image.fromarray(frame_rgb))
+            count += 1
+        
+        cap.release()
+        
+        if not frames:
+            raise ValueError("No frames extracted from video.")
+        
+        return frames
+    
+    def clip_detect_frames(self, frames: List[Image.Image]) -> float:
+        """
+        Run CLIP zero-shot detection on frames and return average fake probability.
+        
+        Args:
+            frames: List of PIL Images
+            
+        Returns:
+            Average fake probability (0=real, 1=fake)
+        """
+        fake_probs = []
+        
+        for frame in frames:
+            try:
+                image_input = self.clip_preprocess(frame).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    image_features = self.clip_model.encode_image(image_input)
+                    image_features /= image_features.norm(dim=-1, keepdim=True)
+                    similarity = image_features @ self.text_features.T
+                    probs = similarity.softmax(dim=-1)[0].cpu().numpy()
+                    fake_prob = probs[1]  # Index 1 = fake prompt
+                fake_probs.append(fake_prob)
+            except Exception as e:
+                print(f"CLIP detection error on frame: {e}")
+                continue
+        
+        if not fake_probs:
+            return 0.5  # Neutral if all frames failed
+        
+        return np.mean(fake_probs)
+    
+    def laa_detect_frames(self, frames: List[Image.Image]) -> float:
+        """
+        Run LAA-Net detection on frames (requires face cropping).
+        
+        Args:
+            frames: List of PIL Images
+            
+        Returns:
+            Average fake probability (0=real, 1=fake)
+        """
+        if not self.laa_available or self.laa_model is None:
+            # Return neutral score if LAA-Net not available
+            return 0.5
+        
+        fake_probs = []
+        
+        for frame in frames:
+            try:
+                # Convert PIL to numpy for face detection
+                frame_np = np.array(frame)
+                
+                # Crop face
+                face_crop = self.face_detector.crop_face(frame_np, target_size=(224, 224))
+                if face_crop is None:
+                    continue  # Skip if no face detected
+                
+                # Apply LAA-Net preprocessing transform
+                # TODO: Replace with actual LAA-Net transform after submodule setup
+                # Example:
+                # if self.laa_transform:
+                #     face_tensor = self.laa_transform(face_crop).unsqueeze(0).to(self.device)
+                # else:
+                #     # Fallback transform
+                #     face_tensor = torch.from_numpy(face_crop).permute(2, 0, 1).float() / 255.0
+                #     face_tensor = face_tensor.unsqueeze(0).to(self.device)
+                #
+                # with torch.no_grad():
+                #     output = self.laa_model(face_tensor)
+                #     fake_prob = torch.sigmoid(output).item()  # Assuming binary logit
+                # fake_probs.append(fake_prob)
+                
+                # Placeholder: return neutral for now
+                fake_probs.append(0.5)
+                
+            except Exception as e:
+                print(f"LAA-Net detection error on frame: {e}")
+                continue
+        
+        if not fake_probs:
+            return 0.5  # Neutral if all frames failed
+        
+        return np.mean(fake_probs)
+    
+    def detect(self, video_path: str, num_frames: int = 16) -> Dict[str, Any]:
+        """
+        Main detection method: Ensemble fake probability.
+        
+        Args:
+            video_path: Path to video file
+            num_frames: Number of frames to sample for detection
+            
+        Returns:
+            Dictionary with detection results:
+            - ensemble_fake_probability: Combined score (0=real, 1=fake)
+            - clip_fake_probability: CLIP-only score
+            - laa_fake_probability: LAA-Net score (or 0.5 if unavailable)
+            - is_deepfake: Boolean prediction
+            - method: Detection method used
+        """
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Video file not found: {video_path}")
+        
+        # Extract frames
+        frames = self.extract_frames(video_path, num_frames)
+        
+        # Run CLIP detection
+        clip_prob = self.clip_detect_frames(frames)
+        
+        # Run LAA-Net detection (or placeholder)
+        laa_prob = self.laa_detect_frames(frames)
+        
+        # Simple ensemble (average) - can be enhanced with adaptive weighting later
+        if self.laa_available:
+            ensemble_prob = (clip_prob + laa_prob) / 2.0
+            method = 'ensemble_clip_laa'
+        else:
+            # CLIP-only if LAA-Net not available
+            ensemble_prob = clip_prob
+            method = 'clip_only'
+        
+        return {
+            'ensemble_fake_probability': float(ensemble_prob),
+            'clip_fake_probability': float(clip_prob),
+            'laa_fake_probability': float(laa_prob),
+            'is_deepfake': ensemble_prob > 0.5,
+            'method': method,
+            'num_frames_analyzed': len(frames),
+            'laa_available': self.laa_available
         }
 
-        # Set to evaluation mode
-        self.quality_detector.eval()
-        self.dm_detector.eval()
 
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+# Backward compatibility: Keep the old function name for existing code
+def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
+    """
+    Enhanced deepfake detection using ensemble of CLIP and LAA-Net.
+    Backward compatibility wrapper for existing code.
+    """
+    detector = EnhancedDetector(**kwargs)
+    result = detector.detect(video_path)
+    
+    # Convert to expected format for backward compatibility
+    return {
+        'is_fake': result['is_deepfake'],
+        'confidence': result['ensemble_fake_probability'] if result['is_deepfake'] else (1 - result['ensemble_fake_probability']),
+        'ensemble_score': result['ensemble_fake_probability'],
+        'detector_scores': {
+            'clip_based': result['clip_fake_probability'],
+            'laa_net': result['laa_fake_probability']
+        },
+        'method': result['method'],
+        'video_hash': None,  # Can be added if needed
+        'frame_count': result['num_frames_analyzed']
+    }
 
-    def preprocess_frame(self, frame: np.ndarray) -> torch.Tensor:
-        """Preprocess video frame for detection"""
-        # Convert BGR to RGB
-        if frame.shape[2] == 3:  # BGR format
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-        # Convert to PIL Image
-        pil_image = Image.fromarray(frame)
-
-        # Apply transforms
-        tensor = self.transform(pil_image).unsqueeze(0).to(self.device)
-        return tensor
-
-    def detect_frame(self, frame: np.ndarray) -> Dict:
-        """Detect deepfake in a single frame"""
-        try:
-            tensor = self.preprocess_frame(frame)
-
-            # Get predictions from each detector
-            with torch.no_grad():
-                # Quality-agnostic detection
-                qa_logits, artifact_score, quality_score = self.quality_detector(tensor)
-                qa_probs = F.softmax(qa_logits, dim=1)
-                qa_fake_prob = qa_probs[0, 1].item()
-
-                # CLIP-based detection
-                clip_logits = self.clip_detector(tensor)
-                clip_probs = F.softmax(clip_logits, dim=1)
-                clip_fake_prob = clip_probs[0, 1].item()
-
-                # DM-aware detection
-                dm_logits = self.dm_detector(tensor)
-                dm_probs = F.softmax(dm_logits, dim=1)
-                dm_fake_prob = dm_probs[0, 1].item()
-
-                # Ensemble prediction
-                ensemble_fake_prob = (
-                    self.weights['quality'] * qa_fake_prob +
-                    self.weights['clip'] * clip_fake_prob +
-                    self.weights['dm'] * dm_fake_prob
-                )
-
-                # Determine final result
-                is_fake = ensemble_fake_prob > 0.5
-                confidence = ensemble_fake_prob if is_fake else (1 - ensemble_fake_prob)
-
-                return {
-                    'is_fake': is_fake,
-                    'confidence': confidence,
-                    'ensemble_score': ensemble_fake_prob,
-                    'detector_scores': {
-                        'quality_agnostic': qa_fake_prob,
-                        'clip_based': clip_fake_prob,
-                        'dm_aware': dm_fake_prob
-                    },
-                    'artifact_score': artifact_score.item(),
-                    'quality_score': quality_score.item(),
-                    'method': 'ensemble_sota'
-                }
-
-        except Exception as e:
-            print(f"Frame detection error: {e}")
-            return {
-                'is_fake': False,
-                'confidence': 0.0,
-                'error': str(e),
-                'method': 'ensemble_sota'
-            }
-
-    def detect_video(self, video_path: str, sample_rate: int = 30) -> Dict:
-        """Detect deepfake in video using ensemble approach"""
-        try:
-            cap = cv2.VideoCapture(video_path)
-            if not cap.isOpened():
-                raise ValueError("Could not open video file")
-
-            frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            fps = cap.get(cv2.CAP_PROP_FPS)
-
-            # Sample frames
-            frame_indices = np.linspace(0, frame_count - 1, min(sample_rate, frame_count), dtype=int)
-
-            frame_results = []
-            for idx in frame_indices:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                ret, frame = cap.read()
-                if ret:
-                    result = self.detect_frame(frame)
-                    frame_results.append(result)
-
-            cap.release()
-
-            if not frame_results:
-                raise ValueError("No frames could be processed")
-
-            # Aggregate results
-            fake_scores = [r['ensemble_score'] for r in frame_results]
-            avg_fake_score = np.mean(fake_scores)
-            std_fake_score = np.std(fake_scores)
-
-            # Confidence based on consistency
-            consistency = 1 - std_fake_score
-            final_confidence = (avg_fake_score + consistency) / 2
-
-            is_fake = avg_fake_score > 0.5
-
-            # Generate video hash
-            with open(video_path, 'rb') as f:
-                video_hash = hashlib.sha256(f.read()).hexdigest()
-
-            return {
-                'is_fake': is_fake,
-                'confidence': final_confidence,
-                'video_hash': video_hash,
-                'authenticity_score': 1 - avg_fake_score,
-                'frame_count': len(frame_results),
-                'avg_fake_score': avg_fake_score,
-                'score_std': std_fake_score,
-                'method': 'ensemble_sota',
-                'detector_breakdown': {
-                    'quality_agnostic': np.mean([r['detector_scores']['quality_agnostic'] for r in frame_results]),
-                    'clip_based': np.mean([r['detector_scores']['clip_based'] for r in frame_results]),
-                    'dm_aware': np.mean([r['detector_scores']['dm_aware'] for r in frame_results])
-                },
-                'processing_time': time.time()
-            }
-
-        except Exception as e:
-            print(f"Video detection error: {e}")
-            return {
-                'is_fake': False,
-                'confidence': 0.0,
-                'error': str(e),
-                'method': 'ensemble_sota'
-            }
-
-# Global detector instance
+# Global detector instance for singleton pattern
 _detector_instance = None
 
-def get_enhanced_detector() -> EnsembleDetector:
-    """Get or create enhanced detector instance"""
+def get_enhanced_detector(**kwargs) -> EnhancedDetector:
+    """Get or create enhanced detector instance (singleton)."""
     global _detector_instance
     if _detector_instance is None:
-        _detector_instance = EnsembleDetector()
+        _detector_instance = EnhancedDetector(**kwargs)
     return _detector_instance
 
-def detect_fake_enhanced(video_path: str) -> Dict:
-    """
-    Enhanced deepfake detection using ensemble of SOTA methods
-    Combines quality-agnostic, CLIP-based, and DM-aware detection
-    """
-    detector = get_enhanced_detector()
-    return detector.detect_video(video_path)
 
 if __name__ == "__main__":
-    # Test the enhanced detector
-    print("Testing Enhanced DeepFake Detector...")
-
-    detector = get_enhanced_detector()
+    # Example usage and testing
+    print("Testing Enhanced DeepFake Detector (Priority 1 MVP)...")
+    print("=" * 60)
+    
+    # Initialize detector
+    detector = EnhancedDetector()
     print(f"Detector initialized on device: {detector.device}")
-
+    print(f"CLIP model: Loaded")
+    print(f"LAA-Net: {'Available' if detector.laa_available else 'Not available (submodule setup required)'}")
+    print()
+    
     # Test with sample video if available
-    sample_video = "sample_video.mp4"
-    if os.path.exists(sample_video):
-        print(f"Testing with {sample_video}...")
-        result = detector.detect_video(sample_video)
-        print("Detection Result:", result)
+    sample_videos = [
+        "sample_video.mp4",
+        "test_video_1.mp4",
+        "test_video_2.mp4",
+        "test_video_3.mp4"
+    ]
+    
+    test_video = None
+    for video in sample_videos:
+        if os.path.exists(video):
+            test_video = video
+            break
+    
+    if test_video:
+        print(f"Testing with {test_video}...")
+        try:
+            result = detector.detect(test_video, num_frames=16)
+            print("\nDetection Results:")
+            print(f"  Method: {result['method']}")
+            print(f"  Is Deepfake: {result['is_deepfake']}")
+            print(f"  Ensemble Probability: {result['ensemble_fake_probability']:.4f}")
+            print(f"  CLIP Probability: {result['clip_fake_probability']:.4f}")
+            print(f"  LAA-Net Probability: {result['laa_fake_probability']:.4f}")
+            print(f"  Frames Analyzed: {result['num_frames_analyzed']}")
+        except Exception as e:
+            print(f"Error during detection: {e}")
+            import traceback
+            traceback.print_exc()
     else:
-        print("Sample video not found. Enhanced detector ready for use.")
+        print("No sample video found. Enhanced detector is ready for use.")
+        print("\nTo test:")
+        print("  detector = EnhancedDetector()")
+        print("  result = detector.detect('path/to/video.mp4')")
+        print("  print(result)")
