@@ -10,6 +10,7 @@ This project implements a comprehensive deepfake detection system combining AI a
 - **Blockchain Storage**: Solana smart contract for tamper-proof result storage
 - **Real-time Analysis**: Web interface with drag-and-drop video analysis
 - **Batch Processing**: Process multiple videos with comprehensive analytics
+- **Production Infrastructure**: Redis caching, PostgreSQL database, AWS S3 cloud storage, Sentry error tracking
 
 ## 🧠 Advanced Detection Techniques
 
@@ -83,6 +84,9 @@ python test_enhanced_models.py --output_dir benchmark_results
 - Solana CLI
 - Anchor Framework
 - Git
+- Docker (optional, for Redis)
+- PostgreSQL (optional, for database storage)
+- AWS Account (optional, for S3 cloud storage)
 
 ### Quick Setup
 ```bash
@@ -102,6 +106,50 @@ pip install git+https://github.com/openai/CLIP.git
 # Setup advanced datasets
 python datasets/advanced_datasets.py
 ```
+
+### Optional Services Setup (Production-Ready)
+
+The application supports optional production services for enhanced performance and reliability:
+
+#### 1. Redis (Caching)
+```bash
+# Using Docker (recommended)
+docker run -d --name redis-secureai -p 6379:6379 redis:7-alpine
+
+# Or install locally
+# Windows: Download from https://redis.io/download
+# Linux: sudo apt-get install redis-server
+# macOS: brew install redis
+```
+
+#### 2. PostgreSQL (Database)
+```bash
+# Install PostgreSQL
+# Windows: Download from https://www.postgresql.org/download/windows/
+# Linux: sudo apt-get install postgresql postgresql-contrib
+# macOS: brew install postgresql
+
+# Create database and user
+# See POSTGRESQL_SETUP_COMPLETE.md for detailed instructions
+```
+
+#### 3. AWS S3 (Cloud Storage)
+```bash
+# Configure AWS credentials in .env file
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_DEFAULT_REGION=us-east-2
+S3_BUCKET_NAME=secureai-deepfake-videos
+S3_RESULTS_BUCKET_NAME=secureai-deepfake-results
+```
+
+#### 4. Sentry (Error Tracking)
+```bash
+# Add Sentry DSN to .env file
+SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+```
+
+**Note**: All services are optional. The application will work with file-based storage if services are not configured. See `ALL_SERVICES_SETUP_COMPLETE.md` for detailed setup instructions.
 
 ## 🎯 Usage
 
@@ -149,12 +197,26 @@ SecureAI-DeepFake-Detection/
 │   ├── deepfake_classifier.py   # CNN-based detection
 │   ├── train_enhanced.py        # Advanced training script
 │   └── detect.py               # Unified detection interface
+├── database/
+│   ├── db_session.py           # PostgreSQL database session
+│   └── models.py               # SQLAlchemy models
+├── storage/
+│   └── s3_manager.py           # AWS S3 storage manager
+├── monitoring/
+│   ├── sentry_config.py        # Sentry error tracking
+│   └── logging_config.py       # Structured logging
+├── performance/
+│   └── cache_manager.py        # Redis caching
 ├── datasets/
 │   ├── advanced_datasets.py     # Dataset management
 │   ├── data.yaml               # Dataset configuration
 │   └── unified_deepfake/       # Combined dataset structure
 ├── blockchain/
 │   └── programs/secure-ai-detector/  # Solana smart contract
+├── secureai-guardian/          # React frontend
+│   ├── components/             # React components
+│   ├── services/               # Frontend services
+│   └── package.json           # Frontend dependencies
 ├── static/templates/
 │   ├── index.html              # Web interface
 │   └── analytics.html          # Results dashboard
@@ -162,6 +224,7 @@ SecureAI-DeepFake-Detection/
 ├── realtime_analysis.py        # Real-time video analysis
 ├── batch_processor.py          # Batch video processing
 ├── test_enhanced_models.py     # Model benchmarking
+├── requirements.txt            # Python dependencies
 └── README.md
 ```
 
@@ -197,6 +260,30 @@ from integration.integrate import store_detection_result
 tx_hash = store_detection_result(video_hash, detection_result, confidence)
 print(f"Stored on blockchain: {tx_hash}")
 ```
+
+## 🏭 Production Infrastructure
+
+### Redis Caching
+- **Purpose**: Performance optimization, API response caching
+- **Status**: Optional but recommended for production
+- **Setup**: See `QUICK_SETUP_REDIS.md` or `REDIS_SETUP_COMPLETE.md`
+
+### PostgreSQL Database
+- **Purpose**: Persistent storage for analysis results and user data
+- **Status**: Optional, falls back to file-based storage
+- **Setup**: See `POSTGRESQL_SETUP_COMPLETE.md` or `STEP2_POSTGRESQL_SETUP.md`
+
+### AWS S3 Cloud Storage
+- **Purpose**: Scalable cloud storage for videos and analysis results
+- **Status**: Optional, falls back to local storage
+- **Setup**: See `STEP3_AWS_S3_SETUP.md` or `S3_SETUP_COMPLETE.md`
+
+### Sentry Error Tracking
+- **Purpose**: Real-time error monitoring and performance tracking
+- **Status**: Optional but recommended for production
+- **Setup**: See `STEP4_SENTRY_SETUP.md` or `SENTRY_QUICK_SETUP.md`
+
+**All services are optional** - the application works without them but provides enhanced features when configured.
 
 ## 🧪 Testing & Validation
 
@@ -256,10 +343,21 @@ This implementation incorporates techniques from:
 - **CLIP import error**: `pip install git+https://github.com/openai/CLIP.git`
 - **Dataset download failed**: Check internet connection and disk space
 - **Blockchain deployment**: Use Solana Playground for easier deployment
+- **Redis connection failed**: Ensure Redis is running (`docker ps` or `redis-cli ping`)
+- **PostgreSQL connection failed**: Verify database credentials in `.env` file
+- **S3 upload failed**: Check AWS credentials and bucket permissions
+- **Sentry errors**: Verify `SENTRY_DSN` in `.env` file
 
 ### Performance Optimization:
 - Use CUDA-enabled GPU for faster inference
 - Reduce frame count for faster processing
 - Use batch processing for multiple videos
+- Enable Redis caching for faster API responses
+- Use S3 for scalable cloud storage
+
+### Production Deployment:
+- See `PRODUCTION_READINESS_ROADMAP.md` for complete production setup guide
+- See `HTTPS_SETUP_GUIDE.md` for SSL/HTTPS configuration
+- See `PRODUCTION_SETUP_COMPLETE.md` for deployment checklist
 
 For more help, check the [Issues](issues) page or create a new issue.
