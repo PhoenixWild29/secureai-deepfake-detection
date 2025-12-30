@@ -5,7 +5,7 @@ torchaudio>=2.0.0
 
 # Computer Vision & Detection
 opencv-python>=4.8.0
-ultralytics>=8.3.241  # Fixed: Code Injection vulnerability (CVE-81385)
+ultralytics>=8.3.226  # Fixed: Code Injection vulnerability (CVE-81385, PVE-2025-81385)
 Pillow>=10.0.0
 
 # Scientific Computing
@@ -34,6 +34,14 @@ starlette>=0.50.0  # Fixed: DoS vulnerabilities (CVE-2025-54121, CVE-2024-47874,
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
 python-multipart>=0.0.6
+# Transitive dependencies with vulnerabilities - pin secure versions
+sentence-transformers>=5.2.0  # Fixed: Arbitrary code execution (PVE-2024-73169)
+langchain-core>=1.2.5  # Fixed: Template injection (CVE-2025-65106)
+langchain-text-splitters>=1.1.0  # Fixed: XXE injection (CVE-2025-6985, PVE-2025-78354)
+langfuse>=3.11.2  # Fixed: Multiple vulnerabilities (PVE-2025-75620, PVE-2025-75619, PVE-2025-77285, PVE-2024-73564, PVE-2025-75618)
+langgraph-checkpoint>=3.0.1  # Fixed: Deserialization (CVE-2025-64439)
+litellm>=1.80.11  # Fixed: Information disclosure (PVE-2025-80130, PVE-2025-80100)
+dspy>=3.0.4  # Fixed: Information disclosure (CVE-2025-12695)
 
 # Async Processing
 celery>=5.3.0
@@ -62,7 +70,7 @@ tqdm>=4.66.0
 requests>=2.32.0
 pyyaml>=6.0.1
 brotli>=1.2.0  # Fixed: DoS vulnerability (CVE-2025-6176)
-fonttools>=4.61.1  # Fixed: Path traversal (CVE-2025-66034)
+fonttools>=4.61.0  # Fixed: Path traversal (CVE-2025-66034)
 
 # CLIP for enhanced detection - using open-clip-torch for better compatibility
 open-clip-torch>=2.20.0
