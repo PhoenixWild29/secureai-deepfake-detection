@@ -30,6 +30,13 @@ from ai_model.morpheus_security import analyze_video_security, get_security_stat
 from ai_model.jetson_inference import detect_video_jetson, get_jetson_stats
 import logging
 
+# Load environment variables
+load_dotenv()
+
+# Setup basic logging first (before other imports that might use logger)
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 # Database imports
 try:
     from database.db_session import get_db, init_db, SessionLocal
@@ -52,19 +59,14 @@ try:
     from monitoring.sentry_config import init_sentry
     from monitoring.logging_config import setup_logging
     MONITORING_AVAILABLE = True
+    # Upgrade to structured logging if available
+    try:
+        logger = setup_logging('secureai-guardian', os.getenv('LOG_LEVEL', 'INFO'))
+    except Exception:
+        pass  # Keep basic logger if setup fails
 except ImportError:
     MONITORING_AVAILABLE = False
     logger.warning("Monitoring modules not available.")
-
-# Load environment variables
-load_dotenv()
-
-# Setup logging
-try:
-    logger = setup_logging('secureai-guardian', os.getenv('LOG_LEVEL', 'INFO'))
-except:
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__,
             template_folder='templates',
@@ -200,7 +202,7 @@ def load_analysis_result(analysis_id):
 
 def update_processing_stats(result):
     """Update global processing statistics"""
-    global processing_stats
+    global processing_stats  # noqa: F824
     processing_stats['total_analyses'] += 1
     processing_stats['videos_processed'] += 1
 
@@ -463,7 +465,7 @@ def security_audit():
 @limiter.limit("10 per minute")  # Limit video uploads to 10 per minute
 def analyze_video():
     """Analyze a single video for deepfakes"""
-    global processing_stats
+    global processing_stats  # noqa: F824
 
     if 'video' not in request.files:
         return jsonify({'error': 'No video file provided'}), 400
@@ -692,7 +694,7 @@ def analyze_video():
 @limiter.limit("10 per minute")  # Limit URL analysis to 10 per minute
 def analyze_video_from_url():
     """Analyze a video from URL (STREAM_INTEL mode)"""
-    global processing_stats
+    global processing_stats  # noqa: F824
     
     try:
         data = request.get_json()
@@ -938,7 +940,7 @@ def batch_analyze():
 
 def process_batch(batch_id, files):
     """Process batch of videos in background"""
-    global processing_stats
+    global processing_stats  # noqa: F824
 
     results = []
     for file in files:
