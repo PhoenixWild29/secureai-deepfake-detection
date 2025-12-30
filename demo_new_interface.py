@@ -33,7 +33,10 @@ def main():
     
     try:
         from api import app
-        app.run(debug=True, host='0.0.0.0', port=5000)
+        import os
+        # Use environment variable for debug mode, default to False for security
+        debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+        app.run(debug=debug_mode, host='0.0.0.0', port=5000)
     except Exception as e:
         print(f"Error starting server: {e}")
 

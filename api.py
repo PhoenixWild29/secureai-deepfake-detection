@@ -15,9 +15,9 @@ try:
     BCRYPT_AVAILABLE = True
 except ImportError:
     BCRYPT_AVAILABLE = False
-from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for, flash, session
+from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for, session
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
+from flask_socketio import SocketIO
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
@@ -43,8 +43,8 @@ logging.basicConfig(level=logging.INFO)
 
 # Database imports
 try:
-    from database.db_session import get_db, init_db, SessionLocal
-    from database.models import Analysis, User, ProcessingStats
+    from database.db_session import get_db, init_db
+    from database.models import Analysis
     DATABASE_AVAILABLE = True
 except ImportError:
     DATABASE_AVAILABLE = False
@@ -143,6 +143,7 @@ processing_stats = {
     'avg_processing_time': 0,
     'last_updated': datetime.now().isoformat()
 }
+
 
 # User management functions
 def load_users():
@@ -385,7 +386,7 @@ def security_audit():
                 with open(test_file, 'w') as f:
                     f.write('test')
                 os.remove(test_file)
-            except:
+            except (IOError, OSError, PermissionError):
                 storage_ok = False
             
             # Check if results folder is writable
@@ -395,7 +396,7 @@ def security_audit():
                 with open(test_file, 'w') as f:
                     f.write('test')
                 os.remove(test_file)
-            except:
+            except (IOError, OSError, PermissionError):
                 results_writable = False
             
             service_ok = storage_ok and results_writable
@@ -1088,12 +1089,19 @@ def submit_to_blockchain():
         return jsonify({'error': 'Analysis ID required'}), 400
 
     try:
-        # Load analysis result
-        result_file = os.path.join(app.config['RESULTS_FOLDER'], f"{data['analysis_id']}.json")
-        if not os.path.exists(result_file):
+        # Load analysis result - sanitize analysis_id to prevent path traversal
+        analysis_id = data.get('analysis_id', '').strip()
+        if not analysis_id or not analysis_id.replace('-', '').replace('_', '').isalnum():
+            return jsonify({'error': 'Invalid analysis ID'}), 400
+        result_file = os.path.join(app.config['RESULTS_FOLDER'], f"{analysis_id}.json")
+        # Ensure path is within RESULTS_FOLDER (prevent path traversal)
+        safe_result_file = os.path.normpath(result_file)
+        if not safe_result_file.startswith(os.path.normpath(app.config['RESULTS_FOLDER'])):
+            return jsonify({'error': 'Invalid file path'}), 400
+        if not os.path.exists(safe_result_file):
             return jsonify({'error': 'Analysis result not found'}), 404
 
-        with open(result_file, 'r') as f:
+        with open(safe_result_file, 'r') as f:
             analysis_result = json.load(f)
 
         # Get video hash and authenticity score
