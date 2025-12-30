@@ -1,0 +1,8 @@
+{
+  "name": "Copy of SecureAI Guardian",
+  "description": "A flagship deepfake detection platform featuring CLIP zero-shot scanning, Solana blockchain verification, and federated learning integration.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

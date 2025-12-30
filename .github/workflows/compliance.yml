@@ -45,7 +45,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload GDPR report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gdpr-compliance-report
         path: gdpr_compliance_report.txt
@@ -83,7 +83,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload CCPA report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ccpa-compliance-report
         path: ccpa_compliance_report.txt
@@ -121,7 +121,7 @@ jobs:
       continue-on-error: true
     
     - name: Upload AI Act report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ai-act-compliance-report
         path: ai_act_compliance_report.txt
@@ -179,7 +179,7 @@ jobs:
         echo "- Regulatory requirements status"
     
     - name: Upload comprehensive reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: comprehensive-compliance-reports
         path: |
