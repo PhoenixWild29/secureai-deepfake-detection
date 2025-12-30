@@ -191,10 +191,8 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           modelType: 'enhanced',
         });
         analysisId = result.id;
-        // Store analysis ID for potential future use (e.g., cancellation, status checks)
-        if (wsConnection) {
-          wsConnection.analysisId = analysisId;
-        }
+        // Store analysis ID for WebSocket connection tracking and potential future use
+        console.log('Analysis started with ID:', analysisId);
       } else {
         setTerminalLogs(prev => [...prev.slice(-6), '[UPLOAD] Starting file upload...']);
         setProgress(10);
@@ -206,10 +204,8 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           modelType: 'enhanced',
         });
         analysisId = result.id;
-        // Store analysis ID for potential future use (e.g., cancellation, status checks)
-        if (wsConnection) {
-          wsConnection.analysisId = analysisId;
-        }
+        // Store analysis ID for WebSocket connection tracking and potential future use
+        console.log('Analysis started with ID:', analysisId);
       }
       
       // If WebSocket didn't provide the result, use the API result
