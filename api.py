@@ -10,10 +10,14 @@ import time
 import hashlib
 import secrets
 from datetime import datetime, timedelta
+try:
+    import bcrypt
+    BCRYPT_AVAILABLE = True
+except ImportError:
+    BCRYPT_AVAILABLE = False
 from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for, flash, session
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, disconnect, join_room, leave_room
-from flask_socketio import SocketIO, emit, disconnect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
@@ -158,11 +162,10 @@ def save_users(users):
 
 def hash_password(password):
     """Hash password using bcrypt for secure password storage"""
-    try:
-        import bcrypt
+    if BCRYPT_AVAILABLE:
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
-    except ImportError:
+    else:
         # Fallback to SHA-256 with salt if bcrypt not available (not recommended for production)
         import secrets
         salt = secrets.token_hex(16)
@@ -170,16 +173,19 @@ def hash_password(password):
 
 def verify_password(password, hashed):
     """Verify password against hash"""
-    try:
-        import bcrypt
-        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-    except (ImportError, ValueError):
-        # Fallback for SHA-256 with salt
-        if ':' in hashed:
-            hash_part, salt = hashed.rsplit(':', 1)
-            return hashlib.sha256((password + salt).encode()).hexdigest() == hash_part
-        # Legacy SHA-256 without salt (insecure, but needed for backward compatibility)
-        return hash_password(password) == hashed
+    if BCRYPT_AVAILABLE:
+        try:
+            return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        except (ValueError, TypeError):
+            # Invalid bcrypt hash format, fall through to legacy
+            pass
+    
+    # Fallback for SHA-256 with salt
+    if ':' in hashed:
+        hash_part, salt = hashed.rsplit(':', 1)
+        return hashlib.sha256((password + salt).encode()).hexdigest() == hash_part
+    # Legacy SHA-256 without salt (insecure, but needed for backward compatibility)
+    return hash_password(password) == hashed
 
 def get_current_user():
     """Get current logged-in user"""
