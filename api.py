@@ -152,7 +152,7 @@ def load_users():
         try:
             with open(USERS_FILE, 'r') as f:
                 return json.load(f)
-        except:
+        except (json.JSONDecodeError, IOError, OSError):
             return {}
     return {}
 
@@ -1126,8 +1126,11 @@ def submit_to_blockchain():
         analysis_result['blockchain_network'] = network
         analysis_result['blockchain_timestamp'] = datetime.now().isoformat()
         
-        # Save updated result
-        with open(result_file, 'w') as f:
+        # Save updated result - sanitize path to prevent traversal
+        safe_result_file = os.path.normpath(result_file)
+        if not safe_result_file.startswith(os.path.normpath(app.config['RESULTS_FOLDER'])):
+            return jsonify({'error': 'Invalid file path'}), 400
+        with open(safe_result_file, 'w') as f:
             json.dump(analysis_result, f, indent=2)
 
         return jsonify({
@@ -1730,4 +1733,6 @@ if __name__ == '__main__':
     print("🚀 Starting SecureAI DeepFake Detection API...")
     print("📊 Web Interface: http://localhost:5000")
     print("🔗 API Endpoints: http://localhost:5000/api/*")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use environment variable for debug mode, default to False for security
+    debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
