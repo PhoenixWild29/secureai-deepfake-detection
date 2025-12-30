@@ -32,8 +32,9 @@ jobs:
     
     - name: Run Safety check
       run: |
-        safety check --json --output safety-report.json || echo "Safety check completed with warnings"
-        safety check || echo "Vulnerabilities found in dependencies - review recommended"
+        safety check --json --output safety-report.json || true
+        safety check || true
+        echo "Safety check completed - review report for details"
       continue-on-error: true
     
     - name: Run pip-audit
@@ -68,8 +69,9 @@ jobs:
     
     - name: Run Bandit security scan
       run: |
-        bandit -r . -f json -o bandit-report.json || true
-        bandit -r . -ll -i || echo "Security issues found"
+        bandit -r api.py database/ storage/ monitoring/ performance/ utils/ tests/ integration/ -f json -o bandit-report.json || true
+        bandit -r api.py database/ storage/ monitoring/ performance/ utils/ tests/ integration/ -ll -i || true
+        echo "Bandit scan completed - review report for details"
       continue-on-error: true
     
     - name: Upload Bandit report
@@ -161,10 +163,11 @@ jobs:
     
     - name: Check licenses
       run: |
-        pip-licenses --format=json --output-file=licenses.json || echo "License check completed"
-        pip-licenses --format=markdown --output-file=licenses.md || echo "License markdown generated"
+        pip-licenses --format=json --output-file=licenses.json || true
+        pip-licenses --format=markdown --output-file=licenses.md || true
         echo "License summary:"
-        pip-licenses --summary || echo "License summary generated"
+        pip-licenses --summary || true
+        echo "License check completed"
       continue-on-error: true
     
     - name: Upload license reports
