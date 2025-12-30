@@ -119,6 +119,7 @@ export class ReconnectingWebSocket {
   private onComplete: CompleteCallback;
   private onError: ErrorCallback;
   private analysisId: string;
+  public currentAnalysisId: string | null = null;
 
   constructor(
     analysisId: string,
@@ -127,11 +128,19 @@ export class ReconnectingWebSocket {
     onError: ErrorCallback
   ) {
     this.analysisId = analysisId;
+    this.currentAnalysisId = analysisId;
     this.onProgress = onProgress;
     this.onComplete = onComplete;
     this.onError = onError;
     this.url = `${WS_BASE_URL}/analysis/${analysisId}`;
     this.connect();
+  }
+  
+  public updateAnalysisId(newAnalysisId: string): void {
+    this.currentAnalysisId = newAnalysisId;
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.send({ type: 'update_analysis_id', analysis_id: newAnalysisId });
+    }
   }
 
   private connect() {

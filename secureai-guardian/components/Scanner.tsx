@@ -191,8 +191,18 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           modelType: 'enhanced',
         });
         analysisId = result.id;
-        // Store analysis ID for WebSocket connection tracking and potential future use
-        console.log('Analysis started with ID:', analysisId);
+        // Store analysis ID for WebSocket connection tracking and error handling
+        if (wsConnection) {
+          wsConnection.currentAnalysisId = analysisId;
+          if (wsConnection.ws?.readyState === WebSocket.OPEN) {
+            // Update WebSocket connection with actual analysis ID
+            wsConnection.send({ type: 'update_analysis_id', analysis_id: analysisId });
+          }
+        }
+        // Use analysisId for error tracking and logging
+        if (!analysisId) {
+          throw new Error('Analysis ID not received from backend');
+        }
       } else {
         setTerminalLogs(prev => [...prev.slice(-6), '[UPLOAD] Starting file upload...']);
         setProgress(10);
@@ -204,8 +214,14 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           modelType: 'enhanced',
         });
         analysisId = result.id;
-        // Store analysis ID for WebSocket connection tracking and potential future use
-        console.log('Analysis started with ID:', analysisId);
+        // Store analysis ID for WebSocket connection tracking and error handling
+        if (wsConnection) {
+          wsConnection.updateAnalysisId(analysisId);
+        }
+        // Validate analysisId was received (fixes unused variable warning)
+        if (!analysisId) {
+          throw new Error('Analysis ID not received from backend');
+        }
       }
       
       // If WebSocket didn't provide the result, use the API result

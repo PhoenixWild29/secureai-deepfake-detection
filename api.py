@@ -157,12 +157,29 @@ def save_users(users):
         json.dump(users, f, indent=2)
 
 def hash_password(password):
-    """Hash password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash password using bcrypt for secure password storage"""
+    try:
+        import bcrypt
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+    except ImportError:
+        # Fallback to SHA-256 with salt if bcrypt not available (not recommended for production)
+        import secrets
+        salt = secrets.token_hex(16)
+        return hashlib.sha256((password + salt).encode()).hexdigest() + ':' + salt
 
 def verify_password(password, hashed):
     """Verify password against hash"""
-    return hash_password(password) == hashed
+    try:
+        import bcrypt
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    except (ImportError, ValueError):
+        # Fallback for SHA-256 with salt
+        if ':' in hashed:
+            hash_part, salt = hashed.rsplit(':', 1)
+            return hashlib.sha256((password + salt).encode()).hexdigest() == hash_part
+        # Legacy SHA-256 without salt (insecure, but needed for backward compatibility)
+        return hash_password(password) == hashed
 
 def get_current_user():
     """Get current logged-in user"""
