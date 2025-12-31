@@ -40,7 +40,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p uploads results logs && \
+RUN mkdir -p uploads results logs run && \
     chown -R app:app /app
 
 # Switch to non-root user

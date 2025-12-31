@@ -28,7 +28,8 @@ proc_name = "secureai-guardian"
 
 # Server mechanics
 daemon = False
-pidfile = "/var/run/secureai-guardian.pid"
+# Disable pidfile for Docker (not needed in containers, and app user can't write to /var/run/)
+pidfile = None
 umask = 0
 user = None
 group = None
