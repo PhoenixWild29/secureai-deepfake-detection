@@ -4,20 +4,22 @@
 import multiprocessing
 import os
 
-# Server socket
-bind = "127.0.0.1:5000"
+# Server socket - Use environment variable or default to 0.0.0.0:8000 for Docker
+bind = os.getenv('GUNICORN_BIND', "0.0.0.0:8000")
 backlog = 2048
 
-# Worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
-worker_class = "sync"
+# Worker processes - Use environment variable or default
+workers = int(os.getenv('GUNICORN_WORKERS', multiprocessing.cpu_count() * 2 + 1))
+worker_class = os.getenv('GUNICORN_WORKER_CLASS', "gevent")
 worker_connections = 1000
-timeout = 300  # 5 minutes for video processing
+timeout = int(os.getenv('GUNICORN_TIMEOUT', '300'))  # 5 minutes for video processing
 keepalive = 5
 
-# Logging
-accesslog = "/var/log/secureai/access.log"
-errorlog = "/var/log/secureai/error.log"
+# Logging - Use /app/logs for Docker compatibility
+log_dir = os.getenv('LOG_DIR', '/app/logs')
+os.makedirs(log_dir, exist_ok=True)
+accesslog = os.path.join(log_dir, "access.log")
+errorlog = os.path.join(log_dir, "error.log")
 loglevel = "info"
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 

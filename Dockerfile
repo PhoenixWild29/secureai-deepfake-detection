@@ -40,7 +40,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p uploads results && \
+RUN mkdir -p uploads results logs && \
     chown -R app:app /app
 
 # Switch to non-root user
@@ -54,5 +54,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
 # Run application
-# Use api.py directly with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "--worker-class", "gevent", "api:app"]
+# Use gunicorn with config file for proper logging
+CMD ["gunicorn", "--config", "gunicorn_config.py", "api:app"]

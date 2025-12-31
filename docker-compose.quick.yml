@@ -51,6 +51,7 @@ services:
       - DEBUG=false
       - FLASK_ENV=production
       - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
+      - LOG_DIR=/app/logs
     env_file:
       - .env
     volumes:
