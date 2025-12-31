@@ -29,7 +29,25 @@ from dotenv import load_dotenv
 
 from ai_model.detect import detect_fake
 from integration.integrate import submit_to_solana
-from ai_model.aistore_integration import store_video_distributed, get_storage_status as get_aistore_status
+
+# AIStore integration (optional)
+try:
+    from ai_model.aistore_integration import store_video_distributed, get_storage_status as get_aistore_status
+    AISTORE_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    AISTORE_AVAILABLE = False
+    # Create mock functions for when AIStore is not available
+    def store_video_distributed(video_path, metadata=None):
+        return {
+            'video_hash': '',
+            'stored_distributed': False,
+            'storage_type': 'local_only',
+            'distributed_urls': []
+        }
+    def get_aistore_status():
+        return {'available': False, 'storage_type': 'local_only'}
+    print("[WARNING] AIStore integration not available. Using local storage only.")
+
 from ai_model.morpheus_security import analyze_video_security, get_security_status, start_security_monitoring
 from ai_model.jetson_inference import detect_video_jetson, get_jetson_stats
 import logging

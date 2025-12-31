@@ -7,7 +7,15 @@ import os
 import hashlib
 from pathlib import Path
 from typing import Dict, Any, Optional, List
-import aistore as ais
+
+# Try to import aistore, but make it optional
+try:
+    import aistore as ais
+    AISTORE_AVAILABLE = True
+except ImportError:
+    AISTORE_AVAILABLE = False
+    ais = None
+    print("[WARNING] AIStore library not available. Running in local storage mode only.")
 
 class AIStoreManager:
     """Manages distributed storage using AIStore"""
@@ -26,13 +34,16 @@ class AIStoreManager:
         self.bucket = None
 
         # Try to connect to AIStore
-        try:
-            self.client = ais.Client(endpoint)
-            self.bucket = self.client.bucket(bucket_name)
-            print(f"[OK] Connected to AIStore at {endpoint}")
-        except Exception as e:
-            print(f"[WARNING] AIStore not available: {e}")
-            print("   Running in local storage mode only")
+        if AISTORE_AVAILABLE:
+            try:
+                self.client = ais.Client(endpoint)
+                self.bucket = self.client.bucket(bucket_name)
+                print(f"[OK] Connected to AIStore at {endpoint}")
+            except Exception as e:
+                print(f"[WARNING] AIStore not available: {e}")
+                print("   Running in local storage mode only")
+        else:
+            print("[WARNING] AIStore library not installed. Running in local storage mode only.")
 
     def is_available(self) -> bool:
         """Check if AIStore is available"""
