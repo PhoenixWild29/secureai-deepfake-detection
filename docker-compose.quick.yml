@@ -42,8 +42,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: secureai-backend
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - DATABASE_URL=postgresql://secureai:${DB_PASSWORD:-SecureAI2024!DB}@postgres:5432/secureai_db
       - REDIS_URL=redis://redis:6379/0
@@ -69,6 +69,20 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    networks:
+      - secureai-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: secureai-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./secureai-guardian/dist:/usr/share/nginx/html:ro
+      - ./nginx.quick.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - secureai-backend
+    restart: unless-stopped
     networks:
       - secureai-network
 
