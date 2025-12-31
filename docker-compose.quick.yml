@@ -1,0 +1,83 @@
+version: '3.8'
+
+# Quick Docker Deployment - Minimal Setup
+# This is a simplified version for quick cloud deployment
+# Run: docker-compose -f docker-compose.quick.yml up -d
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: secureai-postgres
+    environment:
+      POSTGRES_DB: secureai_db
+      POSTGRES_USER: secureai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SecureAI2024!DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secureai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secureai-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: secureai-redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - secureai-network
+
+  secureai-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secureai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://secureai:${DB_PASSWORD:-SecureAI2024!DB}@postgres:5432/secureai_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - DEBUG=false
+      - FLASK_ENV=production
+      - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - secureai-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  secureai-network:
+    driver: bridge
+

@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: secureai-postgres
+    environment:
+      POSTGRES_DB: secureai_db
+      POSTGRES_USER: secureai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-this-in-production}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secureai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secureai-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: secureai-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - secureai-network
+
+  secureai-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secureai-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://secureai:${DB_PASSWORD:-change-this}@postgres:5432/secureai_db
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - secureai-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: secureai-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./secureai-guardian/dist:/usr/share/nginx/html:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - secureai-backend
+    restart: unless-stopped
+    networks:
+      - secureai-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  secureai-network:
+    driver: bridge
+

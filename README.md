@@ -356,8 +356,17 @@ This implementation incorporates techniques from:
 - Use S3 for scalable cloud storage
 
 ### Production Deployment:
-- See `PRODUCTION_READINESS_ROADMAP.md` for complete production setup guide
+- **🌐 NEW TO CLOUD?**: See `CREATE_CLOUD_SERVER.md` - How to create a cloud server (DigitalOcean, AWS, etc.)
+- **🐳 QUICK START**: See `DOCKER_QUICK_START.md` - Get running in 5 minutes
+- **📚 GET STARTED**: See `GET_STARTED_DEPLOYMENT.md` - Complete step-by-step deployment guide
+- **📖 FILES EXPLAINED**: See `DEPLOYMENT_FILES_EXPLAINED.md` - Understand what each file does
+- **🚀 FULL GUIDE**: See `PRODUCTION_DEPLOYMENT_GUIDE.md` for complete production deployment guide
+- **Docker Deployment**: Use `docker-compose.prod.yml` for containerized deployment
+- **VPS/Cloud Deployment**: Use `deploy-production.sh` for automated server setup
+- **Cloud Providers**: AWS, GCP, Azure deployment instructions included
+- See `PRODUCTION_READINESS_ROADMAP.md` for production readiness checklist
 - See `HTTPS_SETUP_GUIDE.md` for SSL/HTTPS configuration
 - See `PRODUCTION_SETUP_COMPLETE.md` for deployment checklist
+- **Windows Development**: See `WINDOWS_SERVICE_SETUP.md` for local development (NOT for production)
 
 For more help, check the [Issues](issues) page or create a new issue.
