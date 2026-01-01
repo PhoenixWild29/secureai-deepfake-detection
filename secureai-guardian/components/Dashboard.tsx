@@ -156,7 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
       try {
         const API_BASE_URL = import.meta.env.DEV 
           ? '' // Use relative path in development to leverage Vite proxy
-          : import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+          : (import.meta.env.VITE_API_BASE_URL || ''); // Use relative URLs in production (Nginx proxies /api)
         
         // Create AbortController for timeout
         const controller = new AbortController();

@@ -4,9 +4,10 @@
  */
 
 // Use relative WebSocket URL in development to work with Vite proxy
+// In production, construct WebSocket URL from current location (Nginx proxies /socket.io)
 const WS_BASE_URL = import.meta.env.DEV
   ? (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host.replace(':3000', ':5000')
-  : (import.meta.env.VITE_WS_URL || 'ws://localhost:5000');
+  : (import.meta.env.VITE_WS_URL || (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host);
 
 export interface ProgressMessage {
   type: 'progress' | 'status' | 'complete' | 'error';
@@ -32,7 +33,10 @@ export function connectAnalysisWebSocket(
 ): WebSocket {
   // Flask-SocketIO uses Socket.IO protocol, but we can use standard WebSocket
   // The backend will handle Socket.IO protocol conversion
-  const wsUrl = `${WS_BASE_URL}`;
+  // In production, use Socket.IO endpoint through Nginx proxy
+  const wsUrl = import.meta.env.DEV
+    ? `${WS_BASE_URL}`
+    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/socket.io`;
   const ws = new WebSocket(wsUrl);
 
   ws.onopen = () => {
@@ -145,7 +149,11 @@ export class ReconnectingWebSocket {
 
   private connect() {
     try {
-      this.ws = new WebSocket(this.url);
+      // In production, use Socket.IO endpoint through Nginx proxy
+      const wsUrl = import.meta.env.DEV 
+        ? this.url
+        : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/socket.io`;
+      this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
         console.log('WebSocket connected:', this.analysisId);

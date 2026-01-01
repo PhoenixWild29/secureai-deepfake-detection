@@ -6,10 +6,11 @@
 import { ScanResult, ForensicMetrics } from '../types';
 
 // Use relative URL in development to leverage Vite proxy, or use env variable for production
+// In production, if no VITE_API_BASE_URL is set, use relative URLs (Nginx will proxy /api to backend)
 // The Vite proxy will forward /api requests to the backend server
 const API_BASE_URL = import.meta.env.DEV 
   ? '' // Use relative URLs in dev (goes through Vite proxy)
-  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000');
+  : (import.meta.env.VITE_API_BASE_URL || ''); // Use relative URLs in production (Nginx proxies /api)
 
 /**
  * Backend API Response Types

@@ -28,7 +28,7 @@ const TestHarness: React.FC<TestHarnessProps> = ({ currentView, onNavigate, onUp
       // Call real backend security audit endpoint
       const API_BASE_URL = import.meta.env.DEV 
         ? '' // Use relative path in development to leverage Vite proxy
-        : import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+        : (import.meta.env.VITE_API_BASE_URL || ''); // Use relative URLs in production (Nginx proxies /api)
       
       const response = await fetch(`${API_BASE_URL}/api/security/audit`, {
         method: 'POST',
