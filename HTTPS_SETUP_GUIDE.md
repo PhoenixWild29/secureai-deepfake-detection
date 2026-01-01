@@ -4,25 +4,30 @@ This guide will help you set up HTTPS/SSL certificates using Let's Encrypt for y
 
 ## Prerequisites
 
-1. **Domain Name**: You need a domain name (e.g., `secureai.example.com`) that points to your server's IP address
+1. **Domain Name**: You need a domain name or subdomain (e.g., `guardian.secureai.dev`) that points to your server's IP address
 2. **DNS Configuration**: Your domain's A record should point to your server IP
 3. **Ports Open**: Ports 80 (HTTP) and 443 (HTTPS) must be open in your firewall
 
-## Step 1: Point Your Domain to Your Server
+## Step 1: Set Up Your Subdomain
 
+**If you already have a domain (like `secureai.dev`):**
+- Follow `SUBDOMAIN_SETUP_GUIDE.md` to create a subdomain (e.g., `guardian.secureai.dev`)
+- Recommended subdomain: `guardian.secureai.dev`
+
+**If you need to set up DNS:**
 1. Log in to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare)
 2. Create an A record:
    - **Type**: A
-   - **Name**: @ (or your subdomain like `secureai`)
+   - **Name**: `guardian` (or your chosen subdomain)
    - **Value**: Your server IP address (e.g., `64.225.57.145`)
    - **TTL**: 3600 (or default)
 
 3. Wait for DNS propagation (can take a few minutes to 24 hours)
 4. Verify DNS is working:
    ```bash
-   nslookup yourdomain.com
+   nslookup guardian.secureai.dev
    # or
-   dig yourdomain.com
+   dig guardian.secureai.dev
    ```
 
 ## Step 2: Install Certbot on Your Server
