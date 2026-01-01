@@ -1,186 +1,188 @@
-# 🔒 HTTPS Setup Guide for SecureAI Guardian
+# HTTPS/SSL Setup Guide for SecureAI Guardian
 
-This guide walks you through setting up HTTPS/SSL for your SecureAI Guardian application using Let's Encrypt and Nginx.
+This guide will help you set up HTTPS/SSL certificates using Let's Encrypt for your SecureAI Guardian deployment.
 
 ## Prerequisites
 
-- A Linux server (Ubuntu 20.04+ recommended)
-- Domain name pointing to your server's IP address
-- Root or sudo access
-- Ports 80 and 443 open in firewall
+1. **Domain Name**: You need a domain name (e.g., `secureai.example.com`) that points to your server's IP address
+2. **DNS Configuration**: Your domain's A record should point to your server IP
+3. **Ports Open**: Ports 80 (HTTP) and 443 (HTTPS) must be open in your firewall
 
-## Step 1: Install Nginx and Certbot
+## Step 1: Point Your Domain to Your Server
+
+1. Log in to your domain registrar (e.g., GoDaddy, Namecheap, Cloudflare)
+2. Create an A record:
+   - **Type**: A
+   - **Name**: @ (or your subdomain like `secureai`)
+   - **Value**: Your server IP address (e.g., `64.225.57.145`)
+   - **TTL**: 3600 (or default)
+
+3. Wait for DNS propagation (can take a few minutes to 24 hours)
+4. Verify DNS is working:
+   ```bash
+   nslookup yourdomain.com
+   # or
+   dig yourdomain.com
+   ```
+
+## Step 2: Install Certbot on Your Server
+
+SSH into your server and run:
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y nginx certbot python3-certbot-nginx
+# Update package list
+sudo apt update
+
+# Install certbot
+sudo apt install certbot -y
+
+# Verify installation
+certbot --version
 ```
 
-## Step 2: Configure Domain DNS
+## Step 3: Stop Nginx Container Temporarily
 
-Ensure your domain's A record points to your server's IP address:
+We need to stop the Nginx container so certbot can use port 80 for verification:
 
 ```bash
-# Check if DNS is configured
-dig your-domain.com +short
-# Should return your server's IP address
+cd /root/secureai-deepfake-detection  # or wherever you cloned the repo
+docker compose -f docker-compose.quick.yml stop nginx
 ```
 
-## Step 3: Update Nginx Configuration
+## Step 4: Get SSL Certificate
 
-1. Edit `nginx.conf` and replace `your-domain.com` with your actual domain
-2. Copy the configuration:
+Run certbot to get your certificate (replace `yourdomain.com` with your actual domain):
 
 ```bash
-sudo cp nginx.conf /etc/nginx/sites-available/secureai-guardian
-sudo ln -s /etc/nginx/sites-available/secureai-guardian /etc/nginx/sites-enabled/
-sudo rm /etc/nginx/sites-enabled/default  # Remove default site
+sudo certbot certonly --standalone -d yourdomain.com -d www.yourdomain.com
 ```
 
-3. Test the configuration:
-
+**Note**: If you only have a subdomain, use:
 ```bash
-sudo nginx -t
-```
-
-4. Start Nginx:
-
-```bash
-sudo systemctl start nginx
-sudo systemctl enable nginx
-```
-
-## Step 4: Obtain SSL Certificate
-
-Run the automated setup script:
-
-```bash
-chmod +x setup-https.sh
-sudo ./setup-https.sh
-```
-
-Or manually:
-
-```bash
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+sudo certbot certonly --standalone -d secureai.yourdomain.com
 ```
 
 Follow the prompts:
-- Enter your email address
+- Enter your email address (for renewal notifications)
 - Agree to terms of service
-- Choose to redirect HTTP to HTTPS
+- Optionally share email with EFF
 
-## Step 5: Verify SSL Certificate
+Certbot will:
+1. Start a temporary web server on port 80
+2. Verify you own the domain
+3. Download and save certificates to `/etc/letsencrypt/live/yourdomain.com/`
 
-1. Check certificate status:
-
-```bash
-sudo certbot certificates
-```
-
-2. Test automatic renewal:
+## Step 5: Create Certificate Directory Structure
 
 ```bash
-sudo certbot renew --dry-run
+# Create directory for certificates in your project
+mkdir -p certs
+
+# Copy certificates (we'll use these in Docker)
+sudo cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem certs/
+sudo cp /etc/letsencrypt/live/yourdomain.com/privkey.pem certs/
+
+# Set proper permissions
+sudo chmod 644 certs/fullchain.pem
+sudo chmod 600 certs/privkey.pem
+sudo chown $USER:$USER certs/*.pem
 ```
 
-3. Visit your site: `https://your-domain.com`
+## Step 6: Update Docker Compose for HTTPS
 
-## Step 6: Build and Deploy Frontend
+The `docker-compose.quick.yml` file needs to be updated to:
+1. Expose port 443
+2. Mount the certificates
+3. Use the HTTPS nginx configuration
 
-1. Build the frontend:
+We'll create an updated version. See the next steps.
 
-```bash
-cd secureai-guardian
-npm run build
-```
+## Step 7: Update Nginx Configuration for HTTPS
 
-2. Copy build to Nginx directory:
-
-```bash
-sudo mkdir -p /var/www/secureai-guardian
-sudo cp -r dist/* /var/www/secureai-guardian/
-sudo chown -R www-data:www-data /var/www/secureai-guardian
-```
-
-## Step 7: Configure Backend
-
-Ensure your backend is running on `127.0.0.1:5000` (localhost only, not publicly accessible).
-
-The Nginx configuration will proxy requests from HTTPS to your backend.
+We'll create an HTTPS-enabled nginx configuration that:
+- Redirects HTTP to HTTPS
+- Serves the frontend over HTTPS
+- Proxies API requests securely
 
 ## Step 8: Restart Services
 
 ```bash
-sudo systemctl restart nginx
-# Restart your backend service if using systemd
+# Start all services with HTTPS
+docker compose -f docker-compose.quick.yml up -d
+
+# Check status
+docker compose -f docker-compose.quick.yml ps
+
+# Check logs
+docker compose -f docker-compose.quick.yml logs nginx
 ```
 
-## Automatic Certificate Renewal
+## Step 9: Test HTTPS
 
-Certbot automatically sets up a systemd timer for renewal. Verify it's active:
+1. Open your browser and go to: `https://yourdomain.com`
+2. You should see a padlock icon indicating the connection is secure
+3. Test the API: `https://yourdomain.com/api/health`
+
+## Step 10: Set Up Auto-Renewal
+
+Let's Encrypt certificates expire every 90 days. Set up auto-renewal:
 
 ```bash
-sudo systemctl status certbot.timer
+# Test renewal (dry run)
+sudo certbot renew --dry-run
+
+# Certbot automatically sets up a systemd timer, but we need to handle Docker
+# Create a renewal script
+sudo nano /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
 ```
 
-Certificates are renewed automatically 30 days before expiration.
+Add this content:
+```bash
+#!/bin/bash
+cd /root/secureai-deepfake-detection  # Update with your actual path
+cp /etc/letsencrypt/live/yourdomain.com/fullchain.pem certs/
+cp /etc/letsencrypt/live/yourdomain.com/privkey.pem certs/
+chmod 644 certs/fullchain.pem
+chmod 600 certs/privkey.pem
+docker compose -f docker-compose.quick.yml restart nginx
+```
+
+Make it executable:
+```bash
+sudo chmod +x /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+```
 
 ## Troubleshooting
 
-### Certificate Not Obtaining
+### Certificate Not Found
+- Verify DNS is pointing to your server: `nslookup yourdomain.com`
+- Ensure port 80 is open: `sudo ufw allow 80`
+- Check certbot logs: `sudo tail -f /var/log/letsencrypt/letsencrypt.log`
 
-1. **Check DNS**: Ensure domain points to your server
-   ```bash
-   dig your-domain.com +short
-   ```
+### Nginx Can't Read Certificates
+- Check file permissions: `ls -la certs/`
+- Ensure certificates are mounted in docker-compose
 
-2. **Check Port 80**: Ensure it's open
-   ```bash
-   sudo ufw allow 80/tcp
-   sudo ufw allow 443/tcp
-   ```
+### Certificate Renewal Fails
+- Ensure the renewal hook script is executable
+- Test manually: `sudo certbot renew --dry-run`
 
-3. **Check Nginx**: Ensure it's running
-   ```bash
-   sudo systemctl status nginx
-   ```
+### Mixed Content Warnings
+- Ensure your frontend uses HTTPS for API calls
+- Check browser console for HTTP requests
 
-### SSL Certificate Expired
+## Security Best Practices
 
-Renew manually:
-```bash
-sudo certbot renew
-sudo systemctl reload nginx
-```
-
-### Nginx Configuration Errors
-
-Test configuration:
-```bash
-sudo nginx -t
-```
-
-Check logs:
-```bash
-sudo tail -f /var/log/nginx/error.log
-```
-
-## Security Checklist
-
-- ✅ HTTPS redirects HTTP traffic
-- ✅ HSTS header enabled
-- ✅ Strong SSL/TLS protocols (TLS 1.2+)
-- ✅ Security headers configured
-- ✅ Automatic certificate renewal active
+1. **HSTS**: Already configured in nginx config
+2. **Strong Ciphers**: Modern TLS 1.2/1.3 only
+3. **Auto-Renewal**: Set up and test renewal
+4. **Firewall**: Only open ports 80 and 443
+5. **Regular Updates**: Keep certbot and nginx updated
 
 ## Next Steps
 
 After HTTPS is set up:
-1. Configure production server (Gunicorn)
-2. Set up security headers
-3. Implement rate limiting
-4. Configure monitoring
-
-See `PRODUCTION_READINESS_ROADMAP.md` for complete production setup.
-
+1. Update your frontend API base URL to use HTTPS
+2. Configure CORS if needed
+3. Set up monitoring for certificate expiration
+4. Consider adding a CDN for better performance
