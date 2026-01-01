@@ -38,7 +38,8 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir tensorflow || echo "TensorFlow install issue (optional for MTCNN)" && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir gunicorn gevent && \
-    pip install --no-cache-dir solana solders base58 || echo "Solana packages install issue"
+    pip install --no-cache-dir solana solders base58 && \
+    python -c "import solana; import solders; print('Solana packages verified')" || echo "Solana packages verification failed"
 
 # Copy application code
 COPY . .
