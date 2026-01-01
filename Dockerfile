@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     libgthread-2.0-0 \
     ffmpeg \
     curl \
+    libopencv-dev \
+    python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app user
@@ -33,6 +35,7 @@ COPY requirements.txt .
 # Install Python dependencies with error handling for optional packages
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir torch torchvision || echo "PyTorch install issue" && \
+    pip install --no-cache-dir tensorflow || echo "TensorFlow install issue (optional for MTCNN)" && \
     pip install --no-cache-dir -r requirements.txt || echo "Some requirements failed" && \
     pip install --no-cache-dir gunicorn gevent
 

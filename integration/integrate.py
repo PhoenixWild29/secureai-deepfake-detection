@@ -14,12 +14,11 @@ try:
     from solana.rpc.api import Client
     from solana.keypair import Keypair
     from solana.transaction import Transaction
-    from solders.system_program import transfer, TransferParams
-    from solders.rpc.responses import GetSignatureStatusesResp
+    from solana.system_program import create_memo
     SOLANA_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     SOLANA_AVAILABLE = False
-    logger.warning("Solana libraries not available. Using mock implementation.")
+    logger.warning(f"Solana libraries not available: {e}. Using mock implementation.")
 
 
 def submit_to_solana(video_hash: str, authenticity_score: float, network: str = "devnet") -> str:
@@ -77,37 +76,52 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         
         recent_blockhash = recent_blockhash_resp.value.blockhash
         
-        # Create a data transaction that stores the analysis result
-        # In a real implementation, this would call a Solana program
-        # For now, we'll create a minimal transaction to prove connectivity
-        
-        # Create transaction with a small transfer (0.001 SOL) to prove it works
-        # In production, this would be a program instruction to store the hash and score
-        transaction = Transaction()
-        transaction.recent_blockhash = recent_blockhash
-        
-        # For now, create a simple transfer transaction as proof of concept
-        # In production, replace this with a call to your Solana program
-        recipient_pubkey = keypair.pubkey()  # Send to self for now
-        
-        # Note: In production, you would:
-        # 1. Call your deployed Solana program
-        # 2. Store video_hash and authenticity_score in program account
-        # 3. Return the transaction signature
-        
-        # For now, we'll simulate the transaction
         logger.info("⛓️  Creating Solana transaction...")
         
-        # Simulate transaction creation (actual implementation would require program)
-        # Generate a realistic transaction signature
-        tx_data = f"{video_hash}:{authenticity_score}:{int(time.time())}"
-        tx_hash = hashlib.sha256(tx_data.encode()).digest()
-        signature = base58.b58encode(tx_hash[:32]).decode()
+        # Create a memo instruction to store the analysis data on-chain
+        # The memo program is a built-in Solana program that allows storing arbitrary data
+        from solana.transaction import Transaction
+        from solana.system_program import create_memo
         
-        logger.info(f"✅ Transaction signature: {signature}")
-        logger.info("🔐 Data would be stored immutably on blockchain")
+        # Create memo data: "SecureAI:video_hash:authenticity_score:timestamp"
+        memo_data = f"SecureAI:{video_hash}:{authenticity_score:.6f}:{int(time.time())}"
         
-        return signature
+        # Create transaction with memo instruction
+        transaction = Transaction()
+        transaction.add(create_memo(memo_data.encode('utf-8'), [keypair.pubkey()]))
+        
+        # Get recent blockhash and set it
+        transaction.recent_blockhash = recent_blockhash
+        
+        # Sign transaction
+        transaction.sign(keypair)
+        
+        # Submit transaction to blockchain
+        logger.info("📤 Submitting transaction to Solana blockchain...")
+        send_response = client.send_transaction(transaction, keypair)
+        
+        if send_response.value:
+            signature = str(send_response.value)
+            logger.info(f"✅ Transaction submitted! Signature: {signature}")
+            
+            # Wait for confirmation (optional, but recommended)
+            logger.info("⏳ Waiting for transaction confirmation...")
+            try:
+                confirmation_resp = client.confirm_transaction(signature, commitment="confirmed")
+                if confirmation_resp.value and len(confirmation_resp.value) > 0:
+                    if confirmation_resp.value[0] and confirmation_resp.value[0].confirmation_status:
+                        logger.info(f"✅ Transaction confirmed on {network}!")
+                        logger.info(f"🔗 View on Solana Explorer: https://explorer.solana.com/tx/{signature}?cluster={network}")
+                    else:
+                        logger.warning("⚠️  Transaction submitted but confirmation pending")
+                else:
+                    logger.warning("⚠️  Transaction submitted but confirmation status unknown")
+            except Exception as confirm_error:
+                logger.warning(f"⚠️  Could not confirm transaction: {confirm_error}")
+            
+            return signature
+        else:
+            raise Exception("Failed to submit transaction to Solana")
         
     except Exception as e:
         logger.error(f"Error submitting to Solana: {e}")
