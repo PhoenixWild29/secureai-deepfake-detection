@@ -9,25 +9,29 @@ Step-by-step guide to add a subdomain DNS record in Squarespace.
 
 ## Step-by-Step: Add A Record for Subdomain
 
-### Step 1: Click "ADD PRESET" Button
+### ⚠️ Important: Don't Use "ADD PRESET"
 
-On the DNS Settings page, look for the **"ADD PRESET"** button (black button, top right of the DNS records section).
+The "ADD PRESET" button is for email service configurations (Google Workspace, Zoho Mail, etc.). We need to add a **custom A record** instead.
 
-**OR** if you don't see "ADD PRESET", look for:
-- **"Add Record"** button
-- **"Custom Record"** option
-- **"+"** icon
+### Step 1: Look for "Add Record" or Custom Record Option
 
-### Step 2: Select Record Type
+On the DNS Settings page, look for one of these options:
 
-1. Click **"ADD PRESET"** (or equivalent)
-2. You'll see options like:
-   - **A Record**
-   - **CNAME Record**
-   - **MX Record**
-   - etc.
+1. **"Add Record"** button (separate from "ADD PRESET")
+2. **"Custom Record"** link or button
+3. **"+"** icon (plus sign) next to existing records
+4. A section labeled **"Custom Records"** or **"Additional Records"**
 
-3. **Select "A Record"** (or "A")
+**Where to look:**
+- Below the existing DNS record sections
+- In the same area as "ADD PRESET" but a different button
+- Sometimes in a separate "Custom Records" section
+
+### Step 2: Select "A Record" Type
+
+1. Click **"Add Record"** or **"Custom Record"**
+2. You'll see a form or dropdown to select record type
+3. **Select "A Record"** (or "A") from the type dropdown
 
 ### Step 3: Fill in the A Record Details
 
@@ -97,10 +101,26 @@ guardian | A | - | 4 hrs | 64.225.57.145
 
 ## Troubleshooting
 
-### Can't Find "ADD PRESET" Button
-- Look for "Add Record" or "+" icon
-- Check if you need to scroll down
-- Try clicking on "Custom Records" section if visible
+### Can't Find "Add Record" Button
+- **Scroll down** on the DNS Settings page - it might be below the preset sections
+- Look for a **"Custom Records"** section - it might be collapsed or at the bottom
+- Check if there's a **"+"** icon or **"Add"** link next to existing records
+- Try clicking on the existing record sections to see if there's an "Add" option
+
+### Only See "ADD PRESET" (Email Presets)
+- **Don't use "ADD PRESET"** - that's only for email services
+- Look for a separate **"Add Record"** button or **"Custom Record"** option
+- The custom record option might be:
+  - Below the preset sections
+  - In a separate "Custom Records" area
+  - As a small "+" or "Add" link
+
+### Alternative: Check Squarespace Help
+If you can't find the custom record option:
+1. Look for a **"?"** help icon on the DNS Settings page
+2. Search Squarespace help for "add custom DNS record"
+3. Or try this direct link format (if Squarespace supports it):
+   - Look for any "Manage" or "Edit" options near existing records
 
 ### Record Not Saving
 - Make sure HOST is just `guardian` (not `guardian.secureai.dev`)
