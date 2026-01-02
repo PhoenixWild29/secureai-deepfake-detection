@@ -58,6 +58,7 @@ services:
       - ./uploads:/app/uploads
       - ./results:/app/results
       - ./wallet:/app/wallet:ro
+      - ./.env:/app/.env:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -57,6 +57,7 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./results:/app/results
+      - ./.env:/app/.env:ro
     depends_on:
       postgres:
         condition: service_healthy
