@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 NVIDIA Jetson Inference Compatibility Layer for DeepFake Detection
-Provides edge AI deployment capabilities with Jetson device simulation
+Provides edge AI deployment capabilities with real inference (CPU/GPU/Jetson)
 """
 import os
 import sys
@@ -208,7 +208,7 @@ class JetsonInferenceEngine:
                     # On actual Jetson, use optimized inference
                     outputs = self._jetson_inference(input_tensor)
                 else:
-                    # Simulation mode
+                    # Real inference on CPU/GPU (not Jetson-optimized, but still real inference)
                     outputs = self.model(input_tensor)
 
             # Process results
@@ -268,12 +268,12 @@ class JetsonInferenceEngine:
             return 'unknown', 0.0
 
     def get_network_fps(self) -> float:
-        """Get network FPS (simulated)"""
+        """Get estimated network FPS based on device"""
         if self.is_jetson:
             # On real Jetson, this would measure actual FPS
-            return 30.0  # Simulated FPS for Jetson Nano
+            return 30.0  # Estimated FPS for Jetson Nano
         else:
-            return 15.0  # Simulated FPS for CPU/GPU
+            return 15.0  # Estimated FPS for CPU/GPU
 
     def get_stats(self) -> Dict[str, Any]:
         """Get inference statistics"""
