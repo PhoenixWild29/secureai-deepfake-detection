@@ -70,11 +70,14 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         # Load wallet keypair
         with open(wallet_path, 'r') as f:
             keypair_data = json.load(f)
-        # Convert list to bytes for solders Keypair
-        if isinstance(keypair_data, list):
+        # Solana keypair file is a JSON array of 64 bytes
+        if isinstance(keypair_data, list) and len(keypair_data) == 64:
             secret_key = bytes(keypair_data)
+        elif isinstance(keypair_data, dict) and 'secretKey' in keypair_data:
+            secret_key = bytes(keypair_data['secretKey'])
         else:
-            secret_key = bytes(keypair_data)
+            # Try to convert whatever format it is
+            secret_key = bytes(keypair_data) if isinstance(keypair_data, list) else bytes(keypair_data.get('secretKey', keypair_data))
         keypair = Keypair.from_bytes(secret_key)
         
         # Get recent blockhash
@@ -102,17 +105,25 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         )
         
         # Create transaction with memo instruction using solders API
+        # Get the fee payer pubkey
+        fee_payer = keypair.pubkey()
+        
+        # Create message with instructions
         message = Message.new_with_blockhash(
             [memo_instruction],
-            keypair.pubkey(),
+            fee_payer,
             recent_blockhash
         )
         
+        # Create unsigned transaction
         transaction = Transaction.new_unsigned(message)
+        
+        # Sign the transaction
         transaction.sign([keypair], recent_blockhash)
         
         # Submit transaction to blockchain
         logger.info("📤 Submitting transaction to Solana blockchain...")
+        # Convert transaction to bytes for sending
         send_response = client.send_transaction(transaction)
         
         if send_response.value:
