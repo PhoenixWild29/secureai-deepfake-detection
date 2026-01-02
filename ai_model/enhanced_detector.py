@@ -189,13 +189,20 @@ class EnhancedDetector:
             clip_pretrained: CLIP pretrained weights identifier
         """
         self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
-        print(f"Initializing EnhancedDetector on device: {self.device}")
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"🔧 Initializing EnhancedDetector on device: {self.device}")
         
         # Initialize face detector for LAA-Net preprocessing
+        logger.info("🔍 Initializing face detector (MTCNN/OpenCV)...")
         self.face_detector = FaceDetector(method='auto')
+        if MTCNN_AVAILABLE:
+            logger.info("✅ MTCNN face detection available")
+        else:
+            logger.info("ℹ️  Using OpenCV Haar cascades for face detection (MTCNN not available)")
         
         # === CLIP Zero-Shot Setup ===
-        print("Loading CLIP model...")
+        logger.info("📦 Loading CLIP model (ViT-B-32)...")
         try:
             self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
                 clip_model_name, pretrained=clip_pretrained
@@ -214,9 +221,9 @@ class EnhancedDetector:
                 self.text_features = self.clip_model.encode_text(self.text_tokens)
                 self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
             
-            print("CLIP model loaded successfully.")
+            logger.info("✅ CLIP model loaded successfully and ready for inference")
         except Exception as e:
-            print(f"Error loading CLIP model: {e}")
+            logger.error(f"❌ Error loading CLIP model: {e}")
             raise
         
         # === LAA-Net Setup ===
@@ -225,7 +232,7 @@ class EnhancedDetector:
         
         if LAA_NET_AVAILABLE and laa_weights_path and os.path.exists(laa_weights_path):
             try:
-                print("Loading LAA-Net model...")
+                logger.info("📦 Loading LAA-Net model...")
                 # TODO: Replace with actual LAA-Net loading code after submodule setup
                 # Example:
                 # from external.laa_net.models import LAANet
@@ -234,17 +241,19 @@ class EnhancedDetector:
                 # self.laa_model.to(self.device)
                 # self.laa_model.eval()
                 # self.laa_available = True
-                print("LAA-Net model loading will be implemented after submodule setup.")
+                logger.info("ℹ️  LAA-Net model loading will be implemented after submodule setup.")
             except Exception as e:
-                print(f"Warning: Could not load LAA-Net model: {e}")
-                print("Continuing with CLIP-only detection.")
+                logger.warning(f"⚠️  Could not load LAA-Net model: {e}")
+                logger.info("Continuing with CLIP-only detection.")
         else:
             if not LAA_NET_AVAILABLE:
-                print("LAA-Net not available (submodule not set up). Using CLIP-only detection.")
+                logger.info("ℹ️  LAA-Net not available (submodule not set up). Using CLIP-only detection.")
             elif not laa_weights_path:
-                print("LAA-Net weights path not provided. Using CLIP-only detection.")
+                logger.info("ℹ️  LAA-Net weights path not provided. Using CLIP-only detection.")
             else:
-                print(f"LAA-Net weights not found at {laa_weights_path}. Using CLIP-only detection.")
+                logger.info(f"ℹ️  LAA-Net weights not found at {laa_weights_path}. Using CLIP-only detection.")
+        
+        logger.info("✅ EnhancedDetector initialization complete")
         
         # LAA-Net preprocessing transform (placeholder - will use actual transform from LAA-Net)
         # This should match LAA-Net's expected input format
@@ -421,6 +430,9 @@ class EnhancedDetector:
             'laa_available': self.laa_available
         }
 
+
+# Global detector instance (lazy initialization)
+_detector_instance = None
 
 # Backward compatibility: Keep the old function name for existing code
 def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:

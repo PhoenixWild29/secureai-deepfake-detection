@@ -43,7 +43,7 @@ class JetsonInferenceEngine:
             if self.is_jetson:
                 logger.info("🎯 Running on actual NVIDIA Jetson device")
             else:
-                logger.info("💻 Running in simulation mode (Windows compatibility)")
+                logger.info(f"💻 Running on {self.device.upper()} (real inference, not simulation)")
         else:
             logger.warning("⚠️  Jetson Inference initialization failed")
 
