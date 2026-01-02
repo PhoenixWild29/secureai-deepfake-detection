@@ -59,7 +59,21 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         client = Client(rpc_url)
         
         # Check if wallet keypair is configured
-        wallet_path = os.getenv('SOLANA_WALLET_PATH', os.path.expanduser('~/.config/solana/id.json'))
+        # Try environment variable first, then check common locations
+        wallet_path = os.getenv('SOLANA_WALLET_PATH')
+        if not wallet_path:
+            # Check common locations in order
+            possible_paths = [
+                '/app/wallet/id.json',  # Docker container default location
+                os.path.expanduser('~/.config/solana/id.json'),  # User home default
+            ]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    wallet_path = path
+                    break
+            else:
+                # Default fallback
+                wallet_path = os.path.expanduser('~/.config/solana/id.json')
         
         if not os.path.exists(wallet_path):
             logger.warning(f"Solana wallet not found at {wallet_path}. Using mock transaction.")
