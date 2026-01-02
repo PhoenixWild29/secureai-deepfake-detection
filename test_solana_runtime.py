@@ -81,7 +81,7 @@ try:
     memo_instruction = Instruction(
         program_id=memo_program_id,
         accounts=[AccountMeta(pubkey=test_keypair.pubkey(), is_signer=True, is_writable=False)],
-        data=list(memo_data)
+        data=memo_data  # Pass bytes directly, not a list
     )
     print("✅ Memo instruction created")
 except Exception as e:
@@ -102,7 +102,7 @@ try:
         memo_instruction = Instruction(
             program_id=memo_program_id,
             accounts=[AccountMeta(pubkey=test_keypair.pubkey(), is_signer=True, is_writable=False)],
-            data=list(b"Test")
+            data=b"Test"  # Pass bytes directly, not a list
         )
         
         message = Message.new_with_blockhash(

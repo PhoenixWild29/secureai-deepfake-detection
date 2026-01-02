@@ -101,7 +101,7 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         memo_instruction = Instruction(
             program_id=memo_program_id,
             accounts=[AccountMeta(pubkey=keypair.pubkey(), is_signer=True, is_writable=False)],
-            data=list(memo_bytes)
+            data=memo_bytes  # Pass bytes directly, not a list
         )
         
         # Create transaction with memo instruction using solders API
