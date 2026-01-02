@@ -157,9 +157,9 @@ class JetsonInferenceEngine:
 
                 tensor = torch.from_numpy(image).unsqueeze(0)
 
-                # Resize if needed (simplified)
+                # Resize if needed to model input size
                 if tensor.shape[-1] != 224 or tensor.shape[-2] != 224:
-                    # Simple resize simulation
+                    # Resize image for model input
                     tensor = torch.nn.functional.interpolate(
                         tensor.unsqueeze(0), size=(224, 224), mode='bilinear'
                     ).squeeze(0)
