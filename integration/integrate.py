@@ -12,9 +12,12 @@ logger = logging.getLogger(__name__)
 # Try to import Solana libraries
 try:
     from solana.rpc.api import Client
-    from solana.keypair import Keypair
-    from solana.transaction import Transaction
-    from solana.system_program import create_memo
+    from solders.keypair import Keypair
+    from solders.transaction import Transaction
+    from solders.system_program import transfer, TransferParams
+    from solders.pubkey import Pubkey
+    from solders.message import Message
+    from solders.instruction import Instruction, AccountMeta
     SOLANA_AVAILABLE = True
 except ImportError as e:
     SOLANA_AVAILABLE = False
@@ -67,7 +70,12 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         # Load wallet keypair
         with open(wallet_path, 'r') as f:
             keypair_data = json.load(f)
-        keypair = Keypair.from_secret_key(bytes(keypair_data))
+        # Convert list to bytes for solders Keypair
+        if isinstance(keypair_data, list):
+            secret_key = bytes(keypair_data)
+        else:
+            secret_key = bytes(keypair_data)
+        keypair = Keypair.from_bytes(secret_key)
         
         # Get recent blockhash
         recent_blockhash_resp = client.get_latest_blockhash()
@@ -80,25 +88,32 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         
         # Create a memo instruction to store the analysis data on-chain
         # The memo program is a built-in Solana program that allows storing arbitrary data
-        from solana.transaction import Transaction
-        from solana.system_program import create_memo
+        memo_program_id = Pubkey.from_string("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
         
         # Create memo data: "SecureAI:video_hash:authenticity_score:timestamp"
         memo_data = f"SecureAI:{video_hash}:{authenticity_score:.6f}:{int(time.time())}"
+        memo_bytes = memo_data.encode('utf-8')
         
-        # Create transaction with memo instruction
-        transaction = Transaction()
-        transaction.add(create_memo(memo_data.encode('utf-8'), [keypair.pubkey()]))
+        # Create memo instruction using solders API
+        memo_instruction = Instruction(
+            program_id=memo_program_id,
+            accounts=[AccountMeta(pubkey=keypair.pubkey(), is_signer=True, is_writable=False)],
+            data=list(memo_bytes)
+        )
         
-        # Get recent blockhash and set it
-        transaction.recent_blockhash = recent_blockhash
+        # Create transaction with memo instruction using solders API
+        message = Message.new_with_blockhash(
+            [memo_instruction],
+            keypair.pubkey(),
+            recent_blockhash
+        )
         
-        # Sign transaction
-        transaction.sign(keypair)
+        transaction = Transaction.new_unsigned(message)
+        transaction.sign([keypair], recent_blockhash)
         
         # Submit transaction to blockchain
         logger.info("📤 Submitting transaction to Solana blockchain...")
-        send_response = client.send_transaction(transaction, keypair)
+        send_response = client.send_transaction(transaction)
         
         if send_response.value:
             signature = str(send_response.value)
