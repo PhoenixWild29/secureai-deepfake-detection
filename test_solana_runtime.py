@@ -30,7 +30,21 @@ except Exception as e:
 
 # Test 2: Load keypair from file (if exists)
 print("\nTest 2: Loading keypair from file...")
-wallet_path = os.getenv('SOLANA_WALLET_PATH', os.path.expanduser('~/.config/solana/id.json'))
+# Check environment variable first, then default locations
+wallet_path = os.getenv('SOLANA_WALLET_PATH')
+if not wallet_path:
+    # Try common locations
+    possible_paths = [
+        '/app/wallet/id.json',  # Docker container location
+        os.path.expanduser('~/.config/solana/id.json'),  # User home
+        os.path.expanduser('~/wallet/id.json'),  # Alternative
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            wallet_path = path
+            break
+    else:
+        wallet_path = '/app/wallet/id.json'  # Default to container location
 if os.path.exists(wallet_path):
     try:
         with open(wallet_path, 'r') as f:
