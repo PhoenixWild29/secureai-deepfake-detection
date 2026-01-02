@@ -61,6 +61,11 @@ python-json-logger>=2.0.0
 boto3>=1.28.0
 botocore>=1.31.0
 
+# AIStore distributed storage (Optional)
+# Install from GitHub: pip install git+https://github.com/NVIDIA/aistore.git
+# Or use: aistore-python (if available on PyPI)
+# Note: AIStore requires a running AIStore cluster/server
+
 # Video Processing
 imageio>=2.31.0
 imageio-ffmpeg>=0.4.9

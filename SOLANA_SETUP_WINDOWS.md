@@ -46,7 +46,7 @@ This is a detailed, step-by-step guide for setting up Solana blockchain integrat
    # Run the installer
    .\solana-install.exe
    ```
-
+;
 2. **Follow the installer prompts:**
    - It will ask for installation directory (default is fine)
    - It will ask if you want to add to PATH (say Yes)

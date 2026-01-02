@@ -15,21 +15,26 @@ try:
 except ImportError:
     AISTORE_AVAILABLE = False
     ais = None
-    print("[WARNING] AIStore library not available. Running in local storage mode only.")
+    # Only print warning if AIStore is actually expected (not in silent mode)
+    if os.getenv('AISTORE_ENDPOINT'):
+        print("[WARNING] AIStore library not available but AISTORE_ENDPOINT is set.")
+        print("   Install with: pip install git+https://github.com/NVIDIA/aistore.git")
+    # Otherwise, silently fall back to local/S3 storage
 
 class AIStoreManager:
     """Manages distributed storage using AIStore"""
 
-    def __init__(self, endpoint: str = "http://localhost:8080", bucket_name: str = "secureai-videos"):
+    def __init__(self, endpoint: Optional[str] = None, bucket_name: Optional[str] = None):
         """
         Initialize AIStore connection
 
         Args:
-            endpoint: AIStore endpoint URL
-            bucket_name: Name of the bucket to use
+            endpoint: AIStore endpoint URL (defaults to AISTORE_ENDPOINT env var or http://localhost:8080)
+            bucket_name: Name of the bucket to use (defaults to AISTORE_BUCKET env var or secureai-videos)
         """
-        self.endpoint = endpoint
-        self.bucket_name = bucket_name
+        # Get configuration from environment variables or use defaults
+        self.endpoint = endpoint or os.getenv('AISTORE_ENDPOINT', 'http://localhost:8080')
+        self.bucket_name = bucket_name or os.getenv('AISTORE_BUCKET', 'secureai-videos')
         self.client = None
         self.bucket = None
 
