@@ -67,16 +67,60 @@ class EnsembleTester:
                         str(p) for p in fake_dir.glob('*.mp4')[:10]
                     ])
         
-        # Also check for any videos in uploads
+        # Also check for any videos in uploads (most common location)
         uploads_dir = Path('uploads')
         if uploads_dir.exists():
-            all_videos = list(uploads_dir.glob('*.mp4'))[:20]
+            all_videos = list(uploads_dir.glob('*.mp4'))
             # If we don't have labeled data, use all videos
             if not test_data['real'] and not test_data['fake']:
                 # We'll test but won't know ground truth
-                test_data['unknown'] = [str(p) for p in all_videos]
+                test_data['unknown'] = [str(p) for p in all_videos[:20]]  # Limit to 20 for testing
+        
+        # Also check root directory for test videos
+        root_videos = list(Path('.').glob('test_video*.mp4')) + list(Path('.').glob('sample_video.mp4'))
+        if root_videos and not test_data.get('unknown'):
+            if 'unknown' not in test_data:
+                test_data['unknown'] = []
+            test_data['unknown'].extend([str(p) for p in root_videos[:5]])
         
         return test_data
+    
+    def create_test_video_if_needed(self):
+        """Create a simple test video if none exist"""
+        try:
+            uploads_dir = Path('uploads')
+            uploads_dir.mkdir(exist_ok=True)
+            
+            test_video_path = uploads_dir / 'auto_generated_test.mp4'
+            
+            if test_video_path.exists():
+                return str(test_video_path)
+            
+            print("   Creating a simple test video...")
+            
+            # Create a simple video
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(str(test_video_path), fourcc, 15, (640, 480))
+            
+            for frame_num in range(45):  # 3 seconds at 15 fps
+                frame = np.zeros((480, 640, 3), dtype=np.uint8)
+                frame[:, :] = [220, 180, 140]  # Skin tone background
+                
+                # Simple face pattern
+                center_x, center_y = 320, 240
+                cv2.circle(frame, (center_x, center_y), 100, (200, 160, 120), -1)
+                cv2.circle(frame, (center_x - 40, center_y - 20), 15, (0, 0, 0), -1)
+                cv2.circle(frame, (center_x + 40, center_y - 20), 15, (0, 0, 0), -1)
+                cv2.ellipse(frame, (center_x, center_y + 50), (30, 15), 0, 0, 180, (0, 0, 0), 2)
+                
+                out.write(frame)
+            
+            out.release()
+            print(f"   ✅ Created test video: {test_video_path}")
+            return str(test_video_path)
+        except Exception as e:
+            print(f"   ⚠️  Could not create test video: {e}")
+            return None
     
     def test_model_on_video(self, video_path: str, model_type: str, ground_truth: Optional[int] = None) -> Dict:
         """Test a specific model on a video"""
@@ -309,11 +353,19 @@ class EnsembleTester:
         
         if not test_data or (not test_data.get('real') and not test_data.get('fake') and not test_data.get('unknown')):
             print("⚠️  No test videos found!")
-            print("\n   To test the ensemble, you need:")
-            print("   1. Upload a test video to the 'uploads/' directory, OR")
-            print("   2. Place videos in 'test_videos/real/' and 'test_videos/fake/' directories")
-            print("\n   The script will test on any videos it finds.")
-            return
+            print("\n   Attempting to create a test video...")
+            test_video = self.create_test_video_if_needed()
+            
+            if test_video:
+                test_data = {'unknown': [test_video]}
+                print(f"   ✅ Using auto-generated test video")
+            else:
+                print("\n   To test the ensemble, you need:")
+                print("   1. Upload a test video to the 'uploads/' directory, OR")
+                print("   2. Place videos in 'test_videos/real/' and 'test_videos/fake/' directories")
+                print("   3. Run: docker exec secureai-backend python /app/create_test_video.py")
+                print("\n   The script will test on any videos it finds.")
+                return
         
         # Test all models
         all_results = self.test_all_models(test_data)
