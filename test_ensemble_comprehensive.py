@@ -231,30 +231,67 @@ class EnsembleTester:
             
             # Test CLIP (via enhanced)
             print("      CLIP...", end=" ", flush=True)
-            clip_result = self.test_model_on_video(video_path, 'enhanced', ground_truth)
-            if clip_result.get('success'):
-                all_results['clip'].append(clip_result)
-                print(f"✅ (prob: {clip_result.get('confidence', 0):.3f})")
-            else:
-                print(f"❌ {clip_result.get('error', 'Failed')}")
+            try:
+                clip_result = self.test_model_on_video(video_path, 'enhanced', ground_truth)
+                if clip_result.get('success'):
+                    all_results['clip'].append(clip_result)
+                    print(f"✅ (prob: {clip_result.get('confidence', 0):.3f})")
+                else:
+                    print(f"❌ {clip_result.get('error', 'Failed')}")
+            except Exception as e:
+                error_msg = str(e)
+                if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
+                    print(f"⚠️  CUDA error (using CPU fallback)")
+                    # Retry with explicit CPU
+                    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+                    clip_result = self.test_model_on_video(video_path, 'enhanced', ground_truth)
+                    if clip_result.get('success'):
+                        all_results['clip'].append(clip_result)
+                        print(f"✅ (prob: {clip_result.get('confidence', 0):.3f})")
+                else:
+                    print(f"❌ {error_msg[:50]}")
             
             # Test ResNet
             print("      ResNet...", end=" ", flush=True)
-            resnet_result = self.test_model_on_video(video_path, 'resnet', ground_truth)
-            if resnet_result.get('success'):
-                all_results['resnet'].append(resnet_result)
-                print(f"✅ (prob: {resnet_result.get('confidence', 0):.3f})")
-            else:
-                print(f"❌ {resnet_result.get('error', 'Failed')}")
+            try:
+                resnet_result = self.test_model_on_video(video_path, 'resnet', ground_truth)
+                if resnet_result.get('success'):
+                    all_results['resnet'].append(resnet_result)
+                    print(f"✅ (prob: {resnet_result.get('confidence', 0):.3f})")
+                else:
+                    print(f"❌ {resnet_result.get('error', 'Failed')}")
+            except Exception as e:
+                error_msg = str(e)
+                if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
+                    print(f"⚠️  CUDA error (using CPU fallback)")
+                    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+                    resnet_result = self.test_model_on_video(video_path, 'resnet', ground_truth)
+                    if resnet_result.get('success'):
+                        all_results['resnet'].append(resnet_result)
+                        print(f"✅ (prob: {resnet_result.get('confidence', 0):.3f})")
+                else:
+                    print(f"❌ {error_msg[:50]}")
             
             # Test Ensemble
             print("      Ensemble...", end=" ", flush=True)
-            ensemble_result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
-            if ensemble_result.get('success'):
-                all_results['ensemble'].append(ensemble_result)
-                print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f})")
-            else:
-                print(f"❌ {ensemble_result.get('error', 'Failed')}")
+            try:
+                ensemble_result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
+                if ensemble_result.get('success'):
+                    all_results['ensemble'].append(ensemble_result)
+                    print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f})")
+                else:
+                    print(f"❌ {ensemble_result.get('error', 'Failed')}")
+            except Exception as e:
+                error_msg = str(e)
+                if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
+                    print(f"⚠️  CUDA error (using CPU fallback)")
+                    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+                    ensemble_result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
+                    if ensemble_result.get('success'):
+                        all_results['ensemble'].append(ensemble_result)
+                        print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f})")
+                else:
+                    print(f"❌ {error_msg[:50]}")
         
         return all_results
     
