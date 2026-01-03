@@ -171,18 +171,20 @@ class InferenceOptimizer:
             time_per_image = avg_time / batch_size
             throughput = (batch_size * 1000) / avg_time
             
+            baseline_avg = self.results.get('baseline', {}).get('avg_time_ms', 0)
             batch_results[f'batch_{batch_size}'] = {
                 'batch_size': batch_size,
                 'total_time_ms': round(avg_time, 2),
                 'time_per_image_ms': round(time_per_image, 2),
                 'throughput_fps': round(throughput, 2),
-                'speedup_vs_single': round(baseline_results['avg_time_ms'] / time_per_image, 2) if 'baseline' in self.results else 1.0
+                'speedup_vs_single': round(baseline_avg / time_per_image, 2) if baseline_avg > 0 else 1.0
             }
             
             print(f"      Time per image: {time_per_image:.2f} ms")
             print(f"      Throughput: {throughput:.2f} FPS")
-            if 'baseline' in self.results:
-                speedup = baseline_results['avg_time_ms'] / time_per_image
+            baseline_avg = self.results.get('baseline', {}).get('avg_time_ms', 0)
+            if baseline_avg > 0:
+                speedup = baseline_avg / time_per_image
                 print(f"      Speedup: {speedup:.2f}x")
         
         self.results['optimizations']['batch_processing'] = batch_results
@@ -226,18 +228,19 @@ class InferenceOptimizer:
                     _ = quantized_model(dummy_img)
                 times.append((time.time() - start_time) * 1000)
             
+            baseline_avg = self.results.get('baseline', {}).get('avg_time_ms', 0)
             quant_results = {
                 'quantization_type': 'dynamic_int8',
                 'avg_time_ms': round(np.mean(times), 2),
                 'throughput_fps': round(1000 / np.mean(times), 2),
-                'speedup_vs_baseline': round(baseline_results['avg_time_ms'] / np.mean(times), 2) if 'baseline' in self.results else 1.0,
+                'speedup_vs_baseline': round(baseline_avg / np.mean(times), 2) if baseline_avg > 0 else 1.0,
                 'model_size_reduction': '~4x smaller'
             }
             
             print(f"   ✅ Quantization Results:")
             print(f"      Avg inference time: {quant_results['avg_time_ms']:.2f} ms")
             print(f"      Throughput: {quant_results['throughput_fps']:.2f} FPS")
-            if 'baseline' in self.results:
+            if quant_results['speedup_vs_baseline'] > 1.0:
                 print(f"      Speedup: {quant_results['speedup_vs_baseline']:.2f}x")
             
             self.results['optimizations']['quantization'] = quant_results
@@ -273,17 +276,18 @@ class InferenceOptimizer:
                     _ = traced_model(dummy_input)
                 times.append((time.time() - start_time) * 1000)
             
+            baseline_avg = self.results.get('baseline', {}).get('avg_time_ms', 0)
             torchscript_results = {
                 'optimization_type': 'torchscript_jit',
                 'avg_time_ms': round(np.mean(times), 2),
                 'throughput_fps': round(1000 / np.mean(times), 2),
-                'speedup_vs_baseline': round(baseline_results['avg_time_ms'] / np.mean(times), 2) if 'baseline' in self.results else 1.0
+                'speedup_vs_baseline': round(baseline_avg / np.mean(times), 2) if baseline_avg > 0 else 1.0
             }
             
             print(f"   ✅ TorchScript Results:")
             print(f"      Avg inference time: {torchscript_results['avg_time_ms']:.2f} ms")
             print(f"      Throughput: {torchscript_results['throughput_fps']:.2f} FPS")
-            if 'baseline' in self.results:
+            if torchscript_results['speedup_vs_baseline'] > 1.0:
                 print(f"      Speedup: {torchscript_results['speedup_vs_baseline']:.2f}x")
             
             self.results['optimizations']['torchscript'] = torchscript_results
