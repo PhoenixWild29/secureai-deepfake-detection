@@ -188,7 +188,11 @@ class EnhancedDetector:
             clip_model_name: CLIP model variant to use
             clip_pretrained: CLIP pretrained weights identifier
         """
-        self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
+        # Force CPU if CUDA_VISIBLE_DEVICES is set to empty
+        if os.getenv('CUDA_VISIBLE_DEVICES') == '':
+            self.device = 'cpu'
+        else:
+            self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         import logging
         logger = logging.getLogger(__name__)
         logger.info(f"🔧 Initializing EnhancedDetector on device: {self.device}")
