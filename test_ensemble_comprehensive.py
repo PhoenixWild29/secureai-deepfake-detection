@@ -17,10 +17,26 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 # Add ai_model to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ai_model'))
+sys.path.insert(0, os.path.dirname(__file__))  # Also add root directory
 
 try:
-    from detect import detect_fake
-    from ensemble_detector import EnsembleDetector
+    # Try importing from ai_model first
+    try:
+        from ai_model.detect import detect_fake
+    except ImportError:
+        from detect import detect_fake
+    
+    # Try importing ensemble_detector from different locations
+    try:
+        from ai_model.ensemble_detector import EnsembleDetector
+    except ImportError:
+        try:
+            from ensemble_detector import EnsembleDetector
+        except ImportError:
+            # If ensemble_detector not available, we'll skip it
+            EnsembleDetector = None
+            print("⚠️  EnsembleDetector not available, will use detect_fake with model_type='ensemble'")
+    
     print("✅ Detection modules imported successfully")
 except ImportError as e:
     print(f"❌ Failed to import modules: {e}")
