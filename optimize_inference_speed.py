@@ -302,12 +302,25 @@ class InferenceOptimizer:
         print("\n📊 Generating Optimization Report")
         print("-" * 70)
         
-        # Find best optimization
+        # Find best optimization (check batch processing first, then others)
         best_optimization = None
         best_speedup = 1.0
         
+        # Check batch processing for best batch size
+        if 'batch_processing' in self.results.get('optimizations', {}):
+            batch_data = self.results['optimizations']['batch_processing']
+            for batch_name, batch_info in batch_data.items():
+                if isinstance(batch_info, dict) and 'speedup_vs_single' in batch_info:
+                    speedup = batch_info['speedup_vs_single']
+                    if speedup > best_speedup:
+                        best_speedup = speedup
+                        best_optimization = batch_name
+        
+        # Check other optimizations
         if 'optimizations' in self.results:
             for opt_name, opt_data in self.results['optimizations'].items():
+                if opt_name == 'batch_processing':
+                    continue  # Already checked
                 if isinstance(opt_data, dict) and 'speedup_vs_baseline' in opt_data:
                     if opt_data['speedup_vs_baseline'] > best_speedup:
                         best_speedup = opt_data['speedup_vs_baseline']
