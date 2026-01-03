@@ -10,12 +10,24 @@ This implementation focuses on:
 The ensemble fuses their predictions for robust detection.
 """
 
+import os
+# Force CPU mode if CUDA_VISIBLE_DEVICES is set to empty (must be before torch import)
+if os.getenv('CUDA_VISIBLE_DEVICES') == '':
+    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+    # Disable TensorFlow CUDA
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import cv2
 import torch
+# Disable CUDA if explicitly requested
+if os.getenv('CUDA_VISIBLE_DEVICES') == '':
+    # Monkey patch to force CPU
+    original_cuda_available = torch.cuda.is_available
+    torch.cuda.is_available = lambda: False
+
 import open_clip
 from PIL import Image
 import numpy as np
-import os
 import sys
 from typing import Dict, List, Optional, Tuple, Any
 import warnings
