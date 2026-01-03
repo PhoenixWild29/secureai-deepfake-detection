@@ -15,10 +15,15 @@ import time
 try:
     from .deepfake_classifier import DeepfakeClassifier, ResNetDeepfakeClassifier
     from .enhanced_detector import detect_fake_enhanced
+    from .ensemble_detector import detect_fake_ensemble
 except ImportError:
     # Fallback for when called from root directory
     from ai_model.deepfake_classifier import DeepfakeClassifier, ResNetDeepfakeClassifier
     from ai_model.enhanced_detector import detect_fake_enhanced
+    try:
+        from ai_model.ensemble_detector import detect_fake_ensemble
+    except ImportError:
+        detect_fake_ensemble = None
 
 def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
     """
@@ -38,23 +43,30 @@ def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
 
     try:
         if model_type == 'enhanced':
-            # Use the new ensemble SOTA detector
+            # Use the new ensemble SOTA detector (CLIP + LAA-Net)
             result = detect_fake_enhanced(video_path)
+
+        elif model_type == 'ensemble' or model_type == 'full_ensemble':
+            # Use full ensemble: CLIP + ResNet50 + LAA-Net
+            if detect_fake_ensemble:
+                try:
+                    result = detect_fake_ensemble(video_path)
+                    # Map ensemble results to expected format
+                    if 'ensemble_fake_probability' in result:
+                        result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
+                        result['confidence'] = result['ensemble_fake_probability']
+                        result['authenticity_score'] = 1 - result['ensemble_fake_probability']
+                except Exception as e:
+                    print(f"Full ensemble failed: {e}, falling back to enhanced")
+                    result = detect_fake_enhanced(video_path)
+            else:
+                # Fallback to enhanced if ensemble not available
+                result = detect_fake_enhanced(video_path)
 
         elif model_type == 'cnn':
             # Use our custom CNN classifier
             classifier = DeepfakeClassifier()
             result = classifier.predict_video(video_path)
-
-        elif model_type == 'ensemble':
-            # Use both CNN and enhanced detection
-            try:
-                # Try enhanced first
-                result = detect_fake_enhanced(video_path)
-            except Exception as e:
-                print(f"Enhanced detection failed: {e}, falling back to CNN")
-                classifier = DeepfakeClassifier()
-                result = classifier.predict_video(video_path)
 
         elif model_type == 'resnet':
             # Use ResNet-based classifier
@@ -92,12 +104,14 @@ def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
 
 def get_available_models() -> Dict[str, str]:
     """Get available detection models and their descriptions"""
-    return {
-        'enhanced': 'Ensemble SOTA detector (LAA-Net + CLIP + DM-aware)',
+    models = {
+        'enhanced': 'Ensemble SOTA detector (CLIP + LAA-Net)',
+        'ensemble': 'Full ensemble (CLIP + ResNet50 + LAA-Net) - Recommended',
+        'full_ensemble': 'Full ensemble (CLIP + ResNet50 + LAA-Net) - Recommended',
         'cnn': 'Custom CNN classifier with YOLO face detection',
-        'ensemble': 'Adaptive ensemble (enhanced with CNN fallback)',
         'resnet': 'ResNet-based deepfake classifier'
     }
+    return models
 
 def benchmark_models(video_path: str) -> Dict[str, Any]:
     """Benchmark all available models on a video"""
