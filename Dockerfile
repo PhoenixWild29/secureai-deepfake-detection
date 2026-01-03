@@ -6,6 +6,9 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
+# Force CPU mode (disable CUDA) for CPU-only servers
+ENV CUDA_VISIBLE_DEVICES=""
+ENV TF_CPP_MIN_LOG_LEVEL=2
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \

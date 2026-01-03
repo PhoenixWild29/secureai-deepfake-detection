@@ -146,9 +146,25 @@ class EnsembleTester:
     def test_model_on_video(self, video_path: str, model_type: str, ground_truth: Optional[int] = None) -> Dict:
         """Test a specific model on a video"""
         try:
-            start_time = time.time()
-            result = detect_fake(video_path, model_type=model_type)
-            processing_time = time.time() - start_time
+            # Suppress CUDA errors - we're using CPU anyway
+            import warnings
+            import logging
+            warnings.filterwarnings('ignore')
+            logging.getLogger('tensorflow').setLevel(logging.ERROR)
+            
+            # Redirect stderr to suppress CUDA error messages
+            import sys
+            from io import StringIO
+            old_stderr = sys.stderr
+            sys.stderr = StringIO()
+            
+            try:
+                start_time = time.time()
+                result = detect_fake(video_path, model_type=model_type)
+                processing_time = time.time() - start_time
+            finally:
+                # Restore stderr
+                sys.stderr = old_stderr
             
             # Extract prediction
             is_fake = result.get('is_fake', False)
