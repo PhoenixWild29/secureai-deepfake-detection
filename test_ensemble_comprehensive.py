@@ -5,6 +5,11 @@ Tests ensemble performance and compares against individual models
 """
 import os
 import sys
+
+# Force CPU mode to avoid CUDA errors on CPU-only servers
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow warnings
+
 import time
 import json
 from pathlib import Path
