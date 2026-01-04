@@ -92,10 +92,14 @@ class EnsembleTester:
         uploads_dir = Path('uploads')
         if uploads_dir.exists():
             all_videos = list(uploads_dir.glob('*.mp4'))
+            print(f"   Found {len(all_videos)} total videos in uploads/")
             # If we don't have labeled data, use all videos
             if not test_data['real'] and not test_data['fake']:
                 # We'll test but won't know ground truth
-                test_data['unknown'] = [str(p) for p in all_videos[:20]]  # Limit to 20 for testing
+                # Limit to reasonable number for testing (can increase if needed)
+                max_videos = int(os.getenv('MAX_TEST_VIDEOS', '10'))  # Default 10, can override
+                test_data['unknown'] = [str(p) for p in all_videos[:max_videos]]
+                print(f"   Using {len(test_data['unknown'])} videos for testing (set MAX_TEST_VIDEOS env var to change)")
         
         # Also check root directory for test videos
         root_videos = list(Path('.').glob('test_video*.mp4')) + list(Path('.').glob('sample_video.mp4'))
@@ -242,8 +246,8 @@ class EnsembleTester:
         print(f"\n📹 Found {len(all_videos)} video(s) to test")
         
         # Test each model
-        for video_path, ground_truth in all_videos:
-            print(f"\n   Testing: {os.path.basename(video_path)}")
+        for idx, (video_path, ground_truth) in enumerate(all_videos, 1):
+            print(f"\n   [{idx}/{len(all_videos)}] Testing: {os.path.basename(video_path)}")
             
             # Test CLIP (via enhanced)
             print("      CLIP...", end=" ", flush=True)
@@ -251,9 +255,9 @@ class EnsembleTester:
                 clip_result = self.test_model_on_video(video_path, 'enhanced', ground_truth)
                 if clip_result.get('success'):
                     all_results['clip'].append(clip_result)
-                    print(f"✅ (prob: {clip_result.get('confidence', 0):.3f})")
+                    print(f"✅ (prob: {clip_result.get('confidence', 0):.3f}, time: {clip_result.get('processing_time', 0):.1f}s)")
                 else:
-                    print(f"❌ {clip_result.get('error', 'Failed')}")
+                    print(f"❌ {clip_result.get('error', 'Failed')[:50]}")
             except Exception as e:
                 error_msg = str(e)
                 if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
@@ -273,9 +277,9 @@ class EnsembleTester:
                 resnet_result = self.test_model_on_video(video_path, 'resnet', ground_truth)
                 if resnet_result.get('success'):
                     all_results['resnet'].append(resnet_result)
-                    print(f"✅ (prob: {resnet_result.get('confidence', 0):.3f})")
+                    print(f"✅ (prob: {resnet_result.get('confidence', 0):.3f}, time: {resnet_result.get('processing_time', 0):.1f}s)")
                 else:
-                    print(f"❌ {resnet_result.get('error', 'Failed')}")
+                    print(f"❌ {resnet_result.get('error', 'Failed')[:50]}")
             except Exception as e:
                 error_msg = str(e)
                 if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
@@ -294,9 +298,9 @@ class EnsembleTester:
                 ensemble_result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
                 if ensemble_result.get('success'):
                     all_results['ensemble'].append(ensemble_result)
-                    print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f})")
+                    print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f}, time: {ensemble_result.get('processing_time', 0):.1f}s)")
                 else:
-                    print(f"❌ {ensemble_result.get('error', 'Failed')}")
+                    print(f"❌ {ensemble_result.get('error', 'Failed')[:50]}")
             except Exception as e:
                 error_msg = str(e)
                 if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
@@ -308,6 +312,8 @@ class EnsembleTester:
                         print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f})")
                 else:
                     print(f"❌ {error_msg[:50]}")
+            
+            print()  # Blank line between videos
         
         return all_results
     
