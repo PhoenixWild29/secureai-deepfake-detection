@@ -286,12 +286,23 @@ class EnsembleTester:
                     'success': True
                 }
         except Exception as e:
-            return {
-                'video_path': video_path,
-                'ground_truth': ground_truth,
-                'error': str(e),
-                'success': False
-            }
+            error_str = str(e).lower()
+            # Check if it's a CUDA error - if so, provide helpful message
+            if 'cuda' in error_str or 'cuinit' in error_str:
+                return {
+                    'video_path': video_path,
+                    'ground_truth': ground_truth,
+                    'error': 'CUDA initialization error (running in CPU mode, this should not happen)',
+                    'success': False,
+                    'cuda_error': True
+                }
+            else:
+                return {
+                    'video_path': video_path,
+                    'ground_truth': ground_truth,
+                    'error': str(e),
+                    'success': False
+                }
     
     def test_all_models(self, test_data: Dict) -> Dict:
         """Test all models on available videos"""

@@ -220,11 +220,20 @@ class EnhancedDetector:
         # === CLIP Zero-Shot Setup ===
         logger.info("📦 Loading CLIP model (ViT-B-32)...")
         try:
-            self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
-                clip_model_name, pretrained=clip_pretrained
-            )
-            self.clip_model.to(self.device)
-            self.clip_model.eval()
+            # Force CPU device explicitly to avoid CUDA errors
+            self.device = 'cpu'
+            
+            # Suppress stderr during model loading to hide CUDA errors
+            import contextlib
+            import io
+            stderr_suppressor = io.StringIO()
+            
+            with contextlib.redirect_stderr(stderr_suppressor):
+                self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
+                    clip_model_name, pretrained=clip_pretrained
+                )
+                self.clip_model.to('cpu')  # Explicitly use CPU
+                self.clip_model.eval()
             
             # Optimized prompts for real vs. fake detection
             # Tuned for modern diffusion-based and traditional deepfakes
@@ -232,15 +241,46 @@ class EnhancedDetector:
                 "a real photograph of a human face taken by a camera",
                 "a fake, manipulated, or AI-generated deepfake face, possibly from diffusion models"
             ]
-            self.text_tokens = open_clip.tokenize(texts).to(self.device)
+            self.text_tokens = open_clip.tokenize(texts).to('cpu')
             with torch.no_grad():
                 self.text_features = self.clip_model.encode_text(self.text_tokens)
                 self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
             
-            logger.info("✅ CLIP model loaded successfully and ready for inference")
+            logger.info("✅ CLIP model loaded successfully and ready for inference (CPU mode)")
         except Exception as e:
-            logger.error(f"❌ Error loading CLIP model: {e}")
-            raise
+            # Check if it's a CUDA error - if so, try again with explicit CPU
+            error_str = str(e).lower()
+            if 'cuda' in error_str or 'cuinit' in error_str:
+                logger.warning(f"⚠️  CUDA error during CLIP loading, retrying with explicit CPU mode...")
+                try:
+                    self.device = 'cpu'
+                    import contextlib
+                    import io
+                    stderr_suppressor = io.StringIO()
+                    
+                    with contextlib.redirect_stderr(stderr_suppressor):
+                        self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
+                            clip_model_name, pretrained=clip_pretrained
+                        )
+                        self.clip_model.to('cpu')
+                        self.clip_model.eval()
+                    
+                    texts = [
+                        "a real photograph of a human face taken by a camera",
+                        "a fake, manipulated, or AI-generated deepfake face, possibly from diffusion models"
+                    ]
+                    self.text_tokens = open_clip.tokenize(texts).to('cpu')
+                    with torch.no_grad():
+                        self.text_features = self.clip_model.encode_text(self.text_tokens)
+                        self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
+                    
+                    logger.info("✅ CLIP model loaded successfully in CPU mode after CUDA error")
+                except Exception as e2:
+                    logger.error(f"❌ Error loading CLIP model even in CPU mode: {e2}")
+                    raise
+            else:
+                logger.error(f"❌ Error loading CLIP model: {e}")
+                raise
         
         # === LAA-Net Setup ===
         self.laa_model = None
