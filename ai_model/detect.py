@@ -36,8 +36,19 @@ def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
     Returns:
         Detection results dictionary
     """
+    # Try to find video file in common locations
     if not os.path.exists(video_path):
-        raise FileNotFoundError(f"Video file not found: {video_path}")
+        # Try in uploads directory
+        uploads_path = os.path.join('uploads', os.path.basename(video_path))
+        if os.path.exists(uploads_path):
+            video_path = uploads_path
+        else:
+            # Try absolute path in /app/uploads
+            abs_uploads_path = os.path.join('/app/uploads', os.path.basename(video_path))
+            if os.path.exists(abs_uploads_path):
+                video_path = abs_uploads_path
+            else:
+                raise FileNotFoundError(f"Video file not found: {video_path} (also checked uploads/ and /app/uploads/)")
 
     start_time = time.time()
 

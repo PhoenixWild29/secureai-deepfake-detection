@@ -89,10 +89,21 @@ class EnsembleTester:
                     ])
         
         # Also check for any videos in uploads (most common location)
-        uploads_dir = Path('uploads')
-        if uploads_dir.exists():
-            all_videos = list(uploads_dir.glob('*.mp4'))
-            print(f"   Found {len(all_videos)} total videos in uploads/")
+        # Check both relative and absolute paths
+        uploads_paths = [Path('uploads'), Path('/app/uploads')]
+        all_videos = []
+        
+        for uploads_dir in uploads_paths:
+            if uploads_dir.exists():
+                videos = list(uploads_dir.glob('*.mp4'))
+                all_videos.extend(videos)
+                print(f"   Found {len(videos)} videos in {uploads_dir}")
+        
+        # Remove duplicates
+        all_videos = list(set(all_videos))
+        
+        if all_videos:
+            print(f"   Total: {len(all_videos)} unique videos in uploads/")
             # If we don't have labeled data, use all videos
             if not test_data['real'] and not test_data['fake']:
                 # We'll test but won't know ground truth
@@ -150,25 +161,38 @@ class EnsembleTester:
     def test_model_on_video(self, video_path: str, model_type: str, ground_truth: Optional[int] = None) -> Dict:
         """Test a specific model on a video"""
         try:
+            # Fix path - check if file exists, try different locations
+            video_path_obj = Path(video_path)
+            if not video_path_obj.exists():
+                # Try in uploads directory
+                uploads_path = Path('uploads') / video_path_obj.name
+                if uploads_path.exists():
+                    video_path = str(uploads_path)
+                else:
+                    # Try absolute path in /app/uploads
+                    abs_uploads_path = Path('/app/uploads') / video_path_obj.name
+                    if abs_uploads_path.exists():
+                        video_path = str(abs_uploads_path)
+                    else:
+                        # Try as-is (might be absolute path already)
+                        if not Path(video_path).exists():
+                            return {
+                                'video_path': video_path,
+                                'ground_truth': ground_truth,
+                                'error': f'Video file not found: {video_path}',
+                                'success': False
+                            }
+            
             # Suppress CUDA errors - we're using CPU anyway
             import warnings
             import logging
             warnings.filterwarnings('ignore')
             logging.getLogger('tensorflow').setLevel(logging.ERROR)
+            os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress all TensorFlow messages
             
-            # Redirect stderr to suppress CUDA error messages
-            import sys
-            from io import StringIO
-            old_stderr = sys.stderr
-            sys.stderr = StringIO()
-            
-            try:
-                start_time = time.time()
-                result = detect_fake(video_path, model_type=model_type)
-                processing_time = time.time() - start_time
-            finally:
-                # Restore stderr
-                sys.stderr = old_stderr
+            start_time = time.time()
+            result = detect_fake(video_path, model_type=model_type)
+            processing_time = time.time() - start_time
             
             # Extract prediction
             is_fake = result.get('is_fake', False)
