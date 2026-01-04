@@ -147,8 +147,18 @@ else:
     s3_client = None
 
 # Ensure directories exist (for local storage fallback)
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(RESULTS_FOLDER, exist_ok=True)
+# Use VideoPathManager if available for consistent directory management
+try:
+    from utils.video_paths import get_video_path_manager
+    path_manager = get_video_path_manager()
+    UPLOAD_FOLDER = str(path_manager.get_uploads_directory())
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    # Also ensure results directory exists
+    os.makedirs(RESULTS_FOLDER, exist_ok=True)
+except ImportError:
+    # Fallback to original method
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    os.makedirs(RESULTS_FOLDER, exist_ok=True)
 
 # Global variables for batch processing
 batch_queue = queue.Queue()
