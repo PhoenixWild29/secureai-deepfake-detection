@@ -61,63 +61,79 @@ class EnsembleTester:
         }
     
     def find_test_videos(self) -> Dict[str, List[str]]:
-        """Find test videos"""
+        """Find test videos using VideoPathManager for reliable discovery"""
         test_data = {'real': [], 'fake': []}
         
-        # Look for videos in uploads or test directories
-        search_dirs = [
-            'uploads',
-            'test_videos',
-            'datasets/unified_deepfake/test',
-            'datasets/unified_deepfake/val'
-        ]
-        
-        for search_dir in search_dirs:
-            if os.path.exists(search_dir):
-                # Real videos
-                real_dir = Path(search_dir) / 'real'
-                if real_dir.exists():
-                    test_data['real'].extend([
-                        str(p) for p in real_dir.glob('*.mp4')[:10]
-                    ])
-                
-                # Fake videos
-                fake_dir = Path(search_dir) / 'fake'
-                if fake_dir.exists():
-                    test_data['fake'].extend([
-                        str(p) for p in fake_dir.glob('*.mp4')[:10]
-                    ])
-        
-        # Also check for any videos in uploads (most common location)
-        # Check both relative and absolute paths
-        uploads_paths = [Path('uploads'), Path('/app/uploads')]
-        all_videos = []
-        
-        for uploads_dir in uploads_paths:
-            if uploads_dir.exists():
-                videos = list(uploads_dir.glob('*.mp4'))
-                all_videos.extend(videos)
-                print(f"   Found {len(videos)} videos in {uploads_dir}")
-        
-        # Remove duplicates
-        all_videos = list(set(all_videos))
-        
-        if all_videos:
-            print(f"   Total: {len(all_videos)} unique videos in uploads/")
-            # If we don't have labeled data, use all videos
+        # Use VideoPathManager for reliable video discovery
+        try:
+            from utils.video_paths import get_video_path_manager
+            path_manager = get_video_path_manager()
+            
+            # Get max videos from environment
+            max_videos = int(os.getenv('MAX_TEST_VIDEOS', '20'))  # Default 20 for testing
+            
+            # Find all videos using path manager
+            all_videos = path_manager.find_all_videos(max_count=max_videos * 2)  # Get more, then filter
+            
+            print(f"   VideoPathManager found {len(all_videos)} videos total")
+            
+            # Check for labeled datasets first
+            labeled_dirs = [
+                Path('datasets/unified_deepfake/test'),
+                Path('datasets/unified_deepfake/val'),
+                Path('test_videos'),
+            ]
+            
+            for search_dir in labeled_dirs:
+                if search_dir.exists():
+                    # Real videos
+                    real_dir = search_dir / 'real'
+                    if real_dir.exists():
+                        real_videos = [str(p) for p in real_dir.glob('*.mp4')[:max_videos//2]]
+                        test_data['real'].extend(real_videos)
+                        print(f"   Found {len(real_videos)} real videos in {real_dir}")
+                    
+                    # Fake videos
+                    fake_dir = search_dir / 'fake'
+                    if fake_dir.exists():
+                        fake_videos = [str(p) for p in fake_dir.glob('*.mp4')[:max_videos//2]]
+                        test_data['fake'].extend(fake_videos)
+                        print(f"   Found {len(fake_videos)} fake videos in {fake_dir}")
+            
+            # If no labeled data, use all found videos
             if not test_data['real'] and not test_data['fake']:
-                # We'll test but won't know ground truth
-                # Limit to reasonable number for testing (can increase if needed)
-                max_videos = int(os.getenv('MAX_TEST_VIDEOS', '10'))  # Default 10, can override
                 test_data['unknown'] = [str(p) for p in all_videos[:max_videos]]
-                print(f"   Using {len(test_data['unknown'])} videos for testing (set MAX_TEST_VIDEOS env var to change)")
-        
-        # Also check root directory for test videos
-        root_videos = list(Path('.').glob('test_video*.mp4')) + list(Path('.').glob('sample_video.mp4'))
-        if root_videos and not test_data.get('unknown'):
-            if 'unknown' not in test_data:
-                test_data['unknown'] = []
-            test_data['unknown'].extend([str(p) for p in root_videos[:5]])
+                print(f"   Using {len(test_data['unknown'])} videos for testing (unlabeled)")
+                print(f"   Uploads directory: {path_manager.get_uploads_directory()}")
+            
+        except ImportError:
+            # Fallback to original method if VideoPathManager not available
+            print("   ⚠️  VideoPathManager not available, using fallback method")
+            
+            # Look for videos in uploads or test directories
+            search_dirs = [
+                'uploads',
+                '/app/uploads',
+                'test_videos',
+                'datasets/unified_deepfake/test',
+                'datasets/unified_deepfake/val'
+            ]
+            
+            all_videos = []
+            for search_dir in search_dirs:
+                search_path = Path(search_dir)
+                if search_path.exists():
+                    videos = list(search_path.glob('*.mp4'))
+                    all_videos.extend(videos)
+                    print(f"   Found {len(videos)} videos in {search_dir}")
+            
+            # Remove duplicates
+            all_videos = list(set(all_videos))
+            
+            if all_videos:
+                max_videos = int(os.getenv('MAX_TEST_VIDEOS', '20'))
+                test_data['unknown'] = [str(p) for p in all_videos[:max_videos]]
+                print(f"   Using {len(test_data['unknown'])} videos for testing")
         
         return test_data
     
@@ -161,27 +177,40 @@ class EnsembleTester:
     def test_model_on_video(self, video_path: str, model_type: str, ground_truth: Optional[int] = None) -> Dict:
         """Test a specific model on a video"""
         try:
-            # Fix path - check if file exists, try different locations
-            video_path_obj = Path(video_path)
-            if not video_path_obj.exists():
-                # Try in uploads directory
-                uploads_path = Path('uploads') / video_path_obj.name
-                if uploads_path.exists():
-                    video_path = str(uploads_path)
-                else:
-                    # Try absolute path in /app/uploads
-                    abs_uploads_path = Path('/app/uploads') / video_path_obj.name
-                    if abs_uploads_path.exists():
-                        video_path = str(abs_uploads_path)
+            # Use VideoPathManager for reliable path resolution
+            try:
+                from utils.video_paths import get_video_path_manager
+                path_manager = get_video_path_manager()
+                resolved_path = path_manager.resolve_video_path(video_path)
+                
+                if resolved_path is None:
+                    return {
+                        'video_path': video_path,
+                        'ground_truth': ground_truth,
+                        'error': f'Video file not found: {video_path}',
+                        'success': False
+                    }
+                
+                video_path = str(resolved_path)
+            except ImportError:
+                # Fallback path resolution
+                video_path_obj = Path(video_path)
+                if not video_path_obj.exists():
+                    uploads_path = Path('uploads') / video_path_obj.name
+                    if uploads_path.exists():
+                        video_path = str(uploads_path)
                     else:
-                        # Try as-is (might be absolute path already)
-                        if not Path(video_path).exists():
-                            return {
-                                'video_path': video_path,
-                                'ground_truth': ground_truth,
-                                'error': f'Video file not found: {video_path}',
-                                'success': False
-                            }
+                        abs_uploads_path = Path('/app/uploads') / video_path_obj.name
+                        if abs_uploads_path.exists():
+                            video_path = str(abs_uploads_path)
+                        else:
+                            if not Path(video_path).exists():
+                                return {
+                                    'video_path': video_path,
+                                    'ground_truth': ground_truth,
+                                    'error': f'Video file not found: {video_path}',
+                                    'success': False
+                                }
             
             # Suppress CUDA errors - we're using CPU anyway
             import warnings

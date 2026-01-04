@@ -36,19 +36,33 @@ def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
     Returns:
         Detection results dictionary
     """
-    # Try to find video file in common locations
-    if not os.path.exists(video_path):
-        # Try in uploads directory
-        uploads_path = os.path.join('uploads', os.path.basename(video_path))
-        if os.path.exists(uploads_path):
-            video_path = uploads_path
-        else:
-            # Try absolute path in /app/uploads
-            abs_uploads_path = os.path.join('/app/uploads', os.path.basename(video_path))
-            if os.path.exists(abs_uploads_path):
-                video_path = abs_uploads_path
+    # Use VideoPathManager for reliable path resolution
+    try:
+        from utils.video_paths import get_video_path_manager
+        path_manager = get_video_path_manager()
+        resolved_path = path_manager.resolve_video_path(video_path)
+        
+        if resolved_path is None:
+            raise FileNotFoundError(
+                f"Video file not found: {video_path}\n"
+                f"Searched in: {path_manager.get_uploads_directory()}, test_videos, and standard locations"
+            )
+        
+        video_path = str(resolved_path)
+    except ImportError:
+        # Fallback if VideoPathManager not available
+        if not os.path.exists(video_path):
+            # Try in uploads directory
+            uploads_path = os.path.join('uploads', os.path.basename(video_path))
+            if os.path.exists(uploads_path):
+                video_path = uploads_path
             else:
-                raise FileNotFoundError(f"Video file not found: {video_path} (also checked uploads/ and /app/uploads/)")
+                # Try absolute path in /app/uploads
+                abs_uploads_path = os.path.join('/app/uploads', os.path.basename(video_path))
+                if os.path.exists(abs_uploads_path):
+                    video_path = abs_uploads_path
+                else:
+                    raise FileNotFoundError(f"Video file not found: {video_path} (also checked uploads/ and /app/uploads/)")
 
     start_time = time.time()
 

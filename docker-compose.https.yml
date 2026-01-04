@@ -59,6 +59,7 @@ services:
       - ./results:/app/results
       - ./wallet:/app/wallet:ro
       - ./.env:/app/.env:ro
+      - ./test_videos:/app/test_videos  # For test video storage
     depends_on:
       postgres:
         condition: service_healthy
