@@ -38,9 +38,9 @@ git pull origin master
 
 ### Step 2: Run Setup Script
 ```bash
-# On your server
+# On your server (use python3, not python)
 cd ~/secureai-deepfake-detection
-python setup_video_management.py
+python3 setup_video_management.py
 ```
 
 This will:
