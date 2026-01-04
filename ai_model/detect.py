@@ -4,8 +4,20 @@ SecureAI DeepFake Detection
 Main detection module with multiple model options
 """
 import os
+
+# CRITICAL: Force CPU mode BEFORE any torch imports
+# Must be set before torch/tensorflow imports to prevent CUDA initialization
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress all TensorFlow messages
+
 import cv2
 import torch
+# Disable CUDA after torch import
+if os.getenv('CUDA_VISIBLE_DEVICES') == '':
+    # Monkey patch to force CPU mode
+    original_cuda_available = torch.cuda.is_available
+    torch.cuda.is_available = lambda: False
+
 import numpy as np
 import hashlib
 from typing import Dict, Any
