@@ -11,11 +11,14 @@ The ensemble fuses their predictions for robust detection.
 """
 
 import os
-# Force CPU mode if CUDA_VISIBLE_DEVICES is set to empty (must be before torch import)
-if os.getenv('CUDA_VISIBLE_DEVICES') == '':
-    os.environ['CUDA_VISIBLE_DEVICES'] = ''
-    # Disable TensorFlow CUDA
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+# CRITICAL: Force CPU mode BEFORE any imports (must be first)
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress all TensorFlow messages
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'false'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+# Disable TensorFlow GPU completely
+os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
 
 import cv2
 import torch
@@ -25,7 +28,21 @@ if os.getenv('CUDA_VISIBLE_DEVICES') == '':
     original_cuda_available = torch.cuda.is_available
     torch.cuda.is_available = lambda: False
 
-import open_clip
+# Suppress warnings before importing open_clip
+import warnings
+warnings.filterwarnings('ignore')
+
+# Import open_clip with stderr suppression
+import contextlib
+import io
+stderr_suppressor = io.StringIO()
+
+try:
+    with contextlib.redirect_stderr(stderr_suppressor):
+        import open_clip
+except Exception:
+    # If import fails, try without suppression
+    import open_clip
 from PIL import Image
 import numpy as np
 import sys
