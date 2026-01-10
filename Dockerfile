@@ -8,7 +8,9 @@ ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 # Force CPU mode (disable CUDA) for CPU-only servers
 ENV CUDA_VISIBLE_DEVICES=""
-ENV TF_CPP_MIN_LOG_LEVEL=2
+ENV TF_CPP_MIN_LOG_LEVEL=3
+ENV TF_FORCE_GPU_ALLOW_GROWTH=false
+ENV TF_ENABLE_ONEDNN_OPTS=0
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \

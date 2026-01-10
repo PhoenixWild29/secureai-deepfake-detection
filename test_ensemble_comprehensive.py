@@ -13,6 +13,12 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ''
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress ALL TensorFlow messages (ERROR level)
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'false'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+# Prevent TensorFlow from finding CUDA libraries
+if 'LD_LIBRARY_PATH' in os.environ:
+    # Remove any CUDA paths from library path
+    paths = os.environ['LD_LIBRARY_PATH'].split(':')
+    paths = [p for p in paths if 'cuda' not in p.lower()]
+    os.environ['LD_LIBRARY_PATH'] = ':'.join(paths)
 
 # Suppress all warnings
 warnings.filterwarnings('ignore')

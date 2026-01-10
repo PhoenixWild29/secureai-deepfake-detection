@@ -61,13 +61,9 @@ try:
 except ImportError:
     LAA_NET_AVAILABLE = False
 
-# Face detection fallback
-try:
-    from mtcnn import MTCNN
-    MTCNN_AVAILABLE = True
-except ImportError:
-    MTCNN_AVAILABLE = False
-    print("Warning: MTCNN not available. Face detection will use OpenCV Haar cascades.")
+# Face detection - MTCNN will be lazy-loaded to prevent TensorFlow from importing at module level
+# This prevents CUDA initialization errors on CPU-only servers
+MTCNN_AVAILABLE = None  # Will be determined on first use
 
 
 class FaceDetector:
@@ -83,22 +79,100 @@ class FaceDetector:
         self.method = method
         self.mtcnn = None
         self.haar_cascade = None
+        self._mtcnn_available = None
         
-        if method in ['auto', 'mtcnn'] and MTCNN_AVAILABLE:
-            try:
-                self.mtcnn = MTCNN()
-                self.method = 'mtcnn'
-            except Exception as e:
-                print(f"Warning: MTCNN initialization failed: {e}. Falling back to Haar.")
-                self.method = 'haar'
+        # Try MTCNN only if requested, with complete TensorFlow suppression
+        if method in ['auto', 'mtcnn']:
+            self._try_mtcnn()
         
+        # Fall back to Haar if MTCNN not available or failed
         if self.method == 'haar' or (method == 'auto' and self.mtcnn is None):
-            cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-            if os.path.exists(cascade_path):
-                self.haar_cascade = cv2.CascadeClassifier(cascade_path)
-                self.method = 'haar'
-            else:
-                print("Warning: Haar cascade not found. Face detection may fail.")
+            self._init_haar()
+    
+    def _try_mtcnn(self):
+        """Try to load MTCNN with complete TensorFlow/CUDA suppression."""
+        global MTCNN_AVAILABLE
+        
+        # Check if we've already determined MTCNN availability
+        if MTCNN_AVAILABLE is False:
+            return  # Already tried and failed
+        
+        try:
+            # CRITICAL: Suppress TensorFlow/CUDA errors during MTCNN import
+            # Redirect both stderr and stdout to completely hide TensorFlow initialization
+            import contextlib
+            import io
+            import sys
+            
+            old_stderr = sys.stderr
+            old_stdout = sys.stdout
+            suppress_io = io.StringIO()
+            
+            # Temporarily redirect all output
+            sys.stderr = suppress_io
+            sys.stdout = suppress_io
+            
+            try:
+                # Set TensorFlow env vars before import
+                os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+                os.environ['CUDA_VISIBLE_DEVICES'] = ''
+                os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'false'
+                
+                # Now try to import MTCNN (this will import TensorFlow)
+                from mtcnn import MTCNN
+                
+                # Restore output immediately after import
+                sys.stderr = old_stderr
+                sys.stdout = old_stdout
+                
+                # If import succeeded, try to create MTCNN instance
+                try:
+                    # Suppress output during MTCNN initialization too
+                    sys.stderr = suppress_io
+                    sys.stdout = suppress_io
+                    self.mtcnn = MTCNN()
+                    sys.stderr = old_stderr
+                    sys.stdout = old_stdout
+                    
+                    self.method = 'mtcnn'
+                    MTCNN_AVAILABLE = True
+                    self._mtcnn_available = True
+                    return  # Success!
+                except Exception as init_e:
+                    sys.stderr = old_stderr
+                    sys.stdout = old_stdout
+                    # MTCNN import succeeded but initialization failed
+                    MTCNN_AVAILABLE = False
+                    self._mtcnn_available = False
+                    
+            except ImportError:
+                # Restore output before checking availability
+                sys.stderr = old_stderr
+                sys.stdout = old_stdout
+                MTCNN_AVAILABLE = False
+                self._mtcnn_available = False
+            except Exception as e:
+                # Restore output before handling error
+                sys.stderr = old_stderr
+                sys.stdout = old_stdout
+                # Any other error during import (including CUDA errors from TensorFlow)
+                MTCNN_AVAILABLE = False
+                self._mtcnn_available = False
+                
+        except Exception as e:
+            # Ultimate fallback - something went very wrong
+            MTCNN_AVAILABLE = False
+            self._mtcnn_available = False
+            # Don't print error - we'll fall back to Haar silently
+    
+    def _init_haar(self):
+        """Initialize Haar cascade face detector."""
+        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+        if os.path.exists(cascade_path):
+            self.haar_cascade = cv2.CascadeClassifier(cascade_path)
+            self.method = 'haar'
+        else:
+            print("Warning: Haar cascade not found. Face detection may fail.")
     
     def detect_face(self, image: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
         """
@@ -229,10 +303,10 @@ class EnhancedDetector:
         # Initialize face detector for LAA-Net preprocessing
         logger.info("🔍 Initializing face detector (MTCNN/OpenCV)...")
         self.face_detector = FaceDetector(method='auto')
-        if MTCNN_AVAILABLE:
-            logger.info("✅ MTCNN face detection available")
+        if self.face_detector.method == 'mtcnn':
+            logger.info("✅ MTCNN face detection initialized successfully")
         else:
-            logger.info("ℹ️  Using OpenCV Haar cascades for face detection (MTCNN not available)")
+            logger.info("ℹ️  Using OpenCV Haar cascades for face detection (MTCNN unavailable or failed)")
         
         # === CLIP Zero-Shot Setup ===
         logger.info("📦 Loading CLIP model (ViT-B-32)...")
