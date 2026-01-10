@@ -123,14 +123,16 @@ class EnsembleTester:
                     # Real videos
                     real_dir = search_dir / 'real'
                     if real_dir.exists():
-                        real_videos = [str(p) for p in real_dir.glob('*.mp4')[:max_videos//2]]
+                        real_videos = list(real_dir.glob('*.mp4'))[:max_videos//2]
+                        real_videos = [str(p) for p in real_videos]
                         test_data['real'].extend(real_videos)
                         print(f"   Found {len(real_videos)} real videos in {real_dir}")
                     
                     # Fake videos
                     fake_dir = search_dir / 'fake'
                     if fake_dir.exists():
-                        fake_videos = [str(p) for p in fake_dir.glob('*.mp4')[:max_videos//2]]
+                        fake_videos = list(fake_dir.glob('*.mp4'))[:max_videos//2]
+                        fake_videos = [str(p) for p in fake_videos]
                         test_data['fake'].extend(fake_videos)
                         print(f"   Found {len(fake_videos)} fake videos in {fake_dir}")
             
