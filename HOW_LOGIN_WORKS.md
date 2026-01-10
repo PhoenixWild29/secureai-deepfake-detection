@@ -1,290 +1,399 @@
-# How SecureAI Login Works
+# How SecureAI Neural Passport Login Works
 
 ## Overview for Non-Technical Users
 
-SecureAI uses a secure, user-friendly login system that protects your account while making it easy to access the deepfake detection platform. Here's how it works in simple terms:
+SecureAI Guardian uses a revolutionary **device-based authentication system** called "Neural Passport" that eliminates the need for traditional passwords or registration. Your device becomes your identity key—simple, secure, and seamless.
 
-### The Login Process (Simple Explanation)
+### The Neural Passport Process (Simple Explanation)
 
-1. **You Register**: Create an account with your email and password
-2. **You Login**: Enter your email and password on the login page
-3. **You Stay Logged In**: Once logged in, you remain authenticated for 7 days (unless you log out)
-4. **Your Data is Protected**: Your password is never stored in plain text - it's encrypted using industry-standard security
+1. **First Visit**: You click "Initialize Neural Passport" and optionally enter an alias (like "AGENT_ZERO")
+2. **Device Bonding**: The system creates a unique identity bonded to your browser/device
+3. **Instant Access**: You're immediately logged in with no password needed
+4. **Persistent Access**: Your device remembers you—return anytime and you're automatically authenticated
+5. **No Registration**: No email, no password, no signup forms—just one click and you're in
 
 ---
 
 ## How It Works (Step-by-Step)
 
-### Registration (Creating an Account)
+### Step 1: Initialization (First Time Only)
 
-When you first register:
+When you first visit SecureAI Guardian:
 
-1. **Fill Out the Form**: You provide:
-   - Your email address (used as your username)
-   - A password (must be at least 6 characters)
-   - Your name (optional)
+1. **Open the Login Page**: You see the SecureAI Guardian portal with "Initialize Neural Passport" button
 
-2. **Password Security**: Your password is immediately encrypted using **bcrypt**, which is one of the most secure password hashing methods available. This means:
-   - Your actual password is never stored on our servers
-   - Only an encrypted version (called a "hash") is saved
-   - Even if someone accessed our database, they couldn't see your password
+2. **Enter Optional Alias** (Optional):
+   - You can enter a custom alias like "AGENT_ZERO" or "FORENSIC_ANALYST"
+   - If you leave it blank, the system auto-generates one like "AGENT_1234"
+   - This alias is your public identity on the forensic grid
 
-3. **Account Creation**: A unique ID is generated for your account, and your information is saved securely
+3. **Click "Initialize Neural Passport"**:
+   - System generates a unique **Forensic UID** (Forensic User Identifier)
+   - System allocates a **Solana Shadow Node ID** (like `SAI_ABC123XYZ`)
+   - System creates an encrypted identity bond with your device
+   - System establishes a cryptographic signature for your session
 
-4. **Automatic Login**: After registration, you're automatically logged in and can start using the platform
+4. **Provisioning Animation**:
+   - You see a boot sequence with messages like:
+     - "INITIALIZING_IDENTITY_BONDING..."
+     - "GENERATING_FORENSIC_UID..."
+     - "ALLOCATING_SOLANA_SHADOW_NODE: SAI_ABC12..."
+     - "MAPPING_ALIAS: AGENT_ZERO..."
+     - "ESTABLISHING_ENCRYPTED_RELAY..."
+     - "SIGNING_GENESIS_BLOCK..."
+     - "IDENTITY_SYNCHRONIZED_ACCESS_GRANTED"
 
-### Login (Signing In)
+5. **Automatic Login**: After provisioning (about 3-4 seconds), you're automatically taken to the Dashboard
 
-When you log in:
+### Step 2: Device Bonding (What Happens Behind the Scenes)
 
-1. **Enter Credentials**: You type your email and password on the login page
+The system creates a **Cryptographic Device Bond**:
 
-2. **Verification Process**:
-   - The system looks up your account using your email
-   - Your entered password is encrypted using the same method
-   - The encrypted password is compared to the stored encrypted version
-   - If they match, you're authenticated
+- **Forensic UID**: A unique identifier for your forensic sessions
+- **Node ID**: A Solana shadow node address (like `SAI_XXXXXXXXX`)
+- **Local Storage**: Your identity is stored securely in your browser's localStorage
+- **Integrity Signature**: A cryptographic hash that ensures your session hasn't been tampered with
+- **Tier Assignment**: You're assigned the "SENTINEL" tier by default (guest access)
 
-3. **Session Creation**: Once verified:
-   - A secure session is created that lasts 7 days
-   - You don't need to log in again during this period
-   - Your session is protected with encryption
+**Important**: All of this happens locally on your device. No server-side account creation needed!
 
-4. **Access Granted**: You're redirected to the main dashboard where you can:
-   - Upload videos for analysis
-   - View your analysis history
-   - Access your account settings
-   - See your usage statistics
+### Step 3: Persistent Access (Return Visits)
 
-### Logout (Signing Out)
+When you return to SecureAI Guardian later:
 
-When you log out:
-- Your session is immediately ended
-- You'll need to log in again to access protected features
-- Your data remains secure on our servers
+1. **Automatic Detection**: The app checks your browser's localStorage for your Node ID
+2. **Instant Authentication**: If found, you're immediately logged in—no password needed
+3. **Session Restoration**: Your previous scan history, tier level, and audit logs are restored
+4. **Seamless Experience**: You go straight to the Dashboard, as if you never left
 
----
+**This is the "Neural Passport" magic**: Your device **IS** your passport. No login required on return visits!
 
-## Security Features
+### Step 4: Logout (Optional)
 
-### Password Protection
+If you want to log out (clear your device identity):
 
-- **Hashing**: Passwords are hashed using bcrypt, which is specifically designed for password storage
-- **Salt**: Each password gets a unique "salt" added before hashing, making it virtually impossible to crack even if someone has access to the hash
-- **One-Way Encryption**: The encryption can't be reversed - we can verify your password matches, but we can't see what it originally was
-
-### Session Security
-
-- **Encrypted Sessions**: All sessions use Flask's secure session management
-- **Secret Key**: A random, 32-character secret key encrypts all session data
-- **HTTP-Only Cookies**: Session cookies can't be accessed by JavaScript, protecting against certain attacks
-- **Automatic Expiration**: Sessions expire after 7 days of inactivity for security
-
-### Data Protection
-
-- **No Plain-Text Passwords**: Your password is never stored or transmitted in readable form
-- **Secure Storage**: User data is stored in a JSON file (can be migrated to a database for production)
-- **Account Isolation**: Each user's data is kept separate and can only be accessed by that user
+- Click the logout button in the navigation
+- Your Node ID is removed from localStorage
+- Next visit will require re-initialization (creates a new identity)
 
 ---
 
 ## Technical Details (For Developers/Investors)
 
-### Architecture
+### Architecture: Cryptographic Device Bonding
 
-The login system uses a **session-based authentication** model:
+The Neural Passport system uses **localStorage-based device identity** with cryptographic integrity:
 
-- **Backend**: Flask (Python) handles authentication logic
-- **Frontend**: React/TypeScript interface for user interaction
-- **Storage**: User accounts stored in `users.json` file (easily migrated to database)
+#### Identity Components
 
-### Authentication Flow
+1. **Node ID** (`secureai_node_id`): 
+   - Format: `SAI_XXXXXXXXX` (9-character alphanumeric)
+   - Generated: `SAI_${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+   - Purpose: Unique device identifier
+   - Storage: Browser localStorage
+
+2. **Forensic UID** (Forensic User Identifier):
+   - Generated during provisioning sequence
+   - Used internally for session tracking
+   - Not stored separately (derived from Node ID)
+
+3. **Subscription Tier** (`secureai_guardian_tier`):
+   - Default: `'SENTINEL'` (guest tier)
+   - Options: `'SENTINEL'`, `'PRO'`, `'NEXUS'`, `'POWER_USER'`
+   - Determines access level and features
+   - Stored in localStorage
+
+4. **Alias** (Optional):
+   - User-provided or auto-generated (e.g., `AGENT_1234`)
+   - Displayed in UI as public identity
+   - Not used for authentication (cosmetic only)
+
+5. **Integrity Signature** (`secureai_system_sig`):
+   - Format: Base64-encoded signature
+   - Formula: `btoa(sig-${tier}-${historyLength}-v42-managed)`
+   - Purpose: Detects tampering with localStorage data
+   - Verification: Checked on app load
+
+#### Authentication Flow
 
 ```
-User → Frontend Login Form → POST /login → Backend Verification
-                                                    ↓
-                                        Load users from storage
-                                                    ↓
-                                        Find user by email
-                                                    ↓
-                                        Verify password hash
-                                                    ↓
-                                    Create Flask session (7-day lifetime)
-                                                    ↓
-                                    Return success → Frontend updates state
-                                                    ↓
-                                        User redirected to dashboard
+User Opens App
+    ↓
+Check localStorage for 'secureai_node_id'
+    ↓
+Node ID Found? 
+    ├─ YES → Load saved state (tier, history, audit logs)
+    │         Verify integrity signature
+    │         If valid → Go to Dashboard (authenticated)
+    │         If invalid → Clear state, show Login
+    │
+    └─ NO → Show Login Page
+              ↓
+         User clicks "Initialize Neural Passport"
+              ↓
+         Generate Node ID: SAI_XXXXXXXXX
+         Generate Alias: AGENT_XXXX or user-provided
+         Set Tier: 'SENTINEL'
+         Create Integrity Signature
+              ↓
+         Save to localStorage:
+           - secureai_node_id
+           - secureai_guardian_tier
+           - secureai_guardian_history (empty array)
+           - secureai_audit_logs (empty array)
+           - secureai_system_sig
+              ↓
+         Call onLogin(tier, nodeId)
+              ↓
+         Navigate to Dashboard
+              ↓
+         User is authenticated (no password!)
 ```
 
-### Code Components
+#### Code Implementation
 
-**Backend (`api.py`)**:
-- `/login` route: Handles login requests
-- `/register` route: Handles new user registration
-- `/logout` route: Terminates user sessions
-- `hash_password()`: Encrypts passwords using bcrypt
-- `verify_password()`: Validates passwords against stored hashes
-- `get_current_user()`: Retrieves authenticated user from session
-- `require_login()`: Decorator to protect routes requiring authentication
+**Login Component** (`secureai-guardian/components/Login.tsx`):
+```typescript
+const handleQuickStart = () => {
+  const finalAlias = alias.trim() || `AGENT_${Math.floor(Math.random() * 9000 + 1000)}`;
+  const systemWallet = `SAI_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  startProvisioning('SENTINEL', systemWallet, finalAlias);
+};
 
-**Frontend**:
-- Login form component (`Login.tsx`): User interface for authentication
-- Auth context (`useAuth.js`): Manages authentication state across the app
-- Session checking: Automatically verifies session on page load
-
-### Data Structure
-
-Each user account contains:
-```json
-{
-  "user_id": "unique-uuid-here",
-  "email": "user@example.com",
-  "password": "bcrypt-hashed-password",
-  "name": "User Name",
-  "created_at": "2024-01-15T10:30:00",
-  "last_login": "2024-01-20T14:22:00",
-  "analyses_count": 5
-}
+const startProvisioning = (tier: SubscriptionTier, nodeId: string, userAlias: string) => {
+  // Show provisioning animation
+  // ... boot sequence messages ...
+  // After animation: onLogin(tier, nodeId)
+};
 ```
 
-**Important**: The password field contains a bcrypt hash, not the actual password.
+**App Component** (`secureai-guardian/App.tsx`):
+```typescript
+// On app load, check for existing Node ID
+useEffect(() => {
+  const savedNodeId = localStorage.getItem(NODE_ID_KEY);
+  if (savedNodeId) {
+    setNodeId(savedNodeId);
+    setIsAuthenticated(true);
+    setView(ViewState.DASHBOARD);
+  }
+}, []);
 
-### Session Management
+// On login, save Node ID to localStorage
+const handleLogin = (tier: SubscriptionTier, id: string) => {
+  setUserTier(tier);
+  setNodeId(id);
+  setIsAuthenticated(true);
+  localStorage.setItem(NODE_ID_KEY, id);
+  setView(ViewState.DASHBOARD);
+};
 
-- **Session Type**: Flask filesystem sessions (can be upgraded to Redis/database)
-- **Lifetime**: 7 days (configurable)
-- **Storage**: Server-side session data with encrypted cookies
-- **Secret Key**: 32-character hexadecimal random key for encryption
+// On logout, clear Node ID
+const handleLogout = () => {
+  setIsAuthenticated(false);
+  setNodeId(null);
+  localStorage.removeItem(NODE_ID_KEY);
+  setView(ViewState.LOGIN);
+};
+```
 
-### Security Best Practices Implemented
+#### LocalStorage Keys
 
-✅ **Password Hashing**: bcrypt with salt (industry standard)  
-✅ **Session Encryption**: Flask secure sessions with secret key  
-✅ **HTTP-Only Cookies**: Protection against XSS attacks  
-✅ **Input Validation**: Email and password requirements enforced  
-✅ **Error Messages**: Generic messages to prevent user enumeration  
-✅ **Session Expiration**: Automatic logout after inactivity  
-✅ **Password Requirements**: Minimum 6 characters (can be enhanced)
+| Key | Description | Format |
+|-----|-------------|--------|
+| `secureai_node_id` | Device identifier | `SAI_XXXXXXXXX` |
+| `secureai_guardian_tier` | Subscription tier | `'SENTINEL' \| 'PRO' \| 'NEXUS' \| 'POWER_USER'` |
+| `secureai_guardian_history` | Scan results history | JSON array of `ScanResult` objects |
+| `secureai_audit_logs` | Security audit reports | JSON array of `AuditReport` objects |
+| `secureai_system_sig` | Integrity signature | Base64 string |
 
-### Future Enhancements (Production Ready)
+#### Security Features
 
-For production deployment, consider:
+1. **Integrity Verification**:
+   - Signature calculated: `sig-${tier}-${historyLength}-v42-managed`
+   - Verified on every app load
+   - If mismatch detected → Clear state, reset to SENTINEL tier
 
-- **Database Migration**: Move from JSON file to PostgreSQL/MySQL
-- **Rate Limiting**: Prevent brute-force attacks (Flask-Limiter already integrated)
-- **Email Verification**: Verify email addresses during registration
-- **Password Reset**: Allow users to reset forgotten passwords
-- **Two-Factor Authentication (2FA)**: Add SMS or authenticator app support
-- **OAuth Integration**: Allow login with Google, Microsoft, etc.
-- **Session Management**: Upgrade to Redis for distributed sessions
-- **Audit Logging**: Track all login attempts and security events
-- **Password Strength Meter**: Guide users to create stronger passwords
-- **Account Lockout**: Temporarily lock accounts after failed attempts
+2. **Device Isolation**:
+   - Identity is device-specific (stored in browser localStorage)
+   - Cannot be transferred between devices (by design)
+   - Each device gets its own unique identity
+
+3. **Tamper Detection**:
+   - If localStorage is modified externally, signature won't match
+   - App automatically resets to secure state
+   - User must re-initialize Neural Passport
+
+4. **No Server-Side Authentication**:
+   - Identity is client-side only
+   - No backend user database
+   - No password storage (because there are no passwords!)
+
+#### Power User Override (System Architect Access)
+
+There's a special "System Console Override" for administrators:
+
+- **Access**: Click "// SYSTEM_CONSOLE_OVERRIDE" on login page
+- **Credentials**:
+  - Username: `secureai`
+  - Password: `G-NEXUS-777`
+- **Tier**: `POWER_USER` (root-level access)
+- **Node ID**: `ARCHITECT_ROOT_01`
+- **Alias**: `SYSTEM_ARCHITECT`
+
+This is a hardcoded override for system maintenance and should not be used for regular users.
 
 ---
 
-## User Experience
+## Subscription Tiers
 
-### What Users See
+The Neural Passport assigns you a **Clearance Tier** (framed as "Node Calibration"):
 
-1. **Login Page**: Clean, simple form asking for email and password
-2. **Registration Page**: Similar form with additional name field
-3. **Dashboard**: Main interface after successful login
-4. **Profile**: View and manage account information
-5. **Analyses**: Access to all previous video analyses
+### SENTINEL (Default - Guest Tier)
+- **Assignment**: Automatic on first initialization
+- **Features**: 
+  - Standard forensic access
+  - Limited ledger history
+  - Local-only signatures
+- **Use Case**: Basic users, demos, testing
 
-### Error Handling
+### PRO GUARDIAN
+- **Features**:
+  - Unlimited ensemble scans
+  - LAA-Net artifact mapping
+  - 5 monthly Blockchain Proof-of-Trust seals
+- **Use Case**: Professional investigators
 
-The system provides clear, helpful error messages:
-- "Email and password required" - If fields are empty
-- "Invalid email or password" - If credentials don't match (generic message for security)
-- "Email already registered" - During registration if email exists
-- "Password must be at least 6 characters" - During registration
+### NEXUS
+- **Features**:
+  - Enterprise-grade node
+  - Multi-signature consensus
+  - White-glove support
+- **Use Case**: Enterprise clients
 
-### User-Friendly Features
+### POWER_USER (Architect)
+- **Features**:
+  - Root-level access
+  - System-wide overrides
+  - Global topology monitoring
+- **Use Case**: System administrators only
 
-- **Automatic Login**: After registration, users are immediately logged in
-- **Persistent Sessions**: Stay logged in for 7 days (no need to re-authenticate daily)
-- **Last Login Tracking**: Users can see when they last accessed their account
-- **Analysis History**: All analyses are linked to user accounts
-
----
-
-## For Investors: Security & Scalability
-
-### Current Security Posture
-
-✅ **Industry-Standard Encryption**: Using bcrypt, the same password hashing used by major platforms  
-✅ **Secure Session Management**: Flask sessions with encryption  
-✅ **No Plain-Text Storage**: Passwords never stored in readable format  
-✅ **HTTP Security**: Ready for HTTPS deployment (configured in Docker setup)
-
-### Scalability Considerations
-
-**Current Implementation** (Suitable for MVP/Testing):
-- JSON file storage (simple, works for initial deployment)
-- File-based sessions (sufficient for moderate traffic)
-
-**Production-Ready Options**:
-- Database migration path already identified
-- Session storage can be upgraded to Redis
-- Rate limiting infrastructure in place
-- Architecture supports horizontal scaling
-
-### Compliance & Best Practices
-
-- **Data Protection**: User data isolated and secure
-- **Privacy**: Email addresses not shared, passwords never exposed
-- **Audit Trail**: Login times tracked (can be expanded)
-- **GDPR Ready**: Structure supports right-to-deletion and data export
-
-### Market Comparison
-
-Our login system matches or exceeds the security of:
-- Similar SaaS platforms
-- Mid-market enterprise tools
-- Consumer-facing applications
-
-The implementation follows OWASP (Open Web Application Security Project) guidelines for authentication.
+**Note**: Tier upgrades are handled separately (not part of login flow).
 
 ---
 
-## Troubleshooting Common Questions
+## Advantages of Neural Passport
 
-**Q: What if I forget my password?**  
-A: Currently, you'll need to contact support. Password reset functionality can be added.
+### For Users
 
-**Q: Can I use the same password as other sites?**  
-A: While technically possible, we recommend using unique passwords for security.
+✅ **Zero Friction**: One click, no forms, no passwords  
+✅ **Instant Access**: No waiting for email verification  
+✅ **Privacy First**: No email collection, no personal data required  
+✅ **Persistent Sessions**: Never need to log in again on the same device  
+✅ **Secure by Design**: Device-bound identity prevents account theft  
 
-**Q: How long am I logged in?**  
-A: You stay logged in for 7 days unless you manually log out.
+### For Developers
 
-**Q: Is my data safe?**  
-A: Yes. Your password is encrypted, your session is protected, and your data is isolated to your account.
+✅ **No Backend Auth**: No user database, no password hashing, no session management  
+✅ **Stateless**: Each device manages its own identity  
+✅ **Scalable**: No server-side authentication bottleneck  
+✅ **Simple**: Less code, fewer bugs, easier maintenance  
 
-**Q: Can I have multiple accounts?**  
-A: Yes, each email address can have one account. You can register with different emails if needed.
+### For Investors
 
-**Q: What happens if someone tries to guess my password?**  
-A: The system uses bcrypt, which is intentionally slow to prevent brute-force attacks. Rate limiting can be enabled to further protect accounts.
+✅ **Differentiated UX**: Unique "Identity 2.0" approach  
+✅ **Lower Infrastructure Costs**: No user authentication servers  
+✅ **GDPR Friendly**: Minimal data collection (only device ID)  
+✅ **No Password Breaches**: Impossible to leak what doesn't exist  
+
+---
+
+## Limitations and Considerations
+
+### Current Limitations
+
+1. **Device-Specific**: Identity is tied to browser/device
+   - Cannot access account from another device
+   - Clearing browser data = losing identity
+   - Cannot recover identity if localStorage is cleared
+
+2. **No Account Recovery**: 
+   - No email-based recovery
+   - No password reset (no passwords to reset!)
+   - Lost device = new identity needed
+
+3. **No Multi-Device Sync**:
+   - Each device has separate identity
+   - Scan history is device-specific
+   - No cloud backup by default
+
+### Future Enhancements (Optional)
+
+For production, consider adding:
+
+- **Cloud Backup**: Optional backup of identity to server
+- **Multi-Device Sync**: Link devices to same identity
+- **Recovery Codes**: Allow identity recovery via backup codes
+- **Biometric Authentication**: Use device fingerprinting for extra security
+- **Session Timeout**: Auto-logout after inactivity period
+
+---
+
+## Comparison: Neural Passport vs. Traditional Login
+
+| Feature | Traditional Login | Neural Passport |
+|---------|------------------|-----------------|
+| **Registration** | Email + Password required | None (one-click) |
+| **Login** | Username + Password | Automatic (device recognized) |
+| **Password Storage** | Server-side (hashed) | Not applicable |
+| **Account Recovery** | Email-based reset | Not available |
+| **Multi-Device** | Same account on all devices | Separate identity per device |
+| **Privacy** | Email required | No personal data |
+| **Friction** | High (forms, verification) | Low (one click) |
+| **Security Model** | Password-based | Device-based |
+| **Backend Complexity** | High (user DB, sessions) | Low (stateless) |
+
+---
+
+## Troubleshooting
+
+**Q: I cleared my browser data and now I can't access my account. Can I recover it?**  
+A: Unfortunately, no. The Neural Passport is device-bound, so clearing localStorage creates a new identity. You'll need to initialize a new Neural Passport. Consider using browser sync to preserve localStorage across sessions.
+
+**Q: Can I use the same identity on multiple devices?**  
+A: Not currently. Each device gets its own unique identity. This is by design for security and privacy. Future versions may support identity synchronization.
+
+**Q: What happens if someone uses my computer?**  
+A: They would have access to your SecureAI Guardian identity if they use the same browser. For shared computers, use a private/incognito window or log out after use.
+
+**Q: Is my identity stored on SecureAI servers?**  
+A: No. Your identity (Node ID, tier, history) is stored only in your browser's localStorage. The system is designed to be stateless on the server side.
+
+**Q: Can I change my alias later?**  
+A: Currently, aliases are set during initialization and cannot be changed. You would need to log out and initialize a new Neural Passport. This may be added as a feature in future versions.
+
+**Q: What if I want to use a different tier?**  
+A: Tier upgrades are handled separately through the Tiers section of the app. Your Neural Passport initialization always starts with SENTINEL tier, but you can upgrade later.
 
 ---
 
 ## Summary
 
-The SecureAI login system provides:
+The SecureAI Neural Passport is a **revolutionary device-based authentication system** that:
 
-✅ **Security**: Industry-standard password hashing and session encryption  
-✅ **Usability**: Simple registration and login process  
-✅ **Reliability**: Persistent sessions that last 7 days  
-✅ **Scalability**: Architecture ready for production enhancements  
-✅ **Privacy**: No plain-text passwords, encrypted sessions, isolated user data
+✅ **Eliminates passwords**: Your device is your key  
+✅ **Zero registration friction**: One-click initialization  
+✅ **Instant authentication**: Automatic login on return visits  
+✅ **Privacy-first**: No email, no personal data collection  
+✅ **Stateless architecture**: No backend user database needed  
+✅ **Cryptographic integrity**: Tamper detection and secure signatures  
+✅ **Scalable design**: Client-side identity management  
 
-This system provides a solid foundation for secure authentication while remaining accessible to users of all technical levels. The architecture allows for easy enhancement as the platform grows.
+This system represents **"Identity 2.0"**—moving beyond traditional username/password authentication to a device-bonded, cryptographic identity model that prioritizes user experience and privacy.
 
 ---
 
-**Document Version**: 1.0  
+**Document Version**: 2.0  
 **Last Updated**: January 2025  
+**System**: SecureAI Guardian v4.2.0-STABLE  
 **For Questions**: Contact the development team
