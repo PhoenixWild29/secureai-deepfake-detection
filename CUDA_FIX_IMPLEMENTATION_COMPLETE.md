@@ -93,15 +93,17 @@ ENV TF_ENABLE_ONEDNN_OPTS=0
 
 ## Testing Instructions
 
-### 1. Pull Latest Changes
+### 1. Navigate to Project Directory and Pull Latest Changes
 
 ```bash
+cd ~/secureai-deepfake-detection
 git pull origin master
 ```
 
 ### 2. Rebuild Docker Container (to apply Dockerfile changes)
 
 ```bash
+cd ~/secureai-deepfake-detection
 docker compose -f docker-compose.https.yml down
 docker compose -f docker-compose.https.yml build --no-cache secureai-backend
 docker compose -f docker-compose.https.yml up -d secureai-backend
@@ -110,6 +112,7 @@ docker compose -f docker-compose.https.yml up -d secureai-backend
 ### 3. Copy Updated Files to Container
 
 ```bash
+cd ~/secureai-deepfake-detection
 docker cp ai_model/enhanced_detector.py secureai-backend:/app/ai_model/
 docker cp test_ensemble_comprehensive.py secureai-backend:/app/
 ```
@@ -118,11 +121,13 @@ docker cp test_ensemble_comprehensive.py secureai-backend:/app/
 
 **Option A: Normal Run (CUDA errors suppressed, but may appear briefly)**
 ```bash
+cd ~/secureai-deepfake-detection
 docker exec secureai-backend python3 /app/test_ensemble_comprehensive.py
 ```
 
 **Option B: Filtered Output (Clean output, no CUDA errors visible)**
 ```bash
+cd ~/secureai-deepfake-detection
 docker exec secureai-backend python3 /app/test_ensemble_comprehensive.py 2>&1 | grep -v -i 'cuda\|cuinit\|stream_executor\|xla\|tensorflow'
 ```
 
