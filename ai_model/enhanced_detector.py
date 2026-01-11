@@ -580,15 +580,31 @@ class EnhancedDetector:
 
 # Global detector instance (lazy initialization)
 _detector_instance = None
+_detector_lock = None
 
 # Backward compatibility: Keep the old function name for existing code
 def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
     """
     Enhanced deepfake detection using ensemble of CLIP and LAA-Net.
     Backward compatibility wrapper for existing code.
+    Uses singleton pattern to reuse detector instance across calls.
     """
-    detector = EnhancedDetector(**kwargs)
-    result = detector.detect(video_path)
+    global _detector_instance, _detector_lock
+    
+    # Use singleton to avoid reloading CLIP model on every call
+    if _detector_instance is None:
+        try:
+            _detector_instance = EnhancedDetector(**kwargs)
+        except Exception as e:
+            # If initialization fails, try again with explicit CPU
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"EnhancedDetector initialization failed: {e}, retrying with CPU...")
+            os.environ['CUDA_VISIBLE_DEVICES'] = ''
+            _detector_instance = EnhancedDetector(**kwargs)
+    
+    try:
+        result = _detector_instance.detect(video_path)
     
     # Convert to expected format for backward compatibility
     return {

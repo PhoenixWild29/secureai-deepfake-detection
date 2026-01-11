@@ -257,8 +257,19 @@ class EnsembleTester:
             
             # Suppress stderr during detection to hide CUDA errors
             start_time = time.time()
-            with contextlib.redirect_stderr(stderr_suppressor):
-                result = detect_fake(video_path, model_type=model_type)
+            try:
+                with contextlib.redirect_stderr(stderr_suppressor):
+                    result = detect_fake(video_path, model_type=model_type)
+            except Exception as detect_error:
+                # If detect_fake crashes, return error result
+                processing_time = time.time() - start_time
+                return {
+                    'video_path': video_path,
+                    'ground_truth': ground_truth,
+                    'error': f'Detection failed: {str(detect_error)[:100]}',
+                    'success': False,
+                    'processing_time': processing_time
+                }
             processing_time = time.time() - start_time
             
             # Extract prediction
