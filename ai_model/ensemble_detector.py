@@ -344,25 +344,97 @@ class EnsembleDetector:
 
 # Global instance for lazy initialization
 _ensemble_instance = None
+_ensemble_init_failed = False
 
-def get_ensemble_detector() -> EnsembleDetector:
-    """Get or create global ensemble detector instance"""
-    global _ensemble_instance
+def get_ensemble_detector(timeout: float = 30.0) -> Optional[EnsembleDetector]:
+    """Get or create global ensemble detector instance with timeout"""
+    global _ensemble_instance, _ensemble_init_failed
+    
+    if _ensemble_init_failed:
+        return None  # Don't retry if initialization already failed
+    
     if _ensemble_instance is None:
-        _ensemble_instance = EnsembleDetector()
+        try:
+            import threading
+            import queue
+            
+            init_queue = queue.Queue(maxsize=1)
+            error_queue = queue.Queue(maxsize=1)
+            
+            def init_ensemble():
+                try:
+                    detector = EnsembleDetector()
+                    init_queue.put(detector, block=False, timeout=0.1)
+                except queue.Full:
+                    pass  # Timeout occurred
+                except Exception as e:
+                    try:
+                        error_queue.put(e, block=False, timeout=0.1)
+                    except queue.Full:
+                        pass
+            
+            # Initialize with timeout
+            init_thread = threading.Thread(target=init_ensemble, daemon=True)
+            init_thread.start()
+            init_thread.join(timeout=timeout)
+            
+            if init_thread.is_alive():
+                logger.warning(f"⚠️  EnsembleDetector initialization timed out (>={timeout}s). Disabling ensemble.")
+                _ensemble_init_failed = True
+                return None
+            
+            if not error_queue.empty():
+                error = error_queue.get()
+                logger.warning(f"⚠️  EnsembleDetector initialization failed: {error}. Disabling ensemble.")
+                _ensemble_init_failed = True
+                return None
+            
+            if not init_queue.empty():
+                _ensemble_instance = init_queue.get()
+                logger.info("✅ EnsembleDetector initialized successfully")
+            else:
+                logger.warning("⚠️  EnsembleDetector initialization returned no result. Disabling ensemble.")
+                _ensemble_init_failed = True
+                return None
+                
+        except Exception as e:
+            logger.error(f"❌ EnsembleDetector initialization error: {e}. Disabling ensemble.")
+            _ensemble_init_failed = True
+            return None
+    
     return _ensemble_instance
 
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
     """
-    Convenience function for ensemble detection
+    Convenience function for ensemble detection with timeout protection
     
     Args:
         video_path: Path to video file
         num_frames: Number of frames to sample
         
     Returns:
-        Detection results
+        Detection results or error dict if ensemble unavailable
     """
-    detector = get_ensemble_detector()
-    return detector.detect(video_path, num_frames)
+    detector = get_ensemble_detector(timeout=30.0)
+    if detector is None:
+        # Ensemble unavailable - return error result
+        return {
+            'error': 'Ensemble detector unavailable (initialization failed or timed out)',
+            'is_deepfake': False,
+            'confidence': 0.0,
+            'ensemble_fake_probability': 0.5,
+            'method': 'ensemble_unavailable'
+        }
+    
+    try:
+        return detector.detect(video_path, num_frames)
+    except Exception as e:
+        logger.error(f"Ensemble detection error: {e}")
+        return {
+            'error': str(e),
+            'is_deepfake': False,
+            'confidence': 0.0,
+            'ensemble_fake_probability': 0.5,
+            'method': 'ensemble_error'
+        }
 
