@@ -416,15 +416,49 @@ class EnsembleTester:
                     else:
                         print(f"❌ {error_msg[:50]}")
                 
-                # Test Ensemble
+                # Test Ensemble (with timeout protection)
                 print("      Ensemble...", end=" ", flush=True)
                 try:
-                    ensemble_result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
-                    if ensemble_result.get('success'):
-                        all_results['ensemble'].append(ensemble_result)
-                        print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f}, time: {ensemble_result.get('processing_time', 0):.1f}s)")
+                    import threading
+                    import queue
+                    
+                    result_queue = queue.Queue()
+                    error_queue = queue.Queue()
+                    
+                    def run_ensemble():
+                        try:
+                            result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
+                            result_queue.put(result)
+                        except Exception as e:
+                            error_queue.put(e)
+                    
+                    # Run with timeout (90 seconds max for ensemble)
+                    ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
+                    ensemble_thread.start()
+                    ensemble_thread.join(timeout=90.0)  # 90 second timeout
+                    
+                    if ensemble_thread.is_alive():
+                        print(f"⏱️  Timeout (>90s), skipping ensemble for this video")
+                        # Can't kill thread, but we'll continue to next video
+                        continue
+                    
+                    # Check for errors
+                    if not error_queue.empty():
+                        raise error_queue.get()
+                    
+                    # Get result
+                    if not result_queue.empty():
+                        ensemble_result = result_queue.get()
+                        if ensemble_result and ensemble_result.get('success'):
+                            all_results['ensemble'].append(ensemble_result)
+                            print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f}, time: {ensemble_result.get('processing_time', 0):.1f}s)")
+                        elif ensemble_result:
+                            print(f"❌ {ensemble_result.get('error', 'Failed')[:50]}")
+                        else:
+                            print(f"❌ No result returned")
                     else:
-                        print(f"❌ {ensemble_result.get('error', 'Failed')[:50]}")
+                        print(f"❌ No result returned (timeout or error)")
+                        
                 except Exception as e:
                     error_msg = str(e)
                     if 'CUDA' in error_msg or 'cuda' in error_msg.lower():

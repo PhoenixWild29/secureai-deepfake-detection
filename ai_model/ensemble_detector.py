@@ -59,36 +59,87 @@ class EnsembleDetector:
             clip_pretrained=clip_pretrained
         )
         
-        # Initialize ResNet50
+        # Initialize ResNet50 (with timeout to prevent hanging)
         logger.info("📦 Loading ResNet50 detector...")
-        self.resnet_model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
+        self.resnet_model = None
         
-        # Load ResNet weights
-        resnet_paths = [
-            resnet_model_path,
-            'ai_model/resnet_resnet50_final.pth',
-            'ai_model/resnet_resnet50_best.pth',
-            'resnet_resnet50_final.pth',
-            'resnet_resnet50_best.pth'
-        ]
-        
-        resnet_loaded = False
-        for path in resnet_paths:
-            if path and os.path.exists(path):
+        try:
+            # Try to create ResNet classifier with timeout
+            import threading
+            resnet_created = [False]
+            resnet_error = [None]
+            
+            def create_resnet():
                 try:
-                    self.resnet_model.load_state_dict(torch.load(path, map_location=self.device))
-                    self.resnet_model.to(self.device)
-                    self.resnet_model.eval()
-                    logger.info(f"✅ ResNet50 loaded from: {path}")
-                    resnet_loaded = True
-                    break
+                    resnet_created[0] = True
+                    return ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
                 except Exception as e:
-                    logger.warning(f"⚠️  Failed to load ResNet from {path}: {e}")
-                    continue
-        
-        if not resnet_loaded:
-            logger.warning("⚠️  ResNet50 not loaded. Ensemble will use CLIP only.")
+                    resnet_error[0] = e
+                    return None
+            
+            # Create ResNet with 10 second timeout
+            resnet_thread = threading.Thread(target=lambda: setattr(self, 'resnet_model', create_resnet()), daemon=True)
+            resnet_thread.start()
+            resnet_thread.join(timeout=10.0)
+            
+            if resnet_thread.is_alive():
+                logger.warning("⚠️  ResNet50 creation timed out (>10s). Skipping ResNet.")
+                self.resnet_model = None
+            elif resnet_error[0]:
+                logger.warning(f"⚠️  ResNet50 creation failed: {resnet_error[0]}. Skipping ResNet.")
+                self.resnet_model = None
+            elif self.resnet_model is None:
+                logger.warning("⚠️  ResNet50 not created. Ensemble will use CLIP only.")
+        except Exception as e:
+            logger.warning(f"⚠️  ResNet50 initialization error: {e}. Skipping ResNet.")
             self.resnet_model = None
+        
+        # Load ResNet weights (only if model was created)
+        if self.resnet_model is not None:
+            resnet_paths = [
+                resnet_model_path,
+                'ai_model/resnet_resnet50_final.pth',
+                'ai_model/resnet_resnet50_best.pth',
+                'resnet_resnet50_final.pth',
+                'resnet_resnet50_best.pth'
+            ]
+            
+            resnet_loaded = False
+            for path in resnet_paths:
+                if path and os.path.exists(path):
+                    try:
+                        # Load with timeout
+                        import threading
+                        load_success = [False]
+                        
+                        def load_weights():
+                            try:
+                                self.resnet_model.load_state_dict(torch.load(path, map_location=self.device))
+                                self.resnet_model.to(self.device)
+                                self.resnet_model.eval()
+                                load_success[0] = True
+                            except Exception as e:
+                                logger.warning(f"Failed to load weights: {e}")
+                        
+                        load_thread = threading.Thread(target=load_weights, daemon=True)
+                        load_thread.start()
+                        load_thread.join(timeout=10.0)
+                        
+                        if load_thread.is_alive():
+                            logger.warning(f"⚠️  ResNet weight loading timed out for {path}")
+                            continue
+                        
+                        if load_success[0]:
+                            logger.info(f"✅ ResNet50 loaded from: {path}")
+                            resnet_loaded = True
+                            break
+                    except Exception as e:
+                        logger.warning(f"⚠️  Failed to load ResNet from {path}: {e}")
+                        continue
+            
+            if not resnet_loaded:
+                logger.warning("⚠️  ResNet50 weights not loaded. Ensemble will use CLIP only.")
+                self.resnet_model = None
         
         # Ensemble weights (can be adaptive based on confidence)
         self.ensemble_weights = ensemble_weights or {
@@ -239,10 +290,18 @@ class EnsembleDetector:
                 'confidence': 0.0
             }
         
-        # Run all detectors
+        # Run all detectors with progress logging
+        logger.debug(f"Running CLIP detection on {len(frames)} frames...")
         clip_prob = self.clip_detect(frames)
+        logger.debug(f"CLIP result: {clip_prob:.3f}")
+        
+        logger.debug(f"Running ResNet detection on {len(frames)} frames...")
         resnet_prob = self.resnet_detect(frames)
+        logger.debug(f"ResNet result: {resnet_prob:.3f}")
+        
+        logger.debug(f"Running LAA-Net detection on {len(frames)} frames...")
         laa_prob = self.laa_detect(frames)
+        logger.debug(f"LAA-Net result: {laa_prob:.3f}")
         
         # Adaptive ensemble
         ensemble_results = self.adaptive_ensemble(clip_prob, resnet_prob, laa_prob)
