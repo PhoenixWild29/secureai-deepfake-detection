@@ -51,33 +51,26 @@ class EnsembleDetector:
             self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"🔧 Initializing EnsembleDetector on device: {self.device}")
         
-        # Initialize CLIP detector (EnhancedDetector) - use singleton to avoid reloading
+        # Initialize CLIP detector (EnhancedDetector) - MUST reuse singleton to avoid reloading CLIP
         logger.info("📦 Loading CLIP detector...")
         try:
-            # Try to use singleton if available - this reuses already-loaded CLIP
-            from .enhanced_detector import get_enhanced_detector, _detector_instance
-            # Check if singleton already exists
-            if _detector_instance is not None:
-                self.clip_detector = _detector_instance
-                logger.info("✅ Reusing existing CLIP detector instance (singleton)")
+            # CRITICAL: Reuse the existing EnhancedDetector singleton to avoid reloading CLIP
+            from .enhanced_detector import _detector_instance as enhanced_singleton
+            if enhanced_singleton is not None:
+                self.clip_detector = enhanced_singleton
+                logger.info("✅ Reusing existing CLIP detector instance (singleton) - no CLIP reload needed")
             else:
-                # Create new instance if singleton doesn't exist yet
-                try:
-                    self.clip_detector = get_enhanced_detector(
-                        device=self.device,
-                        clip_model_name=clip_model_name,
-                        clip_pretrained=clip_pretrained
-                    )
-                    logger.info("✅ Created CLIP detector instance (will be singleton for future calls)")
-                except Exception as e:
-                    logger.warning(f"Failed to get singleton, creating new: {e}")
-                    self.clip_detector = EnhancedDetector(
-                        device=self.device,
-                        clip_model_name=clip_model_name,
-                        clip_pretrained=clip_pretrained
-                    )
-        except ImportError:
-            # Fallback if get_enhanced_detector not available
+                # Singleton doesn't exist yet - create it (this will load CLIP)
+                from .enhanced_detector import get_enhanced_detector
+                self.clip_detector = get_enhanced_detector(
+                    device=self.device,
+                    clip_model_name=clip_model_name,
+                    clip_pretrained=clip_pretrained
+                )
+                logger.info("✅ Created CLIP detector instance (singleton)")
+        except (ImportError, AttributeError) as e:
+            # Fallback if singleton access fails
+            logger.warning(f"Could not access singleton, creating new EnhancedDetector: {e}")
             self.clip_detector = EnhancedDetector(
                 device=self.device,
                 clip_model_name=clip_model_name,
