@@ -605,20 +605,45 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
     
     try:
         result = _detector_instance.detect(video_path)
-    
-    # Convert to expected format for backward compatibility
-    return {
-        'is_fake': result['is_deepfake'],
-        'confidence': result['ensemble_fake_probability'] if result['is_deepfake'] else (1 - result['ensemble_fake_probability']),
-        'ensemble_score': result['ensemble_fake_probability'],
-        'detector_scores': {
-            'clip_based': result['clip_fake_probability'],
-            'laa_net': result['laa_fake_probability']
-        },
-        'method': result['method'],
-        'video_hash': None,  # Can be added if needed
-        'frame_count': result['num_frames_analyzed']
-    }
+        
+        # Convert to expected format for backward compatibility
+        return {
+            'is_fake': result['is_deepfake'],
+            'confidence': result['ensemble_fake_probability'] if result['is_deepfake'] else (1 - result['ensemble_fake_probability']),
+            'ensemble_score': result['ensemble_fake_probability'],
+            'detector_scores': {
+                'clip_based': result['clip_fake_probability'],
+                'laa_net': result['laa_fake_probability']
+            },
+            'method': result['method'],
+            'video_hash': None,  # Can be added if needed
+            'frame_count': result['num_frames_analyzed']
+        }
+    except Exception as e:
+        # If detection fails, reset detector and retry once
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Detection failed: {e}, resetting detector and retrying...")
+        _detector_instance = None  # Reset singleton
+        try:
+            _detector_instance = EnhancedDetector(**kwargs)
+            result = _detector_instance.detect(video_path)
+            return {
+                'is_fake': result['is_deepfake'],
+                'confidence': result['ensemble_fake_probability'] if result['is_deepfake'] else (1 - result['ensemble_fake_probability']),
+                'ensemble_score': result['ensemble_fake_probability'],
+                'detector_scores': {
+                    'clip_based': result['clip_fake_probability'],
+                    'laa_net': result['laa_fake_probability']
+                },
+                'method': result['method'],
+                'video_hash': None,
+                'frame_count': result['num_frames_analyzed']
+            }
+        except Exception as retry_e:
+            # If retry also fails, raise the error
+            logger.error(f"Detection failed even after retry: {retry_e}")
+            raise retry_e
 
 
 # Global detector instance for singleton pattern
