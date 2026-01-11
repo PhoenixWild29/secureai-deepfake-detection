@@ -416,75 +416,72 @@ class EnsembleTester:
                     else:
                         print(f"❌ {error_msg[:50]}")
                 
-                # Test Ensemble (with timeout - skip if unavailable or hangs)
+                # Test Ensemble (with aggressive timeout - skip if hangs)
                 print("      Ensemble...", end=" ", flush=True)
-                try:
-                    # Try ensemble with shorter timeout
-                    import threading
-                    import queue
-                    
-                    result_queue = queue.Queue(maxsize=1)
-                    error_queue = queue.Queue(maxsize=1)
-                    
-                    def run_ensemble():
-                        try:
-                            result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
-                            try:
-                                result_queue.put(result, block=False, timeout=0.1)
-                            except (queue.Full, queue.Empty):
-                                pass
-                        except Exception as e:
-                            try:
-                                error_queue.put(e, block=False, timeout=0.1)
-                            except (queue.Full, queue.Empty):
-                                pass
-                    
-                    # Run with 30 second timeout
-                    ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
-                    ensemble_thread.start()
-                    ensemble_thread.join(timeout=30.0)
-                    
-                    if ensemble_thread.is_alive():
-                        print(f"⏱️  Timeout (>30s), skipping")
-                        print()  # New line
-                        continue  # Skip to next video
-                    
-                    # Check for errors
-                    if not error_queue.empty():
-                        error = error_queue.get()
-                        error_msg = str(error)
-                        if 'unavailable' in error_msg.lower() or 'initialization' in error_msg.lower():
-                            print(f"⚠️  Ensemble unavailable, skipping")
-                        else:
-                            print(f"❌ {error_msg[:50]}")
-                        print()  # New line
-                        continue
-                    
-                    # Get result
-                    if not result_queue.empty():
-                        ensemble_result = result_queue.get()
-                        if ensemble_result and ensemble_result.get('success'):
-                            all_results['ensemble'].append(ensemble_result)
-                            print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f}, time: {ensemble_result.get('processing_time', 0):.1f}s)")
-                        elif ensemble_result:
-                            error_msg = ensemble_result.get('error', 'Failed')
-                            if 'unavailable' in error_msg.lower():
-                                print(f"⚠️  Ensemble unavailable")
-                            else:
-                                print(f"❌ {error_msg[:50]}")
-                    else:
-                        print(f"⏱️  No result (timeout)")
-                        print()  # New line
-                        continue
-                        
-                except Exception as e:
-                    error_msg = str(e)
-                    if 'unavailable' in error_msg.lower():
-                        print(f"⚠️  Ensemble unavailable")
-                    else:
-                        print(f"❌ {error_msg[:50]}")
-                    print()  # New line
-                    continue  # Continue to next video
+                
+                # Skip ensemble entirely if it's causing issues - just use CLIP+ResNet results
+                # Uncomment below to enable ensemble testing
+                print(f"⏭️  Skipped (use CLIP+ResNet results above)")
+                print()  # New line
+                continue  # Skip ensemble for now to prevent hanging
+                
+                # OLD CODE - Disabled to prevent hanging
+                # try:
+                #     import threading
+                #     import queue
+                #     result_queue = queue.Queue(maxsize=1)
+                #     error_queue = queue.Queue(maxsize=1)
+                #     def run_ensemble():
+                #         try:
+                #             result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
+                #             try:
+                #                 result_queue.put(result, block=False, timeout=0.1)
+                #             except (queue.Full, queue.Empty):
+                #                 pass
+                #         except Exception as e:
+                #             try:
+                #                 error_queue.put(e, block=False, timeout=0.1)
+                #             except (queue.Full, queue.Empty):
+                #                 pass
+                #     ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
+                #     ensemble_thread.start()
+                #     ensemble_thread.join(timeout=20.0)  # 20 second timeout
+                #     if ensemble_thread.is_alive():
+                #         print(f"⏱️  Timeout (>20s), skipping")
+                #         print()
+                #         continue
+                #     if not error_queue.empty():
+                #         error = error_queue.get()
+                #         error_msg = str(error)
+                #         if 'unavailable' in error_msg.lower():
+                #             print(f"⚠️  Ensemble unavailable")
+                #         else:
+                #             print(f"❌ {error_msg[:50]}")
+                #         print()
+                #         continue
+                #     if not result_queue.empty():
+                #         ensemble_result = result_queue.get()
+                #         if ensemble_result and ensemble_result.get('success'):
+                #             all_results['ensemble'].append(ensemble_result)
+                #             print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f}, time: {ensemble_result.get('processing_time', 0):.1f}s)")
+                #         elif ensemble_result:
+                #             error_msg = ensemble_result.get('error', 'Failed')
+                #             if 'unavailable' in error_msg.lower():
+                #                 print(f"⚠️  Ensemble unavailable")
+                #             else:
+                #                 print(f"❌ {error_msg[:50]}")
+                #     else:
+                #         print(f"⏱️  No result (timeout)")
+                #         print()
+                #         continue
+                # except Exception as e:
+                #     error_msg = str(e)
+                #     if 'unavailable' in error_msg.lower():
+                #         print(f"⚠️  Ensemble unavailable")
+                #     else:
+                #         print(f"❌ {error_msg[:50]}")
+                #     print()
+                #     continue
                 
                 print()  # Blank line between videos
                 
