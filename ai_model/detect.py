@@ -87,14 +87,53 @@ def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
             # Use full ensemble: CLIP + ResNet50 + LAA-Net
             if detect_fake_ensemble:
                 try:
-                    result = detect_fake_ensemble(video_path)
+                    # Try ensemble with timeout protection
+                    import threading
+                    import queue
+                    
+                    result_queue = queue.Queue(maxsize=1)
+                    error_queue = queue.Queue(maxsize=1)
+                    
+                    def run_ensemble():
+                        try:
+                            result = detect_fake_ensemble(video_path)
+                            try:
+                                result_queue.put(result, block=False, timeout=0.1)
+                            except queue.Full:
+                                pass
+                        except Exception as e:
+                            try:
+                                error_queue.put(e, block=False, timeout=0.1)
+                            except queue.Full:
+                                pass
+                    
+                    # Run with 30 second timeout
+                    ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
+                    ensemble_thread.start()
+                    ensemble_thread.join(timeout=30.0)
+                    
+                    if ensemble_thread.is_alive():
+                        # Timeout - fallback to enhanced
+                        raise TimeoutError("Ensemble detection timed out (>30s)")
+                    
+                    if not error_queue.empty():
+                        raise error_queue.get()
+                    
+                    if not result_queue.empty():
+                        result = result_queue.get()
+                        # Check if ensemble returned error (unavailable)
+                        if result.get('error') and 'unavailable' in result.get('error', '').lower():
+                            raise ValueError("Ensemble unavailable")
+                    else:
+                        raise TimeoutError("Ensemble detection returned no result")
+                    
                     # Map ensemble results to expected format
                     if 'ensemble_fake_probability' in result:
                         result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
                         result['confidence'] = result['ensemble_fake_probability']
                         result['authenticity_score'] = 1 - result['ensemble_fake_probability']
-                except Exception as e:
-                    print(f"Full ensemble failed: {e}, falling back to enhanced")
+                except (TimeoutError, ValueError, Exception) as e:
+                    # Fallback to enhanced if ensemble fails or times out
                     result = detect_fake_enhanced(video_path)
             else:
                 # Fallback to enhanced if ensemble not available
