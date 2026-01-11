@@ -51,13 +51,32 @@ class EnsembleDetector:
             self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"🔧 Initializing EnsembleDetector on device: {self.device}")
         
-        # Initialize CLIP detector (EnhancedDetector)
+        # Initialize CLIP detector (EnhancedDetector) - use singleton to avoid reloading
         logger.info("📦 Loading CLIP detector...")
-        self.clip_detector = EnhancedDetector(
-            device=self.device,
-            clip_model_name=clip_model_name,
-            clip_pretrained=clip_pretrained
-        )
+        try:
+            # Try to use singleton if available
+            from .enhanced_detector import get_enhanced_detector
+            try:
+                self.clip_detector = get_enhanced_detector(
+                    device=self.device,
+                    clip_model_name=clip_model_name,
+                    clip_pretrained=clip_pretrained
+                )
+                logger.info("✅ Using existing CLIP detector instance (singleton)")
+            except:
+                # Fallback to creating new instance if singleton not available
+                self.clip_detector = EnhancedDetector(
+                    device=self.device,
+                    clip_model_name=clip_model_name,
+                    clip_pretrained=clip_pretrained
+                )
+        except ImportError:
+            # Fallback if get_enhanced_detector not available
+            self.clip_detector = EnhancedDetector(
+                device=self.device,
+                clip_model_name=clip_model_name,
+                clip_pretrained=clip_pretrained
+            )
         
         # Initialize ResNet50 (with timeout to prevent hanging)
         logger.info("📦 Loading ResNet50 detector...")

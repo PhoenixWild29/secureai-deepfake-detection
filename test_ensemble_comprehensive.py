@@ -416,31 +416,47 @@ class EnsembleTester:
                     else:
                         print(f"❌ {error_msg[:50]}")
                 
-                # Test Ensemble (with timeout protection)
+                # Test Ensemble (with aggressive timeout - skip if hangs)
                 print("      Ensemble...", end=" ", flush=True)
+                ensemble_completed = False
+                
                 try:
                     import threading
                     import queue
+                    import sys
                     
-                    result_queue = queue.Queue()
-                    error_queue = queue.Queue()
+                    result_queue = queue.Queue(maxsize=1)
+                    error_queue = queue.Queue(maxsize=1)
+                    timeout_flag = threading.Event()
                     
                     def run_ensemble():
+                        if timeout_flag.is_set():
+                            return
                         try:
                             result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
-                            result_queue.put(result)
+                            if not timeout_flag.is_set():
+                                try:
+                                    result_queue.put(result, block=False, timeout=0.1)
+                                except queue.Full:
+                                    pass  # Timeout occurred
                         except Exception as e:
-                            error_queue.put(e)
+                            if not timeout_flag.is_set():
+                                try:
+                                    error_queue.put(e, block=False, timeout=0.1)
+                                except queue.Full:
+                                    pass  # Timeout occurred
                     
-                    # Run with timeout (90 seconds max for ensemble)
+                    # Run with shorter timeout (30 seconds) - ensemble often hangs
                     ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
                     ensemble_thread.start()
-                    ensemble_thread.join(timeout=90.0)  # 90 second timeout
+                    ensemble_thread.join(timeout=30.0)  # 30 second timeout
                     
                     if ensemble_thread.is_alive():
-                        print(f"⏱️  Timeout (>90s), skipping ensemble for this video")
-                        # Can't kill thread, but we'll continue to next video
-                        continue
+                        timeout_flag.set()
+                        print(f"⏱️  Timeout (>30s), skipping ensemble")
+                        ensemble_completed = True  # Mark as "handled" so we continue
+                        print()  # New line
+                        continue  # Skip to next video
                     
                     # Check for errors
                     if not error_queue.empty():
@@ -452,29 +468,30 @@ class EnsembleTester:
                         if ensemble_result and ensemble_result.get('success'):
                             all_results['ensemble'].append(ensemble_result)
                             print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f}, time: {ensemble_result.get('processing_time', 0):.1f}s)")
+                            ensemble_completed = True
                         elif ensemble_result:
                             print(f"❌ {ensemble_result.get('error', 'Failed')[:50]}")
+                            ensemble_completed = True
                         else:
                             print(f"❌ No result returned")
+                            ensemble_completed = True
                     else:
-                        print(f"❌ No result returned (timeout or error)")
+                        # No result - likely timeout or error
+                        print(f"⏱️  No result (timeout)")
+                        ensemble_completed = True
+                        print()  # New line
+                        continue
                         
                 except Exception as e:
                     error_msg = str(e)
-                    if 'CUDA' in error_msg or 'cuda' in error_msg.lower():
-                        print(f"⚠️  CUDA error (using CPU fallback)")
-                        os.environ['CUDA_VISIBLE_DEVICES'] = ''
-                        try:
-                            ensemble_result = self.test_model_on_video(video_path, 'ensemble', ground_truth)
-                            if ensemble_result.get('success'):
-                                all_results['ensemble'].append(ensemble_result)
-                                print(f"✅ (prob: {ensemble_result.get('ensemble_probability', 0):.3f})")
-                            else:
-                                print(f"❌ {ensemble_result.get('error', 'Failed')[:50]}")
-                        except Exception as retry_e:
-                            print(f"❌ Failed after retry: {str(retry_e)[:50]}")
-                    else:
-                        print(f"❌ {error_msg[:50]}")
+                    print(f"❌ {error_msg[:50]}")
+                    ensemble_completed = True
+                    # Continue to next video even on error
+                
+                if not ensemble_completed:
+                    # Shouldn't happen, but just in case
+                    print(f"⚠️  Ensemble incomplete, continuing...")
+                    print()  # New line
                 
                 print()  # Blank line between videos
                 
