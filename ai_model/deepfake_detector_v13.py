@@ -41,6 +41,7 @@ except ImportError:
 
 try:
     from huggingface_hub import hf_hub_download
+    from huggingface_hub.utils import HfHubHTTPError
     HF_HUB_AVAILABLE = True
 except ImportError:
     HF_HUB_AVAILABLE = False
@@ -145,44 +146,60 @@ class DeepFakeDetectorV13:
         try:
             for i, config in enumerate(model_configs, 1):
                 logger.info(f"   Loading {config['name']} ({i}/3)...")
+                logger.info(f"      Downloading {config['file']} (this may take several minutes)...")
                 
                 try:
-                    # Download safetensors file
-                    safetensors_path = hf_hub_download(
-                        repo_id=model_name,
-                        filename=config['file'],
-                        cache_dir=None  # Use default cache
-                    )
+                    # Download safetensors file with retry logic
+                    max_retries = 3
+                    safetensors_path = None
+                    
+                    for attempt in range(max_retries):
+                        try:
+                            logger.info(f"      Attempt {attempt + 1}/{max_retries}...")
+                            safetensors_path = hf_hub_download(
+                                repo_id=model_name,
+                                filename=config['file'],
+                                cache_dir=None,  # Use default cache
+                                resume_download=True  # Resume if interrupted
+                            )
+                            break  # Success!
+                        except (HfHubHTTPError, ConnectionError, TimeoutError) as e:
+                            if attempt < max_retries - 1:
+                                logger.warning(f"      Download failed, retrying in 5 seconds... ({e})")
+                                import time
+                                time.sleep(5)
+                            else:
+                                raise
+                    
+                    if not safetensors_path:
+                        raise RuntimeError(f"Failed to download {config['file']} after {max_retries} attempts")
+                    
+                    logger.info(f"      ✅ Downloaded {config['file']}")
+                    logger.info(f"      Loading model weights...")
                     
                     # Create model with backbone
+                    logger.info(f"      Creating {config['name']} architecture...")
                     model = DeepfakeDetector(config['backbone'], dropout=0.3)
                     
                     # Load state dict from safetensors
+                    logger.info(f"      Loading weights from safetensors...")
                     state_dict = load_file(safetensors_path)
                     model.load_state_dict(state_dict)
                     
+                    logger.info(f"      Moving model to {self.device}...")
                     model.to(self.device)
                     model.eval()
                     
                     self.models.append(model)
-                    logger.info(f"   ✅ {config['name']} loaded")
+                    logger.info(f"   ✅ {config['name']} loaded successfully!")
                     
                 except Exception as e:
-                    logger.warning(f"   ⚠️  Failed to load {config['name']}: {e}")
-                    # Try alternative: use timm's pretrained weights as fallback
-                    logger.info(f"   Trying pretrained {config['name']} as fallback...")
-                    try:
-                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
-                        # Use pretrained backbone weights (not ideal, but better than nothing)
-                        pretrained_backbone = timm.create_model(config['backbone'], pretrained=True, num_classes=0)
-                        model.backbone.load_state_dict(pretrained_backbone.state_dict(), strict=False)
-                        model.to(self.device)
-                        model.eval()
-                        self.models.append(model)
-                        logger.info(f"   ✅ {config['name']} loaded (pretrained fallback)")
-                    except Exception as e2:
-                        logger.error(f"   ❌ {config['name']} fallback also failed: {e2}")
-                        raise
+                    logger.error(f"   ❌ Failed to load {config['name']}: {e}")
+                    import traceback
+                    logger.debug(traceback.format_exc())
+                    # Don't use fallback - we need the actual trained weights
+                    # If download fails, we should fail gracefully
+                    raise RuntimeError(f"Failed to load {config['name']}: {e}. Make sure you have internet connection and Hugging Face access.")
             
             if not self.models:
                 raise RuntimeError("No models loaded from ensemble")
