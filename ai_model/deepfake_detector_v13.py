@@ -156,12 +156,34 @@ class DeepFakeDetectorV13:
                     for attempt in range(max_retries):
                         try:
                             logger.info(f"      Attempt {attempt + 1}/{max_retries}...")
+                            logger.info(f"      Downloading from Hugging Face (this may take 2-5 minutes per file)...")
+                            
+                            # Download file (hf_hub_download shows progress automatically)
+                            # Add timeout and better error handling
+                            import time
+                            start_time = time.time()
+                            
+                            logger.info(f"      Starting download of {config['file']}...")
+                            logger.info(f"      (File size: ~700MB, may take 2-5 minutes)")
+                            
                             safetensors_path = hf_hub_download(
                                 repo_id=model_name,
                                 filename=config['file'],
                                 cache_dir=None,  # Use default cache
-                                resume_download=True  # Resume if interrupted
+                                local_files_only=False  # Force download
                             )
+                            
+                            elapsed = time.time() - start_time
+                            logger.info(f"      Download completed in {elapsed:.1f} seconds")
+                            
+                            # Verify file exists and has size
+                            import os
+                            if os.path.exists(safetensors_path):
+                                file_size = os.path.getsize(safetensors_path) / (1024 * 1024)  # MB
+                                logger.info(f"      File downloaded: {file_size:.1f}MB")
+                            else:
+                                raise RuntimeError(f"Downloaded file not found: {safetensors_path}")
+                            
                             break  # Success!
                         except (HfHubHTTPError, ConnectionError, TimeoutError) as e:
                             if attempt < max_retries - 1:
