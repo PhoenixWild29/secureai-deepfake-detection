@@ -38,6 +38,13 @@ except ImportError:
     XCEPTION_AVAILABLE = False
     logger.info("XceptionNet detector not available")
 
+try:
+    from .efficientnet_detector import get_efficientnet_detector
+    EFFICIENTNET_AVAILABLE = True
+except ImportError:
+    EFFICIENTNET_AVAILABLE = False
+    logger.info("EfficientNet detector not available")
+
 class EnsembleDetector:
     """
     Enhanced ensemble combining CLIP, ResNet50, and LAA-Net
@@ -223,7 +230,14 @@ class EnsembleDetector:
             self.ensemble_weights = {'clip': 0.5, 'resnet': 0.5, 'v13': 0.0, 'xception': 0.0, 'laa': 0.0}
         
         logger.info(f"✅ Ultimate EnsembleDetector initialized")
-        logger.info(f"   Active models: CLIP, ResNet50, {'V13, ' if (self.v13_detector and self.v13_detector.model_loaded) else ''}{'XceptionNet, ' if self.xception_detector else ''}")
+        active_models = ['CLIP', 'ResNet50']
+        if self.v13_detector and self.v13_detector.model_loaded:
+            active_models.append('V13')
+        if self.xception_detector:
+            active_models.append('XceptionNet')
+        if self.efficientnet_detector:
+            active_models.append('EfficientNet')
+        logger.info(f"   Active models: {', '.join(active_models)}")
         logger.info(f"   Ensemble weights: {self.ensemble_weights}")
     
     def extract_frames(self, video_path: str, num_frames: int = 16) -> List[Image.Image]:
@@ -316,6 +330,7 @@ class EnsembleDetector:
         resnet_confidence = abs(resnet_prob - 0.5) * 2
         v13_confidence = abs(v13_prob - 0.5) * 2 if (self.v13_detector and self.v13_detector.model_loaded) else 0
         xception_confidence = abs(xception_prob - 0.5) * 2 if self.xception_detector else 0
+        efficientnet_confidence = abs(efficientnet_prob - 0.5) * 2 if self.efficientnet_detector else 0
         laa_confidence = abs(laa_prob - 0.5) * 2 if self.clip_detector.laa_available else 0
         
         # Build list of available models and their confidences
@@ -328,6 +343,8 @@ class EnsembleDetector:
             models.append(('v13', v13_prob, v13_confidence))
         if self.xception_detector:
             models.append(('xception', xception_prob, xception_confidence))
+        if self.efficientnet_detector:
+            models.append(('efficientnet', efficientnet_prob, efficientnet_confidence))
         if self.clip_detector.laa_available:
             models.append(('laa', laa_prob, laa_confidence))
         
@@ -341,7 +358,7 @@ class EnsembleDetector:
                 for name, _, conf in models
             }
             # Fill in zeros for unavailable models
-            for name in ['clip', 'resnet', 'v13', 'xception', 'laa']:
+            for name in ['clip', 'resnet', 'v13', 'xception', 'efficientnet', 'laa']:
                 if name not in adaptive_weights:
                     adaptive_weights[name] = 0.0
         else:
@@ -354,6 +371,7 @@ class EnsembleDetector:
             adaptive_weights.get('resnet', 0) * resnet_prob +
             adaptive_weights.get('v13', 0) * v13_prob +
             adaptive_weights.get('xception', 0) * xception_prob +
+            adaptive_weights.get('efficientnet', 0) * efficientnet_prob +
             adaptive_weights.get('laa', 0) * laa_prob
         )
         
@@ -366,6 +384,7 @@ class EnsembleDetector:
             'resnet_fake_probability': float(resnet_prob),
             'v13_fake_probability': float(v13_prob),
             'xception_fake_probability': float(xception_prob),
+            'efficientnet_fake_probability': float(efficientnet_prob),
             'laa_fake_probability': float(laa_prob),
             'ensemble_weights_used': adaptive_weights,
             'overall_confidence': float(overall_confidence),
@@ -449,6 +468,7 @@ class EnsembleDetector:
             'resnet_available': self.resnet_model is not None,
             'v13_available': self.v13_detector and self.v13_detector.model_loaded,
             'xception_available': self.xception_detector is not None,
+            'efficientnet_available': self.efficientnet_detector is not None,
             'laa_available': self.clip_detector.laa_available
         }
 

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-XceptionNet Deepfake Detector
-Proven model for deepfake detection, available in PyTorch
+EfficientNet Deepfake Detector
+Proven model for deepfake detection, available via efficientnet-pytorch
 """
 import os
 import torch
 import torch.nn as nn
 import torchvision.transforms as transforms
-from torchvision.models import xception
 import numpy as np
 from typing import List, Optional
 from PIL import Image
@@ -19,66 +18,58 @@ logger = logging.getLogger(__name__)
 if os.getenv('CUDA_VISIBLE_DEVICES') == '':
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
-class XceptionDetector:
+try:
+    from efficientnet_pytorch import EfficientNet
+    EFFICIENTNET_AVAILABLE = True
+except ImportError:
+    EFFICIENTNET_AVAILABLE = False
+    logger.warning("efficientnet-pytorch not available. Install with: pip install efficientnet-pytorch")
+
+class EfficientNetDetector:
     """
-    XceptionNet-based deepfake detector
-    Uses pretrained Xception and fine-tunes for deepfake detection
+    EfficientNet-based deepfake detector
+    Uses EfficientNet-B4 or B7 for high accuracy
     """
     
-    def __init__(self, device: Optional[str] = None, num_classes: int = 2):
+    def __init__(self, device: Optional[str] = None, model_name: str = 'efficientnet-b4'):
         """
-        Initialize XceptionNet detector
+        Initialize EfficientNet detector
         
         Args:
             device: Device to use
-            num_classes: Number of classes (2 for real/fake)
+            model_name: EfficientNet variant ('efficientnet-b0' to 'efficientnet-b7')
         """
+        if not EFFICIENTNET_AVAILABLE:
+            raise ImportError("efficientnet-pytorch not available")
+        
         # Force CPU if CUDA_VISIBLE_DEVICES is set to empty
         if os.getenv('CUDA_VISIBLE_DEVICES') == '':
             self.device = 'cpu'
         else:
             self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         
-        logger.info(f"🔧 Initializing XceptionNet detector on device: {self.device}")
+        logger.info(f"🔧 Initializing EfficientNet detector ({model_name}) on device: {self.device}")
         
-        # Load pretrained Xception
+        # Load pretrained EfficientNet
         try:
-            # Xception is not directly importable, need to use get_model or direct import
-            from torchvision.models import get_model
-            try:
-                # Try new torchvision API (v0.13+)
-                self.model = get_model('xception', weights='IMAGENET1K_V1')
-            except (ImportError, AttributeError):
-                # Fallback to old API
-                try:
-                    from torchvision.models.xception import xception
-                    self.model = xception(pretrained=True)
-                except ImportError:
-                    # Last resort: use EfficientNet or ResNet as alternative
-                    logger.warning("Xception not available, using ResNet50 as alternative")
-                    from torchvision.models import resnet50
-                    self.model = resnet50(pretrained=True)
-            
-            # Modify final layer for binary classification
-            num_features = self.model.fc.in_features
-            self.model.fc = nn.Linear(num_features, num_classes)
+            self.model = EfficientNet.from_pretrained(model_name, num_classes=2)
             
             self.model.to(self.device)
             self.model.eval()
             
-            # Preprocessing transform
+            # Preprocessing transform (EfficientNet uses ImageNet normalization)
             self.transform = transforms.Compose([
-                transforms.Resize((299, 299)),  # Xception input size
+                transforms.Resize((224, 224)),
                 transforms.ToTensor(),
-                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
             
-            logger.info("✅ XceptionNet detector initialized")
-            logger.info("   Note: Using ImageNet pretrained weights")
+            logger.info(f"✅ EfficientNet-{model_name} detector initialized")
+            logger.info("   Using ImageNet pretrained weights")
             logger.info("   For best results, fine-tune on deepfake datasets")
             
         except Exception as e:
-            logger.error(f"❌ Failed to initialize XceptionNet: {e}")
+            logger.error(f"❌ Failed to initialize EfficientNet: {e}")
             raise
     
     def detect_frame(self, frame: Image.Image) -> float:
@@ -106,7 +97,7 @@ class XceptionDetector:
                 return float(fake_prob)
                 
         except Exception as e:
-            logger.warning(f"⚠️  Error in XceptionNet detection: {e}")
+            logger.warning(f"⚠️  Error in EfficientNet detection: {e}")
             return 0.5  # Neutral on error
     
     def detect_frames(self, frames: List[Image.Image]) -> float:
@@ -131,19 +122,19 @@ class XceptionDetector:
 
 
 # Global instance for singleton pattern
-_xception_instance = None
+_efficientnet_instance = None
 
-def get_xception_detector(device: Optional[str] = None) -> Optional[XceptionDetector]:
+def get_efficientnet_detector(device: Optional[str] = None, model_name: str = 'efficientnet-b4') -> Optional[EfficientNetDetector]:
     """
-    Get or create global XceptionNet detector instance (singleton)
+    Get or create global EfficientNet detector instance (singleton)
     """
-    global _xception_instance
+    global _efficientnet_instance
     
-    if _xception_instance is None:
+    if _efficientnet_instance is None:
         try:
-            _xception_instance = XceptionDetector(device=device)
+            _efficientnet_instance = EfficientNetDetector(device=device, model_name=model_name)
         except Exception as e:
-            logger.warning(f"Could not create XceptionNet detector: {e}")
+            logger.warning(f"Could not create EfficientNet detector: {e}")
             return None
     
-    return _xception_instance
+    return _efficientnet_instance
