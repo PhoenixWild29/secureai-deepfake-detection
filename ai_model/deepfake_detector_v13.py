@@ -295,27 +295,6 @@ class DeepFakeDetectorV13:
                         logger.error(traceback.format_exc())
                         raise
                     
-                    if thread.is_alive():
-                        logger.error(f"      ❌ Model creation timed out after {timeout} seconds")
-                        logger.error(f"      This usually means:")
-                        logger.error(f"        1. Model is too large for available memory")
-                        logger.error(f"        2. Model creation is extremely slow on CPU")
-                        logger.error(f"        3. There's a deadlock in timm")
-                        raise RuntimeError(f"Model creation timeout for {config['name']} after {timeout}s")
-                    
-                    if model_error[0]:
-                        logger.error(f"      ❌ Model creation failed: {model_error[0]}")
-                        import traceback
-                        logger.error(traceback.format_exc())
-                        raise model_error[0]
-                    
-                    if not model_created[0] or model_result[0] is None:
-                        raise RuntimeError(f"Model creation failed for {config['name']} (no error reported)")
-                    
-                    model = model_result[0]
-                    elapsed = time.time() - start_time
-                    logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
-                    
                     # Load state dict from safetensors
                     logger.info(f"      Loading weights from safetensors...")
                     logger.info(f"      File: {safetensors_path}")
