@@ -19,7 +19,6 @@ from PIL import Image
 import cv2
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -67,30 +66,46 @@ class DeepfakeDetector(nn.Module):
         # Create backbone using timm with explicit error handling and timeout
         try:
             # For large models like ViT-Large, timm.create_model can hang
-            # Use ThreadPoolExecutor with timeout to prevent hanging
-            logger.debug(f"Creating timm model '{backbone_name}' (timeout: {timeout}s)...")
+            # Use multiprocessing with timeout - can actually kill the process
+            logger.info(f"Creating timm model '{backbone_name}' (timeout: {timeout}s)...")
             
-            def _create_model():
-                return timm.create_model(
-                    backbone_name, 
-                    pretrained=False, 
-                    num_classes=0,
-                    in_chans=3  # RGB input
+            # Use multiprocessing to create model (can be forcefully killed)
+            result_queue = Queue()
+            error_queue = Queue()
+            
+            process = Process(
+                target=_create_model_in_process,
+                args=(backbone_name, result_queue, error_queue)
+            )
+            process.start()
+            process.join(timeout=timeout)
+            
+            if process.is_alive():
+                # Process is still running - kill it
+                logger.error(f"Model creation timed out after {timeout}s - killing process")
+                process.terminate()
+                process.join(timeout=5)  # Give it 5 seconds to terminate
+                if process.is_alive():
+                    process.kill()  # Force kill if still alive
+                    process.join()
+                raise RuntimeError(
+                    f"Model creation timed out after {timeout}s for '{backbone_name}'. "
+                    f"This usually means the model is too large for available memory or "
+                    f"timm is hanging. The process has been killed."
                 )
             
-            # Use ThreadPoolExecutor with timeout
-            with ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(_create_model)
-                try:
-                    self.backbone = future.result(timeout=timeout)
-                    logger.debug(f"✅ Model '{backbone_name}' created successfully")
-                except FutureTimeoutError:
-                    raise RuntimeError(
-                        f"Model creation timed out after {timeout}s for '{backbone_name}'. "
-                        f"This usually means the model is too large for available memory or "
-                        f"timm is hanging. Try: 1) Increase timeout, 2) Use smaller model, "
-                        f"3) Check system memory"
-                    )
+            # Check for errors
+            if not error_queue.empty():
+                error = error_queue.get()
+                raise RuntimeError(f"Failed to create timm model '{backbone_name}': {error}")
+            
+            # Get result
+            if result_queue.empty():
+                raise RuntimeError(f"Model creation failed for '{backbone_name}' (no result returned)")
+            
+            self.backbone = result_queue.get()
+            logger.info(f"✅ Model '{backbone_name}' created successfully")
+            
         except RuntimeError:
             raise
         except Exception as e:
@@ -230,6 +245,9 @@ class DeepFakeDetectorV13:
                 else:
                     logger.error(f"   ❌ No alternatives found for {config['backbone']}")
                     raise RuntimeError(f"Backbone '{config['backbone']}' not found in timm and no alternatives available")
+        
+        # Track which models loaded successfully
+        loaded_models = []
         
         try:
             for i, config in enumerate(model_configs, 1):
@@ -388,9 +406,15 @@ class DeepFakeDetectorV13:
                     logger.error(f"   ❌ Failed to load {config['name']}: {e}")
                     import traceback
                     logger.debug(traceback.format_exc())
-                    # Don't use fallback - we need the actual trained weights
-                    # If download fails, we should fail gracefully
-                    raise RuntimeError(f"Failed to load {config['name']}: {e}. Make sure you have internet connection and Hugging Face access.")
+                    
+                    # If ViT-Large fails, make it optional and continue
+                    if 'ViT-Large' in config['name']:
+                        logger.warning(f"   ⚠️  ViT-Large failed to load - continuing without it")
+                        logger.warning(f"   Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
+                        continue  # Skip this model and continue with next
+                    else:
+                        # For other models, raise the error
+                        raise RuntimeError(f"Failed to load {config['name']}: {e}. Make sure you have internet connection and Hugging Face access.")
             
             if not self.models:
                 raise RuntimeError("No models loaded from ensemble")
