@@ -53,61 +53,32 @@ class DeepfakeDetector(nn.Module):
     Deepfake detector model architecture
     Uses timm backbone with custom classifier
     """
-    def __init__(self, backbone_name: str, dropout: float = 0.3, timeout: int = 300):
+    def __init__(self, backbone_name: str, dropout: float = 0.3):
         """
         Initialize DeepfakeDetector
         
         Args:
             backbone_name: Name of timm backbone model
             dropout: Dropout rate for classifier
-            timeout: Timeout in seconds for model creation (default 5 minutes)
         """
         super().__init__()
-        # Create backbone using timm with explicit error handling and timeout
+        # Create backbone using timm with explicit error handling
+        # Note: For ViT-Large, this can be slow (30-120 seconds) but should complete
         try:
-            # For large models like ViT-Large, timm.create_model can hang
-            # Use multiprocessing with timeout - can actually kill the process
-            logger.info(f"Creating timm model '{backbone_name}' (timeout: {timeout}s)...")
+            logger.info(f"Creating timm model '{backbone_name}'...")
+            start_time = time.time()
             
-            # Use multiprocessing to create model (can be forcefully killed)
-            result_queue = Queue()
-            error_queue = Queue()
-            
-            process = Process(
-                target=_create_model_in_process,
-                args=(backbone_name, result_queue, error_queue)
+            # Direct creation - if this hangs, it's a deeper issue with timm/PyTorch
+            # We'll catch it and make the model optional in the ensemble
+            self.backbone = timm.create_model(
+                backbone_name, 
+                pretrained=False, 
+                num_classes=0,
+                in_chans=3  # RGB input
             )
-            process.start()
-            process.join(timeout=timeout)
             
-            if process.is_alive():
-                # Process is still running - kill it
-                logger.error(f"Model creation timed out after {timeout}s - killing process")
-                process.terminate()
-                process.join(timeout=5)  # Give it 5 seconds to terminate
-                if process.is_alive():
-                    process.kill()  # Force kill if still alive
-                    process.join()
-                raise RuntimeError(
-                    f"Model creation timed out after {timeout}s for '{backbone_name}'. "
-                    f"This usually means the model is too large for available memory or "
-                    f"timm is hanging. The process has been killed."
-                )
-            
-            # Check for errors
-            if not error_queue.empty():
-                error = error_queue.get()
-                raise RuntimeError(f"Failed to create timm model '{backbone_name}': {error}")
-            
-            # Get result
-            if result_queue.empty():
-                raise RuntimeError(f"Model creation failed for '{backbone_name}' (no result returned)")
-            
-            self.backbone = result_queue.get()
-            logger.info(f"✅ Model '{backbone_name}' created successfully")
-            
-        except RuntimeError:
-            raise
+            elapsed = time.time() - start_time
+            logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
         except Exception as e:
             raise RuntimeError(f"Failed to create timm model '{backbone_name}': {e}. "
                              f"Check if model name is correct: timm.list_models('*{backbone_name.split('_')[0]}*')")
