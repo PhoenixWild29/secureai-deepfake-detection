@@ -246,19 +246,21 @@ class DeepFakeDetectorV13:
         
         # Model configurations: backbone name and safetensors file
         # Note: Using timm model names - these must exist in timm
+        # IMPORTANT: Load ViT-Large FIRST (when memory is available) since it needs the most memory
+        # This prevents hanging when loading after ConvNeXt-Large (which consumes memory)
         model_configs = [
             {
-                'backbone': 'convnext_large',  # Fixed: removed .fb_in22k_ft_in1k suffix
-                'file': 'model_1.safetensors',
-                'name': 'ConvNeXt-Large'
-            },
-            {
-                'backbone': 'vit_large_patch16_224',  # ✅ Confirmed working
+                'backbone': 'vit_large_patch16_224',  # ✅ Load FIRST - needs most memory (~2-3 GB)
                 'file': 'model_2.safetensors',
                 'name': 'ViT-Large'
             },
             {
-                'backbone': 'swin_large_patch4_window7_224',  # Will verify
+                'backbone': 'convnext_large',  # Load second - less memory needed
+                'file': 'model_1.safetensors',
+                'name': 'ConvNeXt-Large'
+            },
+            {
+                'backbone': 'swin_large_patch4_window7_224',  # Load last - smallest
                 'file': 'model_3.safetensors',
                 'name': 'Swin-Large'
             }
