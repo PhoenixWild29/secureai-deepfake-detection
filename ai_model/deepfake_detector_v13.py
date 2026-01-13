@@ -366,14 +366,69 @@ class DeepFakeDetectorV13:
                     logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
                     logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
                     
+                    # Free memory before creating next model (especially for ViT-Large)
+                    if i > 1:  # Not the first model
+                        logger.info(f"      Freeing memory before {config['name']} creation...")
+                        import gc
+                        gc.collect()
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
+                    
                     start_time = time.time()
                     
                     # Create model - if ViT-Large fails, we'll skip it and continue with other models
                     try:
                         logger.info(f"      Initializing {config['name']} architecture...")
-                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                        
+                        # For ViT-Large, add signal-based timeout (3 minutes)
+                        if 'ViT-Large' in config['name']:
+                            import signal
+                            
+                            def timeout_handler(signum, frame):
+                                raise TimeoutError(f"Model creation timed out after 180 seconds")
+                            
+                            # Set alarm for 3 minutes (180 seconds)
+                            if hasattr(signal, 'SIGALRM'):
+                                signal.signal(signal.SIGALRM, timeout_handler)
+                                signal.alarm(180)
+                            
+                            try:
+                                model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                                elapsed = time.time() - start_time
+                                logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                            except TimeoutError as te:
+                                elapsed = time.time() - start_time
+                                logger.error(f"      ❌ Model creation TIMED OUT after {elapsed:.1f} seconds")
+                                if PSUTIL_AVAILABLE:
+                                    mem = psutil.virtual_memory()
+                                    logger.error(f"      This is likely due to low memory (only {mem.available / (1024**3):.1f} GB available)")
+                                else:
+                                    logger.error(f"      This is likely due to low memory")
+                                logger.error(f"      ViT-Large needs ~2-3 GB but system has insufficient memory")
+                                raise
+                            finally:
+                                if hasattr(signal, 'SIGALRM'):
+                                    signal.alarm(0)  # Cancel alarm
+                        else:
+                            # For non-ViT models, create normally
+                            model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                            elapsed = time.time() - start_time
+                            logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                            
+                    except (TimeoutError, RuntimeError) as e:
                         elapsed = time.time() - start_time
-                        logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                        logger.error(f"      ❌ Failed to create {config['name']} after {elapsed:.1f} seconds: {e}")
+                        
+                        # If ViT-Large fails, make it optional and continue
+                        if 'ViT-Large' in config['name']:
+                            logger.warning(f"      ⚠️  ViT-Large failed to load - continuing without it")
+                            logger.warning(f"      Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
+                            continue  # Skip this model and continue with next
+                        else:
+                            # For other models, raise the error
+                            import traceback
+                            logger.error(traceback.format_exc())
+                            raise
                     except Exception as e:
                         elapsed = time.time() - start_time
                         logger.error(f"      ❌ Failed to create {config['name']} after {elapsed:.1f} seconds: {e}")
