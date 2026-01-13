@@ -18,6 +18,8 @@ from typing import Dict, List, Any, Optional
 from PIL import Image
 import cv2
 import logging
+import time
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
 
 logger = logging.getLogger(__name__)
 
@@ -52,17 +54,45 @@ class DeepfakeDetector(nn.Module):
     Deepfake detector model architecture
     Uses timm backbone with custom classifier
     """
-    def __init__(self, backbone_name: str, dropout: float = 0.3):
+    def __init__(self, backbone_name: str, dropout: float = 0.3, timeout: int = 300):
+        """
+        Initialize DeepfakeDetector
+        
+        Args:
+            backbone_name: Name of timm backbone model
+            dropout: Dropout rate for classifier
+            timeout: Timeout in seconds for model creation (default 5 minutes)
+        """
         super().__init__()
-        # Create backbone using timm with explicit error handling
+        # Create backbone using timm with explicit error handling and timeout
         try:
-            # Try creating model - this can be slow for large models
-            self.backbone = timm.create_model(
-                backbone_name, 
-                pretrained=False, 
-                num_classes=0,
-                in_chans=3  # RGB input
-            )
+            # For large models like ViT-Large, timm.create_model can hang
+            # Use ThreadPoolExecutor with timeout to prevent hanging
+            logger.debug(f"Creating timm model '{backbone_name}' (timeout: {timeout}s)...")
+            
+            def _create_model():
+                return timm.create_model(
+                    backbone_name, 
+                    pretrained=False, 
+                    num_classes=0,
+                    in_chans=3  # RGB input
+                )
+            
+            # Use ThreadPoolExecutor with timeout
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(_create_model)
+                try:
+                    self.backbone = future.result(timeout=timeout)
+                    logger.debug(f"✅ Model '{backbone_name}' created successfully")
+                except FutureTimeoutError:
+                    raise RuntimeError(
+                        f"Model creation timed out after {timeout}s for '{backbone_name}'. "
+                        f"This usually means the model is too large for available memory or "
+                        f"timm is hanging. Try: 1) Increase timeout, 2) Use smaller model, "
+                        f"3) Check system memory"
+                    )
+        except RuntimeError:
+            raise
         except Exception as e:
             raise RuntimeError(f"Failed to create timm model '{backbone_name}': {e}. "
                              f"Check if model name is correct: timm.list_models('*{backbone_name.split('_')[0]}*')")
@@ -275,19 +305,36 @@ class DeepFakeDetectorV13:
                         logger.error(f"      ❌ Backbone verification failed: {e}")
                         raise
                     
-                    # Create model directly (threading was causing issues)
+                    # Create model with timeout (5 minutes for large models)
                     logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
                     logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
+                    logger.info(f"      Timeout: 5 minutes (will abort if hanging)")
                     
                     start_time = time.time()
                     
-                    # Create model directly (no threading - threading was causing hangs)
+                    # Create model with timeout wrapper
                     # For very large models, this can take 1-2 minutes on CPU
+                    # Timeout prevents infinite hangs
                     try:
                         logger.info(f"      Initializing {config['name']} architecture...")
-                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                        # Use 5 minute timeout for model creation
+                        model = DeepfakeDetector(config['backbone'], dropout=0.3, timeout=300)
                         elapsed = time.time() - start_time
                         logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                    except RuntimeError as e:
+                        elapsed = time.time() - start_time
+                        if "timed out" in str(e).lower():
+                            logger.error(f"      ❌ Model creation TIMED OUT after {elapsed:.1f} seconds")
+                            logger.error(f"      This usually means:")
+                            logger.error(f"        1. Model is too large for available memory")
+                            logger.error(f"        2. timm.create_model is hanging (known issue with some models)")
+                            logger.error(f"        3. System is under heavy load")
+                            logger.error(f"      Try: Increase system memory or use a different model")
+                        else:
+                            logger.error(f"      ❌ Failed to create architecture after {elapsed:.1f} seconds: {e}")
+                        import traceback
+                        logger.error(traceback.format_exc())
+                        raise
                     except Exception as e:
                         elapsed = time.time() - start_time
                         logger.error(f"      ❌ Failed to create architecture after {elapsed:.1f} seconds: {e}")
