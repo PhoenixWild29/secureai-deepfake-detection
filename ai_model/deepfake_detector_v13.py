@@ -67,21 +67,32 @@ class DeepfakeDetector(nn.Module):
             raise RuntimeError(f"Failed to create timm model '{backbone_name}': {e}. "
                              f"Check if model name is correct: timm.list_models('*{backbone_name.split('_')[0]}*')")
         
-        # Get feature dimension
+        # Get feature dimension (avoid forward pass for large models - it can hang)
+        feat_dim = None
+        
+        # Try direct attribute access first
         if hasattr(self.backbone, 'num_features'):
             feat_dim = self.backbone.num_features
         elif hasattr(self.backbone, 'head') and hasattr(self.backbone.head, 'in_features'):
             feat_dim = self.backbone.head.in_features
-        else:
-            # Fallback: try to infer from model
-            with torch.no_grad():
-                test_input = torch.zeros(1, 3, 224, 224)
-                test_output = self.backbone(test_input)
-                if isinstance(test_output, torch.Tensor):
-                    feat_dim = test_output.shape[-1]
-                else:
-                    feat_dim = 1024  # Default for large models
-                    logger.warning(f"Could not infer feature dim, using default {feat_dim}")
+        elif hasattr(self.backbone, 'fc') and hasattr(self.backbone.fc, 'in_features'):
+            feat_dim = self.backbone.fc.in_features
+        elif hasattr(self.backbone, 'classifier') and hasattr(self.backbone.classifier, 'in_features'):
+            feat_dim = self.backbone.classifier.in_features
+        
+        # If still not found, use known defaults for large models
+        if feat_dim is None:
+            if 'vit_large' in backbone_name.lower():
+                feat_dim = 1024  # ViT-Large standard
+            elif 'convnext_large' in backbone_name.lower():
+                feat_dim = 1536  # ConvNeXt-Large standard
+            elif 'swin_large' in backbone_name.lower():
+                feat_dim = 1536  # Swin-Large standard
+            else:
+                feat_dim = 1024  # Default fallback
+            logger.info(f"Using default feature dim {feat_dim} for {backbone_name}")
+        
+        logger.debug(f"Feature dimension: {feat_dim}")
         
         # Custom classifier
         self.classifier = nn.Sequential(
