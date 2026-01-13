@@ -201,12 +201,35 @@ class DeepFakeDetectorV13:
                     
                     # Create model with backbone
                     logger.info(f"      Creating {config['name']} architecture...")
-                    model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                    logger.info(f"      Backbone: {config['backbone']}")
+                    
+                    try:
+                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                        logger.info(f"      ✅ Architecture created")
+                    except Exception as e:
+                        logger.error(f"      ❌ Failed to create architecture: {e}")
+                        raise
                     
                     # Load state dict from safetensors
                     logger.info(f"      Loading weights from safetensors...")
-                    state_dict = load_file(safetensors_path)
-                    model.load_state_dict(state_dict)
+                    logger.info(f"      File: {safetensors_path}")
+                    logger.info(f"      File size: {os.path.getsize(safetensors_path) / (1024*1024):.1f}MB")
+                    
+                    try:
+                        state_dict = load_file(safetensors_path)
+                        logger.info(f"      ✅ Safetensors loaded ({len(state_dict)} keys)")
+                    except Exception as e:
+                        logger.error(f"      ❌ Failed to load safetensors: {e}")
+                        raise
+                    
+                    logger.info(f"      Loading state dict into model...")
+                    try:
+                        model.load_state_dict(state_dict)
+                        logger.info(f"      ✅ State dict loaded")
+                    except Exception as e:
+                        logger.error(f"      ❌ Failed to load state dict: {e}")
+                        logger.info(f"      This might be a model architecture mismatch")
+                        raise
                     
                     logger.info(f"      Moving model to {self.device}...")
                     model.to(self.device)
