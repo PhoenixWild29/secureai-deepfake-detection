@@ -125,6 +125,7 @@ class DeepFakeDetectorV13:
         model_name = "ash12321/deepfake-detector-v13"
         
         # Model configurations: backbone name and safetensors file
+        # Note: Using timm model names - verify these match the actual model architecture
         model_configs = [
             {
                 'backbone': 'convnext_large.fb_in22k_ft_in1k',
@@ -132,7 +133,7 @@ class DeepFakeDetectorV13:
                 'name': 'ConvNeXt-Large'
             },
             {
-                'backbone': 'vit_large_patch16_224',
+                'backbone': 'vit_large_patch16_224',  # ViT-Large
                 'file': 'model_2.safetensors',
                 'name': 'ViT-Large'
             },
