@@ -266,6 +266,7 @@ class DeepFakeDetectorV13:
                     
                     # Create model with timeout using threading
                     logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
+                    logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
                     import threading
                     
                     model_created = [False]
@@ -285,8 +286,20 @@ class DeepFakeDetectorV13:
                     thread.start()
                     
                     # Wait with timeout (3 minutes for very large models)
+                    # Show progress every 10 seconds
                     timeout = 180
-                    thread.join(timeout=timeout)
+                    check_interval = 10
+                    elapsed = 0
+                    
+                    while thread.is_alive() and elapsed < timeout:
+                        thread.join(timeout=check_interval)
+                        elapsed = time.time() - start_time
+                        if thread.is_alive():
+                            logger.info(f"      Still creating... ({elapsed:.0f}s / {timeout}s) - This is normal for ViT-Large")
+                    
+                    if thread.is_alive():
+                        # Final check
+                        thread.join(timeout=0.1)
                     
                     if thread.is_alive():
                         logger.error(f"      ❌ Model creation timed out after {timeout} seconds")
