@@ -264,42 +264,25 @@ class DeepFakeDetectorV13:
                         logger.error(f"      ❌ Backbone verification failed: {e}")
                         raise
                     
-                    # Create model with timeout using threading
+                    # Create model directly (threading was causing issues)
                     logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
                     logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
-                    import threading
-                    
-                    model_created = [False]
-                    model_result = [None]
-                    model_error = [None]
-                    
-                    def create_model():
-                        try:
-                            result = DeepfakeDetector(config['backbone'], dropout=0.3)
-                            model_result[0] = result
-                            model_created[0] = True
-                        except Exception as e:
-                            model_error[0] = e
                     
                     start_time = time.time()
-                    thread = threading.Thread(target=create_model, daemon=True)
-                    thread.start()
                     
-                    # Wait with timeout (3 minutes for very large models)
-                    # Show progress every 10 seconds
-                    timeout = 180
-                    check_interval = 10
-                    elapsed = 0
-                    
-                    while thread.is_alive() and elapsed < timeout:
-                        thread.join(timeout=check_interval)
+                    # Create model directly (no threading - threading was causing hangs)
+                    # For very large models, this can take 1-2 minutes on CPU
+                    try:
+                        logger.info(f"      Initializing {config['name']} architecture...")
+                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
                         elapsed = time.time() - start_time
-                        if thread.is_alive():
-                            logger.info(f"      Still creating... ({elapsed:.0f}s / {timeout}s) - This is normal for ViT-Large")
-                    
-                    if thread.is_alive():
-                        # Final check
-                        thread.join(timeout=0.1)
+                        logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                    except Exception as e:
+                        elapsed = time.time() - start_time
+                        logger.error(f"      ❌ Failed to create architecture after {elapsed:.1f} seconds: {e}")
+                        import traceback
+                        logger.error(traceback.format_exc())
+                        raise
                     
                     if thread.is_alive():
                         logger.error(f"      ❌ Model creation timed out after {timeout} seconds")
