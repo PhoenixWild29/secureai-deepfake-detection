@@ -150,24 +150,45 @@ class DeepFakeDetectorV13:
         model_name = "ash12321/deepfake-detector-v13"
         
         # Model configurations: backbone name and safetensors file
-        # Note: Using timm model names - verify these match the actual model architecture
+        # Note: Using timm model names - these must exist in timm
         model_configs = [
             {
-                'backbone': 'convnext_large.fb_in22k_ft_in1k',
+                'backbone': 'convnext_large',  # Fixed: removed .fb_in22k_ft_in1k suffix
                 'file': 'model_1.safetensors',
                 'name': 'ConvNeXt-Large'
             },
             {
-                'backbone': 'vit_large_patch16_224',  # ViT-Large
+                'backbone': 'vit_large_patch16_224',  # ✅ Confirmed working
                 'file': 'model_2.safetensors',
                 'name': 'ViT-Large'
             },
             {
-                'backbone': 'swin_large_patch4_window7_224',
+                'backbone': 'swin_large_patch4_window7_224',  # Will verify
                 'file': 'model_3.safetensors',
                 'name': 'Swin-Large'
             }
         ]
+        
+        # Try to find correct backbone names if defaults don't work
+        all_models = timm.list_models(pretrained=False)
+        for config in model_configs:
+            if config['backbone'] not in all_models:
+                logger.warning(f"   ⚠️  Backbone '{config['backbone']}' not found, searching for alternatives...")
+                # Try to find similar
+                base_name = config['backbone'].split('.')[0].split('_')[0]  # e.g., 'convnext' from 'convnext_large'
+                similar = [m for m in all_models if base_name in m.lower() and 'large' in m.lower()]
+                if similar:
+                    # Prefer exact match or closest
+                    exact = [m for m in similar if config['name'].lower().replace('-', '').replace('_', '') in m.lower()]
+                    if exact:
+                        logger.info(f"   ✅ Found alternative: {exact[0]}")
+                        config['backbone'] = exact[0]
+                    else:
+                        logger.info(f"   ✅ Using closest match: {similar[0]}")
+                        config['backbone'] = similar[0]
+                else:
+                    logger.error(f"   ❌ No alternatives found for {config['backbone']}")
+                    raise RuntimeError(f"Backbone '{config['backbone']}' not found in timm and no alternatives available")
         
         try:
             for i, config in enumerate(model_configs, 1):
