@@ -54,9 +54,34 @@ class DeepfakeDetector(nn.Module):
     """
     def __init__(self, backbone_name: str, dropout: float = 0.3):
         super().__init__()
-        # Create backbone using timm
-        self.backbone = timm.create_model(backbone_name, pretrained=False, num_classes=0)
-        feat_dim = self.backbone.num_features
+        # Create backbone using timm with explicit error handling
+        try:
+            # Try creating model - this can be slow for large models
+            self.backbone = timm.create_model(
+                backbone_name, 
+                pretrained=False, 
+                num_classes=0,
+                in_chans=3  # RGB input
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to create timm model '{backbone_name}': {e}. "
+                             f"Check if model name is correct: timm.list_models('*{backbone_name.split('_')[0]}*')")
+        
+        # Get feature dimension
+        if hasattr(self.backbone, 'num_features'):
+            feat_dim = self.backbone.num_features
+        elif hasattr(self.backbone, 'head') and hasattr(self.backbone.head, 'in_features'):
+            feat_dim = self.backbone.head.in_features
+        else:
+            # Fallback: try to infer from model
+            with torch.no_grad():
+                test_input = torch.zeros(1, 3, 224, 224)
+                test_output = self.backbone(test_input)
+                if isinstance(test_output, torch.Tensor):
+                    feat_dim = test_output.shape[-1]
+                else:
+                    feat_dim = 1024  # Default for large models
+                    logger.warning(f"Could not infer feature dim, using default {feat_dim}")
         
         # Custom classifier
         self.classifier = nn.Sequential(
