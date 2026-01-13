@@ -323,42 +323,32 @@ class DeepFakeDetectorV13:
                         logger.error(f"      ❌ Backbone verification failed: {e}")
                         raise
                     
-                    # Create model with timeout (5 minutes for large models)
+                    # Create model (may take 30-120 seconds for large models like ViT-Large)
                     logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
                     logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
-                    logger.info(f"      Timeout: 5 minutes (will abort if hanging)")
                     
                     start_time = time.time()
                     
-                    # Create model with timeout wrapper
-                    # For very large models, this can take 1-2 minutes on CPU
-                    # Timeout prevents infinite hangs
+                    # Create model - if ViT-Large fails, we'll skip it and continue with other models
                     try:
                         logger.info(f"      Initializing {config['name']} architecture...")
-                        # Use 5 minute timeout for model creation
-                        model = DeepfakeDetector(config['backbone'], dropout=0.3, timeout=300)
+                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
                         elapsed = time.time() - start_time
                         logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
-                    except RuntimeError as e:
-                        elapsed = time.time() - start_time
-                        if "timed out" in str(e).lower():
-                            logger.error(f"      ❌ Model creation TIMED OUT after {elapsed:.1f} seconds")
-                            logger.error(f"      This usually means:")
-                            logger.error(f"        1. Model is too large for available memory")
-                            logger.error(f"        2. timm.create_model is hanging (known issue with some models)")
-                            logger.error(f"        3. System is under heavy load")
-                            logger.error(f"      Try: Increase system memory or use a different model")
-                        else:
-                            logger.error(f"      ❌ Failed to create architecture after {elapsed:.1f} seconds: {e}")
-                        import traceback
-                        logger.error(traceback.format_exc())
-                        raise
                     except Exception as e:
                         elapsed = time.time() - start_time
-                        logger.error(f"      ❌ Failed to create architecture after {elapsed:.1f} seconds: {e}")
-                        import traceback
-                        logger.error(traceback.format_exc())
-                        raise
+                        logger.error(f"      ❌ Failed to create {config['name']} after {elapsed:.1f} seconds: {e}")
+                        
+                        # If ViT-Large fails, make it optional and continue
+                        if 'ViT-Large' in config['name']:
+                            logger.warning(f"      ⚠️  ViT-Large failed to load - continuing without it")
+                            logger.warning(f"      Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
+                            continue  # Skip this model and continue with next
+                        else:
+                            # For other models, raise the error
+                            import traceback
+                            logger.error(traceback.format_exc())
+                            raise
                     
                     # Load state dict from safetensors
                     logger.info(f"      Loading weights from safetensors...")
