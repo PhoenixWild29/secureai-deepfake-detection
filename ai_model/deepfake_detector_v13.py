@@ -63,22 +63,90 @@ class DeepfakeDetector(nn.Module):
         """
         super().__init__()
         # Create backbone using timm with explicit error handling
-        # Note: For ViT-Large, this can be slow (30-120 seconds) but should complete
+        # For ViT-Large, try multiple approaches to avoid hanging
         try:
             logger.info(f"Creating timm model '{backbone_name}'...")
             start_time = time.time()
             
-            # Direct creation - if this hangs, it's a deeper issue with timm/PyTorch
-            # We'll catch it and make the model optional in the ensemble
-            self.backbone = timm.create_model(
-                backbone_name, 
-                pretrained=False, 
-                num_classes=0,
-                in_chans=3  # RGB input
-            )
-            
-            elapsed = time.time() - start_time
-            logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
+            # For ViT-Large, try different approaches to avoid hanging
+            if 'vit_large' in backbone_name.lower():
+                logger.info(f"   ViT-Large detected - trying optimized creation...")
+                
+                # Approach 1: Standard (most common)
+                try:
+                    logger.info(f"   Attempt 1: Standard creation...")
+                    self.backbone = timm.create_model(
+                        backbone_name, 
+                        pretrained=False, 
+                        num_classes=0,
+                        in_chans=3
+                    )
+                    elapsed = time.time() - start_time
+                    logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds (standard)")
+                except Exception as e1:
+                    logger.warning(f"   Standard creation failed: {e1}")
+                    
+                    # Approach 2: With scriptable=True (sometimes helps)
+                    try:
+                        logger.info(f"   Attempt 2: With scriptable=True...")
+                        self.backbone = timm.create_model(
+                            backbone_name, 
+                            pretrained=False, 
+                            num_classes=0,
+                            in_chans=3,
+                            scriptable=True
+                        )
+                        elapsed = time.time() - start_time
+                        logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds (scriptable)")
+                    except Exception as e2:
+                        logger.warning(f"   Scriptable creation failed: {e2}")
+                        
+                        # Approach 3: Try alternative ViT variant
+                        logger.info(f"   Attempt 3: Trying alternative ViT variant...")
+                        all_models = timm.list_models(pretrained=False)
+                        alternatives = [
+                            'vit_large_patch16_224_in21k',
+                            'vit_large_patch14_224',
+                            'vit_large_patch16_384',
+                        ]
+                        
+                        for alt in alternatives:
+                            if alt in all_models:
+                                try:
+                                    logger.info(f"   Trying '{alt}' as alternative...")
+                                    self.backbone = timm.create_model(
+                                        alt, 
+                                        pretrained=False, 
+                                        num_classes=0,
+                                        in_chans=3
+                                    )
+                                    elapsed = time.time() - start_time
+                                    logger.info(f"✅ Model '{alt}' created in {elapsed:.1f} seconds (alternative)")
+                                    logger.warning(f"   ⚠️  Using alternative '{alt}' instead of '{backbone_name}'")
+                                    break
+                                except Exception as e3:
+                                    logger.warning(f"   Alternative '{alt}' also failed: {e3}")
+                                    continue
+                        else:
+                            # All approaches failed
+                            raise RuntimeError(
+                                f"All creation approaches failed for ViT-Large. "
+                                f"Standard: {e1}, Scriptable: {e2}, Alternatives: all failed. "
+                                f"This might be a timm bug or memory issue."
+                            )
+            else:
+                # For non-ViT models, use standard creation
+                self.backbone = timm.create_model(
+                    backbone_name, 
+                    pretrained=False, 
+                    num_classes=0,
+                    in_chans=3
+                )
+                elapsed = time.time() - start_time
+                logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
+                
+        except RuntimeError:
+            raise
         except Exception as e:
             raise RuntimeError(f"Failed to create timm model '{backbone_name}': {e}. "
                              f"Check if model name is correct: timm.list_models('*{backbone_name.split('_')[0]}*')")
