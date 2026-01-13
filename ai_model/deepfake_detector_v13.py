@@ -431,6 +431,15 @@ class DeepFakeDetectorV13:
                     self.models.append(model)
                     logger.info(f"   ✅ {config['name']} loaded successfully!")
                     
+                    # Free up memory between models (especially important for ViT-Large)
+                    if 'ViT-Large' in config['name'] or i < len(model_configs):
+                        logger.debug(f"      Freeing memory before next model...")
+                        import gc
+                        gc.collect()
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
+                        logger.debug(f"      Memory cleanup complete")
+                    
                 except Exception as e:
                     logger.error(f"   ❌ Failed to load {config['name']}: {e}")
                     import traceback
