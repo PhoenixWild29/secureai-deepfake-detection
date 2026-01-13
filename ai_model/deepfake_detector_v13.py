@@ -225,16 +225,68 @@ class DeepFakeDetectorV13:
                     logger.info(f"      ✅ Downloaded {config['file']}")
                     logger.info(f"      Loading model weights...")
                     
-                    # Create model with backbone
+                    # Create model with backbone (with timeout to prevent infinite hang)
                     logger.info(f"      Creating {config['name']} architecture...")
                     logger.info(f"      Backbone: {config['backbone']}")
                     
+                    # First verify backbone exists
                     try:
-                        model = DeepfakeDetector(config['backbone'], dropout=0.3)
-                        logger.info(f"      ✅ Architecture created")
+                        all_models = timm.list_models(pretrained=False)
+                        if config['backbone'] not in all_models:
+                            logger.error(f"      ❌ Backbone '{config['backbone']}' not found in timm")
+                            similar = [m for m in all_models if config['backbone'].split('_')[0] in m.lower()]
+                            if similar:
+                                logger.info(f"      Similar models found: {similar[:5]}")
+                            raise RuntimeError(f"Backbone '{config['backbone']}' not found in timm")
+                        logger.info(f"      ✅ Backbone verified in timm")
                     except Exception as e:
-                        logger.error(f"      ❌ Failed to create architecture: {e}")
+                        logger.error(f"      ❌ Backbone verification failed: {e}")
                         raise
+                    
+                    # Create model with timeout using threading
+                    logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
+                    import threading
+                    
+                    model_created = [False]
+                    model_result = [None]
+                    model_error = [None]
+                    
+                    def create_model():
+                        try:
+                            result = DeepfakeDetector(config['backbone'], dropout=0.3)
+                            model_result[0] = result
+                            model_created[0] = True
+                        except Exception as e:
+                            model_error[0] = e
+                    
+                    start_time = time.time()
+                    thread = threading.Thread(target=create_model, daemon=True)
+                    thread.start()
+                    
+                    # Wait with timeout (3 minutes for very large models)
+                    timeout = 180
+                    thread.join(timeout=timeout)
+                    
+                    if thread.is_alive():
+                        logger.error(f"      ❌ Model creation timed out after {timeout} seconds")
+                        logger.error(f"      This usually means:")
+                        logger.error(f"        1. Model is too large for available memory")
+                        logger.error(f"        2. Model creation is extremely slow on CPU")
+                        logger.error(f"        3. There's a deadlock in timm")
+                        raise RuntimeError(f"Model creation timeout for {config['name']} after {timeout}s")
+                    
+                    if model_error[0]:
+                        logger.error(f"      ❌ Model creation failed: {model_error[0]}")
+                        import traceback
+                        logger.error(traceback.format_exc())
+                        raise model_error[0]
+                    
+                    if not model_created[0] or model_result[0] is None:
+                        raise RuntimeError(f"Model creation failed for {config['name']} (no error reported)")
+                    
+                    model = model_result[0]
+                    elapsed = time.time() - start_time
+                    logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
                     
                     # Load state dict from safetensors
                     logger.info(f"      Loading weights from safetensors...")
@@ -250,11 +302,25 @@ class DeepFakeDetectorV13:
                     
                     logger.info(f"      Loading state dict into model...")
                     try:
-                        model.load_state_dict(state_dict)
-                        logger.info(f"      ✅ State dict loaded")
+                        # Try strict loading first
+                        try:
+                            model.load_state_dict(state_dict, strict=True)
+                            logger.info(f"      ✅ State dict loaded (strict mode)")
+                        except RuntimeError as e:
+                            # If strict fails, try non-strict (some keys might not match)
+                            logger.warning(f"      ⚠️  Strict loading failed: {e}")
+                            logger.info(f"      Trying non-strict loading...")
+                            missing, unexpected = model.load_state_dict(state_dict, strict=False)
+                            if missing:
+                                logger.warning(f"      Missing keys: {len(missing)} (first 5: {missing[:5]})")
+                            if unexpected:
+                                logger.warning(f"      Unexpected keys: {len(unexpected)} (first 5: {unexpected[:5]})")
+                            logger.info(f"      ✅ State dict loaded (non-strict mode)")
                     except Exception as e:
                         logger.error(f"      ❌ Failed to load state dict: {e}")
-                        logger.info(f"      This might be a model architecture mismatch")
+                        logger.error(f"      This might be a model architecture mismatch")
+                        import traceback
+                        logger.error(traceback.format_exc())
                         raise
                     
                     logger.info(f"      Moving model to {self.device}...")
