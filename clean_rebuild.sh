@@ -26,12 +26,21 @@ rm -rf node_modules package-lock.json
 npm install
 echo ""
 
-echo "4. Building frontend (production mode)..."
-npm run build
+echo "4. Verifying vite is installed..."
+if [ -f "node_modules/.bin/vite" ]; then
+    echo "   ✅ Vite found in node_modules"
+else
+    echo "   ❌ Vite not found, installing..."
+    npm install vite --save-dev
+fi
+echo ""
+
+echo "5. Building frontend (production mode)..."
+NODE_ENV=production VITE_API_BASE_URL="" npm run build
 echo ""
 
 if [ -d "dist" ]; then
-    echo "5. Verifying build..."
+    echo "6. Verifying build..."
     if [ -f "dist/index.html" ]; then
         echo "   ✅ index.html exists"
     else
@@ -48,7 +57,7 @@ if [ -d "dist" ]; then
     fi
     echo ""
     
-    echo "6. Checking for localhost references..."
+    echo "7. Checking for localhost references..."
     LOCALHOST_FOUND=$(grep -r "localhost:5000" dist/ 2>/dev/null | grep -v ".map" | wc -l)
     if [ "$LOCALHOST_FOUND" -gt 0 ]; then
         echo "   ⚠️  Warning: Found $LOCALHOST_FOUND localhost references"
@@ -59,7 +68,7 @@ if [ -d "dist" ]; then
     fi
     echo ""
     
-    echo "7. Copying to Nginx..."
+    echo "8. Copying to Nginx..."
     docker stop secureai-nginx 2>/dev/null
     sleep 1
     docker exec secureai-nginx rm -rf /usr/share/nginx/html/* /usr/share/nginx/html/.[!.]* 2>/dev/null || true
@@ -69,7 +78,7 @@ if [ -d "dist" ]; then
     echo "   ✅ Files copied and Nginx restarted"
     echo ""
     
-    echo "8. Testing Nginx..."
+    echo "9. Testing Nginx..."
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -k https://guardian.secureai.dev/)
     if [ "$HTTP_CODE" = "200" ]; then
         echo "   ✅ Nginx is serving files (HTTP $HTTP_CODE)"
