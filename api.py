@@ -534,6 +534,27 @@ def analyze_video():
         return jsonify({'error': 'Unsupported file format'}), 400
 
     try:
+        # Proactively validate bind-mount permissions (common production failure mode)
+        upload_dir = app.config.get('UPLOAD_FOLDER', UPLOAD_FOLDER)
+        results_dir = app.config.get('RESULTS_FOLDER', RESULTS_FOLDER)
+
+        if not os.path.isdir(upload_dir):
+            os.makedirs(upload_dir, exist_ok=True)
+        if not os.path.isdir(results_dir):
+            os.makedirs(results_dir, exist_ok=True)
+
+        # Ensure we can write to both dirs (bind mounts can override container perms)
+        if not os.access(upload_dir, os.W_OK):
+            raise PermissionError(
+                f"Upload directory not writable: '{upload_dir}'. "
+                f"Fix host permissions (chown/chmod) for the mounted 'uploads' directory."
+            )
+        if not os.access(results_dir, os.W_OK):
+            raise PermissionError(
+                f"Results directory not writable: '{results_dir}'. "
+                f"Fix host permissions (chown/chmod) for the mounted 'results' directory."
+            )
+
         # Generate unique filename
         filename = secure_filename(file.filename or 'unknown.mp4')
         unique_id = str(uuid.uuid4())
@@ -744,7 +765,10 @@ def analyze_video():
         return jsonify(response)
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # Log full traceback so we can diagnose 500s from production logs.
+        error_id = f"ERR-{uuid.uuid4().hex[:8].upper()}"
+        logger.exception(f"[{error_id}] /api/analyze failed: {e}")
+        return jsonify({'error': str(e), 'error_id': error_id}), 500
 
 @app.route('/api/analyze-url', methods=['POST'])
 @limiter.limit("10 per minute")  # Limit URL analysis to 10 per minute
