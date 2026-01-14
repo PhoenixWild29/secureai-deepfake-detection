@@ -320,21 +320,39 @@ export async function analyzeVideoFromUrl(
  */
 export async function checkBackendHealth(): Promise<{ status: string; healthy: boolean }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/health`, {
+    const url = `${API_BASE_URL}/api/health`;
+    console.log('[Health Check] Attempting to connect to:', url || '/api/health (relative)');
+    
+    const response = await fetch(url, {
       method: 'GET',
+      credentials: 'include', // Include cookies
+      headers: {
+        'Accept': 'application/json',
+      },
     });
 
+    console.log('[Health Check] Response status:', response.status, response.statusText);
+    console.log('[Health Check] Response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Health Check] Response not OK:', errorText);
       return { status: 'unhealthy', healthy: false };
     }
 
     const data = await response.json();
+    console.log('[Health Check] Success:', data);
     return {
       status: data.status || 'unknown',
       healthy: data.status === 'healthy' || data.status === 'ok',
     };
   } catch (error) {
-    console.error('Health check error:', error);
+    console.error('[Health Check] Error:', error);
+    console.error('[Health Check] Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      name: error instanceof Error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return { status: 'error', healthy: false };
   }
 }
