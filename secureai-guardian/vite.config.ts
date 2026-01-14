@@ -55,11 +55,11 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        // In production, use empty string (relative URLs) unless explicitly set to a non-localhost URL
+        // In production (mode !== 'development'), use empty string (relative URLs) unless explicitly set to a non-localhost URL
         'import.meta.env.VITE_API_BASE_URL': JSON.stringify(
           env.VITE_API_BASE_URL && !env.VITE_API_BASE_URL.includes('localhost') 
             ? env.VITE_API_BASE_URL 
-            : (import.meta.env.DEV ? 'http://localhost:5000' : '')
+            : (mode === 'development' ? 'http://localhost:5000' : '')
         ),
         'import.meta.env.VITE_WS_URL': JSON.stringify(env.VITE_WS_URL || 'ws://localhost:5000/ws'),
       },

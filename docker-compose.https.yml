@@ -82,7 +82,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./secureai-guardian/dist:/usr/share/nginx/html:ro
+      - ./secureai-guardian/dist:/usr/share/nginx/html
       - ./nginx.https.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/ssl:ro
       - certbot_www:/var/www/certbot:ro
