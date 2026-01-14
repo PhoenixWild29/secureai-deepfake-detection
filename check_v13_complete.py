@@ -4,8 +4,20 @@ Check if V13 loaded completely and show status
 """
 import os
 import sys
+import signal
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
+# Timeout handler
+def timeout_handler(signum, frame):
+    print("\n⚠️  Status check timed out after 2 minutes")
+    print("   V13 initialization is hanging")
+    print("   This means V13 is not fully loaded")
+    sys.exit(1)
+
+# Set 2 minute timeout
+signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(120)  # 2 minutes
 
 print("=" * 70)
 print("🔍 Checking V13 Status")
@@ -13,9 +25,18 @@ print("=" * 70)
 print()
 
 try:
+    print("Importing V13 module...")
     from ai_model.deepfake_detector_v13 import get_deepfake_detector_v13
+    print("✅ Module imported")
+    print()
     
+    print("Initializing V13 (this may take a moment)...")
     v13 = get_deepfake_detector_v13()
+    print("✅ V13 initialized")
+    print()
+    
+    # Cancel timeout
+    signal.alarm(0)
     
     if v13:
         print(f"✅ V13 instance created")
@@ -59,7 +80,14 @@ try:
         print("❌ V13 instance is None")
         print("   V13 failed to initialize")
         
+except KeyboardInterrupt:
+    signal.alarm(0)
+    print("\n⚠️  Check interrupted by user")
+    sys.exit(1)
+except SystemExit:
+    raise  # Re-raise SystemExit from timeout
 except Exception as e:
+    signal.alarm(0)
     print(f"❌ Error checking V13: {e}")
     import traceback
     traceback.print_exc()
