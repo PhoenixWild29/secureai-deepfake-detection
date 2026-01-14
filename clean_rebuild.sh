@@ -13,17 +13,18 @@ rm -rf dist node_modules/.vite .vite
 echo "   ✅ Cleaned"
 echo ""
 
-echo "2. Ensuring production mode with empty API URL..."
+echo "2. Ensuring production build uses relative URLs..."
 unset VITE_API_BASE_URL
 export VITE_API_BASE_URL=""
-export NODE_ENV=production
-echo "   VITE_API_BASE_URL: '$VITE_API_BASE_URL'"
-echo "   NODE_ENV: '$NODE_ENV'"
+echo "   VITE_API_BASE_URL: '$VITE_API_BASE_URL' (empty = relative URLs)"
 echo ""
 
 echo "3. Installing dependencies (fresh install)..."
 rm -rf node_modules package-lock.json
-npm install
+# IMPORTANT:
+# - We must install devDependencies because Vite is a devDependency.
+# - Do NOT set NODE_ENV=production during install, or npm may omit dev deps.
+npm install --include=dev
 echo ""
 
 echo "4. Verifying vite is installed..."
@@ -68,14 +69,15 @@ if [ -d "dist" ]; then
     fi
     echo ""
     
-    echo "8. Copying to Nginx..."
-    docker stop secureai-nginx 2>/dev/null
-    sleep 1
-    docker exec secureai-nginx rm -rf /usr/share/nginx/html/* /usr/share/nginx/html/.[!.]* 2>/dev/null || true
-    docker cp dist/. secureai-nginx:/usr/share/nginx/html/
-    docker start secureai-nginx
-    sleep 2
-    echo "   ✅ Files copied and Nginx restarted"
+    echo "8. Restarting Nginx to pick up new dist/ (served via volume mount)..."
+    # Prefer Docker Compose V2 CLI: `docker compose`
+    if docker compose version >/dev/null 2>&1; then
+        docker compose -f ../docker-compose.https.yml up -d --force-recreate nginx
+    else
+        echo "   ⚠️  'docker compose' not found. Trying legacy docker-compose..."
+        docker-compose -f ../docker-compose.https.yml up -d --force-recreate nginx
+    fi
+    echo "   ✅ Nginx restarted"
     echo ""
     
     echo "9. Testing Nginx..."
