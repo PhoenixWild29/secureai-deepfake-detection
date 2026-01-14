@@ -21,13 +21,13 @@ def timeout_handler(signum, frame):
     print("   This might indicate a problem")
     sys.exit(1)
 
-# Set 5 minute timeout
+# Set 10 minute timeout (ViT-Large loads first now, but all 3 models need time)
 signal.signal(signal.SIGALRM, timeout_handler)
-signal.alarm(300)  # 5 minutes
+signal.alarm(600)  # 10 minutes
 
 try:
     print("=" * 70)
-    print("🧪 Simple V13 Test (5 minute timeout)")
+    print("🧪 Simple V13 Test (10 minute timeout)")
     print("=" * 70)
     print()
     
