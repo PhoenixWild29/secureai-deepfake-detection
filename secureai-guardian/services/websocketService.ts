@@ -3,11 +3,14 @@
  * Handles WebSocket connections for live progress updates during video analysis
  */
 
-// Use relative WebSocket URL in development to work with Vite proxy
-// In production, construct WebSocket URL from current location (Nginx proxies /socket.io)
-const WS_BASE_URL = import.meta.env.DEV
-  ? (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host.replace(':3000', ':5000')
-  : (import.meta.env.VITE_WS_URL || (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host);
+import { io, type Socket } from 'socket.io-client';
+
+// IMPORTANT:
+// Flask-SocketIO speaks the Socket.IO protocol (Engine.IO), NOT raw WebSocket frames.
+// Use socket.io-client and connect via the /socket.io path (proxied by Nginx in prod).
+const SOCKET_IO_URL = import.meta.env.DEV
+  ? (import.meta.env.VITE_WS_URL || (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host)
+  : ((window.location.protocol === 'https:' ? 'https:' : 'http:') + '//' + window.location.host);
 
 export interface ProgressMessage {
   type: 'progress' | 'status' | 'complete' | 'error';
@@ -23,7 +26,7 @@ export type CompleteCallback = (result: any) => void;
 export type ErrorCallback = (error: string) => void;
 
 /**
- * Connect to WebSocket for analysis progress updates
+ * Legacy helper retained for compatibility; use ReconnectingWebSocket below.
  */
 export function connectAnalysisWebSocket(
   analysisId: string,
@@ -31,91 +34,26 @@ export function connectAnalysisWebSocket(
   onComplete: CompleteCallback,
   onError: ErrorCallback
 ): WebSocket {
-  // Flask-SocketIO uses Socket.IO protocol, but we can use standard WebSocket
-  // The backend will handle Socket.IO protocol conversion
-  // In production, use Socket.IO endpoint through Nginx proxy
-  const wsUrl = import.meta.env.DEV
-    ? `${WS_BASE_URL}`
-    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/socket.io`;
-  const ws = new WebSocket(wsUrl);
-
-  ws.onopen = () => {
-    console.log('WebSocket connected for analysis:', analysisId);
-    // Send initial message to subscribe to updates
-    ws.send(JSON.stringify({ 
-      type: 'subscribe', 
-      analysis_id: analysisId 
-    }));
-  };
-
-  ws.onmessage = (event) => {
-    try {
-      const data: ProgressMessage = JSON.parse(event.data);
-
-      switch (data.type) {
-        case 'progress':
-          if (data.progress !== undefined && data.status && data.message) {
-            onProgress(data.progress, data.status, data.message);
-          }
-          break;
-
-        case 'status':
-          if (data.status && data.message) {
-            onProgress(data.progress || 0, data.status, data.message);
-          }
-          break;
-
-        case 'complete':
-          if (data.result) {
-            onComplete(data.result);
-            ws.close();
-          }
-          break;
-
-        case 'error':
-          if (data.error) {
-            onError(data.error);
-            ws.close();
-          }
-          break;
-
-        default:
-          console.warn('Unknown WebSocket message type:', data.type);
-      }
-    } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
-      onError('Failed to parse progress update');
-    }
-  };
-
-  ws.onerror = (error) => {
-    console.error('WebSocket error:', error);
-    onError('WebSocket connection error');
-  };
-
-  ws.onclose = (event) => {
-    if (event.code !== 1000) {
-      // Not a normal closure
-      console.warn('WebSocket closed unexpectedly:', event.code, event.reason);
-    }
-  };
-
-  return ws;
+  // eslint-disable-next-line no-console
+  console.warn('connectAnalysisWebSocket is deprecated; use ReconnectingWebSocket (Socket.IO).');
+  // Dummy WebSocket to keep callers from crashing; real-time progress is handled by ReconnectingWebSocket.
+  // @ts-expect-error - Intentional stub
+  return {};
 }
 
 /**
  * Check if WebSocket is supported
  */
 export function isWebSocketSupported(): boolean {
-  return typeof WebSocket !== 'undefined';
+  // Socket.IO uses WebSocket/polling under the hood.
+  return true;
 }
 
 /**
- * Create a WebSocket connection with automatic reconnection
+ * Socket.IO connection with automatic reconnection and room subscription.
  */
 export class ReconnectingWebSocket {
-  private ws: WebSocket | null = null;
-  private url: string;
+  public socket: Socket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -136,77 +74,68 @@ export class ReconnectingWebSocket {
     this.onProgress = onProgress;
     this.onComplete = onComplete;
     this.onError = onError;
-    this.url = `${WS_BASE_URL}/analysis/${analysisId}`;
     this.connect();
   }
   
   public updateAnalysisId(newAnalysisId: string): void {
+    const prev = this.currentAnalysisId;
     this.currentAnalysisId = newAnalysisId;
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.send({ type: 'update_analysis_id', analysis_id: newAnalysisId });
+    if (this.socket && this.socket.connected) {
+      if (prev) {
+        this.socket.emit('unsubscribe', { analysis_id: prev });
+      }
+      this.socket.emit('subscribe', { analysis_id: newAnalysisId });
     }
   }
 
   private connect() {
     try {
-      // In production, use Socket.IO endpoint through Nginx proxy
-      const wsUrl = import.meta.env.DEV 
-        ? this.url
-        : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/socket.io`;
-      this.ws = new WebSocket(wsUrl);
+      this.socket = io(SOCKET_IO_URL, {
+        path: '/socket.io',
+        transports: ['websocket', 'polling'],
+        withCredentials: true,
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectDelay,
+      });
 
-      this.ws.onopen = () => {
-        console.log('WebSocket connected:', this.analysisId);
+      this.socket.on('connect', () => {
+        console.log('Socket.IO connected:', this.socket?.id);
         this.reconnectAttempts = 0;
-        this.ws?.send(JSON.stringify({ type: 'subscribe', analysis_id: this.analysisId }));
-      };
+        // subscribe to current room
+        this.socket?.emit('subscribe', { analysis_id: this.currentAnalysisId || this.analysisId });
+      });
 
-      this.ws.onmessage = (event) => {
-        try {
-          const data: ProgressMessage = JSON.parse(event.data);
+      this.socket.on('connect_error', (err: any) => {
+        console.error('Socket.IO connect_error:', err);
+      });
 
-          switch (data.type) {
-            case 'progress':
-            case 'status':
-              if (data.progress !== undefined && data.status && data.message) {
-                this.onProgress(data.progress, data.status, data.message);
-              }
-              break;
-
-            case 'complete':
-              if (data.result) {
-                this.onComplete(data.result);
-                this.close();
-              }
-              break;
-
-            case 'error':
-              if (data.error) {
-                this.onError(data.error);
-                this.close();
-              }
-              break;
-          }
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+      this.socket.on('progress', (payload: any) => {
+        // Payload already includes status/message/progress
+        const data = payload as ProgressMessage & { status?: string; message?: string; progress?: number };
+        if (data.progress !== undefined && data.status && data.message) {
+          this.onProgress(data.progress, data.status, data.message);
         }
-      };
+      });
 
-      this.ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
-      this.ws.onclose = (event) => {
-        if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
-          // Attempt to reconnect
-          this.reconnectAttempts++;
-          const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-          console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-          setTimeout(() => this.connect(), delay);
-        } else if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-          this.onError('Failed to establish WebSocket connection after multiple attempts');
+      this.socket.on('complete', (payload: any) => {
+        const data = payload as any;
+        // Backend sends { result: response }
+        const result = data?.result || data;
+        if (result) {
+          this.onComplete(result);
+          this.close();
         }
-      };
+      });
+
+      this.socket.on('error', (payload: any) => {
+        const msg = typeof payload === 'string' ? payload : (payload?.error || 'Socket.IO error');
+        this.onError(msg);
+      });
+
+      this.socket.on('disconnect', (reason: any) => {
+        console.warn('Socket.IO disconnected:', reason);
+      });
     } catch (error) {
       console.error('Failed to create WebSocket:', error);
       this.onError('WebSocket not supported or connection failed');
@@ -214,16 +143,27 @@ export class ReconnectingWebSocket {
   }
 
   public close() {
-    if (this.ws) {
-      this.ws.close(1000, 'Normal closure');
-      this.ws = null;
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
     }
   }
 
   public send(data: any) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data));
+    if (!this.socket || !this.socket.connected) return;
+    // Map previous message shapes to Socket.IO events
+    if (data?.type === 'subscribe') {
+      this.socket.emit('subscribe', { analysis_id: data.analysis_id });
+    } else if (data?.type === 'update_analysis_id') {
+      this.updateAnalysisId(data.analysis_id);
+    } else {
+      // Generic fallback
+      this.socket.emit('message', data);
     }
+  }
+
+  public isConnected(): boolean {
+    return !!this.socket?.connected;
   }
 }
 

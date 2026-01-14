@@ -191,11 +191,10 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           modelType: 'enhanced',
         });
         analysisId = result.id;
-        // Store analysis ID for WebSocket connection tracking and error handling
+        // Store analysis ID for Socket.IO room subscription
         if (wsConnection) {
           wsConnection.currentAnalysisId = analysisId;
-          if (wsConnection.ws?.readyState === WebSocket.OPEN) {
-            // Update WebSocket connection with actual analysis ID
+          if (wsConnection.isConnected()) {
             wsConnection.send({ type: 'update_analysis_id', analysis_id: analysisId });
           }
         }
@@ -226,7 +225,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
       
       // If WebSocket didn't provide the result, use the API result
       // (This happens if analysis completes before WebSocket connects, or WebSocket fails)
-      if (!wsConnection || wsConnection.ws?.readyState !== WebSocket.OPEN) {
+      if (!wsConnection || !wsConnection.isConnected()) {
         // Final progress update
         setProgress(100);
         setScanStatus('REPORT_SIGNED_AND_FINALIZED');

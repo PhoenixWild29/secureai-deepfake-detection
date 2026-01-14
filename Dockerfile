@@ -42,7 +42,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir torch torchvision || echo "PyTorch install issue" && \
     pip install --no-cache-dir tensorflow || echo "TensorFlow install issue (optional for MTCNN)" && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir gunicorn gevent && \
+    pip install --no-cache-dir gunicorn gevent eventlet && \
     pip install --no-cache-dir solana solders base58 && \
     python -c "import solana; import solders; print('Solana packages verified')" || echo "Solana packages verification failed" && \
     pip install --no-cache-dir git+https://github.com/NVIDIA/aistore.git || echo "AIStore install failed (optional - will use S3/local storage)"

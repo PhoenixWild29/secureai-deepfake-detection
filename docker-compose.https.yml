@@ -52,6 +52,10 @@ services:
       - FLASK_ENV=production
       - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
       - LOG_DIR=/app/logs
+      # Socket.IO / progress updates (recommended defaults)
+      - SOCKETIO_ASYNC_MODE=eventlet
+      - GUNICORN_WORKERS=1
+      - GUNICORN_WORKER_CLASS=eventlet
     env_file:
       - .env
     volumes:

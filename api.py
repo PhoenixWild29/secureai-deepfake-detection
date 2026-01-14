@@ -3,7 +3,18 @@
 SecureAI DeepFake Detection API
 REST API for video analysis, batch processing, and blockchain integration
 """
+#
+# Socket.IO note:
+# If running with eventlet, we must monkey-patch very early (before most imports).
+#
 import os
+if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
+    try:
+        import eventlet  # type: ignore
+        eventlet.monkey_patch()
+    except Exception:
+        # If eventlet isn't installed yet, container build will add it.
+        pass
 import uuid
 import json
 import time
@@ -17,7 +28,7 @@ except ImportError:
     BCRYPT_AVAILABLE = False
 from flask import Flask, request, jsonify, send_file, render_template, redirect, url_for, session
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room, leave_room
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
@@ -106,8 +117,50 @@ if MONITORING_AVAILABLE:
 CORS_ORIGINS = os.getenv('CORS_ORIGINS', '*').split(',')
 CORS(app, resources={r"/*": {"origins": CORS_ORIGINS}})
 
-# Initialize SocketIO for WebSocket support
-socketio = SocketIO(app, cors_allowed_origins=CORS_ORIGINS, async_mode='threading')
+# Initialize SocketIO for real-time progress updates.
+# IMPORTANT:
+# - The frontend uses Socket.IO (Engine.IO) protocol, not raw WebSocket frames.
+# - In production we typically run with an async worker (eventlet/gevent).
+# - If multiple Gunicorn workers are used, configure a message queue so rooms/events work across workers.
+socketio_message_queue = os.getenv('REDIS_URL')  # e.g. redis://redis:6379/0 (optional)
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=CORS_ORIGINS,
+    async_mode=os.getenv('SOCKETIO_ASYNC_MODE', 'eventlet'),
+    message_queue=socketio_message_queue if socketio_message_queue else None,
+)
+
+
+@socketio.on('subscribe')
+def handle_subscribe(data):
+    """Subscribe a client to an analysis room to receive progress/complete events."""
+    try:
+        analysis_id = None
+        if isinstance(data, dict):
+            analysis_id = data.get('analysis_id') or data.get('analysisId')
+        if not analysis_id:
+            return {'ok': False, 'error': 'analysis_id is required'}
+
+        join_room(str(analysis_id))
+        return {'ok': True, 'analysis_id': str(analysis_id)}
+    except Exception as e:
+        logger.exception(f"Socket.IO subscribe error: {e}")
+        return {'ok': False, 'error': str(e)}
+
+
+@socketio.on('unsubscribe')
+def handle_unsubscribe(data):
+    """Unsubscribe a client from an analysis room."""
+    try:
+        analysis_id = None
+        if isinstance(data, dict):
+            analysis_id = data.get('analysis_id') or data.get('analysisId')
+        if analysis_id:
+            leave_room(str(analysis_id))
+        return {'ok': True}
+    except Exception as e:
+        logger.exception(f"Socket.IO unsubscribe error: {e}")
+        return {'ok': False, 'error': str(e)}
 
 # Initialize Rate Limiter
 limiter = Limiter(

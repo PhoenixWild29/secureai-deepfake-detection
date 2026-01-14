@@ -23,6 +23,7 @@ Flask>=3.1.0
 Flask-CORS>=6.0.2
 Flask-SocketIO>=5.4.0
 python-socketio>=5.16.0  # Fixed: Deserialization vulnerability (CVE-2025-61765)
+eventlet>=0.36.1
 Flask-Limiter>=3.8.0
 Werkzeug>=3.1.0
 python-dotenv>=1.0.1
