@@ -48,6 +48,12 @@ except ImportError:
     HF_HUB_AVAILABLE = False
     logger.warning("huggingface_hub not available. Install with: pip install huggingface-hub")
 
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+
 class DeepfakeDetector(nn.Module):
     """
     Deepfake detector model architecture
@@ -134,16 +140,86 @@ class DeepfakeDetector(nn.Module):
                                 f"Standard: {e1}, Scriptable: {e2}, Alternatives: all failed. "
                                 f"This might be a timm bug or memory issue."
                             )
+            elif 'convnext_large' in backbone_name.lower():
+                # ConvNeXt-Large can also hang - use timeout and alternative approaches
+                logger.info(f"   ConvNeXt-Large detected - trying optimized creation...")
+                
+                # Try standard creation first (with timeout)
+                try:
+                    import signal
+                    def timeout_handler(signum, frame):
+                        raise TimeoutError("ConvNeXt-Large creation timed out")
+                    
+                    if hasattr(signal, 'SIGALRM'):
+                        signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(180)  # 3 minute timeout
+                    
+                    try:
+                        logger.info(f"   Attempt 1: Standard creation.")
+                        self.backbone = timm.create_model(
+                            backbone_name, 
+                            pretrained=False, 
+                            num_classes=0,
+                            in_chans=3
+                        )
+                        elapsed = time.time() - start_time
+                        logger.info(f"   ✔ Model '{backbone_name}' created in {elapsed:.1f} seconds (standard)")
+                    finally:
+                        if hasattr(signal, 'SIGALRM'):
+                            signal.alarm(0)
+                            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                except TimeoutError:
+                    logger.warning(f"   ⚠️  Standard creation timed out, trying scriptable...")
+                    # Try scriptable version
+                    try:
+                        if hasattr(signal, 'SIGALRM'):
+                            signal.signal(signal.SIGALRM, timeout_handler)
+                            signal.alarm(180)
+                        try:
+                            logger.info(f"   Attempt 2: Scriptable creation.")
+                            self.backbone = timm.create_model(
+                                backbone_name, 
+                                pretrained=False, 
+                                num_classes=0,
+                                in_chans=3,
+                                scriptable=True
+                            )
+                            elapsed = time.time() - start_time
+                            logger.info(f"   ✔ Model '{backbone_name}' created in {elapsed:.1f} seconds (scriptable)")
+                        finally:
+                            if hasattr(signal, 'SIGALRM'):
+                                signal.alarm(0)
+                                signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                    except (TimeoutError, Exception) as e2:
+                        logger.error(f"   ❌ Scriptable creation also failed: {e2}")
+                        raise RuntimeError(f"ConvNeXt-Large creation failed: standard timed out, scriptable failed: {e2}")
             else:
-                # For non-ViT models, use standard creation
-                self.backbone = timm.create_model(
-                    backbone_name, 
-                    pretrained=False, 
-                    num_classes=0,
-                    in_chans=3
-                )
-                elapsed = time.time() - start_time
-                logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
+                # For other models, use standard creation with timeout
+                try:
+                    import signal
+                    def timeout_handler(signum, frame):
+                        raise TimeoutError(f"Model '{backbone_name}' creation timed out")
+                    
+                    if hasattr(signal, 'SIGALRM'):
+                        signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(120)  # 2 minute timeout for other models
+                    
+                    try:
+                        self.backbone = timm.create_model(
+                            backbone_name, 
+                            pretrained=False, 
+                            num_classes=0,
+                            in_chans=3
+                        )
+                        elapsed = time.time() - start_time
+                        logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
+                    finally:
+                        if hasattr(signal, 'SIGALRM'):
+                            signal.alarm(0)
+                            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                except TimeoutError:
+                    logger.error(f"❌ Model '{backbone_name}' creation timed out after 2 minutes")
+                    raise
                 
         except RuntimeError:
             raise
@@ -368,13 +444,27 @@ class DeepFakeDetectorV13:
                     logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
                     logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
                     
-                    # Free memory before creating next model (especially for ViT-Large)
+                    # Free memory before creating next model (especially important for ConvNeXt-Large after ViT-Large)
                     if i > 1:  # Not the first model
                         logger.info(f"      Freeing memory before {config['name']} creation...")
                         import gc
-                        gc.collect()
-                        if torch.cuda.is_available():
-                            torch.cuda.empty_cache()
+                        # Aggressive memory cleanup before ConvNeXt-Large
+                        if 'ConvNeXt-Large' in config['name']:
+                            logger.info(f"      Aggressive memory cleanup for ConvNeXt-Large...")
+                            # Force garbage collection multiple times
+                            for _ in range(3):
+                                gc.collect()
+                            if torch.cuda.is_available():
+                                torch.cuda.empty_cache()
+                                torch.cuda.synchronize()
+                            # Log memory status
+                            if PSUTIL_AVAILABLE:
+                                mem = psutil.virtual_memory()
+                                logger.info(f"      Memory after cleanup: {mem.available / (1024**3):.1f} GB available ({mem.percent}% used)")
+                        else:
+                            gc.collect()
+                            if torch.cuda.is_available():
+                                torch.cuda.empty_cache()
                     
                     start_time = time.time()
                     
@@ -412,7 +502,8 @@ class DeepFakeDetectorV13:
                                 if hasattr(signal, 'SIGALRM'):
                                     signal.alarm(0)  # Cancel alarm
                         else:
-                            # For non-ViT models, create normally
+                            # For non-ViT models (including ConvNeXt-Large), create with timeout protection
+                            # ConvNeXt-Large has timeout protection built into DeepfakeDetector.__init__
                             model = DeepfakeDetector(config['backbone'], dropout=0.3)
                             elapsed = time.time() - start_time
                             logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
@@ -502,13 +593,17 @@ class DeepFakeDetectorV13:
                     import traceback
                     logger.debug(traceback.format_exc())
                     
-                    # If ViT-Large fails, make it optional and continue
+                    # If ViT-Large or ConvNeXt-Large fails, make it optional and continue
                     if 'ViT-Large' in config['name']:
                         logger.warning(f"   ⚠️  ViT-Large failed to load - continuing without it")
                         logger.warning(f"   Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
                         continue  # Skip this model and continue with next
+                    elif 'ConvNeXt-Large' in config['name']:
+                        logger.warning(f"   ⚠️  ConvNeXt-Large failed to load - continuing without it")
+                        logger.warning(f"   Ensemble will use ViT-Large + Swin-Large (still excellent!)")
+                        continue  # Skip this model and continue with next
                     else:
-                        # For other models, raise the error
+                        # For Swin-Large, raise the error (we need at least 2 models)
                         raise RuntimeError(f"Failed to load {config['name']}: {e}. Make sure you have internet connection and Hugging Face access.")
             
             if not self.models:
