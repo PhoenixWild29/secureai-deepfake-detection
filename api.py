@@ -128,6 +128,10 @@ socketio = SocketIO(
     cors_allowed_origins=CORS_ORIGINS,
     async_mode=os.getenv('SOCKETIO_ASYNC_MODE', 'eventlet'),
     message_queue=socketio_message_queue if socketio_message_queue else None,
+    # More tolerant defaults for long-running inference on small CPUs.
+    # Engine.IO default pingTimeout is 20s; inference can block event loop long enough to trigger disconnects.
+    ping_timeout=int(os.getenv('SOCKETIO_PING_TIMEOUT', '60')),
+    ping_interval=int(os.getenv('SOCKETIO_PING_INTERVAL', '25')),
 )
 
 

@@ -92,8 +92,11 @@ export class ReconnectingWebSocket {
     try {
       this.socket = io(SOCKET_IO_URL, {
         path: '/socket.io',
-        transports: ['websocket', 'polling'],
+        // Prefer polling first (more reliable behind some HTTPS proxies),
+        // but allow websocket upgrade if available.
+        transports: ['polling', 'websocket'],
         withCredentials: true,
+        timeout: 20000,
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,
