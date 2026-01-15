@@ -126,16 +126,49 @@ def download_video_from_url(
 
         # Optional cookies for sites that require auth (e.g., X/Twitter)
         if cookies_file:
-            cmd = cmd[:-1] + ['--cookies', cookies_file] + [cmd[-1]]
+            # Copy cookies to writable temp location to avoid read-only filesystem error
+            # yt-dlp tries to save cookies back, so we need a writable copy
+            import shutil
+            temp_cookies = os.path.join(tempfile.gettempdir(), f"cookies_{unique_id}.txt")
+            original_cookies = cookies_file
+            try:
+                # Ensure temp directory exists
+                os.makedirs(os.path.dirname(temp_cookies), exist_ok=True)
+                # Copy cookies file to writable location
+                shutil.copy2(original_cookies, temp_cookies)
+                # Verify copy succeeded
+                if not os.path.exists(temp_cookies):
+                    raise Exception(f"Failed to create temp cookies file: {temp_cookies}")
+                cookies_file = temp_cookies
+                logger.info(f"Copied cookies from {original_cookies} to {temp_cookies}")
+            except Exception as e:
+                logger.error(f"Could not copy cookies file to temp: {e}")
+                # If copy fails, try without cookies (will likely fail for X, but better than crashing)
+                logger.warning(f"Using original cookies file (may fail if read-only): {original_cookies}")
+                cookies_file = original_cookies
+            # Use cookies file - prevent yt-dlp from writing cookies back
+            # Use temp copy so if it tries to write, it won't fail
+            cmd = cmd[:-1] + ['--cookies', cookies_file, '--no-write-cookies'] + [cmd[-1]]
         
         logger.info(f"Downloading video from URL: {url}")
         logger.info(f"Using command: {' '.join(cmd)}")
+        if cookies_file and cookies_file != original_cookies:
+            logger.info(f"Using temp cookies file: {cookies_file} (original: {original_cookies})")
+        
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=timeout_seconds
         )
+        
+        # Clean up temp cookies file if we created one
+        if cookies_file and cookies_file != original_cookies and os.path.exists(cookies_file):
+            try:
+                os.remove(cookies_file)
+                logger.debug(f"Cleaned up temp cookies file: {cookies_file}")
+            except Exception as e:
+                logger.warning(f"Could not clean up temp cookies file: {e}")
         
         if result.returncode != 0:
             error_msg = result.stderr or result.stdout or "Unknown error"
