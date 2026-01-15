@@ -71,6 +71,7 @@ export interface UrlAnalysisRequest {
   url: string;
   analysisType?: 'quick' | 'comprehensive' | 'enhanced';
   modelType?: 'resnet' | 'cnn' | 'ensemble' | 'enhanced';
+  analysisId?: string; // optional: pre-generated id used for Socket.IO room subscription
 }
 
 export interface AnalysisProgress {
@@ -287,6 +288,7 @@ export async function analyzeVideoFromUrl(
       },
       body: JSON.stringify({
         url: request.url,
+        analysis_id: request.analysisId,
       }),
     });
 

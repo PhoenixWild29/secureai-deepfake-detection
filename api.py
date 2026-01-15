@@ -874,19 +874,62 @@ def analyze_video_from_url():
         if not is_valid_video_url(video_url):
             return jsonify({'error': 'Invalid video URL. Supported: YouTube, Twitter/X, Vimeo, or direct video URLs (.mp4, .avi, etc.)'}), 400
         
+        # Determine analysis id (so Socket.IO room matches immediately)
+        requested_analysis_id = (data.get('analysis_id') or '').strip()
+        if requested_analysis_id:
+            safe_id = requested_analysis_id.replace('-', '').replace('_', '')
+            if not safe_id.isalnum() or len(requested_analysis_id) > 120:
+                return jsonify({'error': 'Invalid analysis_id'}), 400
+            unique_id = requested_analysis_id
+        else:
+            unique_id = str(uuid.uuid4())
+
+        # Download video (hybrid mode):
+        # - X/Twitter URLs: require cookies to be reliable; fail fast if not configured
+        # - Direct video URLs: fetch directly
+        # - Other platforms: use yt-dlp
+        import tempfile
+        import shutil
+        from urllib.parse import urlparse
+        parsed = urlparse(video_url)
+        domain = parsed.netloc.lower().replace('www.', '')
+
+        is_x = domain.endswith('x.com') or domain.endswith('twitter.com') or domain.endswith('mobile.twitter.com')
+        cookies_file = os.getenv('X_COOKIES_FILE', '').strip()
+        if is_x and not cookies_file:
+            return jsonify({
+                'error': (
+                    "X/Twitter links require authenticated access to fetch the actual video. "
+                    "To analyze reliably, download the video and upload it, OR configure X_COOKIES_FILE on the server."
+                )
+            }), 400
+
+        temp_dir = tempfile.mkdtemp(prefix="secureai_url_")
+        filepath = None
+        filename = None
+
         # Download video
         try:
-            # Check if it's a direct video URL
-            from urllib.parse import urlparse
-            parsed = urlparse(video_url)
             path_lower = parsed.path.lower()
             is_direct = any(path_lower.endswith(ext) for ext in ['.mp4', '.avi', '.mov', '.mkv', '.webm'])
             
             if is_direct:
-                filepath, filename = download_direct_video(video_url, app.config['UPLOAD_FOLDER'])
+                filepath, filename = download_direct_video(video_url, temp_dir)
             else:
-                filepath, filename = download_video_from_url(video_url, app.config['UPLOAD_FOLDER'])
+                # Shorter timeout for X (when cookies are provided) to avoid hanging UX
+                timeout_seconds = 180 if is_x else 300
+                filepath, filename = download_video_from_url(
+                    video_url,
+                    temp_dir,
+                    timeout_seconds=timeout_seconds,
+                    cookies_file=cookies_file if is_x else None
+                )
         except Exception as e:
+            # Ensure temp directory cleaned on failures
+            try:
+                shutil.rmtree(temp_dir, ignore_errors=True)
+            except Exception:
+                pass
             return jsonify({'error': f'Failed to download video: {str(e)}'}), 400
         
         # Check file size
@@ -895,9 +938,6 @@ def analyze_video_from_url():
         if file_size > max_size:
             os.remove(filepath)
             return jsonify({'error': f'Video file too large: {file_size / (1024*1024):.1f}MB (max: 500MB)'}), 400
-        
-        # Generate unique ID
-        unique_id = str(uuid.uuid4())
         
         # Store in AIStore distributed storage
         aistore_metadata = {
@@ -951,8 +991,16 @@ def analyze_video_from_url():
             'message': '[NEURAL] Loading CLIP and LAA-Net weights'
         }, room=unique_id)
         
-        # Run detection
-        result = detect_fake(filepath)
+        # Run detection (use eventlet threadpool if enabled to keep Socket.IO alive)
+        try:
+            if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
+                import eventlet  # type: ignore
+                from eventlet import tpool  # type: ignore
+                result = tpool.execute(detect_fake, filepath)
+            else:
+                result = detect_fake(filepath)
+        except Exception:
+            result = detect_fake(filepath)
         processing_time = time.time() - start_time
         
         # Progress step 3: Analysis in progress
@@ -1068,6 +1116,14 @@ def analyze_video_from_url():
     except Exception as e:
         logger.error(f"URL analysis error: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        # Always clean up temp download directory to avoid filling disk.
+        try:
+            if 'temp_dir' in locals() and temp_dir:
+                import shutil
+                shutil.rmtree(temp_dir, ignore_errors=True)
+        except Exception:
+            pass
 
 @app.route('/api/batch', methods=['POST'])
 def batch_analyze():

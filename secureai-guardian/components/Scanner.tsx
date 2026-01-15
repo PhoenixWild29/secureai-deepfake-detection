@@ -190,6 +190,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           url: videoUrl,
           analysisType: 'comprehensive',
           modelType: 'enhanced',
+          analysisId: tempAnalysisId,
         });
         analysisId = result.id;
         // Store analysis ID for Socket.IO room subscription

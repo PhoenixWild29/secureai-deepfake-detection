@@ -41,7 +41,12 @@ def is_valid_video_url(url: str) -> bool:
         logger.error(f"URL validation error: {e}")
         return False
 
-def download_video_from_url(url: str, output_dir: str = None) -> tuple[str, str]:
+def download_video_from_url(
+    url: str,
+    output_dir: str = None,
+    timeout_seconds: int = 300,
+    cookies_file: str | None = None
+) -> tuple[str, str]:
     """
     Download video from URL using yt-dlp
     
@@ -118,6 +123,10 @@ def download_video_from_url(url: str, output_dir: str = None) -> tuple[str, str]
                 '--no-warnings',
                 url
             ]
+
+        # Optional cookies for sites that require auth (e.g., X/Twitter)
+        if cookies_file:
+            cmd = cmd[:-1] + ['--cookies', cookies_file] + [cmd[-1]]
         
         logger.info(f"Downloading video from URL: {url}")
         logger.info(f"Using command: {' '.join(cmd)}")
@@ -125,7 +134,7 @@ def download_video_from_url(url: str, output_dir: str = None) -> tuple[str, str]
             cmd,
             capture_output=True,
             text=True,
-            timeout=300  # 5 minute timeout
+            timeout=timeout_seconds
         )
         
         if result.returncode != 0:
@@ -160,7 +169,7 @@ def download_video_from_url(url: str, output_dir: str = None) -> tuple[str, str]
         return filepath, filename
         
     except subprocess.TimeoutExpired:
-        raise Exception("Video download timed out (5 minutes)")
+        raise Exception(f"Video download timed out ({timeout_seconds} seconds)")
     except FileNotFoundError:
         raise Exception("yt-dlp not found. Please install: pip install yt-dlp")
     except Exception as e:
