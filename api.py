@@ -612,11 +612,22 @@ def analyze_video():
                 f"Fix host permissions (chown/chmod) for the mounted 'results' directory."
             )
 
-        # Generate unique filename
+        # Use client-provided analysis id if present (so Socket.IO room matches immediately)
+        requested_analysis_id = (request.form.get('analysis_id') or '').strip()
+        if requested_analysis_id:
+            # Allow only safe chars for room + result file names
+            safe_id = requested_analysis_id.replace('-', '').replace('_', '')
+            if not safe_id.isalnum() or len(requested_analysis_id) > 120:
+                return jsonify({'error': 'Invalid analysis_id'}), 400
+            unique_id = requested_analysis_id
+        else:
+            unique_id = str(uuid.uuid4())
+
+        # Generate unique filename (always uuid-based to avoid collisions)
         filename = secure_filename(file.filename or 'unknown.mp4')
-        unique_id = str(uuid.uuid4())
+        file_uuid = str(uuid.uuid4())
         extension = filename.rsplit('.', 1)[1].lower()
-        unique_filename = f"{unique_id}.{extension}"
+        unique_filename = f"{file_uuid}.{extension}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
 
         # Save file locally first
@@ -674,7 +685,18 @@ def analyze_video():
         }, room=unique_id)
         
         # Run detection
-        result = detect_fake(filepath)
+        # IMPORTANT: This can be CPU-heavy and can block the Socket.IO heartbeat if run on the event loop.
+        # Use eventlet's threadpool when available so pings/polls continue during inference.
+        try:
+            if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
+                import eventlet  # type: ignore
+                from eventlet import tpool  # type: ignore
+                result = tpool.execute(detect_fake, filepath)
+            else:
+                result = detect_fake(filepath)
+        except Exception:
+            # Fallback to direct call (still logs via outer exception handler)
+            result = detect_fake(filepath)
         processing_time = time.time() - start_time
         
         # Progress step 3: Analysis in progress

@@ -162,6 +162,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
             file: file!,
             analysisType: 'comprehensive',
             modelType: 'enhanced',
+            analysisId: tempAnalysisId,
           });
         }
         
@@ -211,6 +212,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
           file: file!,
           analysisType: 'comprehensive',
           modelType: 'enhanced',
+          analysisId: tempAnalysisId,
         });
         analysisId = result.id;
         // Store analysis ID for WebSocket connection tracking and error handling

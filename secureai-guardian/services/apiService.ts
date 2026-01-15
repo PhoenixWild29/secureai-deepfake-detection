@@ -64,6 +64,7 @@ export interface AnalysisRequest {
   file: File;
   analysisType?: 'quick' | 'comprehensive' | 'enhanced';
   modelType?: 'resnet' | 'cnn' | 'ensemble' | 'enhanced';
+  analysisId?: string; // optional: pre-generated id used for Socket.IO room subscription
 }
 
 export interface UrlAnalysisRequest {
@@ -195,6 +196,11 @@ export async function analyzeVideo(
 ): Promise<ScanResult> {
   const formData = new FormData();
   formData.append('video', request.file);
+
+  // If provided, send analysis_id so backend uses the same id for Socket.IO room + result id
+  if (request.analysisId) {
+    formData.append('analysis_id', request.analysisId);
+  }
   
   // Add optional parameters if provided
   if (request.modelType) {
