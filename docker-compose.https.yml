@@ -56,6 +56,9 @@ services:
       - SOCKETIO_ASYNC_MODE=eventlet
       - GUNICORN_WORKERS=1
       - GUNICORN_WORKER_CLASS=eventlet
+      # X/Twitter URL analysis (optional). Provide a Netscape cookies.txt file via volume mount.
+      # If not set, X/Twitter URLs will fail fast with a clear message (no hanging downloads).
+      - X_COOKIES_FILE=/app/secrets/x_cookies.txt
     env_file:
       - .env
     volumes:
@@ -64,6 +67,7 @@ services:
       - ./wallet:/app/wallet:ro
       - ./.env:/app/.env:ro
       - ./test_videos:/app/test_videos  # For test video storage
+      - ./secrets:/app/secrets:ro
     depends_on:
       postgres:
         condition: service_healthy
