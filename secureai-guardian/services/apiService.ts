@@ -189,6 +189,17 @@ export function transformBackendResponseToScanResult(
 }
 
 /**
+ * Backward-compatible alias.
+ * Some call sites still use the older `transformBackendResponse` name.
+ */
+export function transformBackendResponse(
+  backendResponse: BackendAnalysisResponse,
+  fileName: string
+): ScanResult {
+  return transformBackendResponseToScanResult(backendResponse, fileName);
+}
+
+/**
  * Analyze a video file using the backend API
  */
 export async function analyzeVideo(
