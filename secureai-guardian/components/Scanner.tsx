@@ -20,6 +20,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -67,6 +68,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
     setIsScanning(true);
     setProgress(0);
     setError(null);
+    setErrorCode(null);
     setTerminalLogs(["[SYS] Initializing Forensic Kernel v4.2.0...", "[SYS] SecureAI Guardian handshake: OK"]);
     
     let wsConnection: ReconnectingWebSocket | null = null;
@@ -250,6 +252,9 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
       }
       const errorMessage = err instanceof Error ? err.message : 'Analysis failed. Please try again.';
       setError(errorMessage);
+      // Carry through structured error codes (e.g., X_AUTH_REQUIRED)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setErrorCode((err as any)?.code || null);
       setIsScanning(false);
       setTerminalLogs(prev => [...prev.slice(-6), `[ERROR] ${errorMessage}`]);
       console.error('Analysis error:', err);
@@ -272,6 +277,20 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
             <div>
               <p className="text-red-400 font-black text-sm uppercase tracking-wider mb-1">Analysis Error</p>
               <p className="text-red-300 text-xs font-mono">{error}</p>
+              {errorCode === 'X_AUTH_REQUIRED' && (
+                <div className="mt-4 text-xs text-red-200/90 font-mono space-y-2">
+                  <p className="text-red-200 font-black uppercase tracking-widest">X/Twitter Link Detected</p>
+                  <p>
+                    X blocks unauthenticated media retrieval. To analyze the actual video frames (required for deepfake detection),
+                    you need one of the following:
+                  </p>
+                  <ul className="list-disc ml-5 space-y-1">
+                    <li><span className="font-black">Chrome Extension (best UX)</span>: click “Analyze with SecureAI” directly on the X post.</li>
+                    <li><span className="font-black">Connect X account</span>: (production flow) authorize SecureAI to fetch media on your behalf.</li>
+                    <li><span className="font-black">Upload video file</span>: download the video and use LOCAL_BINARY upload.</li>
+                  </ul>
+                </div>
+              )}
             </div>
             <button 
               onClick={() => setError(null)}

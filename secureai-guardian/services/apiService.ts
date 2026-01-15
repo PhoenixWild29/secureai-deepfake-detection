@@ -297,6 +297,14 @@ export async function analyzeVideoFromUrl(
       try {
         const errorData = await response.json();
         errorMessage = errorData.error || errorData.message || errorMessage;
+
+        // Pass through structured error codes for better UX
+        if (errorData?.error_code) {
+          const err: any = new Error(errorMessage);
+          err.code = errorData.error_code;
+          err.details = errorData;
+          throw err;
+        }
         
         if (response.status === 400) {
           if (errorData.error?.includes('Invalid video URL')) {

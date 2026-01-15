@@ -897,11 +897,22 @@ def analyze_video_from_url():
         is_x = domain.endswith('x.com') or domain.endswith('twitter.com') or domain.endswith('mobile.twitter.com')
         cookies_file = os.getenv('X_COOKIES_FILE', '').strip()
         if is_x and not cookies_file:
+            # Production-grade behavior:
+            # - Do not hang trying to fetch restricted media
+            # - Return a structured error so the frontend can guide the user seamlessly
             return jsonify({
                 'error': (
-                    "X/Twitter links require authenticated access to fetch the actual video. "
-                    "To analyze reliably, download the video and upload it, OR configure X_COOKIES_FILE on the server."
-                )
+                    "X/Twitter requires authenticated media access. "
+                    "Connect your X account (recommended) or use the SecureAI Chrome extension to analyze this post."
+                ),
+                'error_code': 'X_AUTH_REQUIRED',
+                'platform': 'x',
+                'recommended': 'BROWSER_EXTENSION_OR_OAUTH',
+                'user_actions': [
+                    'INSTALL_CHROME_EXTENSION',
+                    'CONNECT_X_ACCOUNT',
+                    'UPLOAD_VIDEO_FILE'
+                ]
             }), 400
 
         temp_dir = tempfile.mkdtemp(prefix="secureai_url_")
