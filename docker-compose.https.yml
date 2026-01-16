@@ -69,6 +69,7 @@ services:
       - ./.env:/app/.env:ro
       - ./test_videos:/app/test_videos  # For test video storage
       - ./secrets:/app/secrets  # Writable (yt-dlp needs to write cookies back)
+      - ./scripts:/app/scripts:ro  # Scripts directory (read-only)
     depends_on:
       postgres:
         condition: service_healthy
