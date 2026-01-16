@@ -30,22 +30,60 @@ print("=" * 60)
 print()
 
 try:
-    # List all available models
+    # List all available models using the official API
+    # Reference: https://ai.google.dev/api/models
     models = genai.list_models()
+    models_list = list(models)
     
-    print(f"Found {len(list(models))} models:\n")
+    print(f"Found {len(models_list)} models:\n")
     
-    for model in models:
+    # Filter models that support generateContent
+    generate_content_models = []
+    for model in models_list:
         name = model.name.replace('models/', '')
-        display_name = getattr(model, 'display_name', 'N/A')
-        supported_methods = getattr(model, 'supported_generation_methods', [])
+        base_model_id = getattr(model, 'base_model_id', name.split('-')[0] + '-' + name.split('-')[1] if '-' in name else name)
+        display_name = getattr(model, 'display_name', getattr(model, 'displayName', 'N/A'))
+        supported_methods = getattr(model, 'supported_generation_methods', getattr(model, 'supportedGenerationMethods', []))
         
-        print(f"Model: {name}")
+        # Check if model supports generateContent
+        supports_generate = 'generateContent' in supported_methods if supported_methods else False
+        
+        print(f"Model Name: {name}")
+        print(f"  Base Model ID (use this): {base_model_id}")
         if display_name != 'N/A':
             print(f"  Display Name: {display_name}")
         if supported_methods:
             print(f"  Supported Methods: {', '.join(supported_methods)}")
+        if supports_generate:
+            print(f"  ✓ Supports generateContent - CAN USE FOR SECURESAGE")
+            generate_content_models.append(base_model_id)
         print()
+    
+    print("=" * 60)
+    print("Models that support generateContent (use these for SecureSage):")
+    print("=" * 60)
+    for model_id in generate_content_models:
+        print(f"  - {model_id}")
+    print()
+    print("=" * 60)
+    print("Recommended models for SecureSage (in order of preference):")
+    print("=" * 60)
+    # Prioritize based on common patterns
+    priority_models = [
+        'gemini-3-pro',
+        'gemini-3-flash',
+        'gemini-2.5-pro',
+        'gemini-2.5-flash',
+        'gemini-2.5-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-pro',
+    ]
+    for model_id in priority_models:
+        if model_id in generate_content_models:
+            print(f"  ✓ {model_id} - Available and recommended")
+        else:
+            print(f"  ✗ {model_id} - Not available")
+    print("=" * 60)
     
     print("=" * 60)
     print("Recommended models for SecureSage:")
