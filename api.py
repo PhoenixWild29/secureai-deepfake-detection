@@ -1969,10 +1969,18 @@ RULES:
 4. If logged in as POWER_USER, speak to the user as the Architect of this system. Be highly technical."""
         
         # Create model with system instruction (correct way for google-generativeai)
-        model = genai.GenerativeModel(
-            'gemini-1.5-flash',
-            system_instruction=system_instruction
-        )
+        # Use gemini-1.5-flash-latest or gemini-pro for compatibility
+        try:
+            model = genai.GenerativeModel(
+                'gemini-1.5-flash-latest',
+                system_instruction=system_instruction
+            )
+        except Exception:
+            # Fallback to gemini-pro if flash-latest doesn't work
+            model = genai.GenerativeModel(
+                'gemini-pro',
+                system_instruction=system_instruction
+            )
         
         # Get the last user message
         user_message = None
