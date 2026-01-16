@@ -1,6 +1,5 @@
-version: '3.8'
-
 # Docker Compose for HTTPS Deployment
+# Note: 'version' attribute is obsolete in Docker Compose v2+
 # This includes SSL certificate support
 # Prerequisites: Run HTTPS_SETUP_GUIDE.md first to get certificates
 

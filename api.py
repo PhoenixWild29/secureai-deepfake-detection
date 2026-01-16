@@ -1983,13 +1983,26 @@ RULES:
         full_prompt = f"{context_instruction}\n\nUser Question: {user_message}"
         
         # Generate response with system instruction
-        response = model.generate_content(
-            full_prompt,
-            generation_config={
-                'temperature': 0.5,
-            },
-            system_instruction=system_instruction
-        )
+        # IMPORTANT: Gemini API calls can block, so use eventlet threadpool if available
+        def _call_gemini():
+            return model.generate_content(
+                full_prompt,
+                generation_config={
+                    'temperature': 0.5,
+                },
+                system_instruction=system_instruction
+            )
+        
+        try:
+            if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
+                import eventlet  # type: ignore
+                from eventlet import tpool  # type: ignore
+                response = tpool.execute(_call_gemini)
+            else:
+                response = _call_gemini()
+        except Exception:
+            # Fallback to direct call
+            response = _call_gemini()
         
         return jsonify({
             'response': response.text or "Communication uplink unstable."
