@@ -146,9 +146,9 @@ def download_video_from_url(
                 # If copy fails, try without cookies (will likely fail for X, but better than crashing)
                 logger.warning(f"Using original cookies file (may fail if read-only): {original_cookies}")
                 cookies_file = original_cookies
-            # Use cookies file - prevent yt-dlp from writing cookies back
-            # Use temp copy so if it tries to write, it won't fail
-            cmd = cmd[:-1] + ['--cookies', cookies_file, '--no-write-cookies'] + [cmd[-1]]
+            # Use cookies file - use temp copy so yt-dlp can write to it if needed
+            # (temp file is writable, original is read-only)
+            cmd = cmd[:-1] + ['--cookies', cookies_file] + [cmd[-1]]
         
         logger.info(f"Downloading video from URL: {url}")
         logger.info(f"Using command: {' '.join(cmd)}")
