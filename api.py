@@ -1969,18 +1969,32 @@ RULES:
 4. If logged in as POWER_USER, speak to the user as the Architect of this system. Be highly technical."""
         
         # Create model with system instruction (correct way for google-generativeai)
-        # Use gemini-1.5-flash-latest or gemini-pro for compatibility
-        try:
-            model = genai.GenerativeModel(
-                'gemini-1.5-flash-latest',
-                system_instruction=system_instruction
-            )
-        except Exception:
-            # Fallback to gemini-pro if flash-latest doesn't work
-            model = genai.GenerativeModel(
-                'gemini-pro',
-                system_instruction=system_instruction
-            )
+        # Try models in order of preference (newest to oldest)
+        model_names = [
+            'gemini-2.5-pro',      # Latest stable Pro model
+            'gemini-2.5-flash',    # Latest stable Flash model (faster)
+            'gemini-3-pro',        # Latest preview Pro
+            'gemini-2.0-flash',    # Previous generation
+            'gemini-pro',          # Legacy stable
+            'gemini-1.5-pro',     # Older stable
+        ]
+        
+        model = None
+        last_error = None
+        for model_name in model_names:
+            try:
+                model = genai.GenerativeModel(
+                    model_name,
+                    system_instruction=system_instruction
+                )
+                # Test if model works by checking it's valid
+                break
+            except Exception as e:
+                last_error = e
+                continue
+        
+        if model is None:
+            raise Exception(f"Could not initialize any Gemini model. Last error: {last_error}")
         
         # Get the last user message
         user_message = None
