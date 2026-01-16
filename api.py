@@ -1969,17 +1969,19 @@ RULES:
 4. If logged in as POWER_USER, speak to the user as the Architect of this system. Be highly technical."""
         
         # Create model with system instruction (correct way for google-generativeai)
-        # Try models in order of preference (based on Google AI Studio documentation)
-        # Model names from: https://aistudio.google.com/
+        # Try models in order of preference (based on actual available models from API)
+        # These models were confirmed available via list_gemini_models.py script
         model_names = [
-            'gemini-3-pro',              # Most intelligent model (from docs)
-            'gemini-3-flash-preview',    # Frontier-class performance (from docs - shown in code example)
-            'gemini-3-flash',            # Alternative name
-            'gemini-2.5-pro',            # Powerful reasoning model (from docs)
-            'gemini-2.5-flash',          # Most balanced model (from docs)
-            'gemini-2.5-flash-lite',     # Fastest and most cost-efficient (from docs)
-            'gemini-2.0-flash',          # Previous generation
+            'gemini-3-pro-preview',      # Latest preview Pro (confirmed available)
+            'gemini-3-flash-preview',     # Latest preview Flash (confirmed available)
+            'gemini-2.5-pro',            # Powerful reasoning model (confirmed available)
+            'gemini-2.5-flash',          # Most balanced model (confirmed available)
+            'gemini-2.5-flash-lite',     # Fastest and most cost-efficient (confirmed available)
+            'gemini-2.0-flash',          # Previous generation (confirmed available)
+            'gemini-2.0-flash-lite',     # Previous generation lite (confirmed available)
             'gemini-pro',                # Legacy stable
+            'gemini-flash-latest',       # Latest flash (if available)
+            'gemini-pro-latest',         # Latest pro (if available)
         ]
         
         model = None

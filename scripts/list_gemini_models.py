@@ -41,12 +41,29 @@ try:
     generate_content_models = []
     for model in models_list:
         name = model.name.replace('models/', '')
-        base_model_id = getattr(model, 'base_model_id', name.split('-')[0] + '-' + name.split('-')[1] if '-' in name else name)
+        # Try to get base_model_id from the model object
+        base_model_id = getattr(model, 'base_model_id', None)
+        if not base_model_id:
+            # Fallback: extract from name (remove version suffixes like -001, -preview, etc.)
+            parts = name.split('-')
+            if len(parts) >= 3:
+                # For names like "gemini-2.5-flash-001", use "gemini-2.5-flash"
+                base_model_id = '-'.join(parts[:3])
+            elif len(parts) >= 2:
+                # For names like "gemini-pro", use as-is
+                base_model_id = '-'.join(parts[:2])
+            else:
+                base_model_id = name
+        
         display_name = getattr(model, 'display_name', getattr(model, 'displayName', 'N/A'))
         supported_methods = getattr(model, 'supported_generation_methods', getattr(model, 'supportedGenerationMethods', []))
         
         # Check if model supports generateContent
-        supports_generate = 'generateContent' in supported_methods if supported_methods else False
+        supports_generate = False
+        if supported_methods:
+            # Check both the list and string representations
+            methods_str = ' '.join(str(m) for m in supported_methods).lower()
+            supports_generate = 'generatecontent' in methods_str or any('generatecontent' in str(m).lower() for m in supported_methods)
         
         print(f"Model Name: {name}")
         print(f"  Base Model ID (use this): {base_model_id}")
