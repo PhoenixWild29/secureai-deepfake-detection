@@ -1969,19 +1969,19 @@ RULES:
 4. If logged in as POWER_USER, speak to the user as the Architect of this system. Be highly technical."""
         
         # Create model with system instruction (correct way for google-generativeai)
-        # Try models in order of preference (based on actual available models from API)
-        # These models were confirmed available via list_gemini_models.py script
+        # Try models in order of preference (free tier models first to avoid quota issues)
+        # Free tier models typically have better quota limits
         model_names = [
-            'gemini-3-pro-preview',      # Latest preview Pro (confirmed available)
-            'gemini-3-flash-preview',     # Latest preview Flash (confirmed available)
-            'gemini-2.5-pro',            # Powerful reasoning model (confirmed available)
-            'gemini-2.5-flash',          # Most balanced model (confirmed available)
-            'gemini-2.5-flash-lite',     # Fastest and most cost-efficient (confirmed available)
-            'gemini-2.0-flash',          # Previous generation (confirmed available)
-            'gemini-2.0-flash-lite',     # Previous generation lite (confirmed available)
+            'gemini-2.5-flash',          # Free tier - Most balanced model (confirmed available, good quota)
+            'gemini-2.0-flash',          # Free tier - Previous generation (confirmed available, good quota)
+            'gemini-2.5-flash-lite',     # Free tier - Fastest and most cost-efficient (confirmed available)
+            'gemini-2.0-flash-lite',     # Free tier - Previous generation lite (confirmed available)
+            'gemini-flash-latest',       # Free tier - Latest flash (if available)
+            'gemini-2.5-pro',            # May have quota limits - Powerful reasoning model
             'gemini-pro',                # Legacy stable
-            'gemini-flash-latest',       # Latest flash (if available)
             'gemini-pro-latest',         # Latest pro (if available)
+            'gemini-3-flash-preview',    # Preview - may have quota limits
+            'gemini-3-pro-preview',      # Preview - may have quota limits (0 free tier limit)
         ]
         
         model = None
