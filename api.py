@@ -1918,7 +1918,6 @@ def sage_chat():
         
         # Configure Gemini
         genai.configure(api_key=gemini_api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Build context instruction
         history_summary = ', '.join([f"{s.get('fileName', 'unknown')} ({s.get('verdict', 'unknown')})" for s in context.get('scanHistory', [])]) or 'Empty'
@@ -1969,6 +1968,12 @@ RULES:
 3. Be technical, accurate, and professional.
 4. If logged in as POWER_USER, speak to the user as the Architect of this system. Be highly technical."""
         
+        # Create model with system instruction (correct way for google-generativeai)
+        model = genai.GenerativeModel(
+            'gemini-1.5-flash',
+            system_instruction=system_instruction
+        )
+        
         # Get the last user message
         user_message = None
         for msg in reversed(history):
@@ -1982,15 +1987,14 @@ RULES:
         # Build the full prompt with context
         full_prompt = f"{context_instruction}\n\nUser Question: {user_message}"
         
-        # Generate response with system instruction
+        # Generate response
         # IMPORTANT: Gemini API calls can block, so use eventlet threadpool if available
         def _call_gemini():
             return model.generate_content(
                 full_prompt,
-                generation_config={
-                    'temperature': 0.5,
-                },
-                system_instruction=system_instruction
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.5,
+                )
             )
         
         try:
