@@ -1,16 +1,23 @@
 {
   "manifest_version": 3,
   "name": "SecureAI X Analyzer (MVP)",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Analyze X/Twitter videos with SecureAI by extracting the media URL from the page and uploading it for deepfake detection.",
-  "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["https://x.com/*", "https://twitter.com/*", "https://*.secureai.dev/*"],
+  "permissions": ["activeTab", "scripting", "storage", "webRequest"],
+  "host_permissions": ["https://x.com/*", "https://twitter.com/*", "https://*.secureai.dev/*", "https://video.twimg.com/*"],
   "action": {
     "default_title": "Analyze with SecureAI",
     "default_popup": "popup.html"
   },
   "background": {
     "service_worker": "service_worker.js"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }
 

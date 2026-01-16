@@ -53,8 +53,7 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        // REMOVED: API keys should NEVER be in frontend code - they're now handled securely on the backend
         // In production builds, always use empty string (relative URLs) for API_BASE_URL
         // This ensures requests go to /api/* which Nginx will proxy to the backend
         // Only use localhost in development mode

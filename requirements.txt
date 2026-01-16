@@ -103,3 +103,6 @@ sentry-sdk[flask]>=1.40.0
 
 # Security
 bcrypt>=4.0.0
+
+# Google Generative AI (for SecureSage)
+google-generativeai>=0.3.0

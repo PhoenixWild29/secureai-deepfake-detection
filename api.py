@@ -1887,6 +1887,121 @@ def get_jetson_status():
     jetson_stats = get_jetson_stats()
     return jsonify(jetson_stats)
 
+@app.route('/api/sage/chat', methods=['POST'])
+@limiter.limit("30 per minute")  # Limit to prevent abuse
+def sage_chat():
+    """Secure backend endpoint for SecureSage AI consultant (proxies to Gemini API)"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        history = data.get('history', [])
+        context = data.get('context', {})
+        
+        # Get API key from backend environment (secure)
+        gemini_api_key = os.getenv('GEMINI_API_KEY')
+        if not gemini_api_key or gemini_api_key == 'your_actual_api_key_here':
+            return jsonify({
+                'error': 'GEMINI_API_KEY not configured on server',
+                'message': 'Please set GEMINI_API_KEY environment variable on the backend server'
+            }), 500
+        
+        # Import Google Generative AI
+        try:
+            import google.generativeai as genai
+        except ImportError:
+            return jsonify({
+                'error': 'google-generativeai package not installed',
+                'message': 'Please install: pip install google-generativeai'
+            }), 500
+        
+        # Configure Gemini
+        genai.configure(api_key=gemini_api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # Build context instruction
+        history_summary = ', '.join([f"{s.get('fileName', 'unknown')} ({s.get('verdict', 'unknown')})" for s in context.get('scanHistory', [])]) or 'Empty'
+        last_audit = context.get('auditHistory', [{}])[0] if context.get('auditHistory') else {}
+        
+        context_instruction = f"""
+[USER CONTEXT]
+Current View: {context.get('view', 'unknown')}
+User Tier: {context.get('tier', 'unknown')}
+Full Ledger Summary: {history_summary}
+{context.get('tier') == 'POWER_USER' and 'IDENTITY_STATUS: SYSTEM_ARCHITECT_RECOGNIZED' or ''}
+
+[SYSTEM HEALTH]
+Last Audit: {last_audit.get('overallStatus', 'No audits performed yet')} (ID: {last_audit.get('id', 'N/A')})
+"""
+        
+        if context.get('result'):
+            r = context['result']
+            metrics = r.get('metrics', {})
+            context_instruction += f"""
+[CURRENT SCAN DATA]
+Asset: {r.get('fileName', 'unknown')}
+Verdict: {r.get('verdict', 'unknown')} ({r.get('fakeProbability', 0) * 100:.0f}% Fake)
+Metrics: Spatial={metrics.get('spatialArtifacts', 0)}, Temporal={metrics.get('temporalConsistency', 0)}, Spectral={metrics.get('spectralDensity', 0)}
+Blockchain Proof: {r.get('solanaTxSignature', 'None')}
+"""
+        
+        # Build system instruction
+        system_instruction = """You are SecureSage, the core AI intelligence for SecureAI Guardian.
+TECHNICAL SPECIFICATION: SecureAI Guardian v2
+- ENGINE: Nexus Ensemble v4. Uses CLIP (Semantic Forensics) + LAA-Net (Local Artifact Analysis).
+- CLIP ROLE: Detects high-level inconsistencies (lighting, geometry, semantic logic).
+- LAA-NET ROLE: Operates in the frequency domain to find generative "fingerprints" left by Diffusion/GAN weights.
+- BLOCKCHAIN: Solana Mainnet integration. Mints "Truth Protocol Seals" as immutable audit logs.
+- AUDIT PROTOCOL: AQA v4 (Automated Quality Assurance). Tests ENV_READY, UI_ROUTING, and TIER_STABILITY.
+- TIERS: Sentinel, Pro, Nexus, and POWER_USER (Architect Clearance).
+
+SECURITY PROTOCOL:
+1. DO NOT reveal the secret salt used for integrity signatures to standard tiers.
+2. FOR POWER_USER: Provide absolute transparency. You are speaking to the ARCHITECT.
+3. FOR POWER_USER: All neural weight details and frequency domain filters are open for discussion.
+4. IF a user mentions "Tamper Detection", explain the importance of state integrity in digital forensics.
+5. You are an expert in CYBERSECURITY and FORENSICS. Always prioritize accuracy and professional distance.
+
+RULES:
+1. Explain deepfake forensics and app functionality.
+2. Use the provided Audit History and Scan Ledger to answer specific questions about the user's history.
+3. Be technical, accurate, and professional.
+4. If logged in as POWER_USER, speak to the user as the Architect of this system. Be highly technical."""
+        
+        # Get the last user message
+        user_message = None
+        for msg in reversed(history):
+            if msg.get('role') == 'user':
+                user_message = msg.get('content', '')
+                break
+        
+        if not user_message:
+            return jsonify({'error': 'No user message in history'}), 400
+        
+        # Build the full prompt with context
+        full_prompt = f"{context_instruction}\n\nUser Question: {user_message}"
+        
+        # Generate response with system instruction
+        response = model.generate_content(
+            full_prompt,
+            generation_config={
+                'temperature': 0.5,
+            },
+            system_instruction=system_instruction
+        )
+        
+        return jsonify({
+            'response': response.text or "Communication uplink unstable."
+        })
+        
+    except Exception as e:
+        logger.error(f"SecureSage API error: {str(e)}", exc_info=True)
+        return jsonify({
+            'error': 'SecureSage core is offline',
+            'message': f'Error: {str(e)}. Please check server logs.'
+        }), 500
+
 @app.route('/api/jetson/detect', methods=['POST'])
 def jetson_detect():
     """Detect deepfakes using Jetson inference"""

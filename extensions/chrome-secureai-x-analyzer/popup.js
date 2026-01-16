@@ -45,13 +45,22 @@ btn.addEventListener('click', async () => {
     });
 
     if (!res?.ok) {
-      log(`Failed: ${res?.error || 'Unknown error'}`);
+      const errorMsg = res?.error || 'Unknown error';
+      // Split multi-line errors for better readability
+      errorMsg.split('\n').forEach(line => {
+        if (line.trim()) log(`❌ ${line.trim()}`);
+      });
       return;
     }
-    log(`Uploaded and analyzed. Analysis ID: ${res.analysis_id}`);
-    log('Open SecureAI Guardian to view results.');
+    log(`✅ Uploaded and analyzed. Analysis ID: ${res.analysis_id}`);
+    log('📊 Open SecureAI Guardian to view results.');
+    log(`🔗 ${apiBaseInput.value.trim() || 'https://guardian.secureai.dev'}`);
   } catch (e) {
-    log(`Error: ${e?.message || String(e)}`);
+    const errorMsg = e?.message || String(e);
+    // Split multi-line errors for better readability
+    errorMsg.split('\n').forEach(line => {
+      if (line.trim()) log(`❌ ${line.trim()}`);
+    });
   } finally {
     btn.disabled = false;
   }
