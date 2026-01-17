@@ -7,12 +7,7 @@ export default {
     "./App.tsx",
     "./index.tsx",
   ],
-  theme: {
-    extend: {
-      // Custom animations already defined in index.html
-      // Tailwind will work with CDN version
-    },
-  },
-  plugins: [],
+  // Tailwind v4 uses CSS-based configuration
+  // Custom styles and animations are in index.html <style> tag
 }
 
