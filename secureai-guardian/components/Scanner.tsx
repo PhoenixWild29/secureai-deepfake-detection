@@ -323,7 +323,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
             {mode === 'file' && (
               <div className="space-y-10">
                 <div 
-                  className={`w-full border-2 border-dashed rounded-3xl p-20 flex flex-col items-center gap-8 transition-all cursor-pointer bg-white/[0.01] ${
+                  className={`w-full border-2 border-dashed rounded-2xl sm:rounded-3xl p-8 sm:p-12 md:p-16 lg:p-20 flex flex-col items-center gap-4 sm:gap-6 md:gap-8 transition-all cursor-pointer bg-white/[0.01] ${
                     isDragging ? 'border-blue-500 bg-blue-500/10 scale-[1.01]' : 'border-white/10 hover:border-blue-500/40'
                   }`}
                   onClick={() => fileInputRef.current?.click()}

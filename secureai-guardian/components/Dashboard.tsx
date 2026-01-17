@@ -89,21 +89,21 @@ const ThreatMap = ({ isPowerUser, totalAnalyses, processingRate, recentFakeDetec
         </div>
       ))}
 
-      <div className="absolute bottom-8 left-8 right-8 flex flex-wrap items-center justify-between pointer-events-none gap-4">
-        <div className="bg-black/80 backdrop-blur-2xl border border-white/10 p-5 rounded-3xl flex items-center gap-8 shadow-2xl">
+      <div className="absolute bottom-2 sm:bottom-4 md:bottom-8 left-2 sm:left-4 md:left-8 right-2 sm:right-4 md:right-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between pointer-events-none gap-2 sm:gap-4">
+        <div className="bg-black/80 backdrop-blur-2xl border border-white/10 p-3 sm:p-4 md:p-5 rounded-2xl sm:rounded-3xl flex items-center gap-4 sm:gap-6 md:gap-8 shadow-2xl flex-1 sm:flex-initial">
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Analyses</span>
-            <span className="text-base font-black text-white font-mono">{totalAnalyses.toLocaleString()}_PROCESSED</span>
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Analyses</span>
+            <span className="text-sm sm:text-base font-black text-white font-mono">{totalAnalyses.toLocaleString()}_PROCESSED</span>
           </div>
-          <div className="w-[1px] h-10 bg-white/10"></div>
+          <div className="w-[1px] h-8 sm:h-10 bg-white/10"></div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Processing Rate</span>
-            <span className="text-base font-black text-green-400 font-mono">{formatProcessingRate(processingRate)}</span>
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Processing Rate</span>
+            <span className="text-sm sm:text-base font-black text-green-400 font-mono">{formatProcessingRate(processingRate)}</span>
           </div>
         </div>
-        <div className={`${isPowerUser ? 'bg-red-600/20 border-red-500/30' : 'bg-blue-600/10 border-blue-500/20'} backdrop-blur-xl border px-6 py-3 rounded-2xl flex items-center gap-4 shadow-xl`}>
-           <span className={`w-2.5 h-2.5 rounded-full ${isPowerUser ? 'bg-red-500' : recentFakeDetections > 0 ? 'bg-yellow-500' : 'bg-blue-500'} animate-pulse`}></span>
-           <span className={`text-[11px] font-black ${isPowerUser ? 'text-red-500' : recentFakeDetections > 0 ? 'text-yellow-500' : 'text-blue-500'} uppercase tracking-[0.2em]`}>
+        <div className={`${isPowerUser ? 'bg-red-600/20 border-red-500/30' : 'bg-blue-600/10 border-blue-500/20'} backdrop-blur-xl border px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 md:gap-4 shadow-xl flex-shrink-0`}>
+           <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${isPowerUser ? 'bg-red-500' : recentFakeDetections > 0 ? 'bg-yellow-500' : 'bg-blue-500'} animate-pulse`}></span>
+           <span className={`text-[9px] sm:text-[10px] md:text-[11px] font-black ${isPowerUser ? 'text-red-500' : recentFakeDetections > 0 ? 'text-yellow-500' : 'text-blue-500'} uppercase tracking-[0.2em] whitespace-nowrap`}>
              {isPowerUser ? 'Architect Mode: Active' : `System Status: ${systemStatus}`}
            </span>
         </div>
@@ -343,8 +343,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-8 h-[550px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10">
+        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px]">
           <div className="flex items-center justify-between mb-8 px-6">
              <div className="flex flex-col">
                <h3 className="text-sm font-black text-white uppercase tracking-[0.4em]">{isPowerUser ? 'Master Topology Override' : 'Live Propagation Topology'}</h3>
@@ -363,15 +363,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-10">
-           <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-10 rounded-[3rem] shadow-2xl flex flex-col h-[300px] hover:border-blue-500/30 transition-all group`}>
-              <h3 className="text-lg font-black text-white mb-8 flex items-center gap-5 uppercase tracking-tighter">
-                <div className={`w-12 h-12 rounded-2xl ${isPowerUser ? 'bg-red-600/10 text-red-500 border-red-500/20' : 'bg-blue-600/10 text-blue-500 border-blue-500/20'} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform`}>
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+           <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col h-[250px] sm:h-[280px] md:h-[300px] hover:border-blue-500/30 transition-all group`}>
+              <h3 className="text-sm sm:text-base md:text-lg font-black text-white mb-4 sm:mb-6 md:mb-8 flex items-center gap-3 sm:gap-4 md:gap-5 uppercase tracking-tighter">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl ${isPowerUser ? 'bg-red-600/10 text-red-500 border-red-500/20' : 'bg-blue-600/10 text-blue-500 border-blue-500/20'} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform flex-shrink-0`}>
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </div>
-                Inference Flow
+                <span className="truncate">Inference Flow</span>
               </h3>
-              <div className="flex-1 w-full" style={{ height: '200px' }}>
-                <ResponsiveContainer width="100%" height={200}>
+              <div className="flex-1 w-full" style={{ height: '150px', minHeight: '150px' }}>
+                <ResponsiveContainer width="100%" height={150}>
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" opacity={0.03} />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#475569', fontSize: 10, fontWeight: 'black'}} />
@@ -386,15 +386,15 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
               </div>
            </div>
 
-           <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-10 rounded-[3rem] shadow-2xl flex flex-col flex-1 hover:border-yellow-500/30 transition-all group border-t-yellow-500/10 relative`}>
+           <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col flex-1 hover:border-yellow-500/30 transition-all group border-t-yellow-500/10 relative min-h-[200px]`}>
               {!isPowerUser && userTier !== 'NEXUS' && <AccessLocked tier="Nexus" onUpgrade={() => onNavigate(ViewState.TIERS)} />}
-              <h3 className="text-lg font-black text-white mb-8 flex items-center gap-5 uppercase tracking-tighter">
-                <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 border border-yellow-500/20 shadow-xl group-hover:scale-110 transition-transform">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <h3 className="text-sm sm:text-base md:text-lg font-black text-white mb-4 sm:mb-6 md:mb-8 flex items-center gap-3 sm:gap-4 md:gap-5 uppercase tracking-tighter">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 border border-yellow-500/20 shadow-xl group-hover:scale-110 transition-transform flex-shrink-0">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                 </div>
-                {isPowerUser ? 'Architect Intelligence' : 'Enterprise Analytics'}
+                <span className="truncate">{isPowerUser ? 'Architect Intelligence' : 'Enterprise Analytics'}</span>
               </h3>
-              <div className="flex-1 w-full" style={{ height: '150px' }}>
+              <div className="flex-1 w-full" style={{ height: '120px', minHeight: '120px' }}>
                 <ResponsiveContainer width="100%" height={150}>
                   <AreaChart data={auditData}>
                     <defs>
