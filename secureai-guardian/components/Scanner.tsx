@@ -263,9 +263,9 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 sm:space-y-12 animate-fadeIn pb-8 sm:pb-20 px-3 sm:px-4 md:px-6 w-full overflow-x-hidden">
-      <div className="text-center">
-        <h2 className="text-2xl sm:text-4xl font-black text-white uppercase tracking-tighter">Forensic Laboratory</h2>
-        <p className="text-gray-500 mt-2 sm:mt-3 font-medium text-xs sm:text-sm tracking-wide italic">SecureAI Federated Node_492_Online</p>
+      <div className="text-center px-2">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white uppercase tracking-tighter break-words">Forensic Laboratory</h2>
+        <p className="text-gray-500 mt-2 sm:mt-3 font-medium text-[10px] sm:text-xs md:text-sm tracking-wide italic break-words px-2">SecureAI Federated Node_492_Online</p>
       </div>
 
       {error && (
