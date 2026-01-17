@@ -336,19 +336,19 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                   </div>
-                  <div className="text-center space-y-2 sm:space-y-3">
+                  <div className="text-center space-y-3 sm:space-y-4">
                     {file ? (
-                      <div className="px-4 sm:px-6 py-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl">
-                        <span className="text-blue-400 font-mono text-xs sm:text-sm font-black uppercase tracking-widest break-all">{file.name}</span>
+                      <div className="px-4 sm:px-6 py-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl max-w-full">
+                        <span className="text-blue-400 font-mono text-xs sm:text-sm font-black uppercase tracking-widest break-all block overflow-hidden text-ellipsis">{file.name}</span>
                       </div>
                     ) : (
                       <>
-                        <p className="text-white font-black uppercase text-xs sm:text-sm md:text-base tracking-widest break-words px-2 leading-tight">Ingress Data Buffer</p>
-                        <p className="text-gray-600 text-[8px] sm:text-[9px] md:text-[10px] uppercase font-mono text-center px-2 break-words leading-relaxed">
-                          <span className="block sm:inline">SUPPORTED: MP4, AVI, MOV, MKV, WEBM</span>
-                          <span className="block sm:inline sm:mx-1">//</span>
-                          <span className="block sm:inline">500MB LIMIT</span>
-                        </p>
+                        <p className="text-white font-black uppercase text-xs sm:text-sm md:text-base tracking-widest break-words px-2 leading-tight word-break-break-word">Ingress Data Buffer</p>
+                        <div className="text-gray-600 text-[8px] sm:text-[9px] md:text-[10px] uppercase font-mono text-center px-2 space-y-1">
+                          <p className="break-words leading-relaxed">SUPPORTED: MP4, AVI, MOV, MKV, WEBM</p>
+                          <p className="break-words leading-relaxed">//</p>
+                          <p className="break-words leading-relaxed">500MB LIMIT</p>
+                        </div>
                       </>
                     )}
                   </div>

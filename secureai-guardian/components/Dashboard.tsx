@@ -77,7 +77,7 @@ const ThreatMap = ({ isPowerUser, totalAnalyses, processingRate, recentFakeDetec
     : 'Standby';
 
   return (
-    <div className={`relative w-full h-full bg-white/[0.03] backdrop-blur-md rounded-[2.5rem] border ${isPowerUser ? 'border-red-500/30 shadow-[0_0_50px_rgba(220,38,38,0.1)]' : 'border-white/10'} overflow-hidden group shadow-2xl transition-all duration-1000`}>
+    <div className={`relative w-full h-full bg-white/[0.03] backdrop-blur-md rounded-[2.5rem] border ${isPowerUser ? 'border-red-500/30 shadow-[0_0_50px_rgba(220,38,38,0.1)]' : 'border-white/10'} overflow-hidden group shadow-2xl transition-all duration-1000 pb-20 sm:pb-24 md:pb-28`}>
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className={`w-full h-full ${isPowerUser ? 'bg-[radial-gradient(rgba(239,68,68,0.3)_1px,transparent_1px)]' : 'bg-[radial-gradient(rgba(59,130,246,0.3)_1px,transparent_1px)]'} [background-size:30px_30px]`}></div>
       </div>
@@ -89,7 +89,7 @@ const ThreatMap = ({ isPowerUser, totalAnalyses, processingRate, recentFakeDetec
         </div>
       ))}
 
-      <div className="absolute bottom-2 sm:bottom-4 md:bottom-8 left-2 sm:left-4 md:left-8 right-2 sm:right-4 md:right-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between pointer-events-none gap-3 sm:gap-4">
+      <div className="absolute bottom-2 sm:bottom-4 md:bottom-8 left-2 sm:left-4 md:left-8 right-2 sm:right-4 md:right-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between pointer-events-none gap-3 sm:gap-4 z-10">
         <div className="bg-black/80 backdrop-blur-2xl border border-white/10 p-3 sm:p-4 md:p-5 rounded-2xl sm:rounded-3xl flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 shadow-2xl flex-1 sm:flex-initial">
           <div className="flex flex-col min-w-0">
             <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest whitespace-nowrap">Total Analyses</span>
@@ -344,7 +344,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10">
-        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px] mb-12 sm:mb-8 lg:mb-0">
+        <div className="lg:col-span-8 h-[380px] sm:h-[450px] md:h-[550px] lg:h-[550px] mb-16 sm:mb-12 lg:mb-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8 px-3 sm:px-4 md:px-6">
              <div className="flex flex-col flex-1 min-w-0">
                <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.3em] sm:tracking-[0.4em] break-words">{isPowerUser ? 'Master Topology Override' : 'Live Propagation Topology'}</h3>
@@ -362,7 +362,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
           />
         </div>
 
-        <div className="lg:col-span-4 flex flex-col gap-6 sm:gap-8 md:gap-10 mt-8 sm:mt-6 lg:mt-0">
+        <div className="lg:col-span-4 flex flex-col gap-6 sm:gap-8 md:gap-10 mt-12 sm:mt-8 lg:mt-0">
            <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col min-h-[200px] sm:min-h-[250px] md:min-h-[280px] lg:h-[300px] hover:border-blue-500/30 transition-all group`}>
               <h3 className="text-sm sm:text-base md:text-lg font-black text-white mb-4 sm:mb-6 md:mb-8 flex items-center gap-3 sm:gap-4 md:gap-5 uppercase tracking-tighter">
                 <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl ${isPowerUser ? 'bg-red-600/10 text-red-500 border-red-500/20' : 'bg-blue-600/10 text-blue-500 border-blue-500/20'} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform flex-shrink-0`}>

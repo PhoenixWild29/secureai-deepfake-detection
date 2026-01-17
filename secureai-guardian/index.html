@@ -30,6 +30,18 @@
         * {
           -webkit-tap-highlight-color: transparent;
         }
+        /* Force text wrapping on mobile */
+        .word-break-break-word {
+          word-break: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+      }
+      
+      /* Global text wrapping utilities */
+      .word-break-break-word {
+        word-break: break-word;
+        overflow-wrap: break-word;
       }
       .font-mono {
         font-family: 'JetBrains Mono', monospace;
