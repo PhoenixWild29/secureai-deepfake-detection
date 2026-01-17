@@ -89,21 +89,21 @@ const ThreatMap = ({ isPowerUser, totalAnalyses, processingRate, recentFakeDetec
         </div>
       ))}
 
-      <div className="absolute bottom-2 sm:bottom-4 md:bottom-8 left-2 sm:left-4 md:left-8 right-2 sm:right-4 md:right-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between pointer-events-none gap-2 sm:gap-4">
-        <div className="bg-black/80 backdrop-blur-2xl border border-white/10 p-3 sm:p-4 md:p-5 rounded-2xl sm:rounded-3xl flex items-center gap-4 sm:gap-6 md:gap-8 shadow-2xl flex-1 sm:flex-initial">
-          <div className="flex flex-col">
-            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Total Analyses</span>
-            <span className="text-sm sm:text-base font-black text-white font-mono">{totalAnalyses.toLocaleString()}_PROCESSED</span>
+      <div className="absolute bottom-2 sm:bottom-4 md:bottom-8 left-2 sm:left-4 md:left-8 right-2 sm:right-4 md:right-8 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-between pointer-events-none gap-3 sm:gap-4">
+        <div className="bg-black/80 backdrop-blur-2xl border border-white/10 p-3 sm:p-4 md:p-5 rounded-2xl sm:rounded-3xl flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6 lg:gap-8 shadow-2xl flex-1 sm:flex-initial">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest whitespace-nowrap">Total Analyses</span>
+            <span className="text-xs sm:text-sm md:text-base font-black text-white font-mono break-words">{totalAnalyses.toLocaleString()}_PROCESSED</span>
           </div>
-          <div className="w-[1px] h-8 sm:h-10 bg-white/10"></div>
-          <div className="flex flex-col">
-            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest">Processing Rate</span>
-            <span className="text-sm sm:text-base font-black text-green-400 font-mono">{formatProcessingRate(processingRate)}</span>
+          <div className="w-[1px] h-6 sm:h-8 md:h-10 bg-white/10 hidden sm:block"></div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-widest whitespace-nowrap">Processing Rate</span>
+            <span className="text-xs sm:text-sm md:text-base font-black text-green-400 font-mono break-words">{formatProcessingRate(processingRate)}</span>
           </div>
         </div>
-        <div className={`${isPowerUser ? 'bg-red-600/20 border-red-500/30' : 'bg-blue-600/10 border-blue-500/20'} backdrop-blur-xl border px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 md:py-3 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 md:gap-4 shadow-xl flex-shrink-0`}>
-           <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${isPowerUser ? 'bg-red-500' : recentFakeDetections > 0 ? 'bg-yellow-500' : 'bg-blue-500'} animate-pulse`}></span>
-           <span className={`text-[9px] sm:text-[10px] md:text-[11px] font-black ${isPowerUser ? 'text-red-500' : recentFakeDetections > 0 ? 'text-yellow-500' : 'text-blue-500'} uppercase tracking-[0.2em] whitespace-nowrap`}>
+        <div className={`${isPowerUser ? 'bg-red-600/20 border-red-500/30' : 'bg-blue-600/10 border-blue-500/20'} backdrop-blur-xl border px-3 sm:px-4 md:px-5 lg:px-6 py-2 sm:py-2.5 md:py-3 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3 md:gap-4 shadow-xl flex-shrink-0 w-full sm:w-auto`}>
+           <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${isPowerUser ? 'bg-red-500' : recentFakeDetections > 0 ? 'bg-yellow-500' : 'bg-blue-500'} animate-pulse flex-shrink-0`}></span>
+           <span className={`text-[8px] sm:text-[9px] md:text-[10px] lg:text-[11px] font-black ${isPowerUser ? 'text-red-500' : recentFakeDetections > 0 ? 'text-yellow-500' : 'text-blue-500'} uppercase tracking-[0.1em] sm:tracking-[0.2em] break-words`}>
              {isPowerUser ? 'Architect Mode: Active' : `System Status: ${systemStatus}`}
            </span>
         </div>
@@ -344,7 +344,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10">
-        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px] mb-8 sm:mb-0">
+        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px] mb-12 sm:mb-8 lg:mb-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8 px-3 sm:px-4 md:px-6">
              <div className="flex flex-col flex-1 min-w-0">
                <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.3em] sm:tracking-[0.4em] break-words">{isPowerUser ? 'Master Topology Override' : 'Live Propagation Topology'}</h3>
@@ -362,7 +362,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
           />
         </div>
 
-        <div className="lg:col-span-4 flex flex-col gap-6 sm:gap-8 md:gap-10 mt-6 lg:mt-0">
+        <div className="lg:col-span-4 flex flex-col gap-6 sm:gap-8 md:gap-10 mt-8 sm:mt-6 lg:mt-0">
            <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col min-h-[200px] sm:min-h-[250px] md:min-h-[280px] lg:h-[300px] hover:border-blue-500/30 transition-all group`}>
               <h3 className="text-sm sm:text-base md:text-lg font-black text-white mb-4 sm:mb-6 md:mb-8 flex items-center gap-3 sm:gap-4 md:gap-5 uppercase tracking-tighter">
                 <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl ${isPowerUser ? 'bg-red-600/10 text-red-500 border-red-500/20' : 'bg-blue-600/10 text-blue-500 border-blue-500/20'} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform flex-shrink-0`}>

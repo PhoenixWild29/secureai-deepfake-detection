@@ -263,9 +263,9 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 sm:space-y-12 animate-fadeIn pb-8 sm:pb-20 px-3 sm:px-4 md:px-6 w-full overflow-x-hidden">
-      <div className="text-center px-2">
-        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white uppercase tracking-tighter break-words">Forensic Laboratory</h2>
-        <p className="text-gray-500 mt-2 sm:mt-3 font-medium text-[10px] sm:text-xs md:text-sm tracking-wide italic break-words px-2">SecureAI Federated Node_492_Online</p>
+      <div className="text-center px-2 mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white uppercase tracking-tighter break-words leading-tight">Forensic Laboratory</h2>
+        <p className="text-gray-500 mt-3 sm:mt-4 font-medium text-[10px] sm:text-xs md:text-sm tracking-wide italic break-words px-2 leading-relaxed">SecureAI Federated Node_492_Online</p>
       </div>
 
       {error && (
@@ -336,15 +336,19 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                   </div>
-                  <div className="text-center">
+                  <div className="text-center space-y-2 sm:space-y-3">
                     {file ? (
-                      <div className="px-6 py-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl">
-                        <span className="text-blue-400 font-mono text-xs font-black uppercase tracking-widest">{file.name}</span>
+                      <div className="px-4 sm:px-6 py-3 bg-blue-500/10 border border-blue-500/30 rounded-2xl">
+                        <span className="text-blue-400 font-mono text-xs sm:text-sm font-black uppercase tracking-widest break-all">{file.name}</span>
                       </div>
                     ) : (
                       <>
-                        <p className="text-white font-black uppercase text-xs sm:text-sm md:text-base tracking-widest mb-2 break-words px-2">Ingress Data Buffer</p>
-                        <p className="text-gray-600 text-[8px] sm:text-[9px] md:text-[10px] uppercase font-mono text-center px-2 break-words">SUPPORTED: MP4, AVI, MOV, MKV, WEBM // 500MB LIMIT</p>
+                        <p className="text-white font-black uppercase text-xs sm:text-sm md:text-base tracking-widest break-words px-2 leading-tight">Ingress Data Buffer</p>
+                        <p className="text-gray-600 text-[8px] sm:text-[9px] md:text-[10px] uppercase font-mono text-center px-2 break-words leading-relaxed">
+                          <span className="block sm:inline">SUPPORTED: MP4, AVI, MOV, MKV, WEBM</span>
+                          <span className="block sm:inline sm:mx-1">//</span>
+                          <span className="block sm:inline">500MB LIMIT</span>
+                        </p>
                       </>
                     )}
                   </div>
@@ -381,7 +385,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                     accept=".mp4,.avi,.mov,.mkv,.webm" 
                   />
                 </div>
-                <button onClick={startAnalysis} disabled={!file} className="w-full py-4 sm:py-6 bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-gray-700 text-white rounded-2xl sm:rounded-3xl transition-all font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.4em] shadow-2xl active:scale-95 border border-white/10 animate-shimmer text-xs sm:text-sm md:text-base break-words px-2">
+                <button onClick={startAnalysis} disabled={!file} className="w-full py-4 sm:py-6 bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-gray-700 text-white rounded-2xl sm:rounded-3xl transition-all font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.4em] shadow-2xl active:scale-95 border border-white/10 animate-shimmer text-xs sm:text-sm md:text-base break-words px-4 mt-4 sm:mt-6">
                   Initialize Scan Sequence
                 </button>
               </div>
