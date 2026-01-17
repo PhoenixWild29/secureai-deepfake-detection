@@ -394,7 +394,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
                 </div>
                 {isPowerUser ? 'Architect Intelligence' : 'Enterprise Analytics'}
               </h3>
-              <div className="flex-1 w-full" style={{ minHeight: '150px', height: '150px' }}>
+              <div className="flex-1 w-full overflow-hidden" style={{ minHeight: '150px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={auditData}>
                     <defs>
