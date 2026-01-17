@@ -370,7 +370,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
                 </div>
                 Inference Flow
               </h3>
-              <div className="flex-1 w-full" style={{ minHeight: '200px', height: '200px' }}>
+              <div className="flex-1 w-full overflow-hidden" style={{ minHeight: '200px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" opacity={0.03} />
