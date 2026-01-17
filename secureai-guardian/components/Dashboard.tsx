@@ -370,8 +370,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
                 </div>
                 Inference Flow
               </h3>
-              <div className="flex-1 w-full overflow-hidden" style={{ minHeight: '200px' }}>
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="flex-1 w-full" style={{ height: '200px' }}>
+                <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#ffffff" opacity={0.03} />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#475569', fontSize: 10, fontWeight: 'black'}} />
@@ -394,8 +394,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
                 </div>
                 {isPowerUser ? 'Architect Intelligence' : 'Enterprise Analytics'}
               </h3>
-              <div className="flex-1 w-full overflow-hidden" style={{ minHeight: '150px' }}>
-                <ResponsiveContainer width="100%" height="100%">
+              <div className="flex-1 w-full" style={{ height: '150px' }}>
+                <ResponsiveContainer width="100%" height={150}>
                   <AreaChart data={auditData}>
                     <defs>
                       <linearGradient id="colorHealth" x1="0" y1="0" x2="0" y2="1">
