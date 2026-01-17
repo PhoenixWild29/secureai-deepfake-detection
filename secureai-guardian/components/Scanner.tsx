@@ -306,14 +306,14 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
 
       {!isScanning ? (
         <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl transition-all hover:border-white/20">
-          <div className="flex border-b border-white/5 bg-black/20">
+          <div className="flex border-b border-white/5 bg-black/20 overflow-x-auto">
             {['file', 'url', 'live'].map((m) => (
               <button 
                 key={m}
                 onClick={() => setMode(m as ScanMode)}
-                className={`flex-1 py-6 text-[10px] font-black uppercase tracking-[0.4em] transition-all relative ${mode === m ? 'text-blue-500' : 'text-gray-500 hover:text-gray-300'}`}
+                className={`flex-1 min-w-0 py-4 sm:py-5 md:py-6 text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] transition-all relative ${mode === m ? 'text-blue-500' : 'text-gray-500 hover:text-gray-300'}`}
               >
-                {m === 'file' ? 'Local_Binary' : m === 'url' ? 'Stream_Intel' : 'Live_Peer'}
+                <span className="block truncate px-1">{m === 'file' ? 'Local_Binary' : m === 'url' ? 'Stream_Intel' : 'Live_Peer'}</span>
                 {mode === m && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 shadow-lg"></span>}
               </button>
             ))}
@@ -343,8 +343,8 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                       </div>
                     ) : (
                       <>
-                        <p className="text-white font-black uppercase text-sm sm:text-base tracking-widest mb-2">Ingress Data Buffer</p>
-                        <p className="text-gray-600 text-[9px] sm:text-[10px] uppercase font-mono text-center px-2">SUPPORTED: MP4, AVI, MOV, MKV, WEBM // 500MB LIMIT</p>
+                        <p className="text-white font-black uppercase text-xs sm:text-sm md:text-base tracking-widest mb-2 break-words px-2">Ingress Data Buffer</p>
+                        <p className="text-gray-600 text-[8px] sm:text-[9px] md:text-[10px] uppercase font-mono text-center px-2 break-words">SUPPORTED: MP4, AVI, MOV, MKV, WEBM // 500MB LIMIT</p>
                       </>
                     )}
                   </div>

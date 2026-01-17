@@ -344,13 +344,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10">
-        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px]">
-          <div className="flex items-center justify-between mb-8 px-6">
-             <div className="flex flex-col">
-               <h3 className="text-sm font-black text-white uppercase tracking-[0.4em]">{isPowerUser ? 'Master Topology Override' : 'Live Propagation Topology'}</h3>
-               <p className="text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest font-mono">{isPowerUser ? 'Full Network Visibility' : 'Active Ingress Monitoring'}</p>
+        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px] mb-6 sm:mb-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8 px-3 sm:px-4 md:px-6">
+             <div className="flex flex-col flex-1 min-w-0">
+               <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.3em] sm:tracking-[0.4em] break-words">{isPowerUser ? 'Master Topology Override' : 'Live Propagation Topology'}</h3>
+               <p className="text-[9px] sm:text-[10px] text-gray-600 mt-1 uppercase font-bold tracking-widest font-mono break-words">{isPowerUser ? 'Full Network Visibility' : 'Active Ingress Monitoring'}</p>
              </div>
-             <span className={`text-[10px] ${isPowerUser ? 'text-red-500 border-red-500/20 bg-red-500/10' : 'text-blue-500 border-blue-500/20 bg-blue-500/10'} font-mono font-black animate-pulse px-4 py-1.5 rounded-lg border`}>
+             <span className={`text-[8px] sm:text-[9px] md:text-[10px] ${isPowerUser ? 'text-red-500 border-red-500/20 bg-red-500/10' : 'text-blue-500 border-blue-500/20 bg-blue-500/10'} font-mono font-black animate-pulse px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 rounded-lg border flex-shrink-0 whitespace-nowrap`}>
                {isPowerUser ? 'ADMIN_NODE_ARCHITECT' : 'REAL_TIME_NODE_v4.2'}
              </span>
           </div>
@@ -362,8 +362,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
           />
         </div>
 
-        <div className="lg:col-span-4 flex flex-col gap-10">
-           <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col h-[250px] sm:h-[280px] md:h-[300px] hover:border-blue-500/30 transition-all group`}>
+        <div className="lg:col-span-4 flex flex-col gap-6 sm:gap-8 md:gap-10 mt-6 lg:mt-0">
+           <div className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col min-h-[200px] sm:min-h-[250px] md:min-h-[280px] lg:h-[300px] hover:border-blue-500/30 transition-all group`}>
               <h3 className="text-sm sm:text-base md:text-lg font-black text-white mb-4 sm:mb-6 md:mb-8 flex items-center gap-3 sm:gap-4 md:gap-5 uppercase tracking-tighter">
                 <div className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl ${isPowerUser ? 'bg-red-600/10 text-red-500 border-red-500/20' : 'bg-blue-600/10 text-blue-500 border-blue-500/20'} flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform flex-shrink-0`}>
                   <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
