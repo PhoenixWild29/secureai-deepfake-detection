@@ -395,7 +395,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
                 <span className="truncate">{isPowerUser ? 'Architect Intelligence' : 'Enterprise Analytics'}</span>
               </h3>
               <div className="flex-1 w-full" style={{ height: '120px', minHeight: '120px' }}>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={120}>
                   <AreaChart data={auditData}>
                     <defs>
                       <linearGradient id="colorHealth" x1="0" y1="0" x2="0" y2="1">
