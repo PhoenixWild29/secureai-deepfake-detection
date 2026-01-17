@@ -381,7 +381,7 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
                     accept=".mp4,.avi,.mov,.mkv,.webm" 
                   />
                 </div>
-                <button onClick={startAnalysis} disabled={!file} className="w-full py-4 sm:py-6 bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-gray-700 text-white rounded-2xl sm:rounded-3xl transition-all font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] shadow-2xl active:scale-95 border border-white/10 animate-shimmer text-sm sm:text-base">
+                <button onClick={startAnalysis} disabled={!file} className="w-full py-4 sm:py-6 bg-blue-600 hover:bg-blue-500 disabled:bg-white/5 disabled:text-gray-700 text-white rounded-2xl sm:rounded-3xl transition-all font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.4em] shadow-2xl active:scale-95 border border-white/10 animate-shimmer text-xs sm:text-sm md:text-base break-words px-2">
                   Initialize Scan Sequence
                 </button>
               </div>

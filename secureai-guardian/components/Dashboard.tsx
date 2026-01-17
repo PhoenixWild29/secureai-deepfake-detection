@@ -344,7 +344,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10">
-        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px] mb-6 sm:mb-0">
+        <div className="lg:col-span-8 h-[300px] sm:h-[400px] md:h-[500px] lg:h-[550px] mb-8 sm:mb-0">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8 px-3 sm:px-4 md:px-6">
              <div className="flex flex-col flex-1 min-w-0">
                <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.3em] sm:tracking-[0.4em] break-words">{isPowerUser ? 'Master Topology Override' : 'Live Propagation Topology'}</h3>
