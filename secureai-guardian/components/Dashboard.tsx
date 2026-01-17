@@ -333,11 +333,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
           { label: 'Proofs', val: blockchainProofs, color: isPowerUser ? 'text-red-400' : 'text-green-400', sub: 'SOL_TX' },
           { label: 'Node Health', val: isPowerUser ? 'BEYOND_OPTIMAL' : (auditHistory[0]?.overallStatus || 'OPTIMAL'), color: isPowerUser ? 'text-red-400' : 'text-blue-400', sub: 'LAST_AUDIT' }
         ].map((stat, i) => (
-          <div key={i} className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-10 rounded-[2.5rem] shadow-2xl hover:bg-white/[0.06] transition-all group cursor-default border-t-white/20`}>
-            <span className={`text-gray-500 text-[11px] font-black uppercase tracking-[0.5em] block mb-5 group-hover:${isPowerUser ? 'text-red-400' : 'text-blue-400'}/80 transition-colors`}>{stat.label}</span>
-            <div className="flex items-end justify-between">
-              <span className={`text-4xl font-black ${stat.color}`}>{stat.val}</span>
-              <span className="text-[10px] font-mono font-black text-gray-600 uppercase tracking-tighter">{stat.sub}</span>
+          <div key={i} className={`bg-white/[0.03] backdrop-blur-2xl border ${isPowerUser ? 'border-red-500/20' : 'border-white/10'} p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl sm:rounded-[2.5rem] shadow-2xl hover:bg-white/[0.06] transition-all group cursor-default border-t-white/20`}>
+            <span className={`text-gray-500 text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] sm:tracking-[0.5em] block mb-3 sm:mb-4 md:mb-5 group-hover:${isPowerUser ? 'text-red-400' : 'text-blue-400'}/80 transition-colors`}>{stat.label}</span>
+            <div className="flex items-end justify-between gap-2">
+              <span className={`text-2xl sm:text-3xl md:text-4xl font-black ${stat.color} truncate`}>{stat.val}</span>
+              <span className="text-[8px] sm:text-[9px] md:text-[10px] font-mono font-black text-gray-600 uppercase tracking-tighter flex-shrink-0">{stat.sub}</span>
             </div>
           </div>
         ))}
