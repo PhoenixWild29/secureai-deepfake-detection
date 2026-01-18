@@ -1,10 +1,13 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SubscriptionTier } from '../types';
 
 interface LoginProps {
-  onLogin: (tier: SubscriptionTier, wallet: string) => void;
+  onLogin: (tier: SubscriptionTier, wallet: string, alias?: string) => void;
 }
+
+const NODE_ID_KEY = 'secureai_node_id';
+const ALIAS_KEY = 'secureai_guardian_alias';
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [authStep, setAuthStep] = useState<'entry' | 'provisioning' | 'power'>('entry');
@@ -14,6 +17,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [bootLogs, setBootLogs] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [showAliasInfo, setShowAliasInfo] = useState(false);
+
+  // Check if user is already authenticated on mount
+  useEffect(() => {
+    const savedNodeId = localStorage.getItem(NODE_ID_KEY);
+    const savedAlias = localStorage.getItem(ALIAS_KEY);
+    
+    // If already authenticated, restore immediately
+    if (savedNodeId) {
+      const savedTier = (localStorage.getItem('secureai_guardian_tier') as SubscriptionTier) || 'SENTINEL';
+      onLogin(savedTier, savedNodeId, savedAlias || undefined);
+      return;
+    }
+    
+    // Pre-fill alias if it exists (for re-initialization scenarios)
+    if (savedAlias) {
+      setAlias(savedAlias);
+    }
+  }, [onLogin]);
 
   const addLog = (msg: string) => setBootLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`].slice(-8));
 
@@ -53,7 +74,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         i++;
       } else {
         clearInterval(interval);
-        setTimeout(() => onLogin(tier, nodeId), 800);
+        setTimeout(() => onLogin(tier, nodeId, userAlias), 800);
       }
     }, 500);
   };

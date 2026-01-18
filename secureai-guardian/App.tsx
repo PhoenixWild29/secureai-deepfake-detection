@@ -15,20 +15,23 @@ const TIER_KEY = 'secureai_guardian_tier';
 const NODE_ID_KEY = 'secureai_node_id';
 const AUDIT_KEY = 'secureai_audit_logs';
 const INTEGRITY_KEY = 'secureai_system_sig';
+const ALIAS_KEY = 'secureai_guardian_alias';
 
 const App: React.FC = () => {
   console.log('🔵 App component rendering...');
   
-  const [view, setView] = useState<ViewState>(ViewState.LOGIN);
+  // Initialize state from localStorage immediately to prevent Login flash
+  const savedNodeIdOnInit = typeof window !== 'undefined' ? localStorage.getItem(NODE_ID_KEY) : null;
+  const [view, setView] = useState<ViewState>(savedNodeIdOnInit ? ViewState.DASHBOARD : ViewState.LOGIN);
   const [lastResult, setLastResult] = useState<ScanResult | null>(null);
   const [history, setHistory] = useState<ScanResult[]>([]);
   const [auditHistory, setAuditHistory] = useState<AuditReport[]>([]);
   const [isSageOpen, setIsSageOpen] = useState(false);
   const [userTier, setUserTier] = useState<SubscriptionTier>('SENTINEL');
-  const [nodeId, setNodeId] = useState<string | null>(null);
+  const [nodeId, setNodeId] = useState<string | null>(savedNodeIdOnInit);
   const [isTestMode, setIsTestMode] = useState(false);
   const [isTampered, setIsTampered] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!savedNodeIdOnInit);
   
   console.log('🔵 App state initialized, view:', view, 'authenticated:', isAuthenticated);
 
@@ -80,17 +83,30 @@ const App: React.FC = () => {
     localStorage.setItem(AUDIT_KEY, JSON.stringify(auditHistory));
   }, [userTier, history, auditHistory, generateSignature, isAuthenticated, nodeId]);
 
-  const handleLogin = (tier: SubscriptionTier, id: string) => {
+  const handleLogin = (tier: SubscriptionTier, id: string, alias?: string) => {
     setUserTier(tier);
     setNodeId(id);
     setIsAuthenticated(true);
     setView(ViewState.DASHBOARD);
+    // Save alias if provided
+    if (alias) {
+      localStorage.setItem(ALIAS_KEY, alias);
+    }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setNodeId(null);
+    // Clear all authentication data
     localStorage.removeItem(NODE_ID_KEY);
+    localStorage.removeItem(ALIAS_KEY);
+    localStorage.removeItem(TIER_KEY);
+    localStorage.removeItem(HISTORY_KEY);
+    localStorage.removeItem(AUDIT_KEY);
+    localStorage.removeItem(INTEGRITY_KEY);
+    setHistory([]);
+    setAuditHistory([]);
+    setUserTier('SENTINEL');
     setView(ViewState.LOGIN);
   };
 
