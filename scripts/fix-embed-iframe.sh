@@ -15,14 +15,23 @@ git pull origin master
 
 echo ""
 echo "2. Copying updated nginx config to container..."
-docker cp nginx.https.conf secureai-nginx:/etc/nginx/nginx.conf
+# Copy to temp location first (avoids "device or resource busy" error)
+docker cp nginx.https.conf secureai-nginx:/tmp/nginx.conf.new
 
 if [ $? -ne 0 ]; then
     echo "   ❌ Failed to copy nginx config"
     exit 1
 fi
 
-echo "   ✅ Config copied"
+# Move it into place from inside the container
+docker exec secureai-nginx mv /tmp/nginx.conf.new /etc/nginx/nginx.conf
+
+if [ $? -ne 0 ]; then
+    echo "   ❌ Failed to move nginx config into place"
+    exit 1
+fi
+
+echo "   ✅ Config copied and moved into place"
 
 echo ""
 echo "3. Testing nginx configuration..."
