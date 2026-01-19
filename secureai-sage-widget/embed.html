@@ -77,14 +77,16 @@
             }
 
             function scrollToBottom() {
-                if (messagesContainer) {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                const container = document.getElementById('sage-messages');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
                 }
             }
 
             function addMessage(role, content) {
-                if (!messagesContainer) {
-                    console.error('SecureSage: messagesContainer not found!');
+                const container = document.getElementById('sage-messages');
+                if (!container) {
+                    console.error('[SecureSage] messagesContainer not found!');
                     return;
                 }
                 
@@ -94,19 +96,20 @@
                 messageDiv.className = `sage-message sage-message-${role}`;
                 messageDiv.innerHTML = `<div class="sage-message-content">${escapeHtml(content)}</div>`;
                 
-                messagesContainer.appendChild(messageDiv);
+                container.appendChild(messageDiv);
                 scrollToBottom();
             }
 
             function showTyping() {
-                if (!messagesContainer) return;
+                const container = document.getElementById('sage-messages');
+                if (!container) return;
                 
                 isTyping = true;
                 const typingDiv = document.createElement('div');
                 typingDiv.className = 'sage-message sage-message-assistant sage-typing';
                 typingDiv.id = 'sage-typing-indicator';
                 typingDiv.innerHTML = '<div class="sage-message-content"><div class="sage-typing-dots"><span></span><span></span><span></span></div><span class="sage-typing-text">Neural Query</span></div>';
-                messagesContainer.appendChild(typingDiv);
+                container.appendChild(typingDiv);
                 scrollToBottom();
             }
 
