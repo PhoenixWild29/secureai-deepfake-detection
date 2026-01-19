@@ -26,7 +26,7 @@ fi
 
 echo ""
 echo "2. Copying updated nginx config to container..."
-# Copy to temp location first (avoids "device or resource busy" error)
+# Copy to temp location first
 docker cp nginx.https.conf secureai-nginx:/tmp/nginx.conf.new
 
 if [ $? -ne 0 ]; then
@@ -34,15 +34,18 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Move it into place from inside the container
-docker exec secureai-nginx mv /tmp/nginx.conf.new /etc/nginx/nginx.conf
+# Use cat to overwrite the file (works even when file is in use)
+docker exec secureai-nginx sh -c "cat /tmp/nginx.conf.new > /etc/nginx/nginx.conf"
 
 if [ $? -ne 0 ]; then
-    echo "   ❌ Failed to move nginx config into place"
+    echo "   ❌ Failed to update nginx config"
     exit 1
 fi
 
-echo "   ✅ Config copied and moved into place"
+# Clean up temp file
+docker exec secureai-nginx rm -f /tmp/nginx.conf.new
+
+echo "   ✅ Config updated successfully"
 
 echo ""
 echo "3. Testing nginx configuration..."
