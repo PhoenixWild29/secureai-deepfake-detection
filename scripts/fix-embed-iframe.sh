@@ -17,12 +17,25 @@ else
     exit 1
 fi
 
-echo "1. Pulling latest changes..."
-# Try to pull, but continue even if it fails (due to local changes)
-if ! git pull origin master 2>/dev/null; then
-    echo "   ⚠️  Git pull failed (likely due to local changes)"
-    echo "   Continuing with current version..."
+echo "1. Fixing git conflicts and pulling latest changes..."
+# Check if there are local changes that would block the pull
+if git diff --quiet scripts/fix-embed-iframe.sh 2>/dev/null; then
+    # No local changes, safe to pull
+    git pull origin master
+else
+    echo "   ⚠️  Local changes detected in scripts/fix-embed-iframe.sh"
+    echo "   Discarding local changes to get latest version..."
+    git checkout -- scripts/fix-embed-iframe.sh
+    # Now pull should work
+    git pull origin master
 fi
+
+if [ $? -ne 0 ]; then
+    echo "   ❌ Git pull failed. Please check manually."
+    exit 1
+fi
+
+echo "   ✅ Latest changes pulled successfully"
 
 echo ""
 echo "2. Copying updated nginx config to container..."
