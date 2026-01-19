@@ -8,7 +8,7 @@ echo "=========================================="
 echo ""
 
 # Navigate to project directory
-cd /root/SecureAI-DeepFake-Detection || exit 1
+cd /root/secureai-deepfake-detection || exit 1
 
 echo "1. Pulling latest changes..."
 git pull origin master
