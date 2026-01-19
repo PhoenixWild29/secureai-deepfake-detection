@@ -7,11 +7,22 @@ echo "Fixing iframe embedding for SecureSage"
 echo "=========================================="
 echo ""
 
-# Navigate to project directory
-cd /root/secureai-deepfake-detection || exit 1
+# Navigate to project directory (try multiple common paths)
+if [ -d ~/secureai-deepfake-detection ]; then
+    cd ~/secureai-deepfake-detection
+elif [ -d /root/secureai-deepfake-detection ]; then
+    cd /root/secureai-deepfake-detection
+else
+    echo "❌ Error: Project directory not found!"
+    exit 1
+fi
 
 echo "1. Pulling latest changes..."
-git pull origin master
+# Try to pull, but continue even if it fails (due to local changes)
+if ! git pull origin master 2>/dev/null; then
+    echo "   ⚠️  Git pull failed (likely due to local changes)"
+    echo "   Continuing with current version..."
+fi
 
 echo ""
 echo "2. Copying updated nginx config to container..."
