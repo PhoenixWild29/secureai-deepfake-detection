@@ -38,30 +38,31 @@ fi
 echo "   ✅ Latest changes pulled successfully"
 
 echo ""
-echo "2. Copying updated nginx config to container..."
-# Copy to temp location first
-docker cp nginx.https.conf secureai-nginx:/tmp/nginx.conf.new
-
-if [ $? -ne 0 ]; then
-    echo "   ❌ Failed to copy nginx config"
+echo "2. Verifying nginx config file exists..."
+if [ ! -f "nginx.https.conf" ]; then
+    echo "   ❌ nginx.https.conf not found in current directory"
     exit 1
 fi
 
-# Use cat to overwrite the file (works even when file is in use)
-docker exec secureai-nginx sh -c "cat /tmp/nginx.conf.new > /etc/nginx/nginx.conf"
-
-if [ $? -ne 0 ]; then
-    echo "   ❌ Failed to update nginx config"
-    exit 1
-fi
-
-# Clean up temp file
-docker exec secureai-nginx rm -f /tmp/nginx.conf.new
-
-echo "   ✅ Config updated successfully"
+echo "   ✅ Config file found"
 
 echo ""
-echo "3. Testing nginx configuration..."
+echo "3. Restarting Nginx container to pick up config changes..."
+# The nginx config is mounted as a volume from the host, so we just need to restart
+docker restart secureai-nginx
+
+if [ $? -ne 0 ]; then
+    echo "   ❌ Failed to restart nginx container"
+    exit 1
+fi
+
+# Wait for nginx to start
+sleep 3
+
+echo "   ✅ Nginx container restarted"
+
+echo ""
+echo "4. Testing nginx configuration..."
 docker exec secureai-nginx nginx -t
 
 if [ $? -ne 0 ]; then
@@ -72,22 +73,12 @@ fi
 echo "   ✅ Config is valid"
 
 echo ""
-echo "4. Reloading Nginx..."
-docker exec secureai-nginx nginx -s reload
-
-if [ $? -eq 0 ]; then
-    echo "   ✅ Nginx reloaded successfully"
+echo "5. Verifying Nginx is running..."
+if docker exec secureai-nginx nginx -t > /dev/null 2>&1; then
+    echo "   ✅ Nginx is running with valid config"
 else
-    echo "   ⚠️  Reload failed, trying restart..."
-    docker restart secureai-nginx
-    sleep 2
-    docker exec secureai-nginx nginx -t
-    if [ $? -eq 0 ]; then
-        echo "   ✅ Nginx restarted successfully"
-    else
-        echo "   ❌ Nginx restart failed!"
-        exit 1
-    fi
+    echo "   ❌ Nginx config test failed!"
+    exit 1
 fi
 
 echo ""
