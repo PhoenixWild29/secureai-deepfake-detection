@@ -275,27 +275,48 @@
         const messages = [];
         let isTyping = false;
 
-        // Initialize with welcome message
-        addMessage('assistant', 'SecureSage active. How can I assist you with cybersecurity and SecureAI services today?');
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('SecureSage widget initializing...');
+            
+            const form = document.getElementById('sage-form');
+            const input = document.getElementById('sage-input');
+            const messagesContainer = document.getElementById('sage-messages');
 
-        const form = document.getElementById('sage-form');
-        const input = document.getElementById('sage-input');
-        const messagesContainer = document.getElementById('sage-messages');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const message = input.value.trim();
-            if (message && !isTyping) {
-                await sendMessage(message);
-                input.value = '';
+            if (!form || !input || !messagesContainer) {
+                console.error('SecureSage: Required DOM elements not found!');
+                return;
             }
+
+            // Initialize with welcome message
+            addMessage('assistant', 'SecureSage active. How can I assist you with cybersecurity and SecureAI services today?');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const message = input.value.trim();
+                console.log('Form submitted with message:', message);
+                if (message && !isTyping) {
+                    await sendMessage(message);
+                    input.value = '';
+                }
+            });
+
+            // Also handle Enter key
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
         });
 
         async function sendMessage(message) {
+            console.log('sendMessage called with:', message);
             addMessage('user', message);
             showTyping();
             
             try {
+                console.log('Sending request to:', `${API_BASE_URL}/api/sage/chat`);
                 const response = await fetch(`${API_BASE_URL}/api/sage/chat`, {
                     method: 'POST',
                     headers: {
@@ -313,24 +334,33 @@
                     })
                 });
 
+                console.log('Response status:', response.status);
                 hideTyping();
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                    console.error('API error:', errorData);
+                    throw new Error(errorData.error || errorData.message || `HTTP ${response.status}`);
                 }
 
                 const data = await response.json();
+                console.log('Response data:', data);
                 addMessage('assistant', data.response || 'Communication uplink unstable.');
                 
             } catch (error) {
                 hideTyping();
-                addMessage('assistant', `SecureSage is temporarily unavailable. Please try again later. Error: ${error.message}`);
                 console.error('SecureSage API Error:', error);
+                addMessage('assistant', `SecureSage is temporarily unavailable. Please try again later. Error: ${error.message}`);
             }
         }
 
         function addMessage(role, content) {
+            const messagesContainer = document.getElementById('sage-messages');
+            if (!messagesContainer) {
+                console.error('SecureSage: messagesContainer not found!');
+                return;
+            }
+            
             messages.push({ role, content });
             
             const messageDiv = document.createElement('div');
@@ -344,6 +374,9 @@
         }
 
         function showTyping() {
+            const messagesContainer = document.getElementById('sage-messages');
+            if (!messagesContainer) return;
+            
             isTyping = true;
             const typingDiv = document.createElement('div');
             typingDiv.className = 'sage-message sage-message-assistant sage-typing';
@@ -371,7 +404,10 @@
         }
 
         function scrollToBottom() {
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            const messagesContainer = document.getElementById('sage-messages');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
         }
 
         function escapeHtml(text) {
