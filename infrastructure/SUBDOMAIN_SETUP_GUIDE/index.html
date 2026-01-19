@@ -1,0 +1,968 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Subdomain Setup Guide for SecureAI Guardian - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#subdomain-setup-guide-for-secureai-guardian" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Subdomain Setup Guide for SecureAI Guardian
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-subdomain-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Subdomain Names
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-access-your-domain-registrardns-provider" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Access Your Domain Registrar/DNS Provider
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-find-your-dns-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Find Your DNS Management
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-create-an-a-record-for-your-subdomain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Create an A Record for Your Subdomain
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-verify-dns-propagation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Verify DNS Propagation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Verify DNS Propagation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-windows-powershell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Windows (PowerShell):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-linuxmac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Linux/Mac:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#online-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Online Tools:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-proceed-with-https-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Proceed with HTTPS Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloudflare-specific-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloudflare-Specific Instructions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google-domains-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Google Domains Instructions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#namecheap-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Namecheap Instructions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dns-not-resolving" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Not Resolving
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wrong-ip-address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wrong IP Address
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloudflare-proxy-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloudflare Proxy Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="subdomain-setup-guide-for-secureai-guardian">Subdomain Setup Guide for SecureAI Guardian</h1>
+<p>This guide will help you create a subdomain for your SecureAI DeepFake Detection application using your existing <code>secureai.dev</code> domain.</p>
+<h2 id="recommended-subdomain-names">Recommended Subdomain Names</h2>
+<p>Choose one of these subdomain names:
+- <strong><code>guardian.secureai.dev</code></strong> - Recommended (matches "SecureAI Guardian")
+- <strong><code>app.secureai.dev</code></strong> - Simple and clear
+- <strong><code>deepfake.secureai.dev</code></strong> - Descriptive
+- <strong><code>detect.secureai.dev</code></strong> - Action-oriented
+- <strong><code>api.secureai.dev</code></strong> - If you want to separate API</p>
+<h2 id="step-1-access-your-domain-registrardns-provider">Step 1: Access Your Domain Registrar/DNS Provider</h2>
+<p>You need to log in to where you manage your <code>secureai.dev</code> domain. Common providers:
+- <strong>Cloudflare</strong> (most common for .dev domains)
+- <strong>Google Domains</strong> (if purchased there)
+- <strong>Namecheap</strong>
+- <strong>GoDaddy</strong>
+- <strong>AWS Route 53</strong></p>
+<h2 id="step-2-find-your-dns-management">Step 2: Find Your DNS Management</h2>
+<p>Look for:
+- "DNS Management"
+- "DNS Settings"
+- "DNS Records"
+- "Manage DNS"</p>
+<h2 id="step-3-create-an-a-record-for-your-subdomain">Step 3: Create an A Record for Your Subdomain</h2>
+<ol>
+<li>
+<p><strong>Click "Add Record" or "Create Record"</strong></p>
+</li>
+<li>
+<p><strong>Select Record Type: A</strong></p>
+</li>
+<li>
+<p><strong>Enter the following:</strong></p>
+</li>
+<li><strong>Name/Host</strong>: <code>guardian</code> (or your chosen subdomain name)<ul>
+<li>This will create <code>guardian.secureai.dev</code></li>
+</ul>
+</li>
+<li><strong>Type</strong>: A</li>
+<li><strong>Value/IP Address</strong>: <code>64.225.57.145</code> (your server IP)</li>
+<li>
+<p><strong>TTL</strong>: 3600 (or Auto/Default)</p>
+</li>
+<li>
+<p><strong>Save the record</strong></p>
+</li>
+</ol>
+<h2 id="step-4-verify-dns-propagation">Step 4: Verify DNS Propagation</h2>
+<p>After creating the record, wait 5-60 minutes for DNS to propagate, then verify:</p>
+<h3 id="on-windows-powershell">On Windows (PowerShell):</h3>
+<pre><code class="language-powershell">nslookup guardian.secureai.dev
+</code></pre>
+<h3 id="on-linuxmac">On Linux/Mac:</h3>
+<pre><code class="language-bash">dig guardian.secureai.dev
+# or
+nslookup guardian.secureai.dev
+</code></pre>
+<h3 id="online-tools">Online Tools:</h3>
+<ul>
+<li>Visit: https://dnschecker.org</li>
+<li>Enter: <code>guardian.secureai.dev</code></li>
+<li>Select "A" record type</li>
+<li>Check if it resolves to <code>64.225.57.145</code></li>
+</ul>
+<h2 id="step-5-proceed-with-https-setup">Step 5: Proceed with HTTPS Setup</h2>
+<p>Once DNS is verified, proceed with the HTTPS setup using your new subdomain.</p>
+<hr />
+<h2 id="cloudflare-specific-instructions">Cloudflare-Specific Instructions</h2>
+<p>If your domain is managed by Cloudflare:</p>
+<ol>
+<li><strong>Log in to Cloudflare Dashboard</strong></li>
+<li><strong>Select your domain</strong> (<code>secureai.dev</code>)</li>
+<li><strong>Go to "DNS" → "Records"</strong></li>
+<li><strong>Click "Add record"</strong></li>
+<li><strong>Fill in:</strong></li>
+<li><strong>Type</strong>: A</li>
+<li><strong>Name</strong>: <code>guardian</code></li>
+<li><strong>IPv4 address</strong>: <code>64.225.57.145</code></li>
+<li><strong>Proxy status</strong>: ⚠️ <strong>Turn OFF proxy</strong> (gray cloud) for SSL certificate generation<ul>
+<li>You can enable it later after SSL is set up</li>
+</ul>
+</li>
+<li><strong>TTL</strong>: Auto</li>
+<li><strong>Save</strong></li>
+</ol>
+<p><strong>Important for Cloudflare:</strong>
+- For Let's Encrypt to work, the proxy must be <strong>OFF</strong> (gray cloud) initially
+- After SSL is set up, you can enable Cloudflare proxy (orange cloud) for DDoS protection</p>
+<hr />
+<h2 id="google-domains-instructions">Google Domains Instructions</h2>
+<ol>
+<li><strong>Log in to Google Domains</strong></li>
+<li><strong>Click on your domain</strong> (<code>secureai.dev</code>)</li>
+<li><strong>Go to "DNS" tab</strong></li>
+<li><strong>Scroll to "Custom resource records"</strong></li>
+<li><strong>Add record:</strong></li>
+<li><strong>Name</strong>: <code>guardian</code></li>
+<li><strong>Type</strong>: A</li>
+<li><strong>Data</strong>: <code>64.225.57.145</code></li>
+<li><strong>TTL</strong>: 3600</li>
+<li><strong>Save</strong></li>
+</ol>
+<hr />
+<h2 id="namecheap-instructions">Namecheap Instructions</h2>
+<ol>
+<li><strong>Log in to Namecheap</strong></li>
+<li><strong>Go to "Domain List"</strong></li>
+<li><strong>Click "Manage" next to <code>secureai.dev</code></strong></li>
+<li><strong>Go to "Advanced DNS" tab</strong></li>
+<li><strong>Click "Add New Record"</strong></li>
+<li><strong>Select:</strong></li>
+<li><strong>Type</strong>: A Record</li>
+<li><strong>Host</strong>: <code>guardian</code></li>
+<li><strong>Value</strong>: <code>64.225.57.145</code></li>
+<li><strong>TTL</strong>: Automatic</li>
+<li><strong>Save</strong></li>
+</ol>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="dns-not-resolving">DNS Not Resolving</h3>
+<ul>
+<li>Wait longer (can take up to 24 hours, but usually 5-60 minutes)</li>
+<li>Clear your DNS cache:</li>
+<li>Windows: <code>ipconfig /flushdns</code></li>
+<li>Mac/Linux: <code>sudo dscacheutil -flushcache</code></li>
+<li>Try a different DNS server (8.8.8.8)</li>
+</ul>
+<h3 id="wrong-ip-address">Wrong IP Address</h3>
+<ul>
+<li>Double-check your server IP: <code>curl ifconfig.me</code> (on your server)</li>
+<li>Verify the A record value matches exactly</li>
+</ul>
+<h3 id="cloudflare-proxy-issues">Cloudflare Proxy Issues</h3>
+<ul>
+<li>Make sure proxy is OFF (gray cloud) for initial SSL setup</li>
+<li>Let's Encrypt needs direct access to your server</li>
+</ul>
+<hr />
+<h2 id="next-steps">Next Steps</h2>
+<p>After DNS is verified:
+1. Follow <code>HTTPS_SETUP_GUIDE.md</code>
+2. Use your subdomain (e.g., <code>guardian.secureai.dev</code>) instead of the IP
+3. Your site will be accessible at: <code>https://guardian.secureai.dev</code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

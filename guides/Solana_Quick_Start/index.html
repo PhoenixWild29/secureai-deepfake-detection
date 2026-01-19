@@ -1,0 +1,1507 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Solana Integration Testing Quick Start - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#solana-integration-testing-quick-start" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Solana Integration Testing Quick Start
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#secureai-deepfake-detection-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecureAI DeepFake Detection System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SecureAI DeepFake Detection System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#solana-specific-blockchain-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⛓️ Solana-Specific Blockchain Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start-3-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Quick Start (3 Commands)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick Start (3 Commands)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-setup-solana-development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Setup Solana Development Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-run-complete-solana-integration-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Run Complete Solana Integration Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-review-solana-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Review Solana Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-specific-test-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Solana-Specific Test Categories
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Solana-Specific Test Categories">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#solana-network-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🌐 Solana Network Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-program-testing-smart-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📜 Solana Program Testing (Smart Contracts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-transaction-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔗 Solana Transaction Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-audit-trail-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Solana Audit Trail Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-security-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔒 Solana Security Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expected-solana-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Expected Solana Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Expected Solana Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#solana-integration-success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Solana Integration Success Criteria
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-risk-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Solana Risk Assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-test-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Solana Test Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Solana Test Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-solana-network-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: Solana Network Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-solana-program-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: Solana Program Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-solana-transaction-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Solana Transaction Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-4-solana-audit-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 4: Solana Audit Trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-5-solana-account-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 5: Solana Account Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-security-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛡️ Solana Security Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🛡️ Solana Security Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-security-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critical Security Areas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solana Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-testing-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Solana Testing Checklist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Solana Testing Checklist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pre-testing-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pre-Testing Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#during-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        During Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#post-testing-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Testing Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-success-criteria" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Solana Success Criteria
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Solana Success Criteria">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deployment-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Readiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-audit-trail-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solana Audit Trail Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-solana-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Advanced Solana Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Advanced Solana Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-solana-program-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Solana Program Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-transaction-load-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solana Transaction Load Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-audit-trail-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solana Audit Trail Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Solana Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Solana Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#solana-network-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solana Network Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solana-program-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solana Program Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-metrics-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Solana Metrics &amp; KPIs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Solana Metrics &amp; KPIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solana-incident-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Solana Incident Response
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚨 Solana Incident Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rpc-connectivity-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RPC Connectivity Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#program-deployment-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Program Deployment Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ready-for-solana-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Ready for Solana Testing!
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="solana-integration-testing-quick-start">Solana Integration Testing Quick Start</h1>
+<h2 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h2>
+<h3 id="solana-specific-blockchain-testing">⛓️ Solana-Specific Blockchain Testing</h3>
+<p>This framework provides comprehensive Solana blockchain integration testing, ensuring your audit trail functionality works correctly and immutably on the Solana network.</p>
+<hr />
+<h2 id="quick-start-3-commands">🚀 Quick Start (3 Commands)</h2>
+<h3 id="step-1-setup-solana-development-environment">Step 1: Setup Solana Development Environment</h3>
+<pre><code class="language-bash"># Install Solana CLI tools
+sh -c &quot;$(curl -sSfL https://release.solana.com/v1.17.0/install)&quot;
+
+# Configure for testnet
+solana config set --url https://api.testnet.solana.com
+
+# Create test wallet
+solana-keygen new --outfile ~/.config/solana/id.json
+
+# Check balance and airdrop SOL for testing
+solana balance
+solana airdrop 2
+</code></pre>
+<h3 id="step-2-run-complete-solana-integration-test">Step 2: Run Complete Solana Integration Test</h3>
+<pre><code class="language-bash"># Execute comprehensive Solana blockchain testing
+python solana_integration_tester.py --cluster testnet
+</code></pre>
+<p>This will:
+- ✅ <strong>Solana Network Testing</strong> - RPC connectivity and cluster validation
+- ✅ <strong>Solana Program Testing</strong> - Smart contract deployment and functionality
+- ✅ <strong>Solana Transaction Testing</strong> - Transaction creation, simulation, and confirmation
+- ✅ <strong>Solana Audit Trail</strong> - Immutable logging and verification on Solana
+- ✅ <strong>Solana Account Testing</strong> - Program-derived accounts (PDAs) and account management</p>
+<h3 id="step-3-review-solana-results">Step 3: Review Solana Results</h3>
+<p>Check the generated reports in:
+- <code>solana_test_results/</code> - Comprehensive Solana test results
+- <code>solana_report_*.json</code> - Detailed Solana integration reports</p>
+<hr />
+<h2 id="solana-specific-test-categories">🎯 Solana-Specific Test Categories</h2>
+<h3 id="solana-network-testing"><strong>🌐 Solana Network Testing</strong></h3>
+<ul>
+<li><strong>RPC Endpoint Testing</strong>: Testnet, Devnet, and Mainnet connectivity</li>
+<li><strong>Cluster Validation</strong>: Solana cluster version and health checks</li>
+<li><strong>Network Performance</strong>: Latency and response time testing</li>
+<li><strong>Wallet Connectivity</strong>: Keypair validation and balance checking</li>
+</ul>
+<h3 id="solana-program-testing-smart-contracts"><strong>📜 Solana Program Testing</strong> (Smart Contracts)</h3>
+<ul>
+<li><strong>Program Deployment</strong>: Deploy and verify Solana programs</li>
+<li><strong>Instruction Testing</strong>: Test program instructions and data handling</li>
+<li><strong>Account Management</strong>: Program-derived accounts (PDAs) creation</li>
+<li><strong>Cross-Program Invocation</strong>: Inter-program communication testing</li>
+</ul>
+<h3 id="solana-transaction-testing"><strong>🔗 Solana Transaction Testing</strong></h3>
+<ul>
+<li><strong>Transaction Creation</strong>: Build and sign Solana transactions</li>
+<li><strong>Transaction Simulation</strong>: Test transactions without committing</li>
+<li><strong>Transaction Confirmation</strong>: Monitor confirmation and finality</li>
+<li><strong>Retry Logic</strong>: Handle failed transactions and retry mechanisms</li>
+</ul>
+<h3 id="solana-audit-trail-testing"><strong>📋 Solana Audit Trail Testing</strong></h3>
+<ul>
+<li><strong>Immutable Logging</strong>: Store audit data on Solana blockchain</li>
+<li><strong>Slot-Based Timestamps</strong>: Use Solana slots for precise timing</li>
+<li><strong>Account-Based Storage</strong>: Store data in Solana accounts</li>
+<li><strong>Verification</strong>: Verify audit trail integrity on-chain</li>
+</ul>
+<h3 id="solana-security-testing"><strong>🔒 Solana Security Testing</strong></h3>
+<ul>
+<li><strong>Private Key Management</strong>: Secure keypair handling</li>
+<li><strong>Program Security</strong>: Solana program vulnerability assessment</li>
+<li><strong>Account Security</strong>: Account ownership and permission validation</li>
+<li><strong>Transaction Security</strong>: Signature validation and authorization</li>
+</ul>
+<hr />
+<h2 id="expected-solana-results">📊 Expected Solana Results</h2>
+<h3 id="solana-integration-success-criteria">✅ <strong>Solana Integration Success Criteria</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Test Category</th>
+<th>Expected Status</th>
+<th>Solana-Specific Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Network Connectivity</td>
+<td>✅ Connected</td>
+<td>RPC endpoints responsive</td>
+</tr>
+<tr>
+<td>Program Deployment</td>
+<td>✅ Deployed</td>
+<td>Program on-chain and functional</td>
+</tr>
+<tr>
+<td>Transaction Processing</td>
+<td>✅ Working</td>
+<td>&gt;99.5% transaction success</td>
+</tr>
+<tr>
+<td>Audit Trail</td>
+<td>✅ Immutable</td>
+<td>Data stored in Solana accounts</td>
+</tr>
+<tr>
+<td>Account Management</td>
+<td>✅ Functional</td>
+<td>PDAs created and managed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="solana-risk-assessment">🚨 <strong>Solana Risk Assessment</strong></h3>
+<ul>
+<li><strong>Critical Risk</strong>: Program vulnerabilities or RPC failures</li>
+<li><strong>High Risk</strong>: Transaction failures or account corruption</li>
+<li><strong>Medium Risk</strong>: Network latency or compute unit limits</li>
+<li><strong>Low Risk</strong>: Slot timing or minor performance issues</li>
+</ul>
+<hr />
+<h2 id="solana-test-scenarios">🔧 Solana Test Scenarios</h2>
+<h3 id="scenario-1-solana-network-setup"><strong>Scenario 1: Solana Network Setup</strong></h3>
+<ul>
+<li><strong>Duration</strong>: 30 minutes</li>
+<li><strong>Focus</strong>: RPC connectivity, wallet setup, cluster validation</li>
+<li><strong>Expected Results</strong>: Connected to Solana testnet with funded wallet</li>
+</ul>
+<h3 id="scenario-2-solana-program-deployment"><strong>Scenario 2: Solana Program Deployment</strong></h3>
+<ul>
+<li><strong>Duration</strong>: 2 hours</li>
+<li><strong>Focus</strong>: Program deployment, instruction testing, account creation</li>
+<li><strong>Expected Results</strong>: Program deployed with all functions working</li>
+</ul>
+<h3 id="scenario-3-solana-transaction-processing"><strong>Scenario 3: Solana Transaction Processing</strong></h3>
+<ul>
+<li><strong>Duration</strong>: 1 hour</li>
+<li><strong>Focus</strong>: Transaction creation, simulation, confirmation</li>
+<li><strong>Expected Results</strong>: &gt;99.5% transaction success rate</li>
+</ul>
+<h3 id="scenario-4-solana-audit-trail"><strong>Scenario 4: Solana Audit Trail</strong></h3>
+<ul>
+<li><strong>Duration</strong>: 2 hours</li>
+<li><strong>Focus</strong>: Immutable logging, slot-based timestamps, verification</li>
+<li><strong>Expected Results</strong>: 100% immutable audit trail on Solana</li>
+</ul>
+<h3 id="scenario-5-solana-account-management"><strong>Scenario 5: Solana Account Management</strong></h3>
+<ul>
+<li><strong>Duration</strong>: 1 hour</li>
+<li><strong>Focus</strong>: PDA creation, account data storage, ownership validation</li>
+<li><strong>Expected Results</strong>: Secure account management with proper permissions</li>
+</ul>
+<hr />
+<h2 id="solana-security-requirements">🛡️ Solana Security Requirements</h2>
+<h3 id="critical-security-areas"><strong>Critical Security Areas</strong></h3>
+<ul>
+<li><strong>Program Security</strong>: No vulnerabilities in Solana programs</li>
+<li><strong>Private Key Protection</strong>: Secure keypair storage and management</li>
+<li><strong>Account Ownership</strong>: Proper account ownership and permissions</li>
+<li><strong>Transaction Integrity</strong>: Tamper-proof transaction processing</li>
+<li><strong>Data Immutability</strong>: Unmodifiable audit trail on Solana blockchain</li>
+</ul>
+<h3 id="solana-compliance"><strong>Solana Compliance</strong></h3>
+<ul>
+<li><strong>Immutable Records</strong>: All audit trails stored permanently on Solana</li>
+<li><strong>Slot-Based Timestamps</strong>: Precise timing using Solana slots</li>
+<li><strong>Account-Based Storage</strong>: Data stored in dedicated Solana accounts</li>
+<li><strong>Transaction Transparency</strong>: All transactions verifiable on Solana explorer</li>
+<li><strong>Program Auditing</strong>: Regular security assessment of Solana programs</li>
+</ul>
+<hr />
+<h2 id="solana-testing-checklist">📋 Solana Testing Checklist</h2>
+<h3 id="pre-testing-setup"><strong>Pre-Testing Setup</strong></h3>
+<ul>
+<li>[ ] <strong>Solana CLI Installed</strong>: Solana development tools configured</li>
+<li>[ ] <strong>Testnet Access</strong>: Connected to Solana testnet</li>
+<li>[ ] <strong>Wallet Funded</strong>: Test wallet has sufficient SOL for transactions</li>
+<li>[ ] <strong>Program Deployed</strong>: Solana program deployed to testnet</li>
+<li>[ ] <strong>RPC Access</strong>: RPC endpoints accessible and responsive</li>
+</ul>
+<h3 id="during-testing"><strong>During Testing</strong></h3>
+<ul>
+<li>[ ] <strong>Network Tests</strong>: RPC connectivity and cluster validation</li>
+<li>[ ] <strong>Program Tests</strong>: Program deployment and functionality</li>
+<li>[ ] <strong>Transaction Tests</strong>: Transaction creation and confirmation</li>
+<li>[ ] <strong>Audit Trail Tests</strong>: Immutable logging and verification</li>
+<li>[ ] <strong>Account Tests</strong>: PDA creation and account management</li>
+</ul>
+<h3 id="post-testing-validation"><strong>Post-Testing Validation</strong></h3>
+<ul>
+<li>[ ] <strong>Results Analysis</strong>: All test results analyzed and documented</li>
+<li>[ ] <strong>Issue Resolution</strong>: Any issues identified and addressed</li>
+<li>[ ] <strong>Performance Validation</strong>: Solana performance meets requirements</li>
+<li>[ ] <strong>Security Validation</strong>: All security requirements satisfied</li>
+<li>[ ] <strong>Deployment Readiness</strong>: Solana integration ready for production</li>
+</ul>
+<hr />
+<h2 id="solana-success-criteria">🎯 Solana Success Criteria</h2>
+<h3 id="deployment-readiness"><strong>Deployment Readiness</strong></h3>
+<ul>
+<li><strong>Network</strong>: Connected to Solana mainnet with stable RPC</li>
+<li><strong>Program</strong>: Successfully deployed and functional on Solana</li>
+<li><strong>Transactions</strong>: &gt;99.5% transaction success rate</li>
+<li><strong>Audit Trail</strong>: 100% immutable and verifiable on Solana</li>
+<li><strong>Security</strong>: No critical vulnerabilities or unauthorized access</li>
+</ul>
+<h3 id="solana-audit-trail-requirements"><strong>Solana Audit Trail Requirements</strong></h3>
+<ul>
+<li><strong>Complete Logging</strong>: All system activities logged to Solana blockchain</li>
+<li><strong>Slot-Based Timing</strong>: Precise timestamps using Solana slots</li>
+<li><strong>Account Storage</strong>: Data stored in dedicated Solana accounts</li>
+<li><strong>Immutability</strong>: No ability to modify logged data on blockchain</li>
+<li><strong>Verification</strong>: Hash-based integrity verification on Solana</li>
+</ul>
+<hr />
+<h2 id="advanced-solana-testing">🚀 Advanced Solana Testing</h2>
+<h3 id="custom-solana-program-testing"><strong>Custom Solana Program Testing</strong></h3>
+<pre><code class="language-bash"># Test specific Solana program functions
+python -c &quot;
+from solana_integration_tester import SolanaIntegrationTester
+tester = SolanaIntegrationTester()
+result = tester.test_solana_program_deployment()
+print('Solana Program Status:', result['status'])
+&quot;
+</code></pre>
+<h3 id="solana-transaction-load-testing"><strong>Solana Transaction Load Testing</strong></h3>
+<pre><code class="language-bash"># Test Solana performance under load
+python -c &quot;
+from solana_integration_tester import SolanaIntegrationTester
+tester = SolanaIntegrationTester()
+result = tester.test_solana_transactions()
+print('Transaction Status:', result['status'])
+&quot;
+</code></pre>
+<h3 id="solana-audit-trail-verification"><strong>Solana Audit Trail Verification</strong></h3>
+<pre><code class="language-bash"># Verify Solana audit trail immutability
+python -c &quot;
+from solana_integration_tester import SolanaIntegrationTester
+tester = SolanaIntegrationTester()
+result = tester.test_solana_audit_trail()
+print('Audit Trail Status:', result['status'])
+&quot;
+</code></pre>
+<hr />
+<h2 id="solana-configuration">🔧 Solana Configuration</h2>
+<h3 id="solana-network-settings"><strong>Solana Network Settings</strong></h3>
+<pre><code class="language-json">{
+  &quot;cluster&quot;: &quot;testnet&quot;,
+  &quot;rpc_urls&quot;: {
+    &quot;testnet&quot;: &quot;https://api.testnet.solana.com&quot;,
+    &quot;devnet&quot;: &quot;https://api.devnet.solana.com&quot;,
+    &quot;mainnet&quot;: &quot;https://api.mainnet-beta.solana.com&quot;
+  },
+  &quot;commitment&quot;: &quot;confirmed&quot;,
+  &quot;timeout&quot;: 30,
+  &quot;max_retries&quot;: 3
+}
+</code></pre>
+<h3 id="solana-program-configuration"><strong>Solana Program Configuration</strong></h3>
+<pre><code class="language-json">{
+  &quot;program_id&quot;: &quot;YOUR_SOLANA_PROGRAM_ID&quot;,
+  &quot;wallet_keypair&quot;: &quot;~/.config/solana/id.json&quot;,
+  &quot;instructions&quot;: [
+    &quot;store_audit_trail&quot;,
+    &quot;retrieve_audit_data&quot;,
+    &quot;create_pda_account&quot;,
+    &quot;verify_data_integrity&quot;
+  ]
+}
+</code></pre>
+<hr />
+<h2 id="solana-metrics-kpis">📊 Solana Metrics &amp; KPIs</h2>
+<h3 id="performance-metrics"><strong>Performance Metrics</strong></h3>
+<ul>
+<li><strong>Transaction Confirmation Time</strong>: &lt;2 seconds average</li>
+<li><strong>Transaction Success Rate</strong>: &gt;99.5%</li>
+<li><strong>RPC Response Time</strong>: &lt;1 second average</li>
+<li><strong>Compute Units Used</strong>: &lt;100,000 per transaction</li>
+<li><strong>Network Uptime</strong>: &gt;99.9%</li>
+</ul>
+<h3 id="security-metrics"><strong>Security Metrics</strong></h3>
+<ul>
+<li><strong>Program Vulnerabilities</strong>: 0 critical</li>
+<li><strong>Unauthorized Access</strong>: 0 successful attempts</li>
+<li><strong>Data Tampering</strong>: 0 successful attempts</li>
+<li><strong>Audit Trail Completeness</strong>: 100%</li>
+<li><strong>Account Security</strong>: 100% verified</li>
+</ul>
+<hr />
+<h2 id="solana-incident-response">🚨 Solana Incident Response</h2>
+<h3 id="rpc-connectivity-issues"><strong>RPC Connectivity Issues</strong></h3>
+<ol>
+<li><strong>Detection</strong>: Monitor Solana RPC endpoint health</li>
+<li><strong>Failover</strong>: Switch to backup RPC endpoints</li>
+<li><strong>Queue Management</strong>: Queue transactions during outages</li>
+<li><strong>Recovery</strong>: Resume normal operations when connectivity restored</li>
+<li><strong>Catch-up</strong>: Process queued transactions</li>
+</ol>
+<h3 id="program-deployment-issues"><strong>Program Deployment Issues</strong></h3>
+<ol>
+<li><strong>Detection</strong>: Monitor program deployment status</li>
+<li><strong>Rollback</strong>: Revert to previous program version if needed</li>
+<li><strong>Testing</strong>: Validate program functionality in test environment</li>
+<li><strong>Redeployment</strong>: Deploy fixed program version</li>
+<li><strong>Verification</strong>: Confirm program working correctly</li>
+</ol>
+<hr />
+<h2 id="ready-for-solana-testing">🎉 Ready for Solana Testing!</h2>
+<p>Your Solana integration testing framework is ready to ensure immutable audit trails and secure blockchain functionality on the Solana network.</p>
+<p><strong>Setup</strong>: Install Solana CLI and configure testnet access</p>
+<p><strong>Start with</strong>: <code>python solana_integration_tester.py --cluster testnet</code></p>
+<p><strong>Verify audit trails</strong>: Test immutability and completeness on Solana</p>
+<p><strong>Review results</strong>: Check <code>solana_test_results/</code> for detailed reports</p>
+<p><strong>Good luck with your Solana integration! ⛓️</strong></p>
+<hr />
+<p><em>For detailed information, refer to the complete Solana Integration Testing Framework documentation.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

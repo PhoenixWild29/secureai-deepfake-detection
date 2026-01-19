@@ -1,0 +1,1782 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>📖 Complete Usage Guide - SecureAI DeepFake Detection - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#complete-usage-guide-secureai-deepfake-detection" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              📖 Complete Usage Guide - SecureAI DeepFake Detection
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Running the System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Running the System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method-1-interactive-quick-start-easiest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 1: Interactive Quick Start (Easiest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-2-simple-demo-quick-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 2: Simple Demo (Quick Testing)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#method-3-web-interface-full-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method 3: Web Interface (Full Features)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detection-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🤖 Detection Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🤖 Detection Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-resnet-model-default-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. ResNet Model (Default, Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-enhanced-sota-model-most-accurate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Enhanced SOTA Model (Most Accurate)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-cnn-classifier-fast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. CNN Classifier (Fast)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-ensemble-adaptive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Ensemble (Adaptive)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#web-interface-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🖥️ Web Interface Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🖥️ Web Interface Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#starting-the-web-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starting the Web Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#main-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Main Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-video-upload-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Video Upload &amp; Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-history-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. History &amp; Analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-batch-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Batch Upload
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-statistics-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Statistics Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-endpoints-for-developers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Endpoints (for Developers)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💻 Command Line Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💻 Command Line Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specify-model-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specify Model Type
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benchmark-all-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benchmark All Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📦 Batch Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📦 Batch Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-batch-processor-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Batch Processor Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#programmatic-batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programmatic Batch Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-processing-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Processing Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Understanding Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Understanding Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#result-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-confidence-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpreting Confidence Scores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-result-scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Result Scenarios
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Result Scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scenario-1-high-confidence-fake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 1: High Confidence Fake
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-2-high-confidence-authentic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 2: High Confidence Authentic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenario-3-low-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenario 3: Low Confidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#false-positives-false-negatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        False Positives &amp; False Negatives
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-your-own-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Training Your Own Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Training Your Own Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-train-custom-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Train Custom Models?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-your-trained-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Your Trained Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔌 API Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔌 API Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Python Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rest-api-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REST API Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javascriptnodejs-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JavaScript/Node.js Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-case-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Use Case Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Use Case Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-case-1-content-moderation-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 1: Content Moderation Platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-2-news-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 2: News Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-3-batch-video-library-scan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case 3: Batch Video Library Scan
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💡 Tips &amp; Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 Tips &amp; Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accuracy-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accuracy Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="complete-usage-guide-secureai-deepfake-detection">📖 Complete Usage Guide - SecureAI DeepFake Detection</h1>
+<p>This guide covers everything you need to know to use the deepfake detection system effectively.</p>
+<h2 id="table-of-contents">🎯 Table of Contents</h2>
+<ol>
+<li><a href="#running-the-system">Running the System</a></li>
+<li><a href="#detection-methods">Detection Methods</a></li>
+<li><a href="#web-interface-guide">Web Interface Guide</a></li>
+<li><a href="#command-line-usage">Command Line Usage</a></li>
+<li><a href="#batch-processing">Batch Processing</a></li>
+<li><a href="#understanding-results">Understanding Results</a></li>
+<li><a href="#training-your-own-models">Training Your Own Models</a></li>
+<li><a href="#api-integration">API Integration</a></li>
+</ol>
+<hr />
+<h2 id="running-the-system">🚀 Running the System</h2>
+<h3 id="method-1-interactive-quick-start-easiest">Method 1: Interactive Quick Start (Easiest)</h3>
+<pre><code class="language-bash">python quick_start.py
+</code></pre>
+<p>This interactive script will:
+- Check your system requirements
+- Verify installed dependencies
+- Find test videos
+- Let you choose what to do next</p>
+<p><strong>Best for:</strong> First-time users</p>
+<h3 id="method-2-simple-demo-quick-testing">Method 2: Simple Demo (Quick Testing)</h3>
+<pre><code class="language-bash"># Test a specific video
+python simple_demo.py path/to/video.mp4
+
+# Or run without arguments to select from available videos
+python simple_demo.py
+</code></pre>
+<p><strong>Best for:</strong> Quick tests, single videos, command-line users</p>
+<h3 id="method-3-web-interface-full-features">Method 3: Web Interface (Full Features)</h3>
+<pre><code class="language-bash">python api.py
+</code></pre>
+<p>Then open: http://localhost:5000</p>
+<p><strong>Best for:</strong> Multiple videos, sharing with others, visualization, production use</p>
+<hr />
+<h2 id="detection-methods">🤖 Detection Methods</h2>
+<p>The system offers multiple AI models for different use cases:</p>
+<h3 id="1-resnet-model-default-recommended">1. ResNet Model (Default, Recommended)</h3>
+<pre><code class="language-python">from ai_model.detect import detect_fake
+result = detect_fake('video.mp4', model_type='resnet')
+</code></pre>
+<p><strong>Characteristics:</strong>
+- ✓ Most reliable and stable
+- ✓ Good accuracy (90%+ on standard datasets)
+- ✓ Works well with various video qualities
+- ⚠ Moderate speed (10-30s per video)</p>
+<p><strong>Best for:</strong> General purpose, production use</p>
+<h3 id="2-enhanced-sota-model-most-accurate">2. Enhanced SOTA Model (Most Accurate)</h3>
+<pre><code class="language-python">result = detect_fake('video.mp4', model_type='enhanced')
+</code></pre>
+<p><strong>Characteristics:</strong>
+- ✓ Highest accuracy (94%+ on benchmarks)
+- ✓ Uses ensemble of LAA-Net, CLIP, and DM-aware techniques
+- ✓ Handles difficult cases better
+- ⚠ Slower processing (30-60s per video)
+- ⚠ Requires more memory</p>
+<p><strong>Best for:</strong> Critical applications, difficult videos, best accuracy needed</p>
+<h3 id="3-cnn-classifier-fast">3. CNN Classifier (Fast)</h3>
+<pre><code class="language-python">result = detect_fake('video.mp4', model_type='cnn')
+</code></pre>
+<p><strong>Characteristics:</strong>
+- ✓ Fast processing (5-15s per video)
+- ✓ Lower memory usage
+- ⚠ Slightly lower accuracy (85-88%)</p>
+<p><strong>Best for:</strong> Quick scans, batch processing, resource-constrained environments</p>
+<h3 id="4-ensemble-adaptive">4. Ensemble (Adaptive)</h3>
+<pre><code class="language-python">result = detect_fake('video.mp4', model_type='ensemble')
+</code></pre>
+<p><strong>Characteristics:</strong>
+- ✓ Tries enhanced first, falls back to CNN
+- ✓ Good balance of accuracy and reliability
+- ⚠ Variable processing time</p>
+<p><strong>Best for:</strong> Unknown video types, automated systems</p>
+<hr />
+<h2 id="web-interface-guide">🖥️ Web Interface Guide</h2>
+<h3 id="starting-the-web-server">Starting the Web Server</h3>
+<pre><code class="language-bash">python api.py
+</code></pre>
+<p>Access at: <strong>http://localhost:5000</strong></p>
+<h3 id="main-features">Main Features</h3>
+<h4 id="1-video-upload-analysis">1. Video Upload &amp; Analysis</h4>
+<p><strong>Steps:</strong>
+1. Click "Upload Video" or drag &amp; drop
+2. Select video file (.mp4, .avi, .mov, .mkv, .webm)
+3. Click "Analyze"
+4. Wait for results (progress bar shows status)
+5. View detailed results</p>
+<p><strong>What you see:</strong>
+- 🚨 FAKE or ✓ AUTHENTIC verdict
+- Confidence percentage
+- Processing time
+- Video hash for verification
+- Frame analysis details</p>
+<h4 id="2-history-analytics">2. History &amp; Analytics</h4>
+<p><strong>Access:</strong> Click "History" tab</p>
+<p><strong>Features:</strong>
+- View all past analyses
+- Sort by date, result, confidence
+- Export results as JSON
+- Delete old analyses
+- Search by filename</p>
+<h4 id="3-batch-upload">3. Batch Upload</h4>
+<p><strong>Steps:</strong>
+1. Click "Batch Upload"
+2. Select multiple videos
+3. Click "Process Batch"
+4. Monitor progress
+5. Download batch report</p>
+<p><strong>Limitations:</strong>
+- Max 50 videos per batch
+- Max 500MB per video
+- Processing time depends on total size</p>
+<h4 id="4-statistics-dashboard">4. Statistics Dashboard</h4>
+<p><strong>Access:</strong> Click "Stats" tab</p>
+<p><strong>Metrics shown:</strong>
+- Total videos analyzed
+- Fake vs Authentic ratio
+- Average processing time
+- Detection accuracy trends
+- Usage over time graphs</p>
+<h3 id="api-endpoints-for-developers">API Endpoints (for Developers)</h3>
+<pre><code class="language-bash"># Health check
+GET /api/health
+
+# Analyze single video
+POST /api/analyze
+Body: { &quot;video&quot;: &lt;file&gt; }
+
+# Batch analysis
+POST /api/batch
+Body: { &quot;videos&quot;: [&lt;files&gt;] }
+
+# Get analysis history
+GET /api/history
+
+# Get statistics
+GET /api/stats
+
+# Get specific result
+GET /api/result/&lt;analysis_id&gt;
+</code></pre>
+<hr />
+<h2 id="command-line-usage">💻 Command Line Usage</h2>
+<h3 id="basic-detection">Basic Detection</h3>
+<pre><code class="language-bash"># Using Python API
+python -c &quot;from ai_model.detect import detect_fake; print(detect_fake('video.mp4'))&quot;
+
+# Using simple demo
+python simple_demo.py video.mp4
+</code></pre>
+<h3 id="specify-model-type">Specify Model Type</h3>
+<pre><code class="language-python"># In Python script
+from ai_model.detect import detect_fake
+
+# Try different models
+result_resnet = detect_fake('video.mp4', model_type='resnet')
+result_enhanced = detect_fake('video.mp4', model_type='enhanced')
+result_cnn = detect_fake('video.mp4', model_type='cnn')
+
+print(f&quot;ResNet: {result_resnet['is_fake']}&quot;)
+print(f&quot;Enhanced: {result_enhanced['is_fake']}&quot;)
+print(f&quot;CNN: {result_cnn['is_fake']}&quot;)
+</code></pre>
+<h3 id="benchmark-all-models">Benchmark All Models</h3>
+<pre><code class="language-python">from ai_model.detect import benchmark_models
+
+results = benchmark_models('video.mp4')
+for model, result in results.items():
+    if result['success']:
+        print(f&quot;{model}: {result['result']['is_fake']} ({result['processing_time']:.2f}s)&quot;)
+</code></pre>
+<hr />
+<h2 id="batch-processing">📦 Batch Processing</h2>
+<h3 id="using-batch-processor-script">Using Batch Processor Script</h3>
+<pre><code class="language-bash"># Process entire folder
+python batch_processor.py --input_dir videos/ --output_dir results/
+
+# With specific model
+python batch_processor.py --input_dir videos/ --model_type enhanced
+
+# Generate report
+python batch_processor.py --input_dir videos/ --generate_report
+</code></pre>
+<h3 id="programmatic-batch-processing">Programmatic Batch Processing</h3>
+<pre><code class="language-python">import os
+from ai_model.detect import detect_fake
+
+video_folder = 'videos/'
+results = []
+
+for filename in os.listdir(video_folder):
+    if filename.endswith(('.mp4', '.avi', '.mov')):
+        video_path = os.path.join(video_folder, filename)
+        result = detect_fake(video_path)
+        results.append({
+            'filename': filename,
+            'is_fake': result['is_fake'],
+            'confidence': result['confidence']
+        })
+
+# Save results
+import json
+with open('batch_results.json', 'w') as f:
+    json.dump(results, f, indent=2)
+
+print(f&quot;Processed {len(results)} videos&quot;)
+</code></pre>
+<h3 id="batch-processing-best-practices">Batch Processing Best Practices</h3>
+<ol>
+<li><strong>Sort by size</strong>: Process smaller videos first for quick wins</li>
+<li><strong>Monitor memory</strong>: Close other applications for large batches</li>
+<li><strong>Save incrementally</strong>: Save results after each video to avoid data loss</li>
+<li><strong>Use appropriate model</strong>: Use 'cnn' for speed, 'enhanced' for accuracy</li>
+<li><strong>Parallel processing</strong>: Consider using multiple workers for large batches</li>
+</ol>
+<hr />
+<h2 id="understanding-results">📊 Understanding Results</h2>
+<h3 id="result-structure">Result Structure</h3>
+<pre><code class="language-python">{
+    'is_fake': True/False,           # Verdict
+    'confidence': 0.0-1.0,           # Model confidence
+    'authenticity_score': 0.0-1.0,   # For authentic videos
+    'video_hash': 'sha256_hash',     # Unique video identifier
+    'processing_time': 12.5,         # Seconds
+    'method': 'resnet',              # Model used
+    'frames_analyzed': 150,          # Number of frames
+    'frame_details': [...],          # Per-frame analysis (optional)
+    'error': 'message'               # If error occurred
+}
+</code></pre>
+<h3 id="interpreting-confidence-scores">Interpreting Confidence Scores</h3>
+<table>
+<thead>
+<tr>
+<th>Confidence</th>
+<th>Interpretation</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>90-100%</td>
+<td>Very High</td>
+<td>Trust the result</td>
+</tr>
+<tr>
+<td>80-90%</td>
+<td>High</td>
+<td>Likely accurate</td>
+</tr>
+<tr>
+<td>70-80%</td>
+<td>Medium-High</td>
+<td>Good confidence</td>
+</tr>
+<tr>
+<td>60-70%</td>
+<td>Medium</td>
+<td>Consider manual review</td>
+</tr>
+<tr>
+<td>50-60%</td>
+<td>Low-Medium</td>
+<td>Manual review recommended</td>
+</tr>
+<tr>
+<td>0-50%</td>
+<td>Low</td>
+<td>Video may be unclear</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-result-scenarios">Common Result Scenarios</h3>
+<h4 id="scenario-1-high-confidence-fake">Scenario 1: High Confidence Fake</h4>
+<pre><code class="language-python">{
+    'is_fake': True,
+    'confidence': 0.95,
+    'authenticity_score': 0.05
+}
+</code></pre>
+<p><strong>Interpretation:</strong> Strong indicators of deepfake detected. Very likely manipulated.</p>
+<h4 id="scenario-2-high-confidence-authentic">Scenario 2: High Confidence Authentic</h4>
+<pre><code class="language-python">{
+    'is_fake': False,
+    'confidence': 0.12,
+    'authenticity_score': 0.88
+}
+</code></pre>
+<p><strong>Interpretation:</strong> No significant deepfake artifacts found. Likely authentic.</p>
+<h4 id="scenario-3-low-confidence">Scenario 3: Low Confidence</h4>
+<pre><code class="language-python">{
+    'is_fake': False,
+    'confidence': 0.55,
+    'authenticity_score': 0.45
+}
+</code></pre>
+<p><strong>Interpretation:</strong> Unclear result. Could be:
+- Low quality video
+- Unusual lighting/angles
+- Borderline case
+- Video compression artifacts</p>
+<p><strong>Action:</strong> Manual review recommended</p>
+<h3 id="false-positives-false-negatives">False Positives &amp; False Negatives</h3>
+<p><strong>False Positive</strong> (Authentic marked as Fake):
+- Caused by: Heavy makeup, unusual lighting, video filters
+- Solution: Try 'enhanced' model, check with multiple models</p>
+<p><strong>False Negative</strong> (Fake marked as Authentic):
+- Caused by: High-quality deepfakes, subtle manipulations
+- Solution: Look for secondary indicators, use ensemble model</p>
+<hr />
+<h2 id="training-your-own-models">🎓 Training Your Own Models</h2>
+<h3 id="why-train-custom-models">Why Train Custom Models?</h3>
+<ul>
+<li>Specialize for specific video types</li>
+<li>Improve accuracy on your dataset</li>
+<li>Adapt to new deepfake techniques</li>
+<li>Reduce false positives for your use case</li>
+</ul>
+<h3 id="quick-training">Quick Training</h3>
+<pre><code class="language-bash"># Train ResNet model
+python ai_model/train_enhanced.py --epochs 50 --batch_size 8
+
+# Train with specific datasets
+python ai_model/train_enhanced.py --dataset celeb_df --epochs 30
+
+# Train enhanced SOTA model
+python ai_model/train_enhanced.py --use_laa --use_clip --use_dm_aware
+</code></pre>
+<h3 id="training-parameters">Training Parameters</h3>
+<pre><code class="language-bash">--epochs          # Number of training epochs (default: 50)
+--batch_size      # Batch size (default: 8, reduce if OOM)
+--learning_rate   # Learning rate (default: 0.001)
+--dataset         # Dataset to use (default: unified_deepfake)
+--model_type      # Model architecture (resnet, cnn, enhanced)
+--use_laa         # Enable LAA-Net (advanced)
+--use_clip        # Enable CLIP-based detection
+--use_dm_aware    # Enable diffusion model awareness
+</code></pre>
+<h3 id="using-your-trained-model">Using Your Trained Model</h3>
+<pre><code class="language-python">from ai_model.deepfake_classifier import ResNetDeepfakeClassifier
+
+# Load your custom model
+model = ResNetDeepfakeClassifier(model_path='path/to/your/model.pth')
+result = model.predict_video('video.mp4')
+</code></pre>
+<hr />
+<h2 id="api-integration">🔌 API Integration</h2>
+<h3 id="python-integration">Python Integration</h3>
+<pre><code class="language-python">from ai_model.detect import detect_fake
+
+def check_video(video_path):
+    result = detect_fake(video_path)
+
+    if result['is_fake'] and result['confidence'] &gt; 0.8:
+        print(&quot;⚠️ WARNING: Deepfake detected!&quot;)
+        return False
+    else:
+        print(&quot;✓ Video appears authentic&quot;)
+        return True
+
+# Use in your application
+if check_video('uploaded_video.mp4'):
+    # Process authentic video
+    save_to_database()
+else:
+    # Flag for review
+    mark_for_moderation()
+</code></pre>
+<h3 id="rest-api-integration">REST API Integration</h3>
+<pre><code class="language-python">import requests
+
+# Upload video for analysis
+url = 'http://localhost:5000/api/analyze'
+files = {'video': open('video.mp4', 'rb')}
+response = requests.post(url, files=files)
+result = response.json()
+
+print(f&quot;Is Fake: {result['result']['is_fake']}&quot;)
+print(f&quot;Confidence: {result['result']['confidence']}&quot;)
+</code></pre>
+<h3 id="javascriptnodejs-integration">JavaScript/Node.js Integration</h3>
+<pre><code class="language-javascript">const FormData = require('form-data');
+const fs = require('fs');
+const axios = require('axios');
+
+async function analyzeVideo(videoPath) {
+    const form = new FormData();
+    form.append('video', fs.createReadStream(videoPath));
+
+    const response = await axios.post(
+        'http://localhost:5000/api/analyze',
+        form,
+        { headers: form.getHeaders() }
+    );
+
+    return response.data;
+}
+
+// Usage
+analyzeVideo('video.mp4').then(result =&gt; {
+    console.log('Is Fake:', result.result.is_fake);
+    console.log('Confidence:', result.result.confidence);
+});
+</code></pre>
+<hr />
+<h2 id="use-case-examples">🎯 Use Case Examples</h2>
+<h3 id="use-case-1-content-moderation-platform">Use Case 1: Content Moderation Platform</h3>
+<pre><code class="language-python">def moderate_upload(video_file):
+    # Analyze video
+    result = detect_fake(video_file)
+
+    # Make decision based on confidence
+    if result['is_fake'] and result['confidence'] &gt; 0.85:
+        return {
+            'status': 'rejected',
+            'reason': 'Deepfake detected with high confidence',
+            'details': result
+        }
+    elif result['confidence'] &gt; 0.60:
+        return {
+            'status': 'review',
+            'reason': 'Requires manual review',
+            'details': result
+        }
+    else:
+        return {
+            'status': 'approved',
+            'details': result
+        }
+</code></pre>
+<h3 id="use-case-2-news-verification">Use Case 2: News Verification</h3>
+<pre><code class="language-python">def verify_news_video(video_path, threshold=0.90):
+    result = detect_fake(video_path, model_type='enhanced')
+
+    verification_report = {
+        'video_hash': result['video_hash'],
+        'timestamp': datetime.now().isoformat(),
+        'verdict': 'authentic' if not result['is_fake'] else 'manipulated',
+        'confidence': result['confidence'],
+        'verified': result['confidence'] &gt; threshold
+    }
+
+    return verification_report
+</code></pre>
+<h3 id="use-case-3-batch-video-library-scan">Use Case 3: Batch Video Library Scan</h3>
+<pre><code class="language-python">import os
+from tqdm import tqdm
+
+def scan_video_library(library_path):
+    suspicious_videos = []
+
+    videos = [f for f in os.listdir(library_path) 
+              if f.endswith(('.mp4', '.avi'))]
+
+    for video in tqdm(videos, desc=&quot;Scanning&quot;):
+        video_path = os.path.join(library_path, video)
+        result = detect_fake(video_path, model_type='cnn')  # Fast model
+
+        if result['is_fake'] and result['confidence'] &gt; 0.75:
+            suspicious_videos.append({
+                'filename': video,
+                'confidence': result['confidence']
+            })
+
+    return suspicious_videos
+</code></pre>
+<hr />
+<h2 id="tips-best-practices">💡 Tips &amp; Best Practices</h2>
+<h3 id="performance-optimization">Performance Optimization</h3>
+<ol>
+<li>
+<p><strong>Use GPU</strong>: 5-10x faster processing
+   <code>bash
+   # Check CUDA availability
+   python -c "import torch; print(torch.cuda.is_available())"</code></p>
+</li>
+<li>
+<p><strong>Reduce frame count</strong>: Process fewer frames for speed
+   <code>python
+   # Modify in deepfake_classifier.py
+   max_frames = 30  # Instead of default 150</code></p>
+</li>
+<li>
+<p><strong>Batch processing</strong>: Process multiple videos efficiently
+   <code>bash
+   python batch_processor.py --input_dir videos/ --workers 4</code></p>
+</li>
+</ol>
+<h3 id="accuracy-improvements">Accuracy Improvements</h3>
+<ol>
+<li><strong>Use ensemble voting</strong>: Combine multiple models</li>
+<li><strong>Adjust thresholds</strong>: Based on your false positive/negative tolerance</li>
+<li><strong>Train on similar data</strong>: Custom models for your specific use case</li>
+<li><strong>Quality check</strong>: Ensure input videos are good quality</li>
+</ol>
+<h3 id="production-deployment">Production Deployment</h3>
+<ol>
+<li><strong>Use async processing</strong>: Don't block web requests</li>
+<li><strong>Add caching</strong>: Cache results by video hash</li>
+<li><strong>Monitor performance</strong>: Track processing times and errors</li>
+<li><strong>Scale horizontally</strong>: Use multiple worker processes</li>
+<li><strong>Add rate limiting</strong>: Prevent abuse</li>
+</ol>
+<hr />
+<h2 id="troubleshooting">📞 Troubleshooting</h2>
+<p>See GETTING_STARTED.md for common issues and solutions.</p>
+<hr />
+<p><strong>Happy detecting! 🎬🔍</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1201 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>🌐 How to Create a Cloud Server - Step by Step - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-to-create-a-cloud-server-step-by-step" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🌐 How to Create a Cloud Server - Step by Step
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Quick Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-digitalocean-easiest-for-beginners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏆 Recommended: DigitalOcean (Easiest for Beginners)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏆 Recommended: DigitalOcean (Easiest for Beginners)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-sign-up-for-digitalocean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Sign Up for DigitalOcean
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-add-payment-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Add Payment Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-create-your-server-droplet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Create Your Server (Droplet)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-wait-for-server-to-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Wait for Server to Start
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-get-your-server-ip-address" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Get Your Server IP Address
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connect-to-your-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔌 Connect to Your Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔌 Connect to Your Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Windows:
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="On Windows:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-using-powershell-built-in" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Using PowerShell (Built-in)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-using-putty-if-powershell-doesnt-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Using PuTTY (If PowerShell doesn't work)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-your-server-is-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Verify Your Server is Ready
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-should-have-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 What You Should Have Now
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps-install-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Next Steps: Install Docker
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🆘 Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🆘 Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-refused-or-connection-timed-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Connection refused" or "Connection timed out"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Permission denied"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-key-verification-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Host key verification failed"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cant-remember-password" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Can't remember password
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cost-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💰 Cost Breakdown
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#alternative-cloud-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔄 Alternative Cloud Providers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 Alternative Cloud Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aws-ec2-more-complex" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AWS EC2 (More Complex)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#linode-similar-to-digitalocean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linode (Similar to DigitalOcean)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vultr-similar-to-digitalocean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vultr (Similar to DigitalOcean)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="how-to-create-a-cloud-server-step-by-step">🌐 How to Create a Cloud Server - Step by Step</h1>
+<p><strong>This guide will help you create a cloud server where your app will run.</strong></p>
+<h2 id="quick-overview">🎯 Quick Overview</h2>
+<p>You need a <strong>cloud server</strong> (also called VPS - Virtual Private Server) to host your app. Think of it as a computer in the cloud that runs 24/7.</p>
+<p><strong>Cost</strong>: $12-24/month (about the price of Netflix)</p>
+<hr />
+<h2 id="recommended-digitalocean-easiest-for-beginners">🏆 Recommended: DigitalOcean (Easiest for Beginners)</h2>
+<p>DigitalOcean is the easiest to set up and perfect for getting started.</p>
+<h3 id="step-1-sign-up-for-digitalocean">Step 1: Sign Up for DigitalOcean</h3>
+<ol>
+<li><strong>Go to</strong>: <a href="https://www.digitalocean.com">https://www.digitalocean.com</a></li>
+<li><strong>Click</strong>: "Sign Up" (top right)</li>
+<li><strong>Enter</strong>: Your email address</li>
+<li><strong>Create password</strong></li>
+<li><strong>Verify email</strong>: Check your inbox and click the verification link</li>
+</ol>
+<h3 id="step-2-add-payment-method">Step 2: Add Payment Method</h3>
+<ol>
+<li><strong>Click</strong>: "Billing" in the left menu</li>
+<li><strong>Add credit card</strong> or PayPal</li>
+<li><strong>Don't worry</strong>: You won't be charged until you create a server, and you can delete it anytime</li>
+</ol>
+<h3 id="step-3-create-your-server-droplet">Step 3: Create Your Server (Droplet)</h3>
+<ol>
+<li>
+<p><strong>Click</strong>: "Create" button (top right) → "Droplets"</p>
+</li>
+<li>
+<p><strong>Choose Region</strong>:</p>
+</li>
+<li>Pick the closest to you (e.g., New York, San Francisco, London)</li>
+<li>
+<p>This affects speed slightly</p>
+</li>
+<li>
+<p><strong>Choose Image</strong>:</p>
+</li>
+<li>Select <strong>"Ubuntu"</strong></li>
+<li>Version: <strong>22.04 (LTS)</strong> or <strong>24.04 (LTS)</strong></li>
+<li>
+<p>✅ This is important - must be Ubuntu!</p>
+</li>
+<li>
+<p><strong>Choose Plan</strong>:</p>
+</li>
+<li><strong>Basic</strong> plan (default)</li>
+<li><strong>Regular Intel with SSD</strong> (default)</li>
+<li>
+<p><strong>Size</strong>: </p>
+<ul>
+<li><strong>$12/month</strong> - 2GB RAM, 1 vCPU (minimum, might be slow)</li>
+<li><strong>$24/month</strong> - 4GB RAM, 2 vCPU ⭐ <strong>RECOMMENDED</strong></li>
+<li><strong>$48/month</strong> - 8GB RAM, 4 vCPU (if you have budget)</li>
+</ul>
+</li>
+<li>
+<p><strong>Authentication</strong>:</p>
+</li>
+<li><strong>Option A: SSH Keys</strong> (more secure, recommended)<ul>
+<li>If you have SSH keys, click "New SSH Key" and paste your public key</li>
+</ul>
+</li>
+<li>
+<p><strong>Option B: Password</strong> (easier for beginners)</p>
+<ul>
+<li>Click "Password"</li>
+<li>Enter a strong password (save it somewhere safe!)</li>
+<li>You'll need this to log in</li>
+</ul>
+</li>
+<li>
+<p><strong>Final Settings</strong>:</p>
+</li>
+<li><strong>Hostname</strong>: Leave default or name it "secureai-server"</li>
+<li><strong>Backups</strong>: Optional (costs extra)</li>
+<li>
+<p><strong>Monitoring</strong>: Optional (free)</p>
+</li>
+<li>
+<p><strong>Click</strong>: "Create Droplet"</p>
+</li>
+</ol>
+<h3 id="step-4-wait-for-server-to-start">Step 4: Wait for Server to Start</h3>
+<ul>
+<li>Takes about 1-2 minutes</li>
+<li>You'll see a progress bar</li>
+<li>When done, you'll see your server IP address</li>
+</ul>
+<h3 id="step-5-get-your-server-ip-address">Step 5: Get Your Server IP Address</h3>
+<ol>
+<li><strong>In DigitalOcean dashboard</strong>, you'll see your new droplet</li>
+<li><strong>Copy the IP address</strong> (looks like: <code>157.230.123.45</code>)</li>
+<li><strong>Save this IP</strong> - you'll need it to connect!</li>
+</ol>
+<p><strong>Example IP</strong>: <code>157.230.123.45</code></p>
+<hr />
+<h2 id="connect-to-your-server">🔌 Connect to Your Server</h2>
+<h3 id="on-windows">On Windows:</h3>
+<h4 id="option-a-using-powershell-built-in">Option A: Using PowerShell (Built-in)</h4>
+<ol>
+<li>
+<p><strong>Open PowerShell</strong> (search "PowerShell" in Windows)</p>
+</li>
+<li>
+<p><strong>Connect</strong>:
+   <code>powershell
+   ssh root@your-server-ip</code></p>
+</li>
+</ol>
+<p><strong>Replace <code>your-server-ip</code> with your actual IP</strong></p>
+<p>Example:
+   <code>powershell
+   ssh root@157.230.123.45</code></p>
+<ol>
+<li>
+<p><strong>First time?</strong> Type <code>yes</code> when asked about security</p>
+</li>
+<li>
+<p><strong>Enter password</strong>: Type the password you set (won't show as you type - that's normal!)</p>
+</li>
+<li>
+<p><strong>Success!</strong> You should see something like:
+   <code>root@secureai-server:~#</code></p>
+</li>
+</ol>
+<h4 id="option-b-using-putty-if-powershell-doesnt-work">Option B: Using PuTTY (If PowerShell doesn't work)</h4>
+<ol>
+<li><strong>Download PuTTY</strong>: <a href="https://www.putty.org">https://www.putty.org</a></li>
+<li><strong>Install and open PuTTY</strong></li>
+<li><strong>Enter</strong>:</li>
+<li>Host Name: <code>root@your-server-ip</code></li>
+<li>Port: <code>22</code></li>
+<li>Connection Type: <code>SSH</code></li>
+<li><strong>Click "Open"</strong></li>
+<li><strong>Enter password</strong> when prompted</li>
+</ol>
+<hr />
+<h2 id="verify-your-server-is-ready">✅ Verify Your Server is Ready</h2>
+<p>Once connected, run these commands to verify:</p>
+<pre><code class="language-bash"># Check Ubuntu version
+lsb_release -a
+
+# Check if you have root access
+whoami
+# Should show: root
+
+# Update system (good practice)
+apt update &amp;&amp; apt upgrade -y
+</code></pre>
+<hr />
+<h2 id="what-you-should-have-now">📋 What You Should Have Now</h2>
+<ul>
+<li>✅ DigitalOcean account</li>
+<li>✅ Server created (Droplet)</li>
+<li>✅ Server IP address (e.g., <code>157.230.123.45</code>)</li>
+<li>✅ Password or SSH key</li>
+<li>✅ Ability to connect via SSH</li>
+</ul>
+<hr />
+<h2 id="next-steps-install-docker">🚀 Next Steps: Install Docker</h2>
+<p>Once you're connected to your server, install Docker:</p>
+<pre><code class="language-bash"># Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Install Docker Compose
+sudo apt install docker-compose-plugin
+
+# Verify installation
+docker --version
+docker compose version
+</code></pre>
+<p>Then follow <code>GET_STARTED_DEPLOYMENT.md</code> to deploy your app!</p>
+<hr />
+<h2 id="troubleshooting">🆘 Troubleshooting</h2>
+<h3 id="connection-refused-or-connection-timed-out">"Connection refused" or "Connection timed out"</h3>
+<ul>
+<li><strong>Check</strong>: Is your server running? (Check DigitalOcean dashboard)</li>
+<li><strong>Check</strong>: Are you using the correct IP address?</li>
+<li><strong>Check</strong>: Is port 22 (SSH) open? (Should be by default)</li>
+</ul>
+<h3 id="permission-denied">"Permission denied"</h3>
+<ul>
+<li><strong>Check</strong>: Are you using the correct password?</li>
+<li><strong>Check</strong>: If using SSH keys, make sure the key is added to DigitalOcean</li>
+</ul>
+<h3 id="host-key-verification-failed">"Host key verification failed"</h3>
+<ul>
+<li><strong>Solution</strong>: Type <code>yes</code> when asked about security</li>
+</ul>
+<h3 id="cant-remember-password">Can't remember password</h3>
+<ul>
+<li><strong>Solution</strong>: In DigitalOcean, go to your droplet → "Access" → "Reset Root Password"</li>
+</ul>
+<hr />
+<h2 id="cost-breakdown">💰 Cost Breakdown</h2>
+<ul>
+<li><strong>DigitalOcean Droplet</strong>: $12-24/month</li>
+<li><strong>Bandwidth</strong>: Usually included (1TB free)</li>
+<li><strong>Total</strong>: ~$12-24/month</li>
+</ul>
+<p><strong>Tip</strong>: You can delete the server anytime to stop charges!</p>
+<hr />
+<h2 id="alternative-cloud-providers">🔄 Alternative Cloud Providers</h2>
+<p>If you prefer a different provider:</p>
+<h3 id="aws-ec2-more-complex">AWS EC2 (More Complex)</h3>
+<ol>
+<li>Sign up at <a href="https://aws.amazon.com">aws.amazon.com</a></li>
+<li>Go to EC2 → Launch Instance</li>
+<li>Choose Ubuntu 22.04</li>
+<li>Select t3.small or t3.medium</li>
+<li>Create key pair</li>
+<li>Launch instance</li>
+<li>Get public IP from EC2 dashboard</li>
+</ol>
+<h3 id="linode-similar-to-digitalocean">Linode (Similar to DigitalOcean)</h3>
+<ol>
+<li>Sign up at <a href="https://linode.com">linode.com</a></li>
+<li>Create → Linode</li>
+<li>Choose Ubuntu 22.04</li>
+<li>Select plan ($12-24/month)</li>
+<li>Create Linode</li>
+<li>Get IP address</li>
+</ol>
+<h3 id="vultr-similar-to-digitalocean">Vultr (Similar to DigitalOcean)</h3>
+<ol>
+<li>Sign up at <a href="https://vultr.com">vultr.com</a></li>
+<li>Products → Compute → Deploy Server</li>
+<li>Choose Ubuntu 22.04</li>
+<li>Select plan</li>
+<li>Deploy</li>
+<li>Get IP address</li>
+</ol>
+<hr />
+<h2 id="quick-reference">📝 Quick Reference</h2>
+<p><strong>Your Server Info:</strong>
+- <strong>IP Address</strong>: <code>_________________</code> (fill this in!)
+- <strong>Username</strong>: <code>root</code> (usually)
+- <strong>Password</strong>: <code>_________________</code> (save this!)
+- <strong>Provider</strong>: DigitalOcean / AWS / Other</p>
+<p><strong>Connection Command:</strong></p>
+<pre><code class="language-bash">ssh root@YOUR-IP-ADDRESS
+</code></pre>
+<hr />
+<h2 id="checklist">✅ Checklist</h2>
+<p>Before moving to deployment:</p>
+<ul>
+<li>[ ] Created DigitalOcean account</li>
+<li>[ ] Added payment method</li>
+<li>[ ] Created Ubuntu server (Droplet)</li>
+<li>[ ] Got IP address</li>
+<li>[ ] Successfully connected via SSH</li>
+<li>[ ] Can run commands on server</li>
+<li>[ ] Installed Docker (next step)</li>
+</ul>
+<hr />
+<p><strong>Once you have your server and can connect to it, you're ready to deploy your app!</strong></p>
+<p>See <code>GET_STARTED_DEPLOYMENT.md</code> for the next steps.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
