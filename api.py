@@ -825,11 +825,45 @@ def analyze_video():
             with open(result_file, 'w') as f:
                 json.dump(response, f, indent=2)
 
+        # Submit to Solana blockchain
+        try:
+            from integration.integrate import submit_to_solana
+            video_hash = result.get('video_hash') or response.get('aistore_info', {}).get('video_hash')
+            authenticity_score = result.get('authenticity_score', 0.5)
+            
+            if video_hash:
+                network = os.getenv('SOLANA_NETWORK', 'devnet')
+                blockchain_tx = submit_to_solana(video_hash, authenticity_score, network=network)
+                response['blockchain_tx'] = blockchain_tx
+                response['blockchain_network'] = network
+                response['blockchain_timestamp'] = datetime.now().isoformat()
+                logger.info(f"✅ Blockchain transaction created: {blockchain_tx}")
+            else:
+                logger.warning("⚠️  No video hash available for blockchain submission")
+        except Exception as e:
+            logger.error(f"❌ Failed to submit to blockchain: {e}")
+            # Continue without blockchain - don't fail the whole analysis
+
         # Upload result to S3 if configured (for file-based storage or backup)
         if not DATABASE_AVAILABLE or not S3_AVAILABLE:
             result_file = os.path.join(app.config['RESULTS_FOLDER'], f"{unique_id}.json")
             result_s3_key = f"results/{unique_id}.json"
             upload_to_s3(result_file, S3_RESULTS_BUCKET, result_s3_key)
+        
+        # Update saved result file with blockchain info if it exists
+        result_file = os.path.join(app.config['RESULTS_FOLDER'], f"{unique_id}.json")
+        if os.path.exists(result_file):
+            try:
+                with open(result_file, 'r') as f:
+                    saved_result = json.load(f)
+                if 'blockchain_tx' in response:
+                    saved_result['blockchain_tx'] = response['blockchain_tx']
+                    saved_result['blockchain_network'] = response.get('blockchain_network')
+                    saved_result['blockchain_timestamp'] = response.get('blockchain_timestamp')
+                with open(result_file, 'w') as f:
+                    json.dump(saved_result, f, indent=2)
+            except Exception as e:
+                logger.warning(f"Could not update result file with blockchain info: {e}")
 
         # Emit completion via WebSocket
         progress_manager.complete_analysis(unique_id, response)
