@@ -825,7 +825,7 @@ def analyze_video():
             with open(result_file, 'w') as f:
                 json.dump(response, f, indent=2)
 
-        # Submit to Solana blockchain
+        # Submit to Solana blockchain (non-blocking for Socket.IO)
         try:
             from integration.integrate import submit_to_solana
             video_hash = result.get('video_hash') or response.get('aistore_info', {}).get('video_hash')
@@ -833,7 +833,14 @@ def analyze_video():
             
             if video_hash:
                 network = os.getenv('SOLANA_NETWORK', 'devnet')
-                blockchain_tx = submit_to_solana(video_hash, authenticity_score, network=network)
+                # Wrap in eventlet threadpool to avoid blocking Socket.IO event loop
+                if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
+                    import eventlet  # type: ignore
+                    from eventlet import tpool  # type: ignore
+                    blockchain_tx = tpool.execute(submit_to_solana, video_hash, authenticity_score, network)
+                else:
+                    blockchain_tx = submit_to_solana(video_hash, authenticity_score, network=network)
+                
                 response['blockchain_tx'] = blockchain_tx
                 response['blockchain_network'] = network
                 response['blockchain_timestamp'] = datetime.now().isoformat()
