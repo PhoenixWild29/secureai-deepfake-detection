@@ -39,7 +39,7 @@ COPY requirements.txt .
 
 # Install Python dependencies with error handling for optional packages
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir torch torchvision || echo "PyTorch install issue" && \
+    pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio || echo "PyTorch install issue" && \
     pip install --no-cache-dir tensorflow || echo "TensorFlow install issue (optional for MTCNN)" && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir gunicorn gevent eventlet && \

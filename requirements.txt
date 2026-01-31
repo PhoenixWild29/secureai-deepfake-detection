@@ -1,7 +1,4 @@
 # Core Deep Learning
-torch>=2.0.0
-torchvision>=0.15.0
-torchaudio>=2.0.0
 
 # Computer Vision & Detection
 opencv-python>=4.8.0
