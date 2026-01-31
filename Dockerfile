@@ -37,10 +37,11 @@ WORKDIR /app
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies with error handling for optional packages
+# Install Python dependencies
+# IMPORTANT: Install CPU-only PyTorch wheels to avoid pulling massive CUDA/NVIDIA packages
+# (those CUDA wheels frequently cause "no space left on device" on smaller servers)
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir torch torchvision || echo "PyTorch install issue" && \
-    pip install --no-cache-dir tensorflow || echo "TensorFlow install issue (optional for MTCNN)" && \
+    pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir gunicorn gevent eventlet && \
     pip install --no-cache-dir solana solders base58 && \

@@ -57,6 +57,7 @@ htmlcov/
 # Temporary files
 *.tmp
 *.bak
+*.bak.*
 *.cache
 
 # Documentation builds
@@ -78,3 +79,6 @@ secrets/
 # Version files
 0.*
 *.version
+
+# Local one-off scratch files (avoid accidental commits)
+.3.0

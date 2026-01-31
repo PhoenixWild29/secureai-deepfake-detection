@@ -244,6 +244,18 @@ class EnsembleDetector:
                     logger.info("✅ XceptionNet detector loaded successfully!")
             except Exception as e:
                 logger.warning(f"⚠️  Could not load XceptionNet: {e}")
+
+        # Initialize EfficientNet (optional)
+        logger.info("📦 Loading EfficientNet detector...")
+        self.efficientnet_detector = None
+        if EFFICIENTNET_AVAILABLE:
+            try:
+                # Will return None if efficientnet-pytorch isn't installed
+                self.efficientnet_detector = get_efficientnet_detector(device=self.device)
+                if self.efficientnet_detector:
+                    logger.info("✅ EfficientNet detector loaded successfully!")
+            except Exception as e:
+                logger.warning(f"⚠️  Could not load EfficientNet detector: {e}")
         
         # Ensemble weights (updated to include new models)
         self.ensemble_weights = ensemble_weights or {
@@ -343,7 +355,8 @@ class EnsembleDetector:
                          resnet_prob: float, 
                          laa_prob: float,
                          v13_prob: Optional[float] = None,
-                         xception_prob: Optional[float] = None) -> Dict[str, Any]:
+                         xception_prob: Optional[float] = None,
+                         efficientnet_prob: Optional[float] = None) -> Dict[str, Any]:
         """
         Ultimate adaptive ensemble with all available models
         Combines CLIP + ResNet + V13 + XceptionNet + LAA-Net for maximum accuracy
@@ -363,6 +376,8 @@ class EnsembleDetector:
             v13_prob = 0.5
         if xception_prob is None:
             xception_prob = 0.5
+        if efficientnet_prob is None:
+            efficientnet_prob = 0.5
         
         # Calculate confidence (distance from 0.5) for each model
         clip_confidence = abs(clip_prob - 0.5) * 2
@@ -485,6 +500,16 @@ class EnsembleDetector:
                 logger.debug(f"XceptionNet result: {xception_prob:.3f}")
             except Exception as e:
                 logger.warning(f"XceptionNet detection error: {e}")
+
+        # EfficientNet (optional)
+        efficientnet_prob = 0.5
+        if self.efficientnet_detector:
+            logger.debug("Running EfficientNet detection...")
+            try:
+                efficientnet_prob = self.efficientnet_detector.detect_frames(frames)
+                logger.debug(f"EfficientNet result: {efficientnet_prob:.3f}")
+            except Exception as e:
+                logger.warning(f"EfficientNet detection error: {e}")
         
         # LAA-Net (if available)
         logger.debug(f"Running LAA-Net detection...")
@@ -493,7 +518,7 @@ class EnsembleDetector:
         
         # Ultimate adaptive ensemble
         ensemble_results = self.adaptive_ensemble(
-            clip_prob, resnet_prob, laa_prob, v13_prob, xception_prob
+            clip_prob, resnet_prob, laa_prob, v13_prob, xception_prob, efficientnet_prob
         )
         
         # Determine method used

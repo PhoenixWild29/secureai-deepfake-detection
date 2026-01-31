@@ -9,6 +9,30 @@ echo ""
 # Navigate to project directory
 cd ~/secureai-deepfake-detection || exit 1
 
+echo "0. Checking disk space before build..."
+df -h || true
+echo ""
+docker system df || true
+echo ""
+
+# If Docker disk is low, clean up first (prevents: 'no space left on device')
+DOCKER_ROOT="/var/lib/docker"
+if [ -d "$DOCKER_ROOT" ]; then
+  AVAIL_MB=$(df -Pm "$DOCKER_ROOT" 2>/dev/null | awk 'NR==2{print $4}')
+  if [ -n "${AVAIL_MB:-}" ] && [ "$AVAIL_MB" -lt 8000 ]; then
+    echo "   ⚠️  Low free space under $DOCKER_ROOT (${AVAIL_MB}MB). Running cleanup..."
+    if [ -x ./clean_disk_space.sh ]; then
+      ./clean_disk_space.sh || true
+    else
+      docker container prune -f || true
+      docker network prune -f || true
+      docker builder prune -af || true
+      docker image prune -af || true
+    fi
+    echo ""
+  fi
+fi
+
 echo "1. Pulling latest code from GitHub..."
 git pull origin master
 if [ $? -ne 0 ]; then
@@ -27,6 +51,9 @@ echo "3. Rebuilding backend container (no cache - ensures new code is used)..."
 docker compose -f docker-compose.https.yml build --no-cache secureai-backend
 if [ $? -ne 0 ]; then
     echo "   ❌ Build failed!"
+    echo ""
+    echo "Most common cause: low disk space on the server."
+    echo "Run: ./clean_disk_space.sh"
     exit 1
 fi
 echo "   ✅ Backend rebuilt"
@@ -62,6 +89,16 @@ if [ "$CODE_CHECK" -gt 0 ]; then
     echo "   ✅ New code is loaded (eventlet wrapper found)"
 else
     echo "   ⚠️  Warning: Could not verify new code is loaded"
+fi
+echo ""
+
+echo "7b. Verifying PyTorch is CPU-only (prevents huge CUDA layers)..."
+TORCH_CUDA=$(docker exec secureai-backend python -c "import torch; print(torch.version.cuda or 'None')" 2>/dev/null || true)
+if [ -n "$TORCH_CUDA" ] && [ "$TORCH_CUDA" != "None" ]; then
+    echo "   ⚠️  PyTorch reports CUDA=$TORCH_CUDA (should be None on this server)."
+    echo "   ⚠️  This can cause massive NVIDIA/CUDA packages and disk exhaustion."
+else
+    echo "   ✅ PyTorch is CPU-only (CUDA=None)"
 fi
 echo ""
 

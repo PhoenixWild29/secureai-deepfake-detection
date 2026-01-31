@@ -1,7 +1,7 @@
 # Core Deep Learning
-torch>=2.0.0
-torchvision>=0.15.0
-torchaudio>=2.0.0
+# NOTE: PyTorch is installed in the Dockerfile as CPU-only wheels to avoid pulling
+# massive CUDA/NVIDIA packages (which can break builds on smaller servers).
+# Do NOT add torch/torchvision/torchaudio back here unless you also pin CPU wheels.
 
 # Computer Vision & Detection
 opencv-python>=4.8.0
