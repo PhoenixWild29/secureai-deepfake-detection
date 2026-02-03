@@ -144,3 +144,82 @@ class ProcessingStats(Base):
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
+
+class DeviceIdentity(Base):
+    """
+    Device-bound identity for seamless, passwordless authentication.
+    
+    This model enables:
+    - Zero-friction login (no usernames, passwords, or email signups)
+    - Device-bound security (identity tied to browser fingerprint)
+    - Invisible blockchain anchoring (system-managed Solana wallets)
+    - State persistence (scan history survives browser data clears)
+    """
+    __tablename__ = 'device_identities'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    
+    # Device fingerprint (deterministic hash from browser/device characteristics)
+    # Same device + same browser = same fingerprint
+    device_fingerprint = Column(String(64), unique=True, nullable=False, index=True)
+    
+    # User-facing identity
+    node_id = Column(String(20), unique=True, nullable=False, index=True)  # e.g., "SAI_ABC123XYZ"
+    alias = Column(String(100), nullable=False)  # User's display name / neural alias
+    tier = Column(String(50), default='SENTINEL', nullable=False)  # Subscription tier
+    
+    # System-managed Solana wallet (invisible to user)
+    # User never sees or interacts with this - all blockchain ops are automatic
+    solana_pubkey = Column(String(64), nullable=True)  # Base58 public key
+    solana_keypair_encrypted = Column(Text, nullable=True)  # Encrypted private key (server-side only)
+    
+    # Activity tracking
+    scan_count = Column(Integer, default=0, nullable=False)
+    last_seen = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    # Device metadata (for fingerprint verification)
+    browser_name = Column(String(50), nullable=True)
+    os_name = Column(String(50), nullable=True)
+    screen_resolution = Column(String(20), nullable=True)
+    timezone = Column(String(50), nullable=True)
+    
+    # Blockchain anchoring
+    blockchain_anchored = Column(Boolean, default=False, nullable=False)
+    anchor_tx = Column(String(100), nullable=True)  # Solana transaction signature
+    anchor_timestamp = Column(DateTime, nullable=True)
+    
+    # State persistence (JSON blobs for scan history, audit logs, etc.)
+    scan_history = Column(JSON, nullable=True)
+    audit_history = Column(JSON, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Indexes for common queries
+    __table_args__ = (
+        Index('idx_device_identity_fingerprint', 'device_fingerprint'),
+        Index('idx_device_identity_node_id', 'node_id'),
+        Index('idx_device_identity_last_seen', 'last_seen'),
+    )
+    
+    def to_dict(self):
+        """Convert to API response format"""
+        return {
+            'nodeId': self.node_id,
+            'alias': self.alias,
+            'tier': self.tier,
+            'isNewDevice': False,  # Will be set by caller for new devices
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'lastSeen': self.last_seen.isoformat() if self.last_seen else None,
+            'scanCount': self.scan_count,
+            'blockchainAnchored': self.blockchain_anchored,
+        }
+    
+    def to_full_dict(self):
+        """Convert to full format including history (for state sync)"""
+        result = self.to_dict()
+        result['scanHistory'] = self.scan_history or []
+        result['auditHistory'] = self.audit_history or []
+        return result
+

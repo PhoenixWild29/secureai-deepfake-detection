@@ -7,7 +7,7 @@ export enum ViewState {
   TIERS = 'TIERS'
 }
 
-export type SubscriptionTier = 'SENTINEL' | 'PRO' | 'NEXUS' | 'POWER_USER';
+export type SubscriptionTier = 'SENTINEL' | 'GUARDIAN' | 'PRO' | 'NEXUS' | 'POWER_USER';
 
 export interface ForensicMetrics {
   spatialArtifacts: number;

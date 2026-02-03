@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import Scanner from './components/Scanner';
@@ -9,6 +9,7 @@ import TierSection from './components/TierSection';
 import TestHarness from './components/TestHarness';
 import Login from './components/Login';
 import { ScanResult, ViewState, SubscriptionTier, AuditReport } from './types';
+import { syncIdentityState, clearIdentity } from './services/deviceIdentityService';
 
 const HISTORY_KEY = 'secureai_guardian_history';
 const TIER_KEY = 'secureai_guardian_tier';
@@ -16,6 +17,9 @@ const NODE_ID_KEY = 'secureai_node_id';
 const AUDIT_KEY = 'secureai_audit_logs';
 const INTEGRITY_KEY = 'secureai_system_sig';
 const ALIAS_KEY = 'secureai_guardian_alias';
+
+// Sync interval for backend state persistence (5 minutes)
+const SYNC_INTERVAL_MS = 5 * 60 * 1000;
 
 const App: React.FC = () => {
   console.log('🔵 App component rendering...');
@@ -83,6 +87,41 @@ const App: React.FC = () => {
     localStorage.setItem(AUDIT_KEY, JSON.stringify(auditHistory));
   }, [userTier, history, auditHistory, generateSignature, isAuthenticated, nodeId]);
 
+  // Periodic sync to backend for state persistence
+  // This enables recovery if localStorage is cleared (same device = same identity)
+  const lastSyncRef = useRef<number>(0);
+  
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    const performSync = async () => {
+      const now = Date.now();
+      // Don't sync too frequently
+      if (now - lastSyncRef.current < 30000) return;
+      
+      lastSyncRef.current = now;
+      
+      try {
+        await syncIdentityState({
+          scanHistory: history,
+          auditHistory: auditHistory,
+        });
+        console.log('[App] State synced to backend');
+      } catch (error) {
+        // Non-critical - sync will happen on next interval
+        console.warn('[App] State sync failed (non-critical):', error);
+      }
+    };
+    
+    // Sync on state change (debounced via lastSyncRef)
+    performSync();
+    
+    // Also sync periodically
+    const interval = setInterval(performSync, SYNC_INTERVAL_MS);
+    
+    return () => clearInterval(interval);
+  }, [isAuthenticated, history, auditHistory]);
+
   const handleLogin = (tier: SubscriptionTier, id: string, alias?: string) => {
     setUserTier(tier);
     setNodeId(id);
@@ -97,13 +136,12 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setNodeId(null);
-    // Clear all authentication data
-    localStorage.removeItem(NODE_ID_KEY);
-    localStorage.removeItem(ALIAS_KEY);
-    localStorage.removeItem(TIER_KEY);
-    localStorage.removeItem(HISTORY_KEY);
-    localStorage.removeItem(AUDIT_KEY);
-    localStorage.removeItem(INTEGRITY_KEY);
+    
+    // Clear all identity data using the device identity service
+    // This clears localStorage and resets the device fingerprint cache
+    clearIdentity();
+    
+    // Reset local state
     setHistory([]);
     setAuditHistory([]);
     setUserTier('SENTINEL');

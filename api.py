@@ -389,6 +389,327 @@ def health_check():
         'version': '2.0.0'
     })
 
+
+# =============================================================================
+# DEVICE IDENTITY ENDPOINTS - Seamless Passwordless Authentication
+# =============================================================================
+# These endpoints enable zero-friction authentication:
+# - No usernames, passwords, or email signups
+# - Device-bound identity via browser fingerprinting
+# - System-managed Solana wallets (invisible to user)
+# - State persistence across browser data clears
+# =============================================================================
+
+# In-memory identity store (fallback when database unavailable)
+# In production, always use PostgreSQL
+_identity_store = {}
+
+# Try to import DeviceIdentity model
+try:
+    from database.models import DeviceIdentity
+    DEVICE_IDENTITY_MODEL_AVAILABLE = True
+except ImportError:
+    DEVICE_IDENTITY_MODEL_AVAILABLE = False
+    logger.warning("DeviceIdentity model not available. Using in-memory storage.")
+
+
+def _generate_node_id(fingerprint: str) -> str:
+    """Generate a deterministic node ID from device fingerprint"""
+    # Use first 9 chars of fingerprint hash for readable ID
+    hash_input = f"secureai_{fingerprint}".encode()
+    hash_output = hashlib.sha256(hash_input).hexdigest()
+    return f"SAI_{hash_output[:9].upper()}"
+
+
+def _create_system_wallet() -> dict:
+    """
+    Create a system-managed Solana wallet for the user.
+    User never sees or interacts with this wallet directly.
+    All blockchain operations are automatic and invisible.
+    """
+    try:
+        if SOLANA_AVAILABLE:
+            from solders.keypair import Keypair
+            import base58
+            
+            # Generate new keypair
+            keypair = Keypair()
+            pubkey = str(keypair.pubkey())
+            
+            # Encrypt private key for storage (in production, use proper KMS)
+            # For now, we'll just base64 encode (should be replaced with proper encryption)
+            import base64
+            secret_bytes = bytes(keypair)
+            encrypted_key = base64.b64encode(secret_bytes).decode('utf-8')
+            
+            return {
+                'pubkey': pubkey,
+                'encrypted_key': encrypted_key
+            }
+    except Exception as e:
+        logger.warning(f"Failed to create Solana wallet: {e}")
+    
+    return {'pubkey': None, 'encrypted_key': None}
+
+
+# Import Solana availability flag
+try:
+    from integration.integrate import SOLANA_AVAILABLE
+except ImportError:
+    SOLANA_AVAILABLE = False
+
+
+@app.route('/api/identity/resolve', methods=['POST'])
+@limiter.limit("30 per minute")  # Rate limit to prevent abuse
+def resolve_device_identity():
+    """
+    Resolve device identity - the main authentication endpoint.
+    
+    This enables seamless, passwordless authentication:
+    - If device fingerprint is known: return existing identity with all state
+    - If device is new: create new identity with optional alias
+    
+    No usernames, passwords, emails, or user-created wallets required.
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Request body required'}), 400
+        
+        device_fingerprint = data.get('deviceFingerprint')
+        if not device_fingerprint:
+            return jsonify({'error': 'Device fingerprint required'}), 400
+        
+        # Validate fingerprint format (should be alphanumeric, reasonable length)
+        if not isinstance(device_fingerprint, str) or len(device_fingerprint) < 10 or len(device_fingerprint) > 64:
+            return jsonify({'error': 'Invalid device fingerprint format'}), 400
+        
+        # Optional: user-provided alias for new devices
+        alias = data.get('alias', '').strip().upper() if data.get('alias') else None
+        
+        # Optional: device components for additional verification
+        components = data.get('components', {})
+        
+        # Check if database is available
+        if DATABASE_AVAILABLE and DEVICE_IDENTITY_MODEL_AVAILABLE:
+            return _resolve_identity_db(device_fingerprint, alias, components)
+        else:
+            return _resolve_identity_memory(device_fingerprint, alias, components)
+            
+    except Exception as e:
+        logger.exception(f"Identity resolution error: {e}")
+        return jsonify({'error': 'Identity resolution failed'}), 500
+
+
+def _resolve_identity_db(fingerprint: str, alias: str, components: dict):
+    """Resolve identity using PostgreSQL database"""
+    try:
+        db = next(get_db())
+        
+        # Look for existing identity
+        identity = db.query(DeviceIdentity).filter(
+            DeviceIdentity.device_fingerprint == fingerprint
+        ).first()
+        
+        if identity:
+            # Existing device - update last seen and return
+            identity.last_seen = datetime.utcnow()
+            
+            # Update device components if provided
+            if components:
+                identity.browser_name = components.get('browserName', identity.browser_name)
+                identity.os_name = components.get('osName', identity.os_name)
+                identity.screen_resolution = components.get('screenResolution', identity.screen_resolution)
+                identity.timezone = components.get('timezone', identity.timezone)
+            
+            db.commit()
+            
+            response = identity.to_dict()
+            response['isNewDevice'] = False
+            
+            logger.info(f"Identity resolved for existing device: {identity.node_id}")
+            return jsonify(response)
+        
+        else:
+            # New device - create identity
+            node_id = _generate_node_id(fingerprint)
+            
+            # Generate alias if not provided
+            if not alias:
+                alias = f"AGENT_{secrets.randbelow(9000) + 1000}"
+            
+            # Create system-managed Solana wallet
+            wallet = _create_system_wallet()
+            
+            # Create new identity
+            new_identity = DeviceIdentity(
+                device_fingerprint=fingerprint,
+                node_id=node_id,
+                alias=alias,
+                tier='SENTINEL',
+                solana_pubkey=wallet.get('pubkey'),
+                solana_keypair_encrypted=wallet.get('encrypted_key'),
+                scan_count=0,
+                last_seen=datetime.utcnow(),
+                browser_name=components.get('browserName'),
+                os_name=components.get('osName'),
+                screen_resolution=components.get('screenResolution'),
+                timezone=components.get('timezone'),
+                blockchain_anchored=False,
+                scan_history=[],
+                audit_history=[],
+            )
+            
+            db.add(new_identity)
+            db.commit()
+            
+            response = new_identity.to_dict()
+            response['isNewDevice'] = True
+            
+            logger.info(f"New identity created: {node_id} for device {fingerprint[:8]}...")
+            return jsonify(response)
+            
+    except Exception as e:
+        logger.exception(f"Database identity resolution error: {e}")
+        # Fall back to memory storage
+        return _resolve_identity_memory(fingerprint, alias, components)
+
+
+def _resolve_identity_memory(fingerprint: str, alias: str, components: dict):
+    """Resolve identity using in-memory storage (fallback)"""
+    global _identity_store
+    
+    if fingerprint in _identity_store:
+        # Existing device
+        identity = _identity_store[fingerprint]
+        identity['lastSeen'] = datetime.utcnow().isoformat()
+        identity['isNewDevice'] = False
+        
+        logger.info(f"Identity resolved (memory) for: {identity['nodeId']}")
+        return jsonify(identity)
+    
+    else:
+        # New device
+        node_id = _generate_node_id(fingerprint)
+        
+        if not alias:
+            alias = f"AGENT_{secrets.randbelow(9000) + 1000}"
+        
+        identity = {
+            'nodeId': node_id,
+            'alias': alias,
+            'tier': 'SENTINEL',
+            'isNewDevice': True,
+            'createdAt': datetime.utcnow().isoformat(),
+            'lastSeen': datetime.utcnow().isoformat(),
+            'scanCount': 0,
+            'blockchainAnchored': False,
+        }
+        
+        _identity_store[fingerprint] = identity
+        
+        logger.info(f"New identity created (memory): {node_id}")
+        return jsonify(identity)
+
+
+@app.route('/api/identity/update-alias', methods=['POST'])
+@limiter.limit("10 per minute")
+def update_identity_alias():
+    """Update user's display alias"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Request body required'}), 400
+        
+        fingerprint = data.get('deviceFingerprint')
+        new_alias = data.get('alias', '').strip().upper()
+        
+        if not fingerprint:
+            return jsonify({'error': 'Device fingerprint required'}), 400
+        if not new_alias or len(new_alias) < 3:
+            return jsonify({'error': 'Alias must be at least 3 characters'}), 400
+        if len(new_alias) > 50:
+            return jsonify({'error': 'Alias must be 50 characters or less'}), 400
+        
+        if DATABASE_AVAILABLE and DEVICE_IDENTITY_MODEL_AVAILABLE:
+            db = next(get_db())
+            identity = db.query(DeviceIdentity).filter(
+                DeviceIdentity.device_fingerprint == fingerprint
+            ).first()
+            
+            if not identity:
+                return jsonify({'error': 'Identity not found'}), 404
+            
+            identity.alias = new_alias
+            identity.updated_at = datetime.utcnow()
+            db.commit()
+            
+            return jsonify(identity.to_dict())
+        else:
+            # Memory storage
+            if fingerprint not in _identity_store:
+                return jsonify({'error': 'Identity not found'}), 404
+            
+            _identity_store[fingerprint]['alias'] = new_alias
+            return jsonify(_identity_store[fingerprint])
+            
+    except Exception as e:
+        logger.exception(f"Alias update error: {e}")
+        return jsonify({'error': 'Alias update failed'}), 500
+
+
+@app.route('/api/identity/sync', methods=['POST'])
+@limiter.limit("60 per minute")
+def sync_identity_state():
+    """
+    Sync local state to backend.
+    Called periodically to persist scan history, tier upgrades, etc.
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Request body required'}), 400
+        
+        fingerprint = data.get('deviceFingerprint')
+        if not fingerprint:
+            return jsonify({'error': 'Device fingerprint required'}), 400
+        
+        scan_history = data.get('scanHistory', [])
+        audit_history = data.get('auditHistory', [])
+        
+        if DATABASE_AVAILABLE and DEVICE_IDENTITY_MODEL_AVAILABLE:
+            db = next(get_db())
+            identity = db.query(DeviceIdentity).filter(
+                DeviceIdentity.device_fingerprint == fingerprint
+            ).first()
+            
+            if identity:
+                # Merge histories (keep most recent, limit size)
+                if scan_history:
+                    existing = identity.scan_history or []
+                    merged = scan_history + existing
+                    # Keep only last 100 scans
+                    identity.scan_history = merged[:100]
+                
+                if audit_history:
+                    existing = identity.audit_history or []
+                    merged = audit_history + existing
+                    # Keep only last 50 audits
+                    identity.audit_history = merged[:50]
+                
+                identity.scan_count = len(identity.scan_history or [])
+                identity.last_seen = datetime.utcnow()
+                db.commit()
+                
+                return jsonify({'status': 'synced', 'scanCount': identity.scan_count})
+        
+        return jsonify({'status': 'ok'})
+        
+    except Exception as e:
+        logger.warning(f"State sync error (non-critical): {e}")
+        return jsonify({'status': 'ok'})  # Non-critical, don't fail
+
+
 @app.route('/api/security/audit', methods=['POST'])
 def security_audit():  # noqa: C901
     """
