@@ -140,8 +140,8 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
       {activeTab === 'overview' ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-4 space-y-10">
-            <div className={`bg-white/[0.03] backdrop-blur-3xl border-2 rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] p-6 sm:p-8 md:p-12 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-visible ${borderColorClass}`}>
-              <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 z-10">
+            <div className={`bg-white/[0.03] backdrop-blur-3xl border-2 rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] p-6 sm:p-8 md:p-10 pb-8 sm:pb-10 md:pb-12 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden ${borderColorClass}`}>
+              <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56 z-10">
                 <svg className="w-full h-full -rotate-90">
                   <circle className="text-white/5" strokeWidth="20" stroke="currentColor" fill="transparent" r="100" cx="128" cy="128" />
                   <circle
@@ -162,7 +162,7 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
                   <span className="text-[9px] sm:text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] md:tracking-[0.5em] mt-2 sm:mt-4">Threat_Level</span>
                 </div>
               </div>
-              <h3 className={`mt-8 sm:mt-12 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-[0.05em] sm:tracking-[0.08em] md:tracking-[0.1em] ${colorClass} px-2 text-center`}>
+              <h3 className={`mt-6 sm:mt-8 text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-[0.02em] sm:tracking-[0.04em] ${colorClass} px-4 text-center`}>
                 {result.verdict}
               </h3>
               <p className="text-[11px] text-gray-400 mt-5 font-mono font-black tracking-widest uppercase opacity-60 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">Confidence: {(result.confidence * 100).toFixed(1)}%</p>
