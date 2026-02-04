@@ -140,32 +140,32 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
       {activeTab === 'overview' ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-4 space-y-10">
-            <div className={`bg-white/[0.03] backdrop-blur-3xl border-2 rounded-2xl sm:rounded-3xl md:rounded-[3.5rem] p-6 sm:p-8 md:p-10 pb-8 sm:pb-10 md:pb-12 flex flex-col items-center justify-center text-center shadow-2xl relative overflow-hidden ${borderColorClass}`}>
-              <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56 z-10">
-                <svg className="w-full h-full -rotate-90">
-                  <circle className="text-white/5" strokeWidth="20" stroke="currentColor" fill="transparent" r="100" cx="128" cy="128" />
+            <div className={`bg-white/[0.03] backdrop-blur-3xl border-2 rounded-2xl sm:rounded-3xl md:rounded-[3rem] p-6 sm:p-8 md:p-10 pb-8 sm:pb-10 md:pb-12 flex flex-col items-center justify-center text-center shadow-2xl relative ${borderColorClass}`}>
+              <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 z-10">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                  <circle className="text-white/5" strokeWidth="10" stroke="currentColor" fill="transparent" r="50" cx="60" cy="60" />
                   <circle
-                    className={`${colorClass} transition-all duration-1000 ease-out shadow-[0_0_20px_rgba(255,255,255,0.2)]`}
-                    strokeWidth="20"
-                    strokeDasharray={628}
-                    strokeDashoffset={628 - (result.fakeProbability * 628)}
+                    className={`${colorClass} transition-all duration-1000 ease-out`}
+                    strokeWidth="10"
+                    strokeDasharray={314}
+                    strokeDashoffset={314 - (result.fakeProbability * 314)}
                     strokeLinecap="round"
                     stroke="currentColor"
                     fill="transparent"
-                    r="100"
-                    cx="128"
-                    cy="128"
+                    r="50"
+                    cx="60"
+                    cy="60"
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-4xl sm:text-5xl md:text-6xl font-black ${colorClass}`}>{(result.fakeProbability * 100).toFixed(0)}%</span>
-                  <span className="text-[9px] sm:text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] md:tracking-[0.5em] mt-2 sm:mt-4">Threat_Level</span>
+                  <span className={`text-3xl sm:text-4xl md:text-5xl font-black ${colorClass}`}>{(result.fakeProbability * 100).toFixed(0)}%</span>
+                  <span className="text-[8px] sm:text-[9px] text-gray-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] mt-1 sm:mt-2">Threat Level</span>
                 </div>
               </div>
-              <h3 className={`mt-6 sm:mt-8 text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-[0.02em] sm:tracking-[0.04em] ${colorClass} px-4 text-center`}>
+              <h3 className={`mt-4 sm:mt-6 text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-[0.02em] sm:tracking-[0.04em] ${colorClass} px-4 text-center`}>
                 {result.verdict}
               </h3>
-              <p className="text-[11px] text-gray-400 mt-5 font-mono font-black tracking-widest uppercase opacity-60 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">Confidence: {(result.confidence * 100).toFixed(1)}%</p>
+              <p className="text-[10px] text-gray-400 mt-4 font-mono font-bold tracking-wider uppercase opacity-70 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">Model Confidence: {(result.confidence * 100).toFixed(1)}%</p>
             </div>
 
             <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[3rem] p-12 shadow-2xl flex flex-col">
