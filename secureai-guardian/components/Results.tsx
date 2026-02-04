@@ -162,8 +162,8 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
                   <span className="text-[9px] sm:text-[10px] text-gray-500 font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] md:tracking-[0.5em] mt-2 sm:mt-4">Threat_Level</span>
                 </div>
               </div>
-              <h3 className={`mt-8 sm:mt-12 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] ${colorClass} break-words whitespace-normal px-2 text-center`}>
-                {result.verdict === 'SUSPICIOUS' ? 'SUSPICIOUS' : result.verdict}
+              <h3 className={`mt-8 sm:mt-12 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-[0.05em] sm:tracking-[0.08em] md:tracking-[0.1em] ${colorClass} px-2 text-center`}>
+                {result.verdict}
               </h3>
               <p className="text-[11px] text-gray-400 mt-5 font-mono font-black tracking-widest uppercase opacity-60 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">Confidence: {(result.confidence * 100).toFixed(1)}%</p>
             </div>
@@ -197,12 +197,34 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
           <div className="lg:col-span-8 flex flex-col gap-10">
             {/* Heatmap Grid */}
             <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[3.5rem] p-10 shadow-2xl flex flex-col items-center group flex-1">
-              <div className="w-full flex items-center justify-between mb-8 px-4">
+              <div className="w-full flex items-center justify-between mb-4 px-4">
                 <div className="flex flex-col">
                   <h4 className="text-xs font-black text-white uppercase tracking-[0.3em]">Spatial Entropy Extraction</h4>
                   <p className="text-[10px] font-mono text-gray-600 uppercase mt-1 tracking-widest animate-pulse">Scanning layer 4-8 for diffusion markers...</p>
                 </div>
                 <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,1)]"></div>
+              </div>
+              
+              {/* Explanation Box */}
+              <div className="w-full bg-white/[0.02] border border-white/5 rounded-2xl p-4 mb-6">
+                <p className="text-[11px] text-gray-400 leading-relaxed">
+                  <span className="text-blue-400 font-bold">What is this?</span> This heatmap divides the video frame into 64 sectors and analyzes each for signs of AI manipulation. 
+                  Brighter cells indicate higher probability of synthetic artifacts like GAN fingerprints, face-swap boundaries, or neural network compression patterns.
+                </p>
+                <div className="flex items-center gap-6 mt-3 pt-3 border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded ${isFake ? 'bg-red-500/20' : 'bg-blue-500/20'} border ${isFake ? 'border-red-500/30' : 'border-blue-500/30'}`}></div>
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wide">Low Risk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded ${isFake ? 'bg-red-500/60' : 'bg-blue-500/60'} border ${isFake ? 'border-red-500/50' : 'border-blue-500/50'}`}></div>
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wide">Medium</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded ${isFake ? 'bg-red-500' : 'bg-blue-500'} border ${isFake ? 'border-red-500' : 'border-blue-500'}`}></div>
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wide">High Risk</span>
+                  </div>
+                </div>
               </div>
               
               <div className="w-full max-w-2xl aspect-square bg-black rounded-[2.5rem] relative overflow-hidden border border-white/10 shadow-2xl cursor-crosshair group-hover:border-blue-500/20 transition-all">
@@ -234,9 +256,10 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-10 flex flex-col items-center justify-center text-center opacity-30 group-hover:opacity-50 transition-opacity">
-                     <svg className="w-10 h-10 text-gray-400 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                     <p className="text-xs font-black text-gray-500 uppercase tracking-[0.5em]">Interactive Heat Probe Active // Select Grid Sector</p>
+                  <div className="bg-white/[0.02] border border-white/5 rounded-3xl p-8 flex flex-col items-center justify-center text-center opacity-50 group-hover:opacity-70 transition-opacity">
+                     <svg className="w-10 h-10 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" /></svg>
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Click Any Grid Cell</p>
+                     <p className="text-[10px] text-gray-500">Tap a sector to see detailed forensic analysis for that region of the frame</p>
                   </div>
                 )}
               </div>
