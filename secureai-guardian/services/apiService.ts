@@ -43,6 +43,9 @@ export interface BackendAnalysisResponse {
   processing_time: number;
   timestamp: string;
   file_size: number;
+  blockchain_tx?: string;
+  blockchain_network?: string;
+  blockchain_timestamp?: string;
   storage?: {
     local: boolean;
     s3: boolean;
@@ -200,8 +203,8 @@ export function transformBackendResponseToScanResult(
     artifactsDetected,
     verdict,
     explanation,
-    isBlockchainVerified: !!((backendResponse as any).blockchain_tx),
-    solanaTxSignature: ((backendResponse as any).blockchain_tx) || undefined,
+    isBlockchainVerified: !!backendResponse.blockchain_tx,
+    solanaTxSignature: backendResponse.blockchain_tx || undefined,
     metrics,
     spatialEntropyHeatmap,
     integrityHash: undefined, // Will be set by App.tsx

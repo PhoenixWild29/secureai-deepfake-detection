@@ -1195,6 +1195,21 @@ def analyze_video():
                 response['blockchain_network'] = network
                 response['blockchain_timestamp'] = datetime.now().isoformat()
                 logger.info(f"✅ Blockchain transaction created: {blockchain_tx}")
+                # Persist blockchain proof to database so dashboard PROOFS count updates
+                if DATABASE_AVAILABLE:
+                    try:
+                        db = next(get_db())
+                        analysis = db.query(Analysis).filter(Analysis.id == unique_id).first()
+                        if analysis:
+                            analysis.blockchain_tx = blockchain_tx
+                            analysis.blockchain_network = network
+                            analysis.blockchain_timestamp = datetime.now()
+                            analysis.updated_at = datetime.now()
+                            db.commit()
+                            logger.info(f"✅ Analysis {unique_id} updated with blockchain_tx")
+                        db.close()
+                    except Exception as db_err:
+                        logger.warning(f"Could not update analysis with blockchain_tx: {db_err}")
             else:
                 logger.warning("⚠️  No video hash available for blockchain submission")
         except Exception as e:

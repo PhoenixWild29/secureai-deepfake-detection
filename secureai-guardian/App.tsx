@@ -149,11 +149,13 @@ const App: React.FC = () => {
   };
 
   const handleScanComplete = (result: ScanResult) => {
-    const signedResult = { 
-      ...result, 
+    // Use real Solana tx from backend when present so PROOFS and history stay in sync
+    const hasRealTx = !!result.solanaTxSignature && !result.solanaTxSignature.startsWith('RELAY_TX_');
+    const signedResult: ScanResult = {
+      ...result,
       integrityHash: generateSignature(result.verdict, 1),
-      isBlockchainVerified: true, // Always true for managed relay
-      solanaTxSignature: `RELAY_TX_${Math.random().toString(36).substr(2, 10).toUpperCase()}`
+      isBlockchainVerified: hasRealTx || !!result.solanaTxSignature,
+      solanaTxSignature: hasRealTx ? result.solanaTxSignature! : (result.solanaTxSignature || `RELAY_TX_${Math.random().toString(36).substr(2, 10).toUpperCase()}`),
     };
     setLastResult(signedResult);
     setHistory(prev => [signedResult, ...prev]);
