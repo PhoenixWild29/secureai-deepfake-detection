@@ -70,6 +70,24 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
+def _make_json_serializable(obj):
+    """Convert numpy/types to native Python so json.dump and jsonify work."""
+    import numpy as np
+    if isinstance(obj, dict):
+        return {k: _make_json_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_make_json_serializable(x) for x in obj]
+    if isinstance(obj, (np.integer, np.int64, np.int32)):
+        return int(obj)
+    if isinstance(obj, (np.floating, np.float64, np.float32)):
+        return float(obj)
+    if isinstance(obj, (np.bool_, bool)):
+        return bool(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
 # Database imports
 try:
     from database.db_session import get_db, init_db
@@ -1005,19 +1023,19 @@ def analyze_video():
             'message': '[NEURAL] Loading CLIP and LAA-Net weights'
         }, room=unique_id)
         
-        # Run detection
-        # IMPORTANT: This can be CPU-heavy and can block the Socket.IO heartbeat if run on the event loop.
-        # Use eventlet's threadpool when available so pings/polls continue during inference.
+        # Run detection (use model_type from form or default 'enhanced')
+        model_type_param = request.form.get('model_type') or 'enhanced'
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore
                 from eventlet import tpool  # type: ignore
-                result = tpool.execute(detect_fake, filepath)
+                result = tpool.execute(detect_fake, filepath, model_type_param)
             else:
-                result = detect_fake(filepath)
+                result = detect_fake(filepath, model_type_param)
         except Exception:
             # Fallback to direct call (still logs via outer exception handler)
             result = detect_fake(filepath)
+        result = _make_json_serializable(result)
         processing_time = time.time() - start_time
         
         # Progress step 3: Analysis in progress
@@ -1066,6 +1084,7 @@ def analyze_video():
         response = {
             'id': unique_id,
             'filename': filename,
+            'model_type': model_type_param,
             'result': result,
             'security_analysis': security_analysis,
             'forensic_metrics': forensic_metrics,
@@ -1086,6 +1105,9 @@ def analyze_video():
 
         if upload_success:
             response['s3_url'] = get_s3_url(S3_BUCKET, s3_key)
+
+        # Ensure response is JSON-serializable (numpy bool/int/float -> native)
+        response = _make_json_serializable(response)
 
         # Save result to database or JSON file (fallback)
         if DATABASE_AVAILABLE:
