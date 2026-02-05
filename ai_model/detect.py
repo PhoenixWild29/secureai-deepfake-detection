@@ -80,8 +80,44 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
 
     try:
         if model_type == 'enhanced':
-            # Use the new ensemble SOTA detector (CLIP + LAA-Net)
-            result = detect_fake_enhanced(video_path)
+            # Prefer full ensemble (ResNet + CLIP + V13 + etc.) for real variation; fall back to enhanced
+            if detect_fake_ensemble:
+                try:
+                    import threading
+                    import queue
+                    result_queue = queue.Queue(maxsize=1)
+                    error_queue = queue.Queue(maxsize=1)
+                    def run_ensemble():
+                        try:
+                            r = detect_fake_ensemble(video_path)
+                            try:
+                                result_queue.put(r, block=False, timeout=0.1)
+                            except queue.Full:
+                                pass
+                        except Exception as e:
+                            try:
+                                error_queue.put(e, block=False, timeout=0.1)
+                            except queue.Full:
+                                pass
+                    t = threading.Thread(target=run_ensemble, daemon=True)
+                    t.start()
+                    t.join(timeout=45.0)
+                    if not t.is_alive() and not error_queue.empty():
+                        raise error_queue.get()
+                    if not t.is_alive() and not result_queue.empty():
+                        result = result_queue.get()
+                        if result.get('error') and 'unavailable' in result.get('error', '').lower():
+                            raise ValueError("Ensemble unavailable")
+                    else:
+                        raise TimeoutError("Ensemble timed out")
+                    if 'ensemble_fake_probability' in result:
+                        result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
+                        result['confidence'] = result['ensemble_fake_probability']
+                        result['authenticity_score'] = 1 - result['ensemble_fake_probability']
+                except (TimeoutError, ValueError, Exception):
+                    result = detect_fake_enhanced(video_path)
+            else:
+                result = detect_fake_enhanced(video_path)
 
         elif model_type == 'ensemble' or model_type == 'full_ensemble':
             # Use full ensemble: CLIP + ResNet50 + LAA-Net
@@ -163,6 +199,13 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
         # Ensure authenticity_score is present
         if 'authenticity_score' not in result:
             result['authenticity_score'] = 1 - result.get('confidence', 0)
+
+        # Ensure fake_probability is always set (frontend and API rely on it)
+        if 'fake_probability' not in result:
+            result['fake_probability'] = result.get(
+                'ensemble_fake_probability',
+                result.get('ensemble_score', result.get('confidence', 0.5))
+            )
 
         return result
 

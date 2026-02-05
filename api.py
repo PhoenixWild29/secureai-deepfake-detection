@@ -1036,6 +1036,13 @@ def analyze_video():
             # Fallback to direct call (still logs via outer exception handler)
             result = detect_fake(filepath)
         result = _make_json_serializable(result)
+        # Set verdict for DB and frontend: REAL / FAKE / SUSPICIOUS
+        conf = result.get('confidence', 0.5)
+        is_fake = result.get('is_fake', False)
+        if conf >= 0.7:
+            result['verdict'] = 'FAKE' if is_fake else 'REAL'
+        else:
+            result['verdict'] = 'SUSPICIOUS'
         processing_time = time.time() - start_time
         
         # Progress step 3: Analysis in progress
@@ -1730,18 +1737,39 @@ def submit_to_blockchain():
 
 @app.route('/api/dashboard/stats', methods=['GET'])
 def get_dashboard_stats():
-    """Get aggregated dashboard statistics"""
+    """Get aggregated dashboard statistics (from DB when available, else result files)"""
     try:
-        # Count results from results folder
-        results_dir = app.config['RESULTS_FOLDER']
         total_analyses = 0
         fake_count = 0
         authentic_count = 0
         blockchain_count = 0
         authenticity_scores = []
-        recent_analyses_times = []  # Track timestamps for processing rate calculation
-        
-        if os.path.exists(results_dir):
+        recent_analyses_times = []
+
+        # Prefer database when available (analyses are saved there after each scan)
+        if DATABASE_AVAILABLE:
+            try:
+                db = next(get_db())
+                analyses = db.query(Analysis).order_by(Analysis.created_at.desc()).limit(5000).all()
+                total_analyses = len(analyses)
+                for a in analyses:
+                    if a.is_fake:
+                        fake_count += 1
+                    else:
+                        authentic_count += 1
+                    if a.blockchain_tx:
+                        blockchain_count += 1
+                    if a.authenticity_score is not None:
+                        authenticity_scores.append(float(a.authenticity_score))
+                    if a.created_at:
+                        recent_analyses_times.append(a.created_at)
+                db.close()
+            except Exception as e:
+                logger.warning(f"Dashboard stats from DB failed: {e}, falling back to files")
+
+        # Fallback: count from results folder (when DB not used or failed)
+        results_dir = app.config['RESULTS_FOLDER']
+        if total_analyses == 0 and os.path.exists(results_dir):
             for filename in os.listdir(results_dir):
                 if filename.endswith('.json'):
                     try:

@@ -607,10 +607,13 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
         result = _detector_instance.detect(video_path)
         
         # Convert to expected format for backward compatibility
+        ensemble_prob = result['ensemble_fake_probability']
         return {
             'is_fake': result['is_deepfake'],
-            'confidence': result['ensemble_fake_probability'] if result['is_deepfake'] else (1 - result['ensemble_fake_probability']),
-            'ensemble_score': result['ensemble_fake_probability'],
+            'confidence': ensemble_prob if result['is_deepfake'] else (1 - ensemble_prob),
+            'ensemble_score': ensemble_prob,
+            'fake_probability': ensemble_prob,  # Explicit for API/frontend
+            'authenticity_score': 1 - ensemble_prob,
             'detector_scores': {
                 'clip_based': result['clip_fake_probability'],
                 'laa_net': result['laa_fake_probability']
@@ -628,10 +631,13 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
         try:
             _detector_instance = EnhancedDetector(**kwargs)
             result = _detector_instance.detect(video_path)
+            ep = result['ensemble_fake_probability']
             return {
                 'is_fake': result['is_deepfake'],
-                'confidence': result['ensemble_fake_probability'] if result['is_deepfake'] else (1 - result['ensemble_fake_probability']),
-                'ensemble_score': result['ensemble_fake_probability'],
+                'confidence': ep if result['is_deepfake'] else (1 - ep),
+                'ensemble_score': ep,
+                'fake_probability': ep,
+                'authenticity_score': 1 - ep,
                 'detector_scores': {
                     'clip_based': result['clip_fake_probability'],
                     'laa_net': result['laa_fake_probability']
