@@ -37,7 +37,7 @@ except ImportError:
     except ImportError:
         detect_fake_ensemble = None
 
-def detect_fake(video_path: str, model_type: str = 'resnet') -> Dict[str, Any]:
+def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]:
     """
     Main detection function with multiple model options
 

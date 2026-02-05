@@ -21,13 +21,19 @@ const API_BASE_URL = import.meta.env.DEV
 export interface BackendAnalysisResponse {
   id: string;
   filename: string;
+  sourceUrl?: string;
   result: {
     is_fake: boolean;
     confidence: number;
     authenticity_score: number;
+    fake_probability?: number;
+    real_probability?: number;
+    ensemble_score?: number;
     processing_time: number;
     video_hash?: string;
     method?: string;
+    model_used?: string;
+    frames_analyzed?: number;
     error?: string;
   };
   security_analysis?: {
@@ -113,13 +119,26 @@ export function transformBackendResponseToScanResult(
     verdict = 'SUSPICIOUS';
   }
 
-  // Calculate fake probability (inverse of authenticity score)
+  // Use fake_probability directly from backend if available, otherwise calculate
   const authenticityScore = result.authenticity_score !== undefined 
     ? result.authenticity_score 
     : (1 - confidence);
-  const fakeProbability = isFake 
-    ? Math.max(0.5, confidence) 
-    : Math.min(0.5, 1 - authenticityScore);
+  
+  // Prefer backend's fake_probability (comes from actual model output)
+  // Fall back to calculation only if backend doesn't provide it
+  let fakeProbability: number;
+  if (result.fake_probability !== undefined && typeof result.fake_probability === 'number') {
+    // Use the actual model's fake probability
+    fakeProbability = result.fake_probability;
+  } else if (result.ensemble_score !== undefined) {
+    // Use ensemble score if available (from enhanced detector)
+    fakeProbability = result.ensemble_score;
+  } else {
+    // Fallback calculation (legacy)
+    fakeProbability = isFake 
+      ? Math.max(0.5, confidence) 
+      : Math.min(0.5, 1 - authenticityScore);
+  }
 
   // Extract artifacts from security analysis
   const artifactsDetected: string[] = [];
