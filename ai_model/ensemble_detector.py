@@ -263,7 +263,7 @@ class EnsembleDetector:
             'resnet': 0.30,    # ResNet: trained specifically for deepfakes (100% test accuracy)
             'v13': 0.35,       # DeepFake Detector V13: BEST model (95.86% F1, 699M params) ⭐
             'xception': 0.10,  # XceptionNet: proven for deepfakes
-            'laa': 0.0         # LAA-Net: not available (weights broken)
+            'laa': 0.0         # LAA-Net: optional; set > 0 when external/laa_net + weights are configured
         }
         
         # Remove weights for unavailable models
@@ -271,6 +271,9 @@ class EnsembleDetector:
             self.ensemble_weights['v13'] = 0.0
         if not self.xception_detector:
             self.ensemble_weights['xception'] = 0.0
+        # Enable LAA-Net weight when actually loaded
+        if getattr(self.clip_detector, 'laa_available', False):
+            self.ensemble_weights['laa'] = 0.10
         
         # Normalize weights
         total_weight = sum(self.ensemble_weights.values())
@@ -288,6 +291,8 @@ class EnsembleDetector:
             active_models.append('XceptionNet')
         if self.efficientnet_detector:
             active_models.append('EfficientNet')
+        if getattr(self.clip_detector, 'laa_available', False):
+            active_models.append('LAA-Net')
         logger.info(f"   Active models: {', '.join(active_models)}")
         logger.info(f"   Ensemble weights: {self.ensemble_weights}")
     

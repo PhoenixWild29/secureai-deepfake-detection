@@ -97,9 +97,9 @@ def check_model_status():
     # Check LAA-Net
     print("📦 Checking LAA-Net Model...")
     try:
-        # Check if LAA-Net is available
-        from ai_model.enhanced_detector import LAA_NET_AVAILABLE
-        if LAA_NET_AVAILABLE:
+        from ai_model.enhanced_detector import get_enhanced_detector
+        detector = get_enhanced_detector()
+        if getattr(detector, 'laa_available', False):
             results['laa_net'] = {
                 'status': '✅ Available',
                 'details': {'accuracy_estimate': '+5-10% improvement'}
@@ -108,9 +108,9 @@ def check_model_status():
         else:
             results['laa_net'] = {
                 'status': '⚠️  Not Loaded',
-                'details': {'reason': 'Submodule not set up or weights not found'}
+                'details': {'reason': 'Submodule not set up or weights not found (see external/README.md)'}
             }
-            print("  ⚠️  LAA-Net not loaded (submodule setup required)")
+            print("  ⚠️  LAA-Net not loaded (clone external/laa_net + weights)")
     except Exception as e:
         results['laa_net'] = {
             'status': '❌ Not Available',

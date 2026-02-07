@@ -92,12 +92,52 @@ After setting up, the backend will automatically:
 3. ✅ Submit real transactions to Solana
 4. ✅ Return real transaction signatures
 
+## Docker / server deployment (real transactions)
+
+On the server, the backend expects the wallet at **`./wallet/id.json`** (mounted as `/app/wallet/id.json` in the container). If the file is missing, you will see: *"Solana wallet not found at /app/wallet/id.json. Using mock transaction."*
+
+**Option A – Use an existing devnet wallet (recommended if you already have one):**
+
+1. On your local machine, your Solana keypair is usually at `~/.config/solana/id.json` (or wherever you created it).
+2. Copy that file to the server into the project’s `wallet` folder (create the folder if needed):
+   ```bash
+   # On the server:
+   cd ~/secureai-deepfake-detection
+   mkdir -p wallet
+   ```
+   Then from your **local** machine (replace with your server user/host and path):
+   ```bash
+   scp ~/.config/solana/id.json root@YOUR_SERVER:~/secureai-deepfake-detection/wallet/id.json
+   ```
+3. Restart the backend so it picks up the file:
+   ```bash
+   docker compose -f docker-compose.https.yml restart secureai-backend
+   ```
+   The backend will use this wallet for real Solana transactions. Ensure the wallet is funded on devnet (e.g. faucet) if you use devnet.
+
+**Option B – Create a new wallet on the server (one-time):**
+
+```bash
+cd ~/secureai-deepfake-detection
+mkdir -p wallet
+docker compose -f docker-compose.https.yml run --rm secureai-backend \
+  python /app/scripts/utilities/create_solana_wallet.py /app/wallet/id.json
+```
+
+This creates `./wallet/id.json` on the host. Restart the backend:
+
+```bash
+docker compose -f docker-compose.https.yml restart secureai-backend
+```
+
+Then fund the new wallet (e.g. devnet faucet) and run a scan; you should get real Solana transaction signatures instead of mock.
+
 ## Troubleshooting
 
 ### "Solana wallet not found"
-- Check that `SOLANA_WALLET_PATH` is correct
-- Ensure the wallet file exists and is readable
-- Default location: `~/.config/solana/id.json`
+- **Docker:** Ensure `./wallet/id.json` exists on the host (see "Docker / server deployment" above).
+- Otherwise: check that `SOLANA_WALLET_PATH` is correct and the wallet file exists.
+- Default in-container path: `/app/wallet/id.json` (host: `./wallet/id.json`).
 
 ### "Failed to get recent blockhash"
 - Check your internet connection

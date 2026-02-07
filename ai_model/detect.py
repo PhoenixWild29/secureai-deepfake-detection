@@ -120,7 +120,7 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
                 result = detect_fake_enhanced(video_path)
 
         elif model_type == 'ensemble' or model_type == 'full_ensemble':
-            # Use full ensemble: CLIP + ResNet50 + LAA-Net
+            # Use full ensemble: CLIP + ResNet50 (+ optional LAA-Net when configured)
             if detect_fake_ensemble:
                 try:
                     # Try ensemble with timeout protection
@@ -224,9 +224,9 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
 def get_available_models() -> Dict[str, str]:
     """Get available detection models and their descriptions"""
     models = {
-        'enhanced': 'Ensemble SOTA detector (CLIP + LAA-Net)',
-        'ensemble': 'Full ensemble (CLIP + ResNet50 + LAA-Net) - Recommended',
-        'full_ensemble': 'Full ensemble (CLIP + ResNet50 + LAA-Net) - Recommended',
+        'enhanced': 'CLIP-based detector (optional LAA-Net when configured)',
+        'ensemble': 'Full ensemble (CLIP + ResNet50, optional LAA-Net) - Recommended',
+        'full_ensemble': 'Full ensemble (CLIP + ResNet50, optional LAA-Net) - Recommended',
         'cnn': 'Custom CNN classifier with YOLO face detection',
         'resnet': 'ResNet-based deepfake classifier'
     }

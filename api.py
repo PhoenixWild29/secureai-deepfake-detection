@@ -8,6 +8,10 @@ REST API for video analysis, batch processing, and blockchain integration
 # If running with eventlet, we must monkey-patch very early (before most imports).
 #
 import os
+# NNPACK is optional CPU acceleration for Conv2d. On many cloud VMs it cannot init ("Unsupported hardware");
+# PyTorch already uses other backends (oneDNN / default ATen). Disabling only suppresses the warning.
+# See docs/troubleshooting/NNPACK_AND_CPU_BACKENDS.md
+os.environ.setdefault('USE_NNPACK', '0')
 if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
     try:
         import eventlet  # type: ignore
@@ -1014,13 +1018,13 @@ def analyze_video():
         }, room=unique_id)
         
         # Progress step 2: Starting detection
-        progress_manager.update_progress(unique_id, 35, 'ALGORITHM_V3_BOOT_UP...', '[NEURAL] Loading CLIP and LAA-Net weights', step=2)
+        progress_manager.update_progress(unique_id, 35, 'ALGORITHM_V3_BOOT_UP...', '[NEURAL] Loading detection models (CLIP, ResNet, ...)', step=2)
         socketio.emit('progress', {
             'type': 'progress',
             'analysis_id': unique_id,
             'progress': 35,
             'status': 'ALGORITHM_V3_BOOT_UP...',
-            'message': '[NEURAL] Loading CLIP and LAA-Net weights'
+            'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
         # Run detection (use model_type from form or default 'enhanced')
@@ -1399,13 +1403,13 @@ def analyze_video_from_url():
         }, room=unique_id)
         
         # Progress step 2: Starting detection
-        progress_manager.update_progress(unique_id, 35, 'ALGORITHM_V3_BOOT_UP...', '[NEURAL] Loading CLIP and LAA-Net weights', step=2)
+        progress_manager.update_progress(unique_id, 35, 'ALGORITHM_V3_BOOT_UP...', '[NEURAL] Loading detection models (CLIP, ResNet, ...)', step=2)
         socketio.emit('progress', {
             'type': 'progress',
             'analysis_id': unique_id,
             'progress': 35,
             'status': 'ALGORITHM_V3_BOOT_UP...',
-            'message': '[NEURAL] Loading CLIP and LAA-Net weights'
+            'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
         # Run detection (use eventlet threadpool if enabled to keep Socket.IO alive)
@@ -2375,9 +2379,9 @@ Blockchain Proof: {r.get('solanaTxSignature', 'None')}
         # Build system instruction
         system_instruction = """You are SecureSage, the core AI intelligence for SecureAI Guardian.
 TECHNICAL SPECIFICATION: SecureAI Guardian v2
-- ENGINE: Nexus Ensemble v4. Uses CLIP (Semantic Forensics) + LAA-Net (Local Artifact Analysis).
+- ENGINE: Nexus Ensemble v4. Uses CLIP (Semantic Forensics) + ResNet50 + optional LAA-Net when configured.
 - CLIP ROLE: Detects high-level inconsistencies (lighting, geometry, semantic logic).
-- LAA-NET ROLE: Operates in the frequency domain to find generative "fingerprints" left by Diffusion/GAN weights.
+- LAA-NET: Optional; not used unless external/laa_net is set up and weights are loaded (see external/README.md).
 - BLOCKCHAIN: Solana Mainnet integration. Mints "Truth Protocol Seals" as immutable audit logs.
 - AUDIT PROTOCOL: AQA v4 (Automated Quality Assurance). Tests ENV_READY, UI_ROUTING, and TIER_STABILITY.
 - TIERS: Sentinel, Pro, Nexus, and POWER_USER (Architect Clearance).

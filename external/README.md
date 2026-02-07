@@ -2,6 +2,10 @@
 
 This directory contains external repositories and dependencies for the deepfake detection system.
 
+**LAA-Net is optional and not used in the live pipeline by default.** The detector runs with CLIP (and ResNet50 in the full ensemble) until you set up the LAA-Net repo and weights; then it is used automatically (see below).
+
+**Quick setup:** Clone [10Ring/LAA-Net](https://github.com/10Ring/LAA-Net) into `external/laa_net`, download pretrained weights into `external/laa_net/weights/`, and install their `requirements.txt`. See **docs/guides/LAA_NET_SETUP.md** for step-by-step instructions.
+
 ## LAA-Net Integration
 
 ### Setting up LAA-Net Submodule

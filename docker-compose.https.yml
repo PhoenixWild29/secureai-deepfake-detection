@@ -51,6 +51,11 @@ services:
       - FLASK_ENV=production
       - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
       - LOG_DIR=/app/logs
+      # NNPACK optional; on cloud VMs it often fails (Unsupported hardware). PyTorch uses oneDNN/default CPU.
+      # See docs/troubleshooting/NNPACK_AND_CPU_BACKENDS.md
+      - USE_NNPACK=0
+      # Solana: put keypair at ./wallet/id.json on host (or set SOLANA_WALLET_PATH)
+      - SOLANA_WALLET_PATH=/app/wallet/id.json
       # Socket.IO / progress updates (recommended defaults)
       - SOCKETIO_ASYNC_MODE=eventlet
       - GUNICORN_WORKERS=1
@@ -65,7 +70,7 @@ services:
     volumes:
       - ./uploads:/app/uploads
       - ./results:/app/results
-      - ./wallet:/app/wallet:ro
+      - ./wallet:/app/wallet
       - ./.env:/app/.env:ro
       - ./test_videos:/app/test_videos  # For test video storage
       - ./secrets:/app/secrets  # Writable (yt-dlp needs to write cookies back)

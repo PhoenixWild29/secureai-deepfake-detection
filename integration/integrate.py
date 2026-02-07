@@ -76,7 +76,11 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
                 wallet_path = os.path.expanduser('~/.config/solana/id.json')
         
         if not os.path.exists(wallet_path):
-            logger.warning(f"Solana wallet not found at {wallet_path}. Using mock transaction.")
+            logger.warning(
+                f"Solana wallet not found at {wallet_path}. Using mock transaction. "
+                "For real transactions: on the server create ./wallet/id.json (e.g. run "
+                "scripts/utilities/create_solana_wallet.py with wallet path ./wallet/id.json)."
+            )
             # Generate realistic mock signature
             mock_sig = base58.b58encode(hashlib.sha256(f"{video_hash}{int(time.time())}".encode()).digest()[:32]).decode()
             return mock_sig

@@ -50,16 +50,13 @@ from typing import Dict, List, Optional, Tuple, Any
 import warnings
 warnings.filterwarnings('ignore')
 
-# Try to import LAA-Net components (will be available after submodule setup)
+# LAA-Net: real inference via laa_net_loader when external/laa_net + weights exist
 try:
-    # Adjust these imports based on actual LAA-Net structure
-    # Example paths (to be updated after submodule setup):
-    # sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'external', 'LAA-Net'))
-    # from models import LAANet  # Replace with actual import
-    # from utils.face_utils import preprocess_face  # Replace with actual import
-    LAA_NET_AVAILABLE = False
+    from ai_model.laa_net_loader import load_laa_net, run_laa_inference
+    _LAA_LOADER_AVAILABLE = True
 except ImportError:
-    LAA_NET_AVAILABLE = False
+    _LAA_LOADER_AVAILABLE = False
+    load_laa_net = run_laa_inference = None
 
 # Face detection - MTCNN will be lazy-loaded to prevent TensorFlow from importing at module level
 # This prevents CUDA initialization errors on CPU-only servers
@@ -291,6 +288,16 @@ class EnhancedDetector:
             clip_model_name: CLIP model variant to use
             clip_pretrained: CLIP pretrained weights identifier
         """
+        # Default LAA-Net weights: env LAA_NET_WEIGHTS or first .pth in external/laa_net/weights/
+        if laa_weights_path is None:
+            laa_weights_path = os.getenv("LAA_NET_WEIGHTS")
+        if not laa_weights_path or not os.path.isfile(laa_weights_path):
+            _ext = os.path.join(os.path.dirname(__file__), "..", "external", "laa_net", "weights")
+            if os.path.isdir(_ext):
+                for _f in os.listdir(_ext):
+                    if _f.endswith(".pth"):
+                        laa_weights_path = os.path.join(_ext, _f)
+                        break
         # Force CPU if CUDA_VISIBLE_DEVICES is set to empty
         if os.getenv('CUDA_VISIBLE_DEVICES') == '':
             self.device = 'cpu'
@@ -373,38 +380,42 @@ class EnhancedDetector:
                 logger.error(f"❌ Error loading CLIP model: {e}")
                 raise
         
-        # === LAA-Net Setup ===
+        # === LAA-Net Setup (optional: requires external/laa_net clone + weights) ===
         self.laa_model = None
+        self._laa_preprocess = None
+        self._laa_device = self.device
         self.laa_available = False
         
-        if LAA_NET_AVAILABLE and laa_weights_path and os.path.exists(laa_weights_path):
+        if _LAA_LOADER_AVAILABLE and load_laa_net and laa_weights_path and os.path.exists(laa_weights_path):
             try:
                 logger.info("📦 Loading LAA-Net model...")
-                # TODO: Replace with actual LAA-Net loading code after submodule setup
-                # Example:
-                # from external.laa_net.models import LAANet
-                # self.laa_model = LAANet(...)
-                # self.laa_model.load_state_dict(torch.load(laa_weights_path, map_location=self.device))
-                # self.laa_model.to(self.device)
-                # self.laa_model.eval()
-                # self.laa_available = True
-                logger.info("ℹ️  LAA-Net model loading will be implemented after submodule setup.")
+                laa_root = os.getenv("LAA_NET_ROOT")
+                if not laa_root or not os.path.isdir(laa_root):
+                    laa_root = os.path.join(os.path.dirname(__file__), "..", "external", "laa_net")
+                laa_root = os.path.abspath(laa_root)
+                if os.path.isdir(laa_root):
+                    model, preprocess_fn, dev = load_laa_net(laa_root=laa_root, weights_path=laa_weights_path, device=self.device)
+                    if model is not None and preprocess_fn is not None:
+                        self.laa_model = model
+                        self._laa_preprocess = preprocess_fn
+                        self._laa_device = dev or self.device
+                        self.laa_available = True
+                        logger.info("✅ LAA-Net loaded; ensemble will use CLIP + LAA-Net.")
+                if not self.laa_available:
+                    logger.info("ℹ️  LAA-Net repo or config not found at %s. Using CLIP-only.", laa_root)
             except Exception as e:
-                logger.warning(f"⚠️  Could not load LAA-Net model: {e}")
-                logger.info("Continuing with CLIP-only detection.")
+                logger.warning("⚠️  Could not load LAA-Net: %s. Using CLIP-only.", e)
         else:
-            if not LAA_NET_AVAILABLE:
-                logger.info("ℹ️  LAA-Net not available (submodule not set up). Using CLIP-only detection.")
+            if not _LAA_LOADER_AVAILABLE:
+                logger.info("ℹ️  LAA-Net loader not available. Using CLIP-only detection.")
             elif not laa_weights_path:
                 logger.info("ℹ️  LAA-Net weights path not provided. Using CLIP-only detection.")
             else:
-                logger.info(f"ℹ️  LAA-Net weights not found at {laa_weights_path}. Using CLIP-only detection.")
+                logger.info("ℹ️  LAA-Net weights not found at %s. Using CLIP-only detection.", laa_weights_path)
         
-        logger.info("✅ EnhancedDetector initialization complete")
+        logger.info("✅ EnhancedDetector initialization complete (LAA-Net optional, currently %s)", "enabled" if self.laa_available else "disabled")
         
-        # LAA-Net preprocessing transform (placeholder - will use actual transform from LAA-Net)
-        # This should match LAA-Net's expected input format
-        self.laa_transform = None  # Will be set when LAA-Net is available
+        self.laa_transform = None  # Unused; preprocessing via _laa_preprocess
     
     def extract_frames(self, video_path: str, num_frames: int = 16) -> List[Image.Image]:
         """
@@ -498,56 +509,36 @@ class EnhancedDetector:
     
     def laa_detect_frames(self, frames: List[Image.Image]) -> float:
         """
-        Run LAA-Net detection on frames (requires face cropping).
-        
-        Args:
-            frames: List of PIL Images
-            
-        Returns:
-            Average fake probability (0=real, 1=fake)
+        Run LAA-Net detection on frames.
+        Uses real LAA-Net inference when laa_available else returns 0.5.
         """
-        if not self.laa_available or self.laa_model is None:
-            # Return neutral score if LAA-Net not available
+        if not self.laa_available or self.laa_model is None or self._laa_preprocess is None:
+            return 0.5
+        if not run_laa_inference:
             return 0.5
         
         fake_probs = []
-        
         for frame in frames:
             try:
-                # Convert PIL to numpy for face detection
+                # PIL RGB -> numpy BGR (LAA-Net expects BGR like cv2.imread)
                 frame_np = np.array(frame)
-                
-                # Crop face
-                face_crop = self.face_detector.crop_face(frame_np, target_size=(224, 224))
-                if face_crop is None:
-                    continue  # Skip if no face detected
-                
-                # Apply LAA-Net preprocessing transform
-                # TODO: Replace with actual LAA-Net transform after submodule setup
-                # Example:
-                # if self.laa_transform:
-                #     face_tensor = self.laa_transform(face_crop).unsqueeze(0).to(self.device)
-                # else:
-                #     # Fallback transform
-                #     face_tensor = torch.from_numpy(face_crop).permute(2, 0, 1).float() / 255.0
-                #     face_tensor = face_tensor.unsqueeze(0).to(self.device)
-                #
-                # with torch.no_grad():
-                #     output = self.laa_model(face_tensor)
-                #     fake_prob = torch.sigmoid(output).item()  # Assuming binary logit
-                # fake_probs.append(fake_prob)
-                
-                # Placeholder: return neutral for now
-                fake_probs.append(0.5)
-                
+                if frame_np.ndim == 2:
+                    frame_bgr = cv2.cvtColor(frame_np, cv2.COLOR_GRAY2BGR)
+                else:
+                    frame_bgr = cv2.cvtColor(frame_np, cv2.COLOR_RGB2BGR)
+                prob = run_laa_inference(
+                    self.laa_model,
+                    self._laa_preprocess,
+                    frame_bgr,
+                    device=self._laa_device,
+                )
+                fake_probs.append(prob)
             except Exception as e:
-                print(f"LAA-Net detection error on frame: {e}")
+                logger.debug("LAA-Net detection error on frame: %s", e)
                 continue
-        
         if not fake_probs:
-            return 0.5  # Neutral if all frames failed
-        
-        return np.mean(fake_probs)
+            return 0.5
+        return float(np.mean(fake_probs))
     
     def detect(self, video_path: str, num_frames: int = 16) -> Dict[str, Any]:
         """
