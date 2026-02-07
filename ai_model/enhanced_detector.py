@@ -477,6 +477,25 @@ class EnhancedDetector:
         
         return np.mean(fake_probs)
     
+    def clip_detect_frames_probs(self, frames: List[Image.Image]) -> List[float]:
+        """
+        Run CLIP zero-shot on each frame and return per-frame fake probabilities.
+        Used for real temporal consistency in forensic metrics.
+        """
+        probs = []
+        for frame in frames:
+            try:
+                image_input = self.clip_preprocess(frame).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    image_features = self.clip_model.encode_image(image_input)
+                    image_features /= image_features.norm(dim=-1, keepdim=True)
+                    similarity = image_features @ self.text_features.T
+                    p = similarity.softmax(dim=-1)[0].cpu().numpy()
+                    probs.append(float(p[1]))
+            except Exception:
+                probs.append(0.5)
+        return probs if probs else [0.5]
+    
     def laa_detect_frames(self, frames: List[Image.Image]) -> float:
         """
         Run LAA-Net detection on frames (requires face cropping).
@@ -552,18 +571,20 @@ class EnhancedDetector:
         # Extract frames
         frames = self.extract_frames(video_path, num_frames)
         
-        # Run CLIP detection
+        # Run CLIP detection (and get per-frame probs for temporal consistency)
         clip_prob = self.clip_detect_frames(frames)
+        clip_per_frame = self.clip_detect_frames_probs(frames)
         
         # Run LAA-Net detection (or placeholder)
         laa_prob = self.laa_detect_frames(frames)
         
-        # Simple ensemble (average) - can be enhanced with adaptive weighting later
+        # Per-frame ensemble for real temporal consistency
         if self.laa_available:
+            frame_probabilities = [(c + laa_prob) / 2.0 for c in clip_per_frame]
             ensemble_prob = (clip_prob + laa_prob) / 2.0
             method = 'ensemble_clip_laa'
         else:
-            # CLIP-only if LAA-Net not available
+            frame_probabilities = list(clip_per_frame)
             ensemble_prob = clip_prob
             method = 'clip_only'
         
@@ -571,6 +592,7 @@ class EnhancedDetector:
             'ensemble_fake_probability': float(ensemble_prob),
             'clip_fake_probability': float(clip_prob),
             'laa_fake_probability': float(laa_prob),
+            'frame_probabilities': frame_probabilities,
             'is_deepfake': ensemble_prob > 0.5,
             'method': method,
             'num_frames_analyzed': len(frames),
@@ -608,7 +630,7 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
         
         # Convert to expected format for backward compatibility
         ensemble_prob = result['ensemble_fake_probability']
-        return {
+        out = {
             'is_fake': result['is_deepfake'],
             'confidence': ensemble_prob if result['is_deepfake'] else (1 - ensemble_prob),
             'ensemble_score': ensemble_prob,
@@ -622,6 +644,9 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
             'video_hash': None,  # Can be added if needed
             'frame_count': result['num_frames_analyzed']
         }
+        if result.get('frame_probabilities'):
+            out['frame_probabilities'] = result['frame_probabilities']
+        return out
     except Exception as e:
         # If detection fails, reset detector and retry once
         import logging
@@ -632,7 +657,7 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
             _detector_instance = EnhancedDetector(**kwargs)
             result = _detector_instance.detect(video_path)
             ep = result['ensemble_fake_probability']
-            return {
+            ret = {
                 'is_fake': result['is_deepfake'],
                 'confidence': ep if result['is_deepfake'] else (1 - ep),
                 'ensemble_score': ep,
@@ -646,6 +671,9 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
                 'video_hash': None,
                 'frame_count': result['num_frames_analyzed']
             }
+            if result.get('frame_probabilities'):
+                ret['frame_probabilities'] = result['frame_probabilities']
+            return ret
         except Exception as retry_e:
             # If retry also fails, raise the error
             logger.error(f"Detection failed even after retry: {retry_e}")

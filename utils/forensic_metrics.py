@@ -275,12 +275,24 @@ def calculate_forensic_metrics(
             
             if frame_idx % frame_interval == 0:
                 frames.append(frame)
-                # Use detection confidence as proxy for frame probability
-                frame_probs.append(detection_result.get('confidence', 0.5))
-            
             frame_idx += 1
         
         cap.release()
+        
+        # Use real per-frame probabilities from detector when available (temporal consistency)
+        detector_frame_probs = detection_result.get('frame_probabilities')
+        if detector_frame_probs:
+            probs = [float(p) for p in detector_frame_probs]
+            n_f = len(frames)
+            if len(probs) >= n_f:
+                frame_probs = probs[:n_f]
+            else:
+                frame_probs = probs + [0.5] * (n_f - len(probs))
+            logger.info(f"Forensic metrics: using {len(detector_frame_probs)} per-frame probabilities from detector (temporal consistency = real)")
+        else:
+            # Fallback: same confidence for every frame (legacy behavior)
+            frame_probs = [detection_result.get('confidence', 0.5)] * len(frames)
+            logger.info(f"Forensic metrics: no frame_probabilities in result, using fallback (temporal consistency = single value)")
         
         if not frames:
             # Fallback if no frames extracted

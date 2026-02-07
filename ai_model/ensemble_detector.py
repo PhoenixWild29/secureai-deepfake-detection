@@ -334,6 +334,35 @@ class EnsembleDetector:
         
         return np.mean(fake_probs)
     
+    def resnet_detect_per_frame(self, frames: List[Image.Image]) -> List[float]:
+        """ResNet fake probability per frame (for temporal consistency)."""
+        if self.resnet_model is None:
+            return [0.5] * len(frames) if frames else [0.5]
+        from torchvision import transforms
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        probs = []
+        for frame in frames:
+            try:
+                frame_tensor = transform(frame).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    output = self.resnet_model(frame_tensor)
+                    p = torch.softmax(output, dim=1)
+                    probs.append(p[0][1].item())
+            except Exception:
+                probs.append(0.5)
+        return probs if probs else [0.5]
+    
+    def clip_detect_per_frame(self, frames: List[Image.Image]) -> List[float]:
+        """CLIP fake probability per frame (for temporal consistency)."""
+        if hasattr(self.clip_detector, 'clip_detect_frames_probs'):
+            return self.clip_detector.clip_detect_frames_probs(frames)
+        mean_prob = self.clip_detect(frames)
+        return [mean_prob] * len(frames) if frames else [0.5]
+    
     def laa_detect(self, frames: List[Image.Image]) -> float:
         """Get LAA-Net detection probability"""
         return self.clip_detector.laa_detect_frames(frames)
@@ -470,15 +499,17 @@ class EnsembleDetector:
                 'confidence': 0.0
             }
         
-        # Run all detectors with progress logging
+        # Run all detectors with progress logging (per-frame for CLIP/ResNet for temporal consistency)
         logger.info(f"🔍 Running ultimate ensemble on {len(frames)} frames...")
         
-        logger.debug(f"Running CLIP detection...")
-        clip_prob = self.clip_detect(frames)
+        logger.debug(f"Running CLIP detection (per-frame)...")
+        clip_per_frame = self.clip_detect_per_frame(frames)
+        clip_prob = float(np.mean(clip_per_frame))
         logger.debug(f"CLIP result: {clip_prob:.3f}")
         
-        logger.debug(f"Running ResNet detection...")
-        resnet_prob = self.resnet_detect(frames)
+        logger.debug(f"Running ResNet detection (per-frame)...")
+        resnet_per_frame = self.resnet_detect_per_frame(frames)
+        resnet_prob = float(np.mean(resnet_per_frame))
         logger.debug(f"ResNet result: {resnet_prob:.3f}")
         
         # DeepFake Detector V13 (BEST MODEL!)
@@ -521,12 +552,28 @@ class EnsembleDetector:
             clip_prob, resnet_prob, laa_prob, v13_prob, xception_prob, efficientnet_prob
         )
         
+        # Per-frame ensemble probs for real temporal consistency (same weights as full ensemble)
+        weights = ensemble_results.get('ensemble_weights_used', {})
+        n = len(frames)
+        frame_probabilities = []
+        for i in range(n):
+            fp = (
+                weights.get('clip', 0) * clip_per_frame[i] +
+                weights.get('resnet', 0) * resnet_per_frame[i] +
+                weights.get('v13', 0) * v13_prob +
+                weights.get('xception', 0) * xception_prob +
+                weights.get('efficientnet', 0) * efficientnet_prob +
+                weights.get('laa', 0) * laa_prob
+            )
+            frame_probabilities.append(float(fp))
+        
         # Determine method used
         models_used = ensemble_results.get('models_used', [])
         method = 'ultimate_ensemble_' + '_'.join(models_used) if models_used else 'clip_only'
         
         return {
             **ensemble_results,
+            'frame_probabilities': frame_probabilities,
             'method': method,
             'num_frames_analyzed': len(frames),
             'resnet_available': self.resnet_model is not None,
