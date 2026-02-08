@@ -1,0 +1,870 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Quick Setup on Server - Step by Step - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-setup-on-server-step-by-step" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quick Setup on Server - Step by Step
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-pull-latest-changes-already-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Pull Latest Changes ✅ (Already Done)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-run-setup-script-use-python3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Run Setup Script (Use python3)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-copy-files-to-container-already-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Copy Files to Container ✅ (Already Done)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-create-uploads-directory-and-add-test-videos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Create Uploads Directory and Add Test Videos
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Create Uploads Directory and Add Test Videos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-create-uploads-directory-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Create Uploads Directory First
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-find-existing-videos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Find Existing Videos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-c-create-a-simple-test-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option C: Create a Simple Test Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-d-use-videos-already-in-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option D: Use Videos Already in Container
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-verify-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Verify Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Verify Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#check-videopathmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check VideoPathManager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-test-even-without-videos-will-create-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run Test (Even Without Videos - Will Create One)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#if-uploads-directory-doesnt-exist-in-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If uploads directory doesn't exist in container:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#if-no-videos-are-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        If no videos are found:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="quick-setup-on-server-step-by-step">Quick Setup on Server - Step by Step</h1>
+<h2 id="step-1-pull-latest-changes-already-done">Step 1: Pull Latest Changes ✅ (Already Done)</h2>
+<pre><code class="language-bash">git pull origin master
+</code></pre>
+<h2 id="step-2-run-setup-script-use-python3">Step 2: Run Setup Script (Use python3)</h2>
+<pre><code class="language-bash"># Use python3, not python
+python3 setup_video_management.py
+</code></pre>
+<p>This will create all necessary directories.</p>
+<h2 id="step-3-copy-files-to-container-already-done">Step 3: Copy Files to Container ✅ (Already Done)</h2>
+<pre><code class="language-bash">docker cp utils/video_paths.py secureai-backend:/app/utils/
+docker cp test_ensemble_comprehensive.py secureai-backend:/app/
+docker cp ai_model/detect.py secureai-backend:/app/ai_model/
+docker cp api.py secureai-backend:/app/
+</code></pre>
+<h2 id="step-4-create-uploads-directory-and-add-test-videos">Step 4: Create Uploads Directory and Add Test Videos</h2>
+<h3 id="option-a-create-uploads-directory-first">Option A: Create Uploads Directory First</h3>
+<pre><code class="language-bash"># Create uploads directory on host
+mkdir -p ~/secureai-deepfake-detection/uploads
+
+# Verify it exists
+ls -la ~/secureai-deepfake-detection/uploads/
+</code></pre>
+<h3 id="option-b-find-existing-videos">Option B: Find Existing Videos</h3>
+<pre><code class="language-bash"># Search for any existing MP4 files
+find ~/secureai-deepfake-detection -name &quot;*.mp4&quot; -type f | head -10
+
+# If you find videos, copy them to uploads
+# Example: cp /found/path/video.mp4 ~/secureai-deepfake-detection/uploads/
+</code></pre>
+<h3 id="option-c-create-a-simple-test-video">Option C: Create a Simple Test Video</h3>
+<pre><code class="language-bash"># Create a simple test video using ffmpeg (if available)
+ffmpeg -f lavfi -i testsrc=duration=5:size=640x480:rate=15 -c:v libx264 -pix_fmt yuv420p ~/secureai-deepfake-detection/uploads/test_video_1.mp4
+
+# Or use the Python script to create a test video
+docker exec secureai-backend python3 /app/create_test_video.py
+</code></pre>
+<h3 id="option-d-use-videos-already-in-container">Option D: Use Videos Already in Container</h3>
+<pre><code class="language-bash"># Check if there are videos already in the container
+docker exec secureai-backend find /app -name &quot;*.mp4&quot; -type f | head -10
+
+# If videos exist, they should be accessible via VideoPathManager
+</code></pre>
+<h2 id="step-5-verify-setup">Step 5: Verify Setup</h2>
+<h3 id="check-videopathmanager">Check VideoPathManager</h3>
+<pre><code class="language-bash">docker exec secureai-backend python3 -c &quot;
+import sys
+sys.path.insert(0, '/app')
+from utils.video_paths import get_video_path_manager
+pm = get_video_path_manager()
+print(f'Uploads directory: {pm.get_uploads_directory()}')
+videos = pm.find_all_videos(max_count=10)
+print(f'Found {len(videos)} videos')
+for v in videos[:5]:
+    print(f'  - {v}')
+&quot;
+</code></pre>
+<h3 id="run-test-even-without-videos-will-create-one">Run Test (Even Without Videos - Will Create One)</h3>
+<pre><code class="language-bash">docker exec secureai-backend python3 /app/test_ensemble_comprehensive.py
+</code></pre>
+<p>The test script will automatically create a test video if none are found!</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="if-uploads-directory-doesnt-exist-in-container">If uploads directory doesn't exist in container:</h3>
+<pre><code class="language-bash"># Create it in container
+docker exec secureai-backend mkdir -p /app/uploads
+
+# Verify volume mount
+docker inspect secureai-backend | grep -A 10 Mounts | grep uploads
+</code></pre>
+<h3 id="if-no-videos-are-found">If no videos are found:</h3>
+<p>The test script will automatically create a simple test video if none are found. This is fine for testing the system.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

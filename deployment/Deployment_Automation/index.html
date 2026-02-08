@@ -1,0 +1,2209 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-automation-cicd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Automation &amp; CI/CD
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Automation &amp; CI/CD">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-deployment-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Automated Deployment Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cicd-pipeline-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 CI/CD Pipeline Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 CI/CD Pipeline Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipeline-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pipeline Stages
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pipeline Stages">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-code-quality-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1: Code Quality &amp; Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-build-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2: Build &amp; Package
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3: Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-4-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 4: Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 GitHub Actions Workflows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 GitHub Actions Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-cicd-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main CI/CD Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Main CI/CD Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-workflow-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Workflow Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-scanning-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Scanning Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Scanning Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-security-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comprehensive Security Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🐳 Docker Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🐳 Docker Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-stage-dockerfiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Stage Dockerfiles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Multi-Stage Dockerfiles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend-service-dockerfile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Service Dockerfile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-service-dockerfile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Service Dockerfile
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-for-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose for Development
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker Compose for Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Environment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Deployment Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Deployment Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blue-green-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blue-Green Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Blue-Green Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#blue-green-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blue-Green Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#canary-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canary Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Canary Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#canary-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Canary Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-alerting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Monitoring &amp; Alerting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Monitoring &amp; Alerting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deployment-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deployment Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#deployment-status-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Status Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#application-performance-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Performance Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#infrastructure-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Infrastructure Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Infrastructure Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#terraform-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terraform Automation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Terraform Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Deployment Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Deployment Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rollback-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollback Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rollback Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Rollback
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emergency-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emergency Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Emergency Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emergency-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Emergency Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="deployment-automation-cicd">Deployment Automation &amp; CI/CD</h2>
+<h3 id="automated-deployment-pipeline">🚀 Automated Deployment Pipeline</h3>
+<p>This guide covers the complete CI/CD pipeline, deployment automation, and infrastructure management for the SecureAI DeepFake Detection System.</p>
+<hr />
+<h2 id="cicd-pipeline-overview">🎯 CI/CD Pipeline Overview</h2>
+<h3 id="pipeline-architecture"><strong>Pipeline Architecture</strong></h3>
+<pre><code class="language-mermaid">graph LR
+    A[Code Commit] --&gt; B[GitHub Actions]
+    B --&gt; C[Build &amp; Test]
+    C --&gt; D[Security Scan]
+    D --&gt; E[Build Images]
+    E --&gt; F[Push to ECR]
+    F --&gt; G[Deploy to Staging]
+    G --&gt; H[Integration Tests]
+    H --&gt; I[Deploy to Production]
+    I --&gt; J[Health Checks]
+    J --&gt; K[Notify Teams]
+</code></pre>
+<h3 id="pipeline-stages"><strong>Pipeline Stages</strong></h3>
+<h4 id="stage-1-code-quality-testing"><strong>Stage 1: Code Quality &amp; Testing</strong></h4>
+<ul>
+<li><strong>Code Analysis</strong>: Linting, formatting, type checking</li>
+<li><strong>Unit Tests</strong>: Automated test execution with coverage</li>
+<li><strong>Integration Tests</strong>: API and database integration testing</li>
+<li><strong>Security Scanning</strong>: Vulnerability and dependency scanning</li>
+</ul>
+<h4 id="stage-2-build-package"><strong>Stage 2: Build &amp; Package</strong></h4>
+<ul>
+<li><strong>Docker Images</strong>: Multi-stage builds for optimization</li>
+<li><strong>Artifact Storage</strong>: ECR repository management</li>
+<li><strong>Version Tagging</strong>: Semantic versioning and tagging</li>
+<li><strong>Metadata Generation</strong>: Build information and provenance</li>
+</ul>
+<h4 id="stage-3-deployment"><strong>Stage 3: Deployment</strong></h4>
+<ul>
+<li><strong>Staging Deployment</strong>: Automated staging environment deployment</li>
+<li><strong>Production Deployment</strong>: Blue-green deployment strategy</li>
+<li><strong>Database Migrations</strong>: Automated schema and data migrations</li>
+<li><strong>Configuration Management</strong>: Environment-specific configuration</li>
+</ul>
+<h4 id="stage-4-verification"><strong>Stage 4: Verification</strong></h4>
+<ul>
+<li><strong>Health Checks</strong>: Application and service health validation</li>
+<li><strong>Smoke Tests</strong>: Basic functionality verification</li>
+<li><strong>Performance Tests</strong>: Load and performance validation</li>
+<li><strong>Security Validation</strong>: Security configuration verification</li>
+</ul>
+<hr />
+<h2 id="github-actions-workflows">🔧 GitHub Actions Workflows</h2>
+<h3 id="main-cicd-pipeline"><strong>Main CI/CD Pipeline</strong></h3>
+<h4 id="complete-workflow-configuration"><strong>Complete Workflow Configuration</strong></h4>
+<pre><code class="language-yaml"># .github/workflows/ci-cd.yml
+name: SecureAI CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, 'feature/*']
+  pull_request:
+    branches: [main, develop]
+
+env:
+  AWS_REGION: us-west-2
+  EKS_CLUSTER_NAME: secureai-cluster
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-west-2.amazonaws.com
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # Code Quality and Testing
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Code formatting check
+      run: |
+        black --check src/
+        isort --check-only src/
+
+    - name: Linting
+      run: |
+        flake8 src/
+        pylint src/
+
+    - name: Type checking
+      run: |
+        mypy src/
+
+    - name: Security scan
+      run: |
+        bandit -r src/
+        safety check
+
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=src --cov-report=xml --cov-report=html
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  # Build and Push Images
+  build-images:
+    needs: quality-check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    strategy:
+      matrix:
+        service: [backend, frontend, ai-service, worker]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.ECR_REGISTRY }}/secureai-${{ matrix.service }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./${{ matrix.service }}
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64
+
+  # Deploy to Staging
+  deploy-staging:
+    needs: build-images
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+    - name: Deploy to staging
+      run: |
+        # Update image tags
+        find k8s/staging -name &quot;*.yaml&quot; -exec sed -i &quot;s|secureai/.*:latest|${{ env.ECR_REGISTRY }}/secureai-&amp;:{{ github.sha }}|g&quot; {} \;
+
+        # Apply staging configuration
+        kubectl apply -f k8s/staging/
+
+        # Wait for deployment
+        kubectl rollout status deployment/secureai-backend -n secureai-staging --timeout=300s
+        kubectl rollout status deployment/secureai-frontend -n secureai-staging --timeout=300s
+
+    - name: Run integration tests
+      run: |
+        # Wait for services to be ready
+        kubectl wait --for=condition=available --timeout=300s deployment/secureai-backend -n secureai-staging
+
+        # Run integration tests
+        pytest tests/integration/ --kubeconfig=$HOME/.kube/config --namespace=secureai-staging
+
+  # Deploy to Production
+  deploy-production:
+    needs: [build-images, deploy-staging]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+    - name: Blue-Green Deployment
+      run: |
+        # Create new deployment with updated images
+        envsubst &lt; k8s/production/blue-green-template.yaml &gt; k8s/production/blue-green-deployment.yaml
+
+        # Deploy to blue environment
+        kubectl apply -f k8s/production/blue-green-deployment.yaml
+
+        # Wait for blue deployment to be ready
+        kubectl wait --for=condition=available --timeout=600s deployment/secureai-backend-blue -n secureai-production
+
+        # Run health checks on blue environment
+        ./scripts/health-check.sh --environment=blue
+
+        # Switch traffic to blue environment
+        kubectl patch service secureai-backend -n secureai-production -p '{&quot;spec&quot;:{&quot;selector&quot;:{&quot;version&quot;:&quot;blue&quot;}}}'
+
+        # Wait for green deployment to drain
+        kubectl wait --for=delete --timeout=300s pod -l version=green -n secureai-production
+
+        # Clean up green deployment
+        kubectl delete deployment secureai-backend-green -n secureai-production
+
+  # Post-deployment verification
+  verify-deployment:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+    - name: Health checks
+      run: |
+        ./scripts/health-check.sh --environment=production
+
+    - name: Smoke tests
+      run: |
+        pytest tests/smoke/ --kubeconfig=$HOME/.kube/config --namespace=secureai-production
+
+    - name: Performance tests
+      run: |
+        # Run basic performance tests
+        ./scripts/performance-test.sh --environment=production --duration=300s
+
+  # Notification
+  notify:
+    needs: [quality-check, build-images, deploy-staging, deploy-production, verify-deployment]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          🚀 SecureAI Deployment ${{ job.status }}!
+
+          **Branch:** ${{ github.ref }}
+          **Commit:** ${{ github.sha }}
+          **Author:** ${{ github.actor }}
+          **Duration:** ${{ github.event.head_commit.timestamp }}
+
+          **Services Deployed:**
+          - Backend: ${{ env.ECR_REGISTRY }}/secureai-backend:${{ env.IMAGE_TAG }}
+          - Frontend: ${{ env.ECR_REGISTRY }}/secureai-frontend:${{ env.IMAGE_TAG }}
+          - AI Service: ${{ env.ECR_REGISTRY }}/secureai-ai-service:${{ env.IMAGE_TAG }}
+
+          **Environment:** Production
+          **Status:** ${{ needs.verify-deployment.result }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+</code></pre>
+<h3 id="security-scanning-workflow"><strong>Security Scanning Workflow</strong></h3>
+<h4 id="comprehensive-security-pipeline"><strong>Comprehensive Security Pipeline</strong></h4>
+<pre><code class="language-yaml"># .github/workflows/security.yml
+name: Security Scanning
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run safety check
+      run: safety check --json --output safety-report.json
+
+    - name: Upload safety results
+      uses: actions/upload-artifact@v3
+      with:
+        name: safety-report
+        path: safety-report.json
+
+  container-scan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [backend, frontend, ai-service, worker]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t secureai-${{ matrix.service }} ./${{ matrix.service }}
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'secureai-${{ matrix.service }}'
+        format: 'sarif'
+        output: 'trivy-results-${{ matrix.service }}.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
+
+  infrastructure-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Terraform Format Check
+      run: terraform fmt -check -recursive
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Run Checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: terraform/
+        framework: terraform
+        output_format: sarif
+        output_file_path: checkov-results.sarif
+
+    - name: Upload Checkov results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: checkov-results.sarif
+</code></pre>
+<hr />
+<h2 id="docker-configuration">🐳 Docker Configuration</h2>
+<h3 id="multi-stage-dockerfiles"><strong>Multi-Stage Dockerfiles</strong></h3>
+<h4 id="backend-service-dockerfile"><strong>Backend Service Dockerfile</strong></h4>
+<pre><code class="language-dockerfile"># backend/Dockerfile
+# Build stage
+FROM python:3.11-slim as builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update &amp;&amp; apt-get install -y \
+    build-essential \
+    libpq-dev \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Production stage
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update &amp;&amp; apt-get install -y \
+    libpq5 \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# Copy Python dependencies from builder
+COPY --from=builder /root/.local /root/.local
+
+# Copy application code
+COPY src/ ./src/
+COPY alembic/ ./alembic/
+COPY alembic.ini .
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app \
+    &amp;&amp; chown -R app:app /app
+USER app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c &quot;import requests; requests.get('http://localhost:8000/health')&quot;
+
+# Expose port
+EXPOSE 8000
+
+# Start application
+CMD [&quot;python&quot;, &quot;-m&quot;, &quot;uvicorn&quot;, &quot;src.main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;]
+</code></pre>
+<h4 id="ai-service-dockerfile"><strong>AI Service Dockerfile</strong></h4>
+<pre><code class="language-dockerfile"># ai-service/Dockerfile
+# Base image with CUDA support
+FROM nvidia/cuda:11.8-devel-ubuntu22.04 as builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update &amp;&amp; apt-get install -y \
+    python3.11 \
+    python3.11-pip \
+    python3.11-dev \
+    build-essential \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Production stage
+FROM nvidia/cuda:11.8-runtime-ubuntu22.04
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update &amp;&amp; apt-get install -y \
+    python3.11 \
+    python3.11-distutils \
+    &amp;&amp; rm -rf /var/lib/apt/lists/*
+
+# Copy Python dependencies from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY src/ ./src/
+COPY models/ ./models/
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app \
+    &amp;&amp; chown -R app:app /app
+USER app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD python -c &quot;import requests; requests.get('http://localhost:8080/health')&quot;
+
+# Expose port
+EXPOSE 8080
+
+# Start application
+CMD [&quot;python&quot;, &quot;-m&quot;, &quot;uvicorn&quot;, &quot;src.main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8080&quot;]
+</code></pre>
+<h3 id="docker-compose-for-development"><strong>Docker Compose for Development</strong></h3>
+<h4 id="development-environment"><strong>Development Environment</strong></h4>
+<pre><code class="language-yaml"># docker-compose.dev.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: secureai_dev
+      POSTGRES_USER: secureai
+      POSTGRES_PASSWORD: secureai_password
+    ports:
+      - &quot;5432:5432&quot;
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [&quot;CMD-SHELL&quot;, &quot;pg_isready -U secureai&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - &quot;6379:6379&quot;
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;redis-cli&quot;, &quot;ping&quot;]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - &quot;8000:8000&quot;
+    environment:
+      - DATABASE_URL=postgresql://secureai:secureai_password@postgres:5432/secureai_dev
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
+    volumes:
+      - ./backend:/app
+      - /app/venv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: [&quot;python&quot;, &quot;-m&quot;, &quot;uvicorn&quot;, &quot;src.main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8000&quot;, &quot;--reload&quot;]
+
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - &quot;8080:8080&quot;
+    environment:
+      - MODEL_PATH=/models
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ./ai-service:/app
+      - ./models:/models
+    command: [&quot;python&quot;, &quot;-m&quot;, &quot;uvicorn&quot;, &quot;src.main:app&quot;, &quot;--host&quot;, &quot;0.0.0.0&quot;, &quot;--port&quot;, &quot;8080&quot;, &quot;--reload&quot;]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - &quot;3000:3000&quot;
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: [&quot;npm&quot;, &quot;start&quot;]
+
+volumes:
+  postgres_data:
+  redis_data:
+</code></pre>
+<hr />
+<h2 id="deployment-strategies">🚀 Deployment Strategies</h2>
+<h3 id="blue-green-deployment"><strong>Blue-Green Deployment</strong></h3>
+<h4 id="blue-green-configuration"><strong>Blue-Green Configuration</strong></h4>
+<pre><code class="language-yaml"># blue-green-deployment.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: secureai-backend
+  namespace: secureai-production
+spec:
+  replicas: 3
+  strategy:
+    blueGreen:
+      activeService: secureai-backend-active
+      previewService: secureai-backend-preview
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 30
+      prePromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: secureai-backend-preview
+      postPromotionAnalysis:
+        templates:
+        - templateName: success-rate
+        args:
+        - name: service-name
+          value: secureai-backend-active
+  selector:
+    matchLabels:
+      app: secureai-backend
+  template:
+    metadata:
+      labels:
+        app: secureai-backend
+    spec:
+      containers:
+      - name: secureai-backend
+        image: secureai/backend:latest
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: &quot;1Gi&quot;
+            cpu: &quot;500m&quot;
+          limits:
+            memory: &quot;2Gi&quot;
+            cpu: &quot;1000m&quot;
+
+---
+# Analysis template for blue-green deployment
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  namespace: secureai-production
+spec:
+  args:
+  - name: service-name
+  metrics:
+  - name: success-rate
+    successCondition: result[0] &gt;= 0.95
+    provider:
+      prometheus:
+        address: http://prometheus:9090
+        query: |
+          sum(rate(http_requests_total{service=&quot;{{args.service-name}}&quot;,status!~&quot;5..&quot;}[5m])) /
+          sum(rate(http_requests_total{service=&quot;{{args.service-name}}&quot;}[5m]))
+</code></pre>
+<h3 id="canary-deployment"><strong>Canary Deployment</strong></h3>
+<h4 id="canary-configuration"><strong>Canary Configuration</strong></h4>
+<pre><code class="language-yaml"># canary-deployment.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: secureai-ai-service
+  namespace: secureai-production
+spec:
+  replicas: 5
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 10m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          args:
+          - name: service-name
+            value: secureai-ai-service
+      - setWeight: 40
+      - pause: {duration: 10m}
+      - setWeight: 60
+      - pause: {duration: 10m}
+      - setWeight: 80
+      - pause: {duration: 10m}
+      trafficRouting:
+        istio:
+          virtualService:
+            name: secureai-ai-service
+            routes:
+            - primary
+  selector:
+    matchLabels:
+      app: secureai-ai-service
+  template:
+    metadata:
+      labels:
+        app: secureai-ai-service
+    spec:
+      containers:
+      - name: secureai-ai-service
+        image: secureai/ai-service:latest
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: &quot;4Gi&quot;
+            cpu: &quot;1000m&quot;
+            nvidia.com/gpu: 1
+          limits:
+            memory: &quot;8Gi&quot;
+            cpu: &quot;2000m&quot;
+            nvidia.com/gpu: 1
+</code></pre>
+<hr />
+<h2 id="monitoring-alerting">📊 Monitoring &amp; Alerting</h2>
+<h3 id="deployment-monitoring"><strong>Deployment Monitoring</strong></h3>
+<h4 id="deployment-status-monitoring"><strong>Deployment Status Monitoring</strong></h4>
+<pre><code class="language-yaml"># deployment-monitoring.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: secureai-deployment
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: secureai-backend
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: deployment-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: deployment
+    rules:
+      - alert: DeploymentFailed
+        expr: kube_deployment_status_replicas_unavailable &gt; 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: &quot;Deployment {{ $labels.deployment }} has unavailable replicas&quot;
+          description: &quot;Deployment {{ $labels.deployment }} has {{ $value }} unavailable replicas&quot;
+
+      - alert: RolloutStuck
+        expr: argo_rollouts_rollout_phase{phase!=&quot;Healthy&quot;} == 1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Rollout {{ $labels.name }} is stuck&quot;
+          description: &quot;Rollout {{ $labels.name }} has been in phase {{ $labels.phase }} for more than 10 minutes&quot;
+</code></pre>
+<h3 id="performance-monitoring"><strong>Performance Monitoring</strong></h3>
+<h4 id="application-performance-metrics"><strong>Application Performance Metrics</strong></h4>
+<pre><code class="language-python"># performance_monitoring.py
+from prometheus_client import Counter, Histogram, Gauge, start_http_server
+import time
+import logging
+
+# Deployment metrics
+deployment_requests_total = Counter('secureai_deployment_requests_total', 'Total deployment requests', ['method', 'status'])
+deployment_duration = Histogram('secureai_deployment_duration_seconds', 'Deployment duration', ['service'])
+deployment_success_rate = Gauge('secureai_deployment_success_rate', 'Deployment success rate', ['service'])
+active_deployments = Gauge('secureai_active_deployments', 'Number of active deployments')
+
+# Performance metrics
+response_time = Histogram('secureai_response_time_seconds', 'Response time', ['endpoint', 'method'])
+throughput = Counter('secureai_requests_total', 'Total requests', ['endpoint', 'method', 'status'])
+error_rate = Gauge('secureai_error_rate', 'Error rate percentage', ['service'])
+
+# Resource metrics
+cpu_usage = Gauge('secureai_cpu_usage_percent', 'CPU usage percentage', ['pod', 'service'])
+memory_usage = Gauge('secureai_memory_usage_bytes', 'Memory usage in bytes', ['pod', 'service'])
+gpu_usage = Gauge('secureai_gpu_usage_percent', 'GPU usage percentage', ['gpu_id', 'pod'])
+
+class DeploymentMonitor:
+    def __init__(self):
+        self.start_time = time.time()
+
+    def record_deployment(self, service: str, duration: float, success: bool):
+        deployment_duration.labels(service=service).observe(duration)
+        deployment_requests_total.labels(method=&quot;deploy&quot;, status=&quot;success&quot; if success else &quot;failure&quot;).inc()
+
+    def update_success_rate(self, service: str, rate: float):
+        deployment_success_rate.labels(service=service).set(rate)
+
+    def update_active_deployments(self, count: int):
+        active_deployments.set(count)
+
+# Start metrics server
+start_http_server(8000)
+</code></pre>
+<hr />
+<h2 id="infrastructure-management">🔧 Infrastructure Management</h2>
+<h3 id="terraform-automation"><strong>Terraform Automation</strong></h3>
+<h4 id="infrastructure-pipeline"><strong>Infrastructure Pipeline</strong></h4>
+<pre><code class="language-yaml"># .github/workflows/infrastructure.yml
+name: Infrastructure Management
+
+on:
+  push:
+    branches: [main]
+    paths: ['terraform/**']
+  pull_request:
+    branches: [main]
+    paths: ['terraform/**']
+
+jobs:
+  terraform-plan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: Terraform Format Check
+      run: terraform fmt -check -recursive
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      working-directory: terraform/
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v3
+      with:
+        name: terraform-plan
+        path: terraform/tfplan
+
+  terraform-apply:
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v3
+      with:
+        name: terraform-plan
+        path: terraform/
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-2
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: terraform/
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      working-directory: terraform/
+</code></pre>
+<h3 id="configuration-management"><strong>Configuration Management</strong></h3>
+<h4 id="environment-configuration"><strong>Environment Configuration</strong></h4>
+<pre><code class="language-yaml"># config/environments.yaml
+environments:
+  development:
+    replicas: 1
+    resources:
+      requests:
+        memory: &quot;512Mi&quot;
+        cpu: &quot;250m&quot;
+      limits:
+        memory: &quot;1Gi&quot;
+        cpu: &quot;500m&quot;
+    database:
+      instance_class: &quot;db.t3.micro&quot;
+      allocated_storage: 20
+    monitoring:
+      enabled: false
+
+  staging:
+    replicas: 2
+    resources:
+      requests:
+        memory: &quot;1Gi&quot;
+        cpu: &quot;500m&quot;
+      limits:
+        memory: &quot;2Gi&quot;
+        cpu: &quot;1000m&quot;
+    database:
+      instance_class: &quot;db.t3.small&quot;
+      allocated_storage: 100
+    monitoring:
+      enabled: true
+
+  production:
+    replicas: 3
+    resources:
+      requests:
+        memory: &quot;2Gi&quot;
+        cpu: &quot;1000m&quot;
+      limits:
+        memory: &quot;4Gi&quot;
+        cpu: &quot;2000m&quot;
+    database:
+      instance_class: &quot;db.r6g.xlarge&quot;
+      allocated_storage: 500
+      multi_az: true
+    monitoring:
+      enabled: true
+      alerts:
+        enabled: true
+</code></pre>
+<hr />
+<h2 id="deployment-support">📞 Deployment Support</h2>
+<h3 id="rollback-procedures"><strong>Rollback Procedures</strong></h3>
+<h4 id="automated-rollback"><strong>Automated Rollback</strong></h4>
+<pre><code class="language-bash">#!/bin/bash
+# rollback.sh - Automated rollback script
+
+set -e
+
+ENVIRONMENT=${1:-production}
+NAMESPACE=&quot;secureai-${ENVIRONMENT}&quot;
+TIMEOUT=${2:-300}
+
+echo &quot;Starting rollback for environment: ${ENVIRONMENT}&quot;
+
+# Get current deployment status
+kubectl get deployments -n ${NAMESPACE}
+
+# Rollback to previous version
+kubectl rollout undo deployment/secureai-backend -n ${NAMESPACE}
+kubectl rollout undo deployment/secureai-ai-service -n ${NAMESPACE}
+kubectl rollout undo deployment/secureai-frontend -n ${NAMESPACE}
+
+# Wait for rollback to complete
+kubectl rollout status deployment/secureai-backend -n ${NAMESPACE} --timeout=${TIMEOUT}s
+kubectl rollout status deployment/secureai-ai-service -n ${NAMESPACE} --timeout=${TIMEOUT}s
+kubectl rollout status deployment/secureai-frontend -n ${NAMESPACE} --timeout=${TIMEOUT}s
+
+# Verify rollback
+./scripts/health-check.sh --environment=${ENVIRONMENT}
+
+echo &quot;Rollback completed successfully&quot;
+
+# Notify teams
+curl -X POST &quot;${SLACK_WEBHOOK_URL}&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &quot;{\&quot;text\&quot;:\&quot;🔄 Rollback completed for ${ENVIRONMENT} environment\&quot;}&quot;
+</code></pre>
+<h3 id="emergency-procedures"><strong>Emergency Procedures</strong></h3>
+<h4 id="emergency-deployment"><strong>Emergency Deployment</strong></h4>
+<pre><code class="language-bash">#!/bin/bash
+# emergency-deploy.sh - Emergency deployment script
+
+set -e
+
+ENVIRONMENT=${1:-production}
+NAMESPACE=&quot;secureai-${ENVIRONMENT}&quot;
+IMAGE_TAG=${2:-latest}
+
+echo &quot;Starting emergency deployment for environment: ${ENVIRONMENT}&quot;
+
+# Scale down current deployment
+kubectl scale deployment secureai-backend --replicas=0 -n ${NAMESPACE}
+kubectl scale deployment secureai-ai-service --replicas=0 -n ${NAMESPACE}
+
+# Deploy emergency version
+kubectl set image deployment/secureai-backend secureai-backend=secureai/backend:${IMAGE_TAG} -n ${NAMESPACE}
+kubectl set image deployment/secureai-ai-service secureai-ai-service=secureai/ai-service:${IMAGE_TAG} -n ${NAMESPACE}
+
+# Scale up
+kubectl scale deployment secureai-backend --replicas=3 -n ${NAMESPACE}
+kubectl scale deployment secureai-ai-service --replicas=2 -n ${NAMESPACE}
+
+# Wait for deployment
+kubectl rollout status deployment/secureai-backend -n ${NAMESPACE} --timeout=300s
+kubectl rollout status deployment/secureai-ai-service -n ${NAMESPACE} --timeout=300s
+
+echo &quot;Emergency deployment completed&quot;
+
+# Notify teams
+curl -X POST &quot;${SLACK_WEBHOOK_URL}&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &quot;{\&quot;text\&quot;:\&quot;🚨 Emergency deployment completed for ${ENVIRONMENT} environment\&quot;}&quot;
+</code></pre>
+<hr />
+<p><em>This deployment automation guide provides a comprehensive framework for implementing CI/CD pipelines, automated deployments, and infrastructure management for the SecureAI DeepFake Detection System. For additional configuration details and advanced deployment strategies, refer to the specific component documentation.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

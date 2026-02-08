@@ -1,0 +1,858 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>X Cookies Setup - Quick Start - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#x-cookies-setup-quick-start" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              X Cookies Setup - Quick Start
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-steps-5-minutes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Steps (5 minutes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Steps (5 minutes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-export-cookies-2-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Export Cookies (2 min)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-upload-to-server-1-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Upload to Server (1 min)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-set-permissions-30-sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Set Permissions (30 sec)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-restart-backend-1-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Restart Backend (1 min)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-test-30-sec" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Test (30 sec)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#important-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Important Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#full-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Full Guide
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="x-cookies-setup-quick-start">X Cookies Setup - Quick Start</h1>
+<h2 id="quick-steps-5-minutes">Quick Steps (5 minutes)</h2>
+<h3 id="1-export-cookies-2-min">1. Export Cookies (2 min)</h3>
+<p><strong>Chrome:</strong>
+1. Install: https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc
+2. Go to https://x.com (make sure you're logged in)
+3. Click extension icon → "Export" button
+4. Save the file (it may save as <code>x_cookies.txt.txt</code> - that's OK, we'll fix it)</p>
+<p><strong>Firefox:</strong>
+1. Install: https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/
+2. Go to https://x.com (make sure you're logged in)
+3. Click extension icon → "Export" button
+4. Save the file (it may save as <code>x_cookies.txt.txt</code> - that's OK, we'll fix it)</p>
+<p><strong>Important:</strong> Make sure you're logged into X before exporting!</p>
+<h3 id="2-upload-to-server-1-min">2. Upload to Server (1 min)</h3>
+<p><strong>Your server:</strong> <code>root@guardian.secureai.dev</code></p>
+<p><strong>Option A: Using SCP (from PowerShell)</strong></p>
+<ol>
+<li>Open PowerShell</li>
+<li>
+<p>Navigate to your project folder:
+   <code>powershell
+   cd "C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection"</code></p>
+</li>
+<li>
+<p>Upload the file (use the actual filename - it might be <code>x_cookies.txt.txt</code>):
+   ```powershell
+   # If file is named x_cookies.txt.txt:
+   scp "secrets\x_cookies.txt.txt" root@guardian.secureai.dev:/root/secureai-deepfake-detection/secrets/x_cookies.txt</p>
+</li>
+</ol>
+<p># OR if file is named x_cookies.txt:
+   scp "secrets\x_cookies.txt" root@guardian.secureai.dev:/root/secureai-deepfake-detection/secrets/x_cookies.txt
+   ```</p>
+<p><strong>Option B: Using DigitalOcean Console</strong></p>
+<ol>
+<li>Go to DigitalOcean dashboard → Your droplet</li>
+<li>Click "Access" → "Launch Droplet Console"</li>
+<li>Run:
+   <code>bash
+   cd ~/secureai-deepfake-detection
+   mkdir -p secrets
+   nano secrets/x_cookies.txt</code></li>
+<li>Paste your cookies content</li>
+<li>Press <code>Ctrl+X</code>, then <code>Y</code>, then <code>Enter</code> to save</li>
+</ol>
+<h3 id="3-set-permissions-30-sec">3. Set Permissions (30 sec)</h3>
+<p><strong>SSH into your server:</strong></p>
+<pre><code class="language-bash">ssh root@guardian.secureai.dev
+</code></pre>
+<p><strong>Set permissions:</strong></p>
+<pre><code class="language-bash">cd ~/secureai-deepfake-detection
+chmod 600 secrets/x_cookies.txt
+</code></pre>
+<h3 id="4-restart-backend-1-min">4. Restart Backend (1 min)</h3>
+<p><strong>Still on the server, run:</strong></p>
+<pre><code class="language-bash"># Restart to pick up new cookies
+docker compose -f docker-compose.https.yml restart secureai-backend
+
+# Verify it's working
+docker exec secureai-backend env | grep X_COOKIES_FILE
+</code></pre>
+<p><strong>Should show:</strong> <code>X_COOKIES_FILE=/app/secrets/x_cookies.txt</code></p>
+<p><strong>Also verify file exists in container:</strong></p>
+<pre><code class="language-bash">docker exec secureai-backend ls -la /app/secrets/x_cookies.txt
+</code></pre>
+<h3 id="5-test-30-sec">5. Test (30 sec)</h3>
+<ol>
+<li>Go to https://guardian.secureai.dev</li>
+<li>Click <strong>"STREAM_INTEL"</strong> tab</li>
+<li>Paste an X link (e.g., <code>https://x.com/username/status/1234567890</code>)</li>
+<li>Click <strong>"Authorize Multi-Layer Analysis"</strong></li>
+<li>Should work without errors! ✅</li>
+</ol>
+<h2 id="complete-verification-checklist">Complete Verification Checklist</h2>
+<p>Run these on your server (<code>ssh root@guardian.secureai.dev</code>):</p>
+<pre><code class="language-bash"># 1. Check file exists on server
+ls -la ~/secureai-deepfake-detection/secrets/x_cookies.txt
+
+# 2. Check file exists in container
+docker exec secureai-backend ls -la /app/secrets/x_cookies.txt
+
+# 3. Check environment variable
+docker exec secureai-backend env | grep X_COOKIES_FILE
+
+# 4. Check file content (first few lines)
+docker exec secureai-backend head -5 /app/secrets/x_cookies.txt
+</code></pre>
+<p><strong>All should succeed without errors!</strong></p>
+<h2 id="important-notes">Important Notes</h2>
+<ul>
+<li>⚠️ <strong>Cookies expire after ~30 days</strong> - re-export monthly</li>
+<li>🔒 <strong>Keep cookies file secure</strong> - don't commit to git</li>
+<li>✅ <strong>Works for all users</strong> - once configured, everyone can use X links</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong>Still getting "X_AUTH_REQUIRED" error?</strong></p>
+<pre><code class="language-bash"># 1. Verify file exists
+ls -la secrets/x_cookies.txt
+
+# 2. Check env var in container
+docker exec secureai-backend env | grep X_COOKIES
+
+# 3. Restart backend
+docker compose -f docker-compose.https.yml restart secureai-backend
+
+# 4. Check logs
+docker logs secureai-backend --tail 50
+</code></pre>
+<p><strong>Cookies expired?</strong>
+- Re-export from browser (make sure you're logged into X)
+- Re-upload to server
+- Restart backend</p>
+<h2 id="full-guide">Full Guide</h2>
+<p>For detailed instructions, see: <code>docs/deployment/X_COOKIES_SETUP.md</code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

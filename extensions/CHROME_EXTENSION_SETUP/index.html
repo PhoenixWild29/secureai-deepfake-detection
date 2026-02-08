@@ -1,0 +1,1080 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>SecureAI X Analyzer Chrome Extension - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-x-analyzer-chrome-extension" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI X Analyzer Chrome Extension
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Extension?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-downloadclone-the-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Download/Clone the Extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-load-extension-in-chrome" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Load Extension in Chrome
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-custom-api-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced: Custom API Base
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#technical-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-videotwimgcom-mp4-url-found-on-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "No video.twimg.com MP4 URL found on page"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-fetch-mp4-403-forbidden" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Failed to fetch MP4: 403 Forbidden"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secureai-analyze-failed-400500" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "SecureAI analyze failed: 400/500"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extension-not-appearing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extension Not Appearing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        File Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-video-extraction-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating Video Extraction Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Improvements
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-x-analyzer-chrome-extension">SecureAI X Analyzer Chrome Extension</h1>
+<h2 id="overview">Overview</h2>
+<p>The SecureAI X Analyzer Chrome extension allows users to analyze X/Twitter videos directly from the X website without needing to download or upload files manually. The extension leverages your authenticated browser session to extract video URLs and upload them to SecureAI for deepfake detection.</p>
+<h2 id="why-this-extension">Why This Extension?</h2>
+<p>X/Twitter restricts unauthenticated access to video media. The extension:
+- Uses your authenticated browser session (you're already logged into X)
+- Extracts the actual video URL from the page
+- Uploads it directly to SecureAI for analysis
+- Provides seamless UX - no manual download/upload needed</p>
+<h2 id="installation">Installation</h2>
+<h3 id="step-1-downloadclone-the-extension">Step 1: Download/Clone the Extension</h3>
+<p>The extension is located in:</p>
+<pre><code>extensions/chrome-secureai-x-analyzer/
+</code></pre>
+<h3 id="step-2-load-extension-in-chrome">Step 2: Load Extension in Chrome</h3>
+<ol>
+<li>Open Chrome and navigate to <code>chrome://extensions/</code></li>
+<li>Enable <strong>Developer mode</strong> (toggle in top-right corner)</li>
+<li>Click <strong>"Load unpacked"</strong></li>
+<li>Select the <code>extensions/chrome-secureai-x-analyzer/</code> folder</li>
+<li>The extension should now appear in your extensions list</li>
+</ol>
+<h3 id="step-3-verify-installation">Step 3: Verify Installation</h3>
+<ol>
+<li>Navigate to an X/Twitter post with a video</li>
+<li>Click the SecureAI extension icon in your toolbar</li>
+<li>You should see the "SecureAI X Analyzer" popup</li>
+</ol>
+<h2 id="usage">Usage</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<ol>
+<li><strong>Navigate to an X post with a video</strong></li>
+<li>Open any X/Twitter post that contains a video</li>
+<li>
+<p>The post URL should be something like: <code>https://x.com/username/status/1234567890</code></p>
+</li>
+<li>
+<p><strong>Click the extension icon</strong></p>
+</li>
+<li>Click the SecureAI extension icon in your Chrome toolbar</li>
+<li>
+<p>The popup will open</p>
+</li>
+<li>
+<p><strong>Click "Analyze this X video"</strong></p>
+</li>
+<li>
+<p>The extension will:</p>
+<ul>
+<li>Extract the video URL from the page</li>
+<li>Download the video using your authenticated session</li>
+<li>Upload it to SecureAI backend</li>
+<li>Start the analysis</li>
+</ul>
+</li>
+<li>
+<p><strong>View results</strong></p>
+</li>
+<li>The extension will show an <code>analysis_id</code> in the popup</li>
+<li>Open SecureAI Guardian (<code>https://guardian.secureai.dev</code>)</li>
+<li>The analysis should appear in your results (or you can search by ID)</li>
+</ol>
+<h3 id="advanced-custom-api-base">Advanced: Custom API Base</h3>
+<p>If you're running a local instance or using a different backend:</p>
+<ol>
+<li>Open the extension popup</li>
+<li>Enter your API base URL in the input field (e.g., <code>http://localhost:5000</code> or <code>https://your-domain.com</code>)</li>
+<li>Click "Analyze this X video"</li>
+</ol>
+<p>Default: <code>https://guardian.secureai.dev</code></p>
+<h2 id="how-it-works">How It Works</h2>
+<h3 id="technical-flow">Technical Flow</h3>
+<ol>
+<li><strong>Video Extraction</strong> (<code>service_worker.js</code>):</li>
+<li>Injects a script into the X page</li>
+<li>Searches HTML for <code>video.twimg.com/*.mp4</code> URLs</li>
+<li>
+<p>Selects the highest quality variant (longest URL)</p>
+</li>
+<li>
+<p><strong>Video Download</strong> (<code>service_worker.js</code>):</p>
+</li>
+<li>Uses <code>fetch()</code> with <code>credentials: 'include'</code> to download the video</li>
+<li>Your browser's authenticated session cookies are automatically included</li>
+<li>
+<p>Converts the response to a <code>File</code> object</p>
+</li>
+<li>
+<p><strong>Upload to SecureAI</strong> (<code>service_worker.js</code>):</p>
+</li>
+<li>Creates a <code>FormData</code> with the video file</li>
+<li>Generates a unique <code>analysis_id</code></li>
+<li>POSTs to <code>/api/analyze</code> endpoint</li>
+<li>
+<p>Returns the <code>analysis_id</code> for tracking</p>
+</li>
+<li>
+<p><strong>Analysis</strong> (Backend):</p>
+</li>
+<li>SecureAI backend receives the video</li>
+<li>Runs deepfake detection using V13 ensemble</li>
+<li>Returns results via WebSocket or API</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="no-videotwimgcom-mp4-url-found-on-page">"No video.twimg.com MP4 URL found on page"</h3>
+<p><strong>Cause</strong>: X's HTML structure may have changed, or the video format is different.</p>
+<p><strong>Solutions</strong>:
+1. <strong>Refresh the X page</strong> and try again
+2. <strong>Check if the post actually has a video</strong> (not just an image or GIF)
+3. <strong>Try a different X post</strong> with a video
+4. <strong>Report the issue</strong> - we may need to update the extraction logic</p>
+<h3 id="failed-to-fetch-mp4-403-forbidden">"Failed to fetch MP4: 403 Forbidden"</h3>
+<p><strong>Cause</strong>: Your browser session may have expired, or X is blocking the request.</p>
+<p><strong>Solutions</strong>:
+1. <strong>Refresh your X login</strong> - log out and log back into X
+2. <strong>Check if you're logged into X</strong> in the same browser
+3. <strong>Try a different X post</strong>
+4. <strong>Clear browser cookies</strong> for X and log back in</p>
+<h3 id="secureai-analyze-failed-400500">"SecureAI analyze failed: 400/500"</h3>
+<p><strong>Cause</strong>: Backend API issue or video format problem.</p>
+<p><strong>Solutions</strong>:
+1. <strong>Check backend status</strong>: <code>curl https://guardian.secureai.dev/api/health</code>
+2. <strong>Verify API base URL</strong> is correct in extension popup
+3. <strong>Check backend logs</strong>: <code>docker logs secureai-backend</code>
+4. <strong>Try uploading the video directly</strong> via SecureAI Guardian UI instead</p>
+<h3 id="extension-not-appearing">Extension Not Appearing</h3>
+<p><strong>Solutions</strong>:
+1. <strong>Check if extension is enabled</strong> in <code>chrome://extensions/</code>
+2. <strong>Reload the extension</strong> (click the reload icon)
+3. <strong>Check for errors</strong> in the extension's service worker (click "service worker" link in extensions page)
+4. <strong>Reinstall the extension</strong> (remove and load unpacked again)</p>
+<h2 id="development">Development</h2>
+<h3 id="file-structure">File Structure</h3>
+<pre><code>extensions/chrome-secureai-x-analyzer/
+├── manifest.json          # Extension configuration
+├── popup.html             # Extension popup UI
+├── popup.js               # Popup logic
+└── service_worker.js     # Background script (video extraction &amp; upload)
+</code></pre>
+<h3 id="updating-video-extraction-logic">Updating Video Extraction Logic</h3>
+<p>If X changes their HTML structure, update <code>extractMp4FromPage()</code> in <code>service_worker.js</code>:</p>
+<pre><code class="language-javascript">// Current: searches for video.twimg.com URLs
+const re = /https:\/\/video\.twimg\.com\/[^&quot;'\\\s]+?\.mp4[^&quot;'\\\s]*/g;
+
+// You may need to:
+// 1. Search for different URL patterns
+// 2. Use DOM queries instead of regex
+// 3. Check for video elements directly
+</code></pre>
+<h3 id="testing">Testing</h3>
+<ol>
+<li><strong>Load extension in Chrome</strong> (Developer mode)</li>
+<li><strong>Open DevTools</strong> for the extension:</li>
+<li>Go to <code>chrome://extensions/</code></li>
+<li>Click "service worker" link under the extension</li>
+<li>This opens the service worker console</li>
+<li><strong>Test on an X post</strong>:</li>
+<li>Navigate to an X post with a video</li>
+<li>Click extension icon</li>
+<li>Check service worker console for errors</li>
+<li>Check popup console (right-click popup → Inspect)</li>
+</ol>
+<h2 id="future-improvements">Future Improvements</h2>
+<ul>
+<li>[ ] Better video extraction (DOM queries instead of regex)</li>
+<li>[ ] Support for multiple videos in a thread</li>
+<li>[ ] Direct result display in extension popup</li>
+<li>[ ] Progress tracking in extension</li>
+<li>[ ] Support for other platforms (YouTube, TikTok, etc.)</li>
+<li>[ ] OAuth flow for server-side X authentication (alternative to extension)</li>
+</ul>
+<h2 id="support">Support</h2>
+<p>If you encounter issues:
+1. Check the troubleshooting section above
+2. Review extension logs (service worker console)
+3. Check backend logs: <code>docker logs secureai-backend</code>
+4. Report issues with:
+   - X post URL (if possible)
+   - Browser version
+   - Extension version
+   - Error messages from console</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

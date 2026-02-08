@@ -1,0 +1,1203 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Complete Testing and Optimization Guide - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#complete-testing-and-optimization-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Complete Testing and Optimization Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-large-dataset-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Large Dataset Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Large Dataset Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#purpose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-on-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run on Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-does" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What It Does
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-inference-speed-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Inference Speed Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Inference Speed Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#purpose_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-on-server_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run on Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-it-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What It Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Improvements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-ensemble-integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Ensemble Integration Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Ensemble Integration Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#purpose_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Purpose
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-was-integrated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Was Integrated
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-ensemble" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Ensemble
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compare-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compare Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expected-results_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start-run-all-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start: Run All Tests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start: Run All Tests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-your-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Your Server
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#large-dataset-test-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large Dataset Test Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optimization-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optimization Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ensemble-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ensemble Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps-after-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps After Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-test-datasets-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "No test datasets found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cuda-out-of-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "CUDA out of memory"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-file-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Model file not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Import errors"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#files-created" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Files Created
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="complete-testing-and-optimization-guide">Complete Testing and Optimization Guide</h1>
+<h2 id="overview">Overview</h2>
+<p>This guide covers three main tasks:
+1. <strong>Large Dataset Testing</strong> - Validate generalization on multiple datasets
+2. <strong>Inference Speed Optimization</strong> - Improve performance with GPU, batching, quantization
+3. <strong>Ensemble Integration</strong> - Test CLIP + ResNet50 ensemble performance</p>
+<hr />
+<h2 id="step-1-large-dataset-testing">Step 1: Large Dataset Testing</h2>
+<h3 id="purpose">Purpose</h3>
+<p>Test ResNet50 on larger, diverse datasets to confirm it generalizes well beyond the initial 100-sample test.</p>
+<h3 id="run-on-server">Run on Server</h3>
+<pre><code class="language-bash"># Pull latest changes
+git pull origin master
+
+# Copy script to container
+docker cp test_large_datasets.py secureai-backend:/app/
+
+# Run large dataset testing
+docker exec secureai-backend python /app/test_large_datasets.py
+</code></pre>
+<h3 id="what-it-does">What It Does</h3>
+<ul>
+<li>Finds available test datasets (unified_deepfake, celeb_df_pp, etc.)</li>
+<li>Tests ResNet50 on each dataset</li>
+<li>Calculates accuracy, precision, recall, F1, AUC-ROC</li>
+<li>Generates report: <code>large_dataset_test_results.json</code></li>
+</ul>
+<h3 id="expected-results">Expected Results</h3>
+<ul>
+<li><strong>Good</strong>: Accuracy &gt;85% across multiple datasets</li>
+<li><strong>Excellent</strong>: Accuracy &gt;90% with consistent performance</li>
+<li><strong>Concern</strong>: Accuracy varies significantly between datasets (overfitting)</li>
+</ul>
+<hr />
+<h2 id="step-2-inference-speed-optimization">Step 2: Inference Speed Optimization</h2>
+<h3 id="purpose_1">Purpose</h3>
+<p>Optimize inference speed using GPU, batch processing, quantization, and TorchScript.</p>
+<h3 id="run-on-server_1">Run on Server</h3>
+<pre><code class="language-bash"># Copy script to container
+docker cp optimize_inference_speed.py secureai-backend:/app/
+
+# Run optimization tests
+docker exec secureai-backend python /app/optimize_inference_speed.py
+</code></pre>
+<h3 id="what-it-tests">What It Tests</h3>
+<ol>
+<li><strong>Baseline Performance</strong>: Current single-image inference speed</li>
+<li><strong>Batch Processing</strong>: Tests batch sizes 1, 4, 8, 16, 32</li>
+<li><strong>Quantization</strong>: Dynamic INT8 quantization (CPU only)</li>
+<li><strong>TorchScript</strong>: JIT compilation for faster inference</li>
+</ol>
+<h3 id="expected-improvements">Expected Improvements</h3>
+<ul>
+<li><strong>Batch Processing</strong>: 2-5x speedup (process multiple images together)</li>
+<li><strong>Quantization</strong>: 2-4x speedup on CPU, smaller model size</li>
+<li><strong>TorchScript</strong>: 10-30% speedup</li>
+<li><strong>GPU</strong>: 10-50x speedup vs CPU (if GPU available)</li>
+</ul>
+<h3 id="output">Output</h3>
+<ul>
+<li>Report: <code>inference_optimization_report.json</code></li>
+<li>Recommendations for best optimization strategy</li>
+</ul>
+<hr />
+<h2 id="step-3-ensemble-integration-testing">Step 3: Ensemble Integration Testing</h2>
+<h3 id="purpose_2">Purpose</h3>
+<p>Test the new CLIP + ResNet50 ensemble and compare against individual models.</p>
+<h3 id="what-was-integrated">What Was Integrated</h3>
+<ul>
+<li><strong>New File</strong>: <code>ai_model/ensemble_detector.py</code></li>
+<li>Combines CLIP + ResNet50 + LAA-Net (when available)</li>
+<li>Adaptive weighting based on model confidence</li>
+<li>
+<p>Better accuracy than individual models</p>
+</li>
+<li>
+<p><strong>Updated</strong>: <code>ai_model/detect.py</code></p>
+</li>
+<li>Added <code>model_type='ensemble'</code> option</li>
+<li>Uses full ensemble (CLIP + ResNet50 + LAA-Net)</li>
+</ul>
+<h3 id="test-ensemble">Test Ensemble</h3>
+<pre><code class="language-bash"># Test ensemble on a video
+docker exec secureai-backend python -c &quot;
+from ai_model.detect import detect_fake
+result = detect_fake('uploads/test_video.mp4', model_type='ensemble')
+print(result)
+&quot;
+</code></pre>
+<h3 id="compare-models">Compare Models</h3>
+<pre><code class="language-bash"># Copy comparison script
+docker cp test_ensemble_performance.py secureai-backend:/app/
+
+# Run comparison (requires test videos)
+docker exec secureai-backend python /app/test_ensemble_performance.py
+</code></pre>
+<h3 id="expected-results_1">Expected Results</h3>
+<ul>
+<li><strong>Ensemble</strong> should outperform individual models</li>
+<li><strong>Accuracy</strong>: Ensemble &gt; ResNet &gt; CLIP (typically)</li>
+<li><strong>Confidence</strong>: Ensemble provides higher confidence scores</li>
+</ul>
+<hr />
+<h2 id="quick-start-run-all-tests">Quick Start: Run All Tests</h2>
+<h3 id="on-your-server">On Your Server</h3>
+<pre><code class="language-bash"># 1. Pull latest code
+cd ~/secureai-deepfake-detection
+git pull origin master
+
+# 2. Copy all scripts to container
+docker cp test_large_datasets.py secureai-backend:/app/
+docker cp optimize_inference_speed.py secureai-backend:/app/
+docker cp test_ensemble_performance.py secureai-backend:/app/
+
+# 3. Run tests in sequence
+echo &quot;=== Large Dataset Testing ===&quot;
+docker exec secureai-backend python /app/test_large_datasets.py
+
+echo &quot;=== Inference Optimization ===&quot;
+docker exec secureai-backend python /app/optimize_inference_speed.py
+
+echo &quot;=== Ensemble Testing ===&quot;
+docker exec secureai-backend python /app/test_ensemble_performance.py
+</code></pre>
+<hr />
+<h2 id="understanding-results">Understanding Results</h2>
+<h3 id="large-dataset-test-results">Large Dataset Test Results</h3>
+<p><strong>Good Generalization:</strong>
+- Accuracy &gt;85% across all datasets
+- Consistent performance (low variance)
+- Low false positive/negative rates</p>
+<p><strong>Overfitting Indicators:</strong>
+- High accuracy on one dataset, low on others
+- Significant variance between datasets
+- <strong>Action</strong>: Need more diverse training data</p>
+<h3 id="optimization-results">Optimization Results</h3>
+<p><strong>Best Strategy:</strong>
+- <strong>GPU Available</strong>: Use GPU with batch processing (10-50x speedup)
+- <strong>CPU Only</strong>: Use quantization + batch processing (2-5x speedup)
+- <strong>Production</strong>: Use TorchScript for consistent performance</p>
+<h3 id="ensemble-results">Ensemble Results</h3>
+<p><strong>Expected Improvements:</strong>
+- Ensemble accuracy &gt; individual model accuracy
+- Higher confidence on correct predictions
+- Lower false positive rate</p>
+<hr />
+<h2 id="next-steps-after-testing">Next Steps After Testing</h2>
+<ol>
+<li><strong>If Generalization is Good</strong> (accuracy &gt;85% across datasets):</li>
+<li>✅ Model is production-ready</li>
+<li>
+<p>Consider fine-tuning on specific use cases</p>
+</li>
+<li>
+<p><strong>If Optimization Shows Significant Speedup</strong>:</p>
+</li>
+<li>Implement batch processing in production API</li>
+<li>Use GPU if available</li>
+<li>
+<p>Apply quantization for CPU deployments</p>
+</li>
+<li>
+<p><strong>If Ensemble Outperforms Individual Models</strong>:</p>
+</li>
+<li>Update API to use <code>model_type='ensemble'</code> by default</li>
+<li>Monitor ensemble performance in production</li>
+<li>Consider adding more models to ensemble</li>
+</ol>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="no-test-datasets-found">"No test datasets found"</h3>
+<ul>
+<li>Download test datasets to <code>datasets/</code> directory</li>
+<li>Or use existing <code>datasets/train/</code> and <code>datasets/val/</code></li>
+</ul>
+<h3 id="cuda-out-of-memory">"CUDA out of memory"</h3>
+<ul>
+<li>Reduce batch size in optimization script</li>
+<li>Use CPU instead: Set <code>CUDA_VISIBLE_DEVICES=""</code></li>
+</ul>
+<h3 id="model-file-not-found">"Model file not found"</h3>
+<ul>
+<li>Ensure ResNet50 model is in <code>ai_model/resnet_resnet50_final.pth</code></li>
+<li>Check file permissions</li>
+</ul>
+<h3 id="import-errors">"Import errors"</h3>
+<ul>
+<li>Ensure all dependencies installed: <code>pip install -r requirements.txt</code></li>
+<li>Check Python path includes <code>ai_model/</code> directory</li>
+</ul>
+<hr />
+<h2 id="files-created">Files Created</h2>
+<ol>
+<li><strong>test_large_datasets.py</strong> - Large dataset generalization testing</li>
+<li><strong>optimize_inference_speed.py</strong> - Inference speed optimization</li>
+<li><strong>ai_model/ensemble_detector.py</strong> - CLIP + ResNet50 ensemble</li>
+<li><strong>test_ensemble_performance.py</strong> - Ensemble vs individual comparison</li>
+</ol>
+<p>All scripts generate JSON reports with detailed metrics.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
