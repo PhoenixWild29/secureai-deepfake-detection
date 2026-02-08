@@ -1072,6 +1072,7 @@ def analyze_video():
                 'temporal_consistency': 0.7,
                 'spectral_density': fake_prob * 0.7,
                 'vocal_authenticity': 1.0 - (fake_prob * 0.6),
+                'audio_analyzed': False,
                 'spatial_entropy_heatmap': []
             }
 
@@ -1457,6 +1458,7 @@ def analyze_video_from_url():
                 'temporal_consistency': 0.7,
                 'spectral_density': fake_prob * 0.7,
                 'vocal_authenticity': 1.0 - (fake_prob * 0.6),
+                'audio_analyzed': False,
                 'spatial_entropy_heatmap': []
             }
         

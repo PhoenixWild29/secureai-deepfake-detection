@@ -14,6 +14,8 @@ export interface ForensicMetrics {
   temporalConsistency: number;
   spectralDensity: number;
   vocalAuthenticity?: number;
+  /** When false, vocalAuthenticity is video-derived only; no audio analyzed */
+  audioAnalyzed?: boolean;
 }
 
 export interface SpatialEntropyCell {

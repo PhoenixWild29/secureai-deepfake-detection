@@ -61,6 +61,8 @@ export interface BackendAnalysisResponse {
     temporal_consistency: number;
     spectral_density: number;
     vocal_authenticity: number;
+    /** When false, vocal_authenticity is video-derived only; no audio analyzed */
+    audio_analyzed?: boolean;
     spatial_entropy_heatmap?: Array<{
       sector: [number, number];
       intensity: number;
@@ -163,6 +165,7 @@ export function transformBackendResponseToScanResult(
       temporalConsistency: backendResponse.forensic_metrics.temporal_consistency,
       spectralDensity: backendResponse.forensic_metrics.spectral_density,
       vocalAuthenticity: backendResponse.forensic_metrics.vocal_authenticity,
+      audioAnalyzed: backendResponse.forensic_metrics.audio_analyzed,
     };
   } else {
     // Fallback: calculate from detection result (backward compatibility)

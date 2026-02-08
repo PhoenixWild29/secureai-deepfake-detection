@@ -318,7 +318,9 @@ const Results: React.FC<ResultsProps> = ({ result, onBack }) => {
                { label: 'Spatial Synthesis Artifacts', val: result.metrics.spatialArtifacts, color: 'bg-red-500', desc: 'Neural patterns in high-frequency pixel domains.' },
                { label: 'Temporal Fluidity Inconsistency', val: 1 - result.metrics.temporalConsistency, color: 'bg-orange-500', desc: 'Optical flow variance between frames.' },
                { label: 'Spectral Density Deviation', val: result.metrics.spectralDensity, color: 'bg-purple-500', desc: 'Color entropy mismatches in sensor noise floor.' },
-               { label: 'Vocal Frequency Jitter', val: 1 - (result.metrics.vocalAuthenticity || 1), color: 'bg-blue-500', desc: 'Voice synthesis artifacts in phoneme transitions.' }
+               result.metrics.audioAnalyzed
+                 ? { label: 'Vocal / Audio (analyzed)', val: 1 - (result.metrics.vocalAuthenticity ?? 1), color: 'bg-blue-500', desc: 'Audio extracted and analyzed: duration sync, energy stability, voice consistency.' }
+                 : { label: 'Vocal / Audio (video-only)', val: 1 - (result.metrics.vocalAuthenticity ?? 1), color: 'bg-blue-500', desc: 'Video-only (no audio track or extraction failed).' }
              ].map((m, i) => (
                <div key={i} className="space-y-4 group">
                  <div className="flex justify-between items-end">

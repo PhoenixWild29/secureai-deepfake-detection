@@ -43,6 +43,14 @@ try:
     EFFICIENTNET_AVAILABLE = True
 except ImportError:
     EFFICIENTNET_AVAILABLE = False
+
+try:
+    from .confidence_calibration import confidence_from_ensemble, get_calibration_config
+except ImportError:
+    def get_calibration_config():
+        return "agreement_strength", 1.5
+    def confidence_from_ensemble(ensemble_prob, is_deepfake, calibration="agreement_strength", temperature=1.5):
+        return abs(max(0, min(1, ensemble_prob)) - 0.5) * 2
     logger.info("EfficientNet detector not available")
 
 class EnsembleDetector:
@@ -463,8 +471,12 @@ class EnsembleDetector:
             adaptive_weights.get('laa', 0) * laa_prob
         )
         
-        # Overall confidence
-        overall_confidence = abs(ensemble_prob - 0.5) * 2
+        # Confidence: optional calibration (default = agreement strength; see confidence_calibration.py)
+        is_deepfake = ensemble_prob > 0.5
+        cal_method, cal_T = get_calibration_config()
+        overall_confidence = confidence_from_ensemble(
+            float(ensemble_prob), is_deepfake, calibration=cal_method, temperature=cal_T
+        )
         
         return {
             'ensemble_fake_probability': float(ensemble_prob),
@@ -476,7 +488,9 @@ class EnsembleDetector:
             'laa_fake_probability': float(laa_prob),
             'ensemble_weights_used': adaptive_weights,
             'overall_confidence': float(overall_confidence),
-            'is_deepfake': ensemble_prob > 0.5,
+            'confidence': float(overall_confidence),
+            'confidence_meaning': cal_method,
+            'is_deepfake': is_deepfake,
             'models_used': [name for name, _, _ in models]
         }
     

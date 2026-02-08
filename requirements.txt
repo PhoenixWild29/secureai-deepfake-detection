@@ -90,8 +90,9 @@ imgaug>=0.4.0
 scikit-image>=0.17.2  # Use >= instead of == for compatibility
 tensorboardX>=2.5.0
 
-# Face detection for LAA-Net (fallback if LAA-Net utils not available)
-mtcnn>=0.1.1
+# Face detection (MTCNN needs TensorFlow; tf_keras avoids recursion with TF_USE_LEGACY_KERAS)
+mtcnn[tensorflow]>=0.1.1
+tf_keras>=2.0.0
 
 # Video download from URLs (for STREAM_INTEL mode)
 yt-dlp>=2023.12.30

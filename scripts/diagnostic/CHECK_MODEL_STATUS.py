@@ -4,9 +4,17 @@ Check Deepfake Detection Model Status and Training
 Verifies which models are loaded, trained, and ready for inference
 """
 import os
+import sys
+from pathlib import Path
+
+# Ensure project root is on path when run as: python scripts\diagnostic\CHECK_MODEL_STATUS.py
+_script_dir = Path(__file__).resolve().parent
+_project_root = _script_dir.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import torch
 import json
-from pathlib import Path
 
 def check_model_status():
     """Check status of all deepfake detection models"""
@@ -94,7 +102,48 @@ def check_model_status():
     
     print()
     
-    # Check LAA-Net
+    # Check MTCNN *before* LAA-Net so we don't load EnhancedDetector (and TensorFlow) first
+    print("📦 Checking MTCNN Face Detection...")
+    try:
+        # Avoid legacy Keras recursion if TF_USE_LEGACY_KERAS is set without tf_keras
+        _tf_legacy = os.environ.pop('TF_USE_LEGACY_KERAS', None)
+        try:
+            from mtcnn import MTCNN
+            _detector = MTCNN()
+            results['mtcnn'] = {
+                'status': '✅ Available',
+                'details': {'accuracy_estimate': '95%+ face detection'}
+            }
+            print("  ✅ MTCNN available")
+        finally:
+            if _tf_legacy is not None:
+                os.environ['TF_USE_LEGACY_KERAS'] = _tf_legacy
+    except RecursionError as e:
+        results['mtcnn'] = {
+            'status': '⚠️  Using OpenCV Fallback',
+            'details': {'fallback': 'OpenCV Haar Cascades', 'reason': 'maximum recursion depth exceeded'}
+        }
+        print("  ⚠️  MTCNN not available, using OpenCV Haar cascades")
+        print("     (Reason: maximum recursion depth exceeded)")
+        print("     Fix: pip install tf_keras then re-run; or run the API and check logs for 'MTCNN face detection initialized'")
+    except ImportError as e:
+        results['mtcnn'] = {
+            'status': '⚠️  Using OpenCV Fallback',
+            'details': {'fallback': 'OpenCV Haar Cascades', 'reason': str(e)}
+        }
+        print("  ⚠️  MTCNN not available, using OpenCV Haar cascades")
+        print(f"     (Reason: {e})")
+    except Exception as e:
+        results['mtcnn'] = {
+            'status': '⚠️  Using OpenCV Fallback',
+            'details': {'fallback': 'OpenCV Haar Cascades', 'reason': str(e)}
+        }
+        print("  ⚠️  MTCNN not available, using OpenCV Haar cascades")
+        print(f"     (Reason: {e})")
+    
+    print()
+    
+    # Check LAA-Net (loads EnhancedDetector; do after MTCNN so MTCNN is tested in a clean state)
     print("📦 Checking LAA-Net Model...")
     try:
         from ai_model.enhanced_detector import get_enhanced_detector
@@ -117,24 +166,6 @@ def check_model_status():
             'details': {'error': str(e)}
         }
         print(f"  ❌ LAA-Net not available: {e}")
-    
-    print()
-    
-    # Check MTCNN
-    print("📦 Checking MTCNN Face Detection...")
-    try:
-        from mtcnn import MTCNN
-        results['mtcnn'] = {
-            'status': '✅ Available',
-            'details': {'accuracy_estimate': '95%+ face detection'}
-        }
-        print("  ✅ MTCNN available")
-    except ImportError:
-        results['mtcnn'] = {
-            'status': '⚠️  Using OpenCV Fallback',
-            'details': {'fallback': 'OpenCV Haar Cascades'}
-        }
-        print("  ⚠️  MTCNN not available, using OpenCV Haar cascades")
     
     print()
     

@@ -58,6 +58,15 @@ except ImportError:
     _LAA_LOADER_AVAILABLE = False
     load_laa_net = run_laa_inference = None
 
+# Confidence calibration (optional temperature scaling; default = agreement strength)
+try:
+    from ai_model.confidence_calibration import confidence_from_ensemble, get_calibration_config
+except ImportError:
+    def get_calibration_config():
+        return "agreement_strength", 1.5
+    def confidence_from_ensemble(ensemble_prob, is_deepfake, calibration="agreement_strength", temperature=1.5):
+        return abs(max(0, min(1, ensemble_prob)) - 0.5) * 2  # fallback: agreement strength
+
 # Face detection - MTCNN will be lazy-loaded to prevent TensorFlow from importing at module level
 # This prevents CUDA initialization errors on CPU-only servers
 MTCNN_AVAILABLE = None  # Will be determined on first use
@@ -314,6 +323,13 @@ class EnhancedDetector:
             logger.info("✅ MTCNN face detection initialized successfully")
         else:
             logger.info("ℹ️  Using OpenCV Haar cascades for face detection (MTCNN unavailable or failed)")
+        
+        # Ensure Hugging Face token is visible to open_clip/huggingface_hub (higher rate limits, reliable CLIP downloads)
+        _hf_token = os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")
+        if _hf_token:
+            os.environ["HF_TOKEN"] = _hf_token
+            os.environ["HUGGING_FACE_HUB_TOKEN"] = _hf_token
+            logger.info("🔑 Using Hugging Face token for CLIP (higher rate limits, best reliability)")
         
         # === CLIP Zero-Shot Setup ===
         logger.info("📦 Loading CLIP model (ViT-B-32)...")
@@ -619,11 +635,14 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
     try:
         result = _detector_instance.detect(video_path)
         
-        # Convert to expected format for backward compatibility
+        # Convert to expected format for backward compatibility (confidence = calibrated or agreement strength)
         ensemble_prob = result['ensemble_fake_probability']
+        cal_method, cal_T = get_calibration_config()
+        conf = confidence_from_ensemble(ensemble_prob, result['is_deepfake'], calibration=cal_method, temperature=cal_T)
         out = {
             'is_fake': result['is_deepfake'],
-            'confidence': ensemble_prob if result['is_deepfake'] else (1 - ensemble_prob),
+            'confidence': float(conf),
+            'confidence_meaning': cal_method,
             'ensemble_score': ensemble_prob,
             'fake_probability': ensemble_prob,  # Explicit for API/frontend
             'authenticity_score': 1 - ensemble_prob,
@@ -648,9 +667,12 @@ def detect_fake_enhanced(video_path: str, **kwargs) -> Dict[str, Any]:
             _detector_instance = EnhancedDetector(**kwargs)
             result = _detector_instance.detect(video_path)
             ep = result['ensemble_fake_probability']
+            cal_method, cal_T = get_calibration_config()
+            conf = confidence_from_ensemble(ep, result['is_deepfake'], calibration=cal_method, temperature=cal_T)
             ret = {
                 'is_fake': result['is_deepfake'],
-                'confidence': ep if result['is_deepfake'] else (1 - ep),
+                'confidence': float(conf),
+                'confidence_meaning': cal_method,
                 'ensemble_score': ep,
                 'fake_probability': ep,
                 'authenticity_score': 1 - ep,
