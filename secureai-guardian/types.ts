@@ -16,6 +16,8 @@ export interface ForensicMetrics {
   vocalAuthenticity?: number;
   /** When false, vocalAuthenticity is video-derived only; no audio analyzed */
   audioAnalyzed?: boolean;
+  /** "analyzed" when audio pipeline ran; "video_only" when it did not */
+  audioPipelineStatus?: 'analyzed' | 'video_only';
 }
 
 export interface SpatialEntropyCell {

@@ -166,6 +166,7 @@ export function transformBackendResponseToScanResult(
       spectralDensity: backendResponse.forensic_metrics.spectral_density,
       vocalAuthenticity: backendResponse.forensic_metrics.vocal_authenticity,
       audioAnalyzed: backendResponse.forensic_metrics.audio_analyzed,
+      audioPipelineStatus: backendResponse.forensic_metrics.audio_pipeline_status,
     };
   } else {
     // Fallback: calculate from detection result (backward compatibility)

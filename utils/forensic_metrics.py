@@ -315,6 +315,7 @@ def calculate_forensic_metrics(
                 'spectral_density': fake_prob * 0.7,
                 'vocal_authenticity': vocal_authenticity,
                 'audio_analyzed': audio_analyzed,
+                'audio_pipeline_status': 'analyzed' if audio_analyzed else 'video_only',
                 'spatial_entropy_heatmap': []
             }
         
@@ -328,11 +329,13 @@ def calculate_forensic_metrics(
         
         # Audio pipeline: extract and analyze audio for real vocal/audio-visual metric
         audio_analyzed = False
+        audio_pipeline_status = "video_only"
         try:
             from utils.audio_pipeline import run_audio_pipeline
             audio_result = run_audio_pipeline(video_path, video_duration_sec)
             if audio_result.get("audio_analyzed") and audio_result.get("has_audio"):
                 audio_analyzed = True
+                audio_pipeline_status = "analyzed"
                 # Fuse audio consistency with video detection: audio carries weight, video modulates
                 audio_score = audio_result["vocal_authenticity"]
                 vocal_authenticity = float(np.clip(
@@ -341,8 +344,9 @@ def calculate_forensic_metrics(
                 logger.info(f"Forensic metrics: audio analyzed, vocal_authenticity={vocal_authenticity:.3f} (audio_consistency={audio_score:.3f})")
             else:
                 vocal_authenticity = calculate_vocal_authenticity(fake_probability, has_audio=False)
+                logger.info("Forensic metrics: audio pipeline did not run (no audio track or extraction failed), using video-only vocal score")
         except Exception as e:
-            logger.debug(f"Audio pipeline not run: {e}")
+            logger.warning(f"Forensic metrics: audio pipeline error ({e}), using video-only vocal score")
             vocal_authenticity = calculate_vocal_authenticity(fake_probability, has_audio=False)
         
         return {
@@ -351,6 +355,7 @@ def calculate_forensic_metrics(
             'spectral_density': spectral_density,
             'vocal_authenticity': vocal_authenticity,
             'audio_analyzed': audio_analyzed,
+            'audio_pipeline_status': audio_pipeline_status,
             'spatial_entropy_heatmap': spatial_entropy_heatmap
         }
     except Exception as e:
@@ -363,6 +368,7 @@ def calculate_forensic_metrics(
             'spectral_density': fake_prob * 0.7,
             'vocal_authenticity': 1.0 - (fake_prob * 0.6),
             'audio_analyzed': False,
+            'audio_pipeline_status': 'video_only',
             'spatial_entropy_heatmap': []
         }
 

@@ -18,9 +18,11 @@ try:
     from solders.pubkey import Pubkey
     from solders.message import Message
     from solders.instruction import Instruction, AccountMeta
+    from solders.signature import Signature
     SOLANA_AVAILABLE = True
 except ImportError as e:
     SOLANA_AVAILABLE = False
+    Signature = None
     logger.warning(f"Solana libraries not available: {e}. Using mock implementation.")
 
 
@@ -145,13 +147,20 @@ def submit_to_solana(video_hash: str, authenticity_score: float, network: str = 
         send_response = client.send_transaction(transaction)
         
         if send_response.value:
-            signature = str(send_response.value)
+            # confirm_transaction expects a Signature object, not str (solders/solana-py)
+            raw = send_response.value
+            if isinstance(raw, str):
+                signature_obj = Signature.from_string(raw)
+                signature = raw
+            else:
+                signature_obj = raw
+                signature = str(raw)
             logger.info(f"✅ Transaction submitted! Signature: {signature}")
             
             # Wait for confirmation (optional, but recommended)
             logger.info("⏳ Waiting for transaction confirmation...")
             try:
-                confirmation_resp = client.confirm_transaction(signature, commitment="confirmed")
+                confirmation_resp = client.confirm_transaction(signature_obj, commitment="confirmed")
                 if confirmation_resp.value and len(confirmation_resp.value) > 0:
                     if confirmation_resp.value[0] and confirmation_resp.value[0].confirmation_status:
                         logger.info(f"✅ Transaction confirmed on {network}!")

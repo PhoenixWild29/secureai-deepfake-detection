@@ -204,7 +204,7 @@ def run_audio_pipeline(
     }
     wav_path, audio_duration, err = extract_audio(video_path)
     if err or not wav_path:
-        logger.debug(f"Audio extraction skipped or failed: {err}")
+        logger.info(f"Audio pipeline: skipped or failed (reason: {err or 'no wav path'})")
         return result
     try:
         analysis = analyze_audio(wav_path, video_duration_sec)
@@ -216,6 +216,7 @@ def run_audio_pipeline(
             "audio_consistency_score": analysis["audio_consistency_score"],
             "audio_duration_sec": analysis["audio_duration_sec"],
         }
+        logger.info(f"Audio pipeline: analyzed OK, duration_sec={analysis['audio_duration_sec']:.1f}, consistency={analysis['audio_consistency_score']:.3f}")
         return result
     finally:
         try:

@@ -36,3 +36,10 @@ So we are not “turning off a tool we could use.” On supported hardware, NNPA
 | Are we still using optimized CPU? | Yes. oneDNN (on Intel) and/or default ATen CPU kernels are still used. |
 
 If you later move to hardware that supports NNPACK and you want to try it, you can remove `USE_NNPACK=0` from the environment and restart the backend; PyTorch will use NNPACK if it initializes successfully.
+
+## Still seeing "Could not initialize NNPACK! Reason: Unsupported hardware"?
+
+- **Rebuild the image** so the Dockerfile’s `ENV USE_NNPACK=0` is applied:  
+  `docker compose -f docker-compose.https.yml build --no-cache secureai-backend` then `up -d`.
+- Ensure your compose file sets `USE_NNPACK=0` for the backend service (e.g. in `docker-compose.https.yml`).
+- The warning is harmless: inference still runs using oneDNN or default CPU; it only clutters the logs.
