@@ -1,8 +1,11 @@
 # Gunicorn Configuration for SecureAI Guardian Production Server
 # Run with: gunicorn -c gunicorn_config.py api:app
 
-import multiprocessing
 import os
+# Disable NNPACK before any other imports so PyTorch (loaded by app) does not spam "Unsupported hardware"
+os.environ.setdefault('USE_NNPACK', '0')
+
+import multiprocessing
 
 # Server socket - Use environment variable or default to 0.0.0.0:8000 for Docker
 bind = os.getenv('GUNICORN_BIND', "0.0.0.0:8000")

@@ -92,6 +92,31 @@ def _make_json_serializable(obj):
         return obj.tolist()
     return obj
 
+
+def _run_analysis_core(filepath, model_type_param='enhanced'):
+    """
+    Run detection + forensic metrics + security in one go.
+    Intended to be called via eventlet.tpool.execute so all CPU/heavy work
+    runs in a single worker thread and avoids greenlet.error (cannot switch to a different thread).
+    """
+    import time
+    from utils.forensic_metrics import calculate_forensic_metrics
+    from ai_model.morpheus_security import analyze_video_security
+    start = time.time()
+    result = detect_fake(filepath, model_type_param)
+    try:
+        forensic_metrics = calculate_forensic_metrics(filepath, result, num_frames=16)
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"Error calculating forensic metrics: {e}")
+        fake_prob = result.get('confidence', 0.5) if result.get('is_fake', False) else (1 - result.get('confidence', 0.5))
+        forensic_metrics = {
+            'spatial_artifacts': fake_prob, 'temporal_consistency': 0.7, 'spectral_density': fake_prob * 0.7,
+            'vocal_authenticity': 1.0 - (fake_prob * 0.6), 'audio_analyzed': False, 'audio_pipeline_status': 'video_only',
+            'spatial_entropy_heatmap': []
+        }
+    security_analysis = analyze_video_security(filepath, result)
+    return (result, forensic_metrics, security_analysis, time.time() - start)
+
 # Database imports
 try:
     from database.db_session import get_db, init_db
@@ -1027,18 +1052,20 @@ def analyze_video():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Run detection (use model_type from form or default 'enhanced')
+        # Run full analysis in thread pool when using eventlet to avoid greenlet.error
+        # (PyTorch/OpenCV in detection and forensic_metrics must not run in the eventlet greenlet)
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore
                 from eventlet import tpool  # type: ignore
-                result = tpool.execute(detect_fake, filepath, model_type_param)
+                result, forensic_metrics, security_analysis, processing_time = tpool.execute(
+                    _run_analysis_core, filepath, model_type_param
+                )
             else:
-                result = detect_fake(filepath, model_type_param)
+                result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, model_type_param)
         except Exception:
-            # Fallback to direct call (still logs via outer exception handler)
-            result = detect_fake(filepath)
+            result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, model_type_param)
         result = _make_json_serializable(result)
         # Set verdict for DB and frontend: REAL / FAKE / SUSPICIOUS
         conf = result.get('confidence', 0.5)
@@ -1047,7 +1074,6 @@ def analyze_video():
             result['verdict'] = 'FAKE' if is_fake else 'REAL'
         else:
             result['verdict'] = 'SUSPICIOUS'
-        processing_time = time.time() - start_time
         
         # Progress step 3: Analysis in progress
         progress_manager.update_progress(unique_id, 50, 'CROSS_MAPPING_TENSORS...', '[NEURAL] Analyzing sub-perceptual artifact clusters', step=3)
@@ -1058,27 +1084,6 @@ def analyze_video():
             'status': 'CROSS_MAPPING_TENSORS...',
             'message': '[NEURAL] Analyzing sub-perceptual artifact clusters'
         }, room=unique_id)
-
-        # Calculate forensic metrics
-        try:
-            from utils.forensic_metrics import calculate_forensic_metrics
-            forensic_metrics = calculate_forensic_metrics(filepath, result, num_frames=16)
-        except Exception as e:
-            logger.warning(f"Error calculating forensic metrics: {e}")
-            # Fallback: create basic metrics from detection result
-            fake_prob = result.get('confidence', 0.5) if result.get('is_fake', False) else (1 - result.get('confidence', 0.5))
-            forensic_metrics = {
-                'spatial_artifacts': fake_prob,
-                'temporal_consistency': 0.7,
-                'spectral_density': fake_prob * 0.7,
-                'vocal_authenticity': 1.0 - (fake_prob * 0.6),
-                'audio_analyzed': False,
-                'audio_pipeline_status': 'video_only',
-                'spatial_entropy_heatmap': []
-            }
-
-        # Perform security analysis with Morpheus
-        security_analysis = analyze_video_security(filepath, result)
 
         # Update statistics
         processing_stats['total_analyses'] += 1
@@ -1414,29 +1419,28 @@ def analyze_video_from_url():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Run detection (use eventlet threadpool if enabled to keep Socket.IO alive)
+        # Run full analysis in thread pool when using eventlet to avoid greenlet.error
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore
                 from eventlet import tpool  # type: ignore
-                result = tpool.execute(detect_fake, filepath)
+                result, forensic_metrics, security_analysis, processing_time = tpool.execute(
+                    _run_analysis_core, filepath, 'enhanced'
+                )
             else:
-                result = detect_fake(filepath)
+                result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, 'enhanced')
         except Exception:
-            result = detect_fake(filepath)
+            result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, 'enhanced')
+        result = _make_json_serializable(result)
+        conf = result.get('confidence', 0.5)
+        is_fake = result.get('is_fake', False)
+        if conf >= 0.7:
+            result['verdict'] = 'FAKE' if is_fake else 'REAL'
+        else:
+            result['verdict'] = 'SUSPICIOUS'
         processing_time = time.time() - start_time
         
-        # Progress step 3: Analysis in progress
-        progress_manager.update_progress(unique_id, 50, 'CROSS_MAPPING_TENSORS...', '[NEURAL] Analyzing sub-perceptual artifact clusters', step=3)
-        socketio.emit('progress', {
-            'type': 'progress',
-            'analysis_id': unique_id,
-            'progress': 50,
-            'status': 'CROSS_MAPPING_TENSORS...',
-            'message': '[NEURAL] Analyzing sub-perceptual artifact clusters'
-        }, room=unique_id)
-        
-        # Progress step 4: Extracting artifacts
+        # Progress steps 3–5 (emit after analysis completes)
         progress_manager.update_progress(unique_id, 70, 'NEURAL_ARTIFACT_EXTRACTION...', '[INFERENCE] Detecting temporal flicker in facial vectors', step=4)
         socketio.emit('progress', {
             'type': 'progress',
@@ -1445,26 +1449,6 @@ def analyze_video_from_url():
             'status': 'NEURAL_ARTIFACT_EXTRACTION...',
             'message': '[INFERENCE] Detecting temporal flicker in facial vectors'
         }, room=unique_id)
-        
-        # Calculate forensic metrics
-        try:
-            from utils.forensic_metrics import calculate_forensic_metrics
-            forensic_metrics = calculate_forensic_metrics(filepath, result, num_frames=16)
-        except Exception as e:
-            logger.warning(f"Error calculating forensic metrics: {e}")
-            # Fallback: create basic metrics from detection result
-            fake_prob = result.get('confidence', 0.5) if result.get('is_fake', False) else (1 - result.get('confidence', 0.5))
-            forensic_metrics = {
-                'spatial_artifacts': fake_prob,
-                'temporal_consistency': 0.7,
-                'spectral_density': fake_prob * 0.7,
-                'vocal_authenticity': 1.0 - (fake_prob * 0.6),
-                'audio_analyzed': False,
-                'audio_pipeline_status': 'video_only',
-                'spatial_entropy_heatmap': []
-            }
-        
-        # Progress step 5: Finalizing
         progress_manager.update_progress(unique_id, 85, 'FINALIZING_ENTROPY_ANALYSIS...', '[SYS] Compiling forensic report and signing hash', step=5)
         socketio.emit('progress', {
             'type': 'progress',
@@ -1473,9 +1457,6 @@ def analyze_video_from_url():
             'status': 'FINALIZING_ENTROPY_ANALYSIS...',
             'message': '[SYS] Compiling forensic report and signing hash'
         }, room=unique_id)
-
-        # Perform security analysis
-        security_analysis = analyze_video_security(filepath, result)
         
         # Update statistics
         processing_stats['total_analyses'] += 1
