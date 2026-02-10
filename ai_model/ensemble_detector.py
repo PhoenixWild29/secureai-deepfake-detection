@@ -191,53 +191,57 @@ class EnsembleDetector:
                 self.resnet_model = None
         
         # Initialize DeepFake Detector V13 (BEST MODEL - Available on Hugging Face!)
-        # NOTE: V13 loading can hang on ConvNeXt-Large, so we use a timeout
+        # NOTE: V13 loading can hang on ConvNeXt-Large, so we use a timeout when in main thread (signal only works there)
         logger.info("📦 Loading DeepFake Detector V13 (699M params, F1: 0.9586)...")
         logger.info("   ⚠️  This may take 2-5 minutes or timeout if ConvNeXt-Large hangs")
         self.v13_detector = None
         if V13_AVAILABLE:
             try:
-                # Use timeout to prevent hanging (5 minutes max)
-                import signal
-                v13_loaded = [False]
-                v13_error = [None]
-                v13_instance = [None]
-                
-                def load_v13():
+                import threading
+                in_main_thread = threading.current_thread() is threading.main_thread()
+                if in_main_thread:
+                    import signal
+                    v13_instance = [None]
+                    def load_v13():
+                        try:
+                            v13_instance[0] = get_deepfake_detector_v13(device=self.device)
+                        except Exception as e:
+                            raise e
+                    def timeout_handler(signum, frame):
+                        raise TimeoutError("V13 loading timed out after 5 minutes")
+                    original_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                    signal.alarm(300)  # 5 minutes
                     try:
-                        v13_instance[0] = get_deepfake_detector_v13(device=self.device)
-                        v13_loaded[0] = True
+                        load_v13()
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, original_handler)
+                        self.v13_detector = v13_instance[0]
+                        if self.v13_detector and self.v13_detector.model_loaded:
+                            logger.info("✅ DeepFake Detector V13 loaded successfully!")
+                        elif self.v13_detector is None or not getattr(self.v13_detector, 'model_loaded', False):
+                            logger.info("⚠️  DeepFake Detector V13 not fully loaded (some models may have failed)")
+                    except TimeoutError:
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, original_handler)
+                        logger.warning("⚠️  DeepFake Detector V13 loading timed out (ConvNeXt-Large may be hanging)")
+                        logger.warning("   Ensemble will continue without V13 - still excellent with CLIP + ResNet + XceptionNet")
+                        self.v13_detector = None
                     except Exception as e:
-                        v13_error[0] = e
-                
-                def timeout_handler(signum, frame):
-                    raise TimeoutError("V13 loading timed out after 5 minutes")
-                
-                # Set 5 minute timeout
-                original_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                signal.alarm(300)  # 5 minutes
-                
-                try:
-                    load_v13()
-                    signal.alarm(0)  # Cancel timeout
-                    signal.signal(signal.SIGALRM, original_handler)
-                    
-                    self.v13_detector = v13_instance[0]
+                        signal.alarm(0)
+                        signal.signal(signal.SIGALRM, original_handler)
+                        logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
+                        self.v13_detector = None
+                else:
+                    # Gunicorn/eventlet worker or tpool: signal.signal not allowed; load without timeout
+                    try:
+                        self.v13_detector = get_deepfake_detector_v13(device=self.device)
+                    except Exception as e:
+                        logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
+                        self.v13_detector = None
                     if self.v13_detector and self.v13_detector.model_loaded:
                         logger.info("✅ DeepFake Detector V13 loaded successfully!")
-                    else:
-                        logger.info("⚠️  DeepFake Detector V13 not fully loaded (some models may have failed)")
-                except TimeoutError:
-                    signal.alarm(0)
-                    signal.signal(signal.SIGALRM, original_handler)
-                    logger.warning("⚠️  DeepFake Detector V13 loading timed out (ConvNeXt-Large may be hanging)")
-                    logger.warning("   Ensemble will continue without V13 - still excellent with CLIP + ResNet + XceptionNet")
-                    self.v13_detector = None
-                except Exception as e:
-                    signal.alarm(0)
-                    signal.signal(signal.SIGALRM, original_handler)
-                    logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
-                    self.v13_detector = None
+                    elif self.v13_detector is None:
+                        logger.info("   Ensemble will continue without V13 - still excellent with CLIP + ResNet + XceptionNet")
             except Exception as e:
                 logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
                 self.v13_detector = None

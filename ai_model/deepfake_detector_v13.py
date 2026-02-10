@@ -22,6 +22,15 @@ import time
 
 logger = logging.getLogger(__name__)
 
+
+def _signal_ok():
+    """signal.signal() only works in the main thread; use timeouts only there (e.g. avoid in gunicorn workers)."""
+    try:
+        import threading
+        return threading.current_thread() is threading.main_thread()
+    except Exception:
+        return False
+
 # Force CPU mode if needed
 if os.getenv('CUDA_VISIBLE_DEVICES') == '':
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
@@ -149,11 +158,10 @@ class DeepfakeDetector(nn.Module):
                     import signal
                     def timeout_handler(signum, frame):
                         raise TimeoutError("ConvNeXt-Large creation timed out")
-                    
-                    if hasattr(signal, 'SIGALRM'):
+                    use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                    if use_alarm:
                         signal.signal(signal.SIGALRM, timeout_handler)
                         signal.alarm(180)  # 3 minute timeout
-                    
                     try:
                         logger.info(f"   Attempt 1: Standard creation.")
                         self.backbone = timm.create_model(
@@ -165,14 +173,15 @@ class DeepfakeDetector(nn.Module):
                         elapsed = time.time() - start_time
                         logger.info(f"   ✔ Model '{backbone_name}' created in {elapsed:.1f} seconds (standard)")
                     finally:
-                        if hasattr(signal, 'SIGALRM'):
+                        if use_alarm:
                             signal.alarm(0)
                             signal.signal(signal.SIGALRM, signal.SIG_DFL)
                 except TimeoutError:
                     logger.warning(f"   ⚠️  Standard creation timed out, trying scriptable...")
                     # Try scriptable version
                     try:
-                        if hasattr(signal, 'SIGALRM'):
+                        use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                        if use_alarm:
                             signal.signal(signal.SIGALRM, timeout_handler)
                             signal.alarm(180)
                         try:
@@ -187,23 +196,22 @@ class DeepfakeDetector(nn.Module):
                             elapsed = time.time() - start_time
                             logger.info(f"   ✔ Model '{backbone_name}' created in {elapsed:.1f} seconds (scriptable)")
                         finally:
-                            if hasattr(signal, 'SIGALRM'):
+                            if use_alarm:
                                 signal.alarm(0)
                                 signal.signal(signal.SIGALRM, signal.SIG_DFL)
                     except (TimeoutError, Exception) as e2:
                         logger.error(f"   ❌ Scriptable creation also failed: {e2}")
                         raise RuntimeError(f"ConvNeXt-Large creation failed: standard timed out, scriptable failed: {e2}")
             else:
-                # For other models, use standard creation with timeout
+                # For other models, use standard creation with timeout (only in main thread)
                 try:
                     import signal
                     def timeout_handler(signum, frame):
                         raise TimeoutError(f"Model '{backbone_name}' creation timed out")
-                    
-                    if hasattr(signal, 'SIGALRM'):
+                    use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                    if use_alarm:
                         signal.signal(signal.SIGALRM, timeout_handler)
                         signal.alarm(120)  # 2 minute timeout for other models
-                    
                     try:
                         self.backbone = timm.create_model(
                             backbone_name, 
@@ -214,7 +222,7 @@ class DeepfakeDetector(nn.Module):
                         elapsed = time.time() - start_time
                         logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
                     finally:
-                        if hasattr(signal, 'SIGALRM'):
+                        if use_alarm:
                             signal.alarm(0)
                             signal.signal(signal.SIGALRM, signal.SIG_DFL)
                 except TimeoutError:
@@ -472,18 +480,15 @@ class DeepFakeDetectorV13:
                     try:
                         logger.info(f"      Initializing {config['name']} architecture...")
                         
-                        # For ViT-Large, add signal-based timeout (3 minutes)
+                        # For ViT-Large, add signal-based timeout (3 minutes) when in main thread
                         if 'ViT-Large' in config['name']:
                             import signal
-                            
                             def timeout_handler(signum, frame):
                                 raise TimeoutError(f"Model creation timed out after 180 seconds")
-                            
-                            # Set alarm for 3 minutes (180 seconds)
-                            if hasattr(signal, 'SIGALRM'):
+                            use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                            if use_alarm:
                                 signal.signal(signal.SIGALRM, timeout_handler)
                                 signal.alarm(180)
-                            
                             try:
                                 model = DeepfakeDetector(config['backbone'], dropout=0.3)
                                 elapsed = time.time() - start_time
@@ -499,8 +504,9 @@ class DeepFakeDetectorV13:
                                 logger.error(f"      ViT-Large needs ~2-3 GB but system has insufficient memory")
                                 raise
                             finally:
-                                if hasattr(signal, 'SIGALRM'):
-                                    signal.alarm(0)  # Cancel alarm
+                                if use_alarm:
+                                    signal.alarm(0)
+                                    signal.signal(signal.SIGALRM, signal.SIG_DFL)
                         else:
                             # For non-ViT models (including ConvNeXt-Large), create with timeout protection
                             # ConvNeXt-Large has timeout protection built into DeepfakeDetector.__init__
