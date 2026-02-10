@@ -99,9 +99,14 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
                                 error_queue.put(e, block=False, timeout=0.1)
                             except queue.Full:
                                 pass
+                    try:
+                        from ai_model.ensemble_detector import _ensemble_init_timeout_seconds
+                        run_timeout = _ensemble_init_timeout_seconds() + 120.0
+                    except Exception:
+                        run_timeout = 420.0
                     t = threading.Thread(target=run_ensemble, daemon=True)
                     t.start()
-                    t.join(timeout=45.0)
+                    t.join(timeout=run_timeout)
                     if not t.is_alive() and not error_queue.empty():
                         raise error_queue.get()
                     if not t.is_alive() and not result_queue.empty():
@@ -143,14 +148,19 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
                             except queue.Full:
                                 pass
                     
-                    # Run with 30 second timeout
+                    # Run with timeout that allows ensemble init (2–5+ min first time) + inference
+                    try:
+                        from ai_model.ensemble_detector import _ensemble_init_timeout_seconds
+                        run_timeout = _ensemble_init_timeout_seconds() + 120.0  # init + 2 min for inference
+                    except Exception:
+                        run_timeout = 420.0  # 7 min default
                     ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
                     ensemble_thread.start()
-                    ensemble_thread.join(timeout=30.0)
+                    ensemble_thread.join(timeout=run_timeout)
                     
                     if ensemble_thread.is_alive():
                         # Timeout - fallback to enhanced
-                        raise TimeoutError("Ensemble detection timed out (>30s)")
+                        raise TimeoutError(f"Ensemble detection timed out (>{run_timeout}s)")
                     
                     if not error_queue.empty():
                         raise error_queue.get()

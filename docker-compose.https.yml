@@ -65,6 +65,8 @@ services:
       - X_COOKIES_FILE=/app/secrets/x_cookies.txt
       # SecureSage AI consultant (Google Gemini API)
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Ensemble init can take 2–5+ min (V13, EfficientNet). Increase if init times out.
+      - ENSEMBLE_INIT_TIMEOUT=${ENSEMBLE_INIT_TIMEOUT:-300}
     env_file:
       - .env
     volumes:

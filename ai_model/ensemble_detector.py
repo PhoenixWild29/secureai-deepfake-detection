@@ -611,9 +611,20 @@ class EnsembleDetector:
 _ensemble_instance = None
 _ensemble_init_failed = False
 
-def get_ensemble_detector(timeout: float = 30.0) -> Optional[EnsembleDetector]:
-    """Get or create global ensemble detector instance with timeout"""
+def _ensemble_init_timeout_seconds() -> float:
+    """Ensemble init can take 2–5+ minutes (V13, EfficientNet download). Default 300s unless overridden."""
+    try:
+        import os
+        return float(os.getenv("ENSEMBLE_INIT_TIMEOUT", "300"))
+    except (ValueError, TypeError):
+        return 300.0
+
+def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
+    """Get or create global ensemble detector instance with timeout (default from ENSEMBLE_INIT_TIMEOUT, else 300s)."""
     global _ensemble_instance, _ensemble_init_failed
+    
+    if timeout is None:
+        timeout = _ensemble_init_timeout_seconds()
     
     if _ensemble_init_failed:
         return None  # Don't retry if initialization already failed
@@ -638,7 +649,7 @@ def get_ensemble_detector(timeout: float = 30.0) -> Optional[EnsembleDetector]:
                     except queue.Full:
                         pass
             
-            # Initialize with timeout
+            # Initialize with timeout (first load can take 2–5+ min with V13 + EfficientNet download)
             init_thread = threading.Thread(target=init_ensemble, daemon=True)
             init_thread.start()
             init_thread.join(timeout=timeout)
@@ -680,7 +691,7 @@ def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any
     Returns:
         Detection results or error dict if ensemble unavailable
     """
-    detector = get_ensemble_detector(timeout=30.0)
+    detector = get_ensemble_detector()  # uses ENSEMBLE_INIT_TIMEOUT (default 300s)
     if detector is None:
         # Ensemble unavailable - return error result
         return {

@@ -202,6 +202,12 @@ python -c "from ai_model.enhanced_detector import EnhancedDetector; d = Enhanced
 - OpenCV Haar cascades are included but less accurate
 - Ensure faces are visible in video frames
 
+### "EnsembleDetector initialization timed out" / ensemble disabled
+- First-time load (V13, EfficientNet download) can take **2–5+ minutes**. The init timeout is configurable.
+- **Default:** 300 seconds (5 min). Set `ENSEMBLE_INIT_TIMEOUT` (seconds) in the backend environment to increase it.
+- In Docker: `ENSEMBLE_INIT_TIMEOUT=300` is set in `docker-compose.https.yml`; increase (e.g. `600`) if you have slow network or many models.
+- After the first successful init, the ensemble is cached and later requests are fast.
+
 ## Next Steps
 
 1. **Test with sample videos** - Try real and deepfake videos
