@@ -578,8 +578,23 @@ def _resolve_identity_db(fingerprint: str, alias: str, components: dict):
             return jsonify(response)
         
         else:
-            # New device - create identity
+            # New device - create identity (or reuse existing by node_id to avoid UniqueViolation)
             node_id = _generate_node_id(fingerprint)
+            identity_by_node = db.query(DeviceIdentity).filter(DeviceIdentity.node_id == node_id).first()
+            if identity_by_node:
+                # Same node_id already exists (e.g. fingerprint format changed or race); treat as existing
+                identity_by_node.device_fingerprint = fingerprint
+                identity_by_node.last_seen = datetime.utcnow()
+                if components:
+                    identity_by_node.browser_name = components.get('browserName', identity_by_node.browser_name)
+                    identity_by_node.os_name = components.get('osName', identity_by_node.os_name)
+                    identity_by_node.screen_resolution = components.get('screenResolution', identity_by_node.screen_resolution)
+                    identity_by_node.timezone = components.get('timezone', identity_by_node.timezone)
+                db.commit()
+                response = identity_by_node.to_dict()
+                response['isNewDevice'] = False
+                logger.info(f"Identity resolved for existing node_id: {identity_by_node.node_id}")
+                return jsonify(response)
             
             # Generate alias if not provided
             if not alias:
