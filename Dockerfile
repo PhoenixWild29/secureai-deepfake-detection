@@ -68,6 +68,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# Run application (export USE_NNPACK=0 so it is set before gunicorn loads Python)
-# Use gunicorn with config file for proper logging
-CMD ["sh", "-c", "export USE_NNPACK=0 && exec gunicorn --config gunicorn_config.py api:app"]
+# Run application: wrapper filters NNPACK C++ warning from gunicorn stderr so logs stay readable
+# (Pre-built PyTorch wheels often ignore USE_NNPACK=0; filtering at process level is reliable.)
+CMD ["python", "run_backend.py"]

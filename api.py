@@ -8,10 +8,26 @@ REST API for video analysis, batch processing, and blockchain integration
 # If running with eventlet, we must monkey-patch very early (before most imports).
 #
 import os
+import sys
 # NNPACK is optional CPU acceleration for Conv2d. On many cloud VMs it cannot init ("Unsupported hardware");
 # PyTorch already uses other backends (oneDNN / default ATen). Disabling only suppresses the warning.
 # See docs/troubleshooting/NNPACK_AND_CPU_BACKENDS.md
 os.environ.setdefault('USE_NNPACK', '0')
+# Pre-built PyTorch wheels often ignore USE_NNPACK; filter the NNPACK warning from Python stderr so logs stay readable
+# (C++ may still write to fd 2; if NNPACK spam persists, see docs/troubleshooting/NNPACK_AND_CPU_BACKENDS.md)
+_orig_stderr = sys.stderr
+class _StderrFilter:
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, msg):
+        if msg and "NNPACK" in msg and ("Unsupported hardware" in msg or "Could not initialize NNPACK" in msg):
+            return
+        self._stream.write(msg)
+    def flush(self):
+        self._stream.flush()
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
+sys.stderr = _StderrFilter(_orig_stderr)
 if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
     try:
         import eventlet  # type: ignore

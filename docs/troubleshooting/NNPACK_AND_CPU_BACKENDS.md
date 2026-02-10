@@ -39,7 +39,6 @@ If you later move to hardware that supports NNPACK and you want to try it, you c
 
 ## Still seeing "Could not initialize NNPACK! Reason: Unsupported hardware"?
 
-- **Rebuild the image** so the Dockerfile’s `ENV USE_NNPACK=0` is applied:  
+- The **Docker image uses a wrapper** (`run_backend.py`) that runs gunicorn and filters stderr, so the NNPACK line is dropped before it reaches the container log. After pulling the latest code, **rebuild** the backend image:  
   `docker compose -f docker-compose.https.yml build --no-cache secureai-backend` then `up -d`.
-- Ensure your compose file sets `USE_NNPACK=0` for the backend service (e.g. in `docker-compose.https.yml`).
-- The warning is harmless: inference still runs using oneDNN or default CPU; it only clutters the logs.
+- The warning is harmless: inference still runs using oneDNN or default CPU; filtering only keeps logs readable.
