@@ -271,6 +271,8 @@ docker compose -f docker-compose.https.yml up -d secureai-backend
 
 **Note:** Use `build --no-cache secureai-backend` so the container gets the latest code. Without a rebuild, the old image (and old code) keeps running.
 
+**If the build fails with "no space left on device":** Free disk space on the server (e.g. `docker system prune -a`, remove old images, clear `uploads/` or `results/` if acceptable), then rebuild. The repo’s `.dockerignore` excludes `uploads/`, `results/`, and large files so the build context stays small.
+
 ---
 
 ## Success checklist (what to expect when everything works)
