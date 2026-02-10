@@ -1,0 +1,62 @@
+# Exclude uploads and results so Docker build context stays small and "no space left on device" is avoided.
+# These dirs are created empty in the image and mounted at runtime.
+uploads/
+results/
+logs/
+run/
+batch_results/
+benchmark_results/
+training_runs/
+runs/
+
+# Git and IDE
+.git/
+.github/
+.cursor/
+*.pyc
+__pycache__/
+*.pyo
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.eggs/
+
+# Node (frontend build is separate; backend image does not need it)
+node_modules/
+secureai-guardian/node_modules/
+.next/
+dist/
+build/
+
+# Large or ephemeral content (keep ai_model/*.pth and external/laa_net weights)
+datasets/
+*.mp4
+*.avi
+*.mov
+*.mkv
+test_batch_videos/
+test_videos/
+tests/
+
+# Docs and archives (not needed in backend image)
+archive/
+design/
+*.docx
+*.md
+!README.md
+
+# Env and secrets (mounted at runtime, do not bake into image)
+.env
+.env.*
+!.env.example
+
+# Tests and local scripts (not needed in production image)
+tests/
+test_*.py
+test_*.sh
+*.bat
+
+# Misc
+*.log
+.DS_Store
+Thumbs.db
