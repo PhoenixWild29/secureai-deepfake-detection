@@ -232,8 +232,12 @@ SSH into the server, then run:
 ```bash
 cd /root/secureai-deepfake-detection
 git pull origin master
-docker compose -f docker-compose.https.yml up -d --build secureai-backend
+git submodule update --init --recursive
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d secureai-backend
 ```
+
+**Important:** You must **rebuild** the backend image (`build --no-cache secureai-backend`) after pulling code changes. Restarting the container without rebuilding keeps the old code inside the image. If you only run `up -d` without `build`, the server will still run the previous version.
 
 (If your server project path is different, e.g. `/opt/secureai-deepfake-detection`, use that instead of `/root/secureai-deepfake-detection`.)
 
@@ -260,8 +264,12 @@ Typical server project path (used in this project’s deployment and HTTPS docs)
 ```bash
 cd /root/secureai-deepfake-detection
 git pull origin master
-docker compose -f docker-compose.https.yml up -d --build secureai-backend
+git submodule update --init --recursive
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d secureai-backend
 ```
+
+**Note:** Use `build --no-cache secureai-backend` so the container gets the latest code. Without a rebuild, the old image (and old code) keeps running.
 
 ---
 

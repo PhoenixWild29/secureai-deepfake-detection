@@ -623,7 +623,27 @@ def _resolve_identity_db(fingerprint: str, alias: str, components: dict):
             )
             
             db.add(new_identity)
-            db.commit()
+            try:
+                db.commit()
+            except Exception as commit_err:
+                db.rollback()
+                # Race: another request may have inserted same node_id; fetch and return existing
+                if 'UniqueViolation' in str(commit_err) or 'UniqueViolation' in str(getattr(commit_err, 'orig', '')):
+                    existing = db.query(DeviceIdentity).filter(DeviceIdentity.node_id == node_id).first()
+                    if existing:
+                        existing.device_fingerprint = fingerprint
+                        existing.last_seen = datetime.utcnow()
+                        if components:
+                            existing.browser_name = components.get('browserName', existing.browser_name)
+                            existing.os_name = components.get('osName', existing.os_name)
+                            existing.screen_resolution = components.get('screenResolution', existing.screen_resolution)
+                            existing.timezone = components.get('timezone', existing.timezone)
+                        db.commit()
+                        response = existing.to_dict()
+                        response['isNewDevice'] = False
+                        logger.info(f"Identity resolved after race (node_id): {existing.node_id}")
+                        return jsonify(response)
+                raise commit_err
             
             response = new_identity.to_dict()
             response['isNewDevice'] = True
