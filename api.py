@@ -1104,7 +1104,7 @@ def analyze_video():
         }, room=unique_id)
         
         # Run full analysis in thread pool when using eventlet to avoid greenlet.error
-        # (PyTorch/OpenCV in detection and forensic_metrics must not run in the eventlet greenlet)
+        # Full ensemble only — no fallback. If ensemble unavailable, return 503.
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
@@ -1115,6 +1115,11 @@ def analyze_video():
                 )
             else:
                 result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, model_type_param)
+        except ValueError as e:
+            if 'ensemble' in str(e).lower() or 'unavailable' in str(e).lower():
+                logger.error(f"Ensemble unavailable: {e}")
+                return jsonify({'error': str(e), 'ensemble_unavailable': True}), 503
+            raise
         except Exception:
             result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, model_type_param)
         result = _make_json_serializable(result)
@@ -1311,6 +1316,11 @@ def analyze_video():
 
         return jsonify(response)
 
+    except ValueError as e:
+        if 'ensemble' in str(e).lower() or 'unavailable' in str(e).lower():
+            logger.error(f"Ensemble unavailable: {e}")
+            return jsonify({'error': str(e), 'ensemble_unavailable': True}), 503
+        raise
     except Exception as e:
         # Log full traceback so we can diagnose 500s from production logs.
         error_id = f"ERR-{uuid.uuid4().hex[:8].upper()}"
@@ -1470,7 +1480,7 @@ def analyze_video_from_url():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Run full analysis in thread pool when using eventlet to avoid greenlet.error
+        # Run full analysis — full ensemble only, no fallback
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore
@@ -1480,6 +1490,11 @@ def analyze_video_from_url():
                 )
             else:
                 result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, 'enhanced')
+        except ValueError as e:
+            if 'ensemble' in str(e).lower() or 'unavailable' in str(e).lower():
+                logger.error(f"Ensemble unavailable (analyze-url): {e}")
+                return jsonify({'error': str(e), 'ensemble_unavailable': True}), 503
+            raise
         except Exception:
             result, forensic_metrics, security_analysis, processing_time = _run_analysis_core(filepath, 'enhanced')
         result = _make_json_serializable(result)

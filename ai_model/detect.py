@@ -79,121 +79,17 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
     start_time = time.time()
 
     try:
-        if model_type == 'enhanced':
-            # Prefer full ensemble (ResNet + CLIP + V13 + etc.) for real variation; fall back to enhanced
-            if detect_fake_ensemble:
-                try:
-                    import threading
-                    import queue
-                    result_queue = queue.Queue(maxsize=1)
-                    error_queue = queue.Queue(maxsize=1)
-                    def run_ensemble():
-                        try:
-                            r = detect_fake_ensemble(video_path)
-                            try:
-                                result_queue.put(r, block=False, timeout=0.1)
-                            except queue.Full:
-                                pass
-                        except Exception as e:
-                            try:
-                                error_queue.put(e, block=False, timeout=0.1)
-                            except queue.Full:
-                                pass
-                    try:
-                        from ai_model.ensemble_detector import _ensemble_init_timeout_seconds
-                        run_timeout = _ensemble_init_timeout_seconds() + 120.0
-                    except Exception:
-                        run_timeout = 420.0
-                    t = threading.Thread(target=run_ensemble, daemon=True)
-                    t.start()
-                    t.join(timeout=run_timeout)
-                    if not t.is_alive() and not error_queue.empty():
-                        raise error_queue.get()
-                    if not t.is_alive() and not result_queue.empty():
-                        result = result_queue.get()
-                        if result.get('error') and 'unavailable' in result.get('error', '').lower():
-                            raise ValueError("Ensemble unavailable")
-                    else:
-                        raise TimeoutError("Ensemble timed out")
-                    if 'ensemble_fake_probability' in result:
-                        result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
-                        result.setdefault('confidence', result.get('overall_confidence', result['ensemble_fake_probability']))
-                        result['authenticity_score'] = 1 - result['ensemble_fake_probability']
-                except (TimeoutError, ValueError, Exception) as e:
-                    import logging
-                    logging.getLogger(__name__).warning(
-                        "Ensemble unavailable or timed out (%s), using enhanced detector for this scan.",
-                        e,
-                    )
-                    result = detect_fake_enhanced(video_path)
-            else:
-                result = detect_fake_enhanced(video_path)
-
-        elif model_type == 'ensemble' or model_type == 'full_ensemble':
-            # Use full ensemble: CLIP + ResNet50 (+ optional LAA-Net when configured)
-            if detect_fake_ensemble:
-                try:
-                    # Try ensemble with timeout protection
-                    import threading
-                    import queue
-                    
-                    result_queue = queue.Queue(maxsize=1)
-                    error_queue = queue.Queue(maxsize=1)
-                    
-                    def run_ensemble():
-                        try:
-                            result = detect_fake_ensemble(video_path)
-                            try:
-                                result_queue.put(result, block=False, timeout=0.1)
-                            except queue.Full:
-                                pass
-                        except Exception as e:
-                            try:
-                                error_queue.put(e, block=False, timeout=0.1)
-                            except queue.Full:
-                                pass
-                    
-                    # Run with timeout that allows ensemble init (2–5+ min first time) + inference
-                    try:
-                        from ai_model.ensemble_detector import _ensemble_init_timeout_seconds
-                        run_timeout = _ensemble_init_timeout_seconds() + 120.0  # init + 2 min for inference
-                    except Exception:
-                        run_timeout = 420.0  # 7 min default
-                    ensemble_thread = threading.Thread(target=run_ensemble, daemon=True)
-                    ensemble_thread.start()
-                    ensemble_thread.join(timeout=run_timeout)
-                    
-                    if ensemble_thread.is_alive():
-                        # Timeout - fallback to enhanced
-                        raise TimeoutError(f"Ensemble detection timed out (>{run_timeout}s)")
-                    
-                    if not error_queue.empty():
-                        raise error_queue.get()
-                    
-                    if not result_queue.empty():
-                        result = result_queue.get()
-                        # Check if ensemble returned error (unavailable)
-                        if result.get('error') and 'unavailable' in result.get('error', '').lower():
-                            raise ValueError("Ensemble unavailable")
-                    else:
-                        raise TimeoutError("Ensemble detection returned no result")
-                    
-                    # Map ensemble results to expected format (preserve detector confidence when set)
-                    if 'ensemble_fake_probability' in result:
-                        result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
-                        result.setdefault('confidence', result.get('overall_confidence', result['ensemble_fake_probability']))
-                        result['authenticity_score'] = 1 - result['ensemble_fake_probability']
-                except (TimeoutError, ValueError, Exception) as e:
-                    # Fallback to enhanced if ensemble fails or times out
-                    import logging
-                    logging.getLogger(__name__).warning(
-                        "Ensemble unavailable or timed out (%s), using enhanced detector for this scan.",
-                        e,
-                    )
-                    result = detect_fake_enhanced(video_path)
-            else:
-                # Fallback to enhanced if ensemble not available
-                result = detect_fake_enhanced(video_path)
+        if model_type in ('enhanced', 'ensemble', 'full_ensemble'):
+            # Full ensemble only — no fallback. Ensemble is loaded at worker startup (init_ensemble_blocking).
+            if not detect_fake_ensemble:
+                raise RuntimeError("Ensemble detector not available. Restart the backend.")
+            result = detect_fake_ensemble(video_path)
+            if result.get('method') == 'ensemble_unavailable' or result.get('error'):
+                raise ValueError(result.get('error', 'Ensemble detector unavailable. Restart the backend or retry.'))
+            if 'ensemble_fake_probability' in result:
+                result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
+                result.setdefault('confidence', result.get('overall_confidence', result['ensemble_fake_probability']))
+                result['authenticity_score'] = 1 - result['ensemble_fake_probability']
 
         elif model_type == 'cnn':
             # Use our custom CNN classifier

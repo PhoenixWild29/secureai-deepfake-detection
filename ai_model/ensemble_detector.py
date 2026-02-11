@@ -607,78 +607,55 @@ class EnsembleDetector:
         }
 
 
-# Global instance for lazy initialization
+# Global instance; must be loaded in worker main thread at startup (no fallback, no timeout)
 _ensemble_instance = None
 _ensemble_init_failed = False
 
 def _ensemble_init_timeout_seconds() -> float:
-    """Ensemble init can take 2–5+ minutes (V13, EfficientNet download). Default 300s unless overridden."""
+    """Used for request timeout only; init itself is blocking at startup."""
     try:
         import os
-        return float(os.getenv("ENSEMBLE_INIT_TIMEOUT", "300"))
+        return float(os.getenv("ENSEMBLE_INIT_TIMEOUT", "600"))
     except (ValueError, TypeError):
-        return 300.0
+        return 600.0
+
+def init_ensemble_blocking() -> Optional[EnsembleDetector]:
+    """
+    Load the full ensemble in the current thread (must be main thread for V13 signal).
+    Call this from worker startup (post_worker_init). No timeout - we load the best model, period.
+    """
+    global _ensemble_instance, _ensemble_init_failed
+    if _ensemble_instance is not None:
+        return _ensemble_instance
+    if _ensemble_init_failed:
+        return None
+    try:
+        logger.info("Loading full ensemble (CLIP + ResNet + V13 + XceptionNet + EfficientNet + ...) — this may take 2–5 minutes.")
+        _ensemble_instance = EnsembleDetector()
+        logger.info("✅ EnsembleDetector loaded successfully. Every scan will use the full ensemble.")
+        return _ensemble_instance
+    except Exception as e:
+        logger.exception(f"EnsembleDetector initialization failed: {e}")
+        _ensemble_init_failed = True
+        return None
 
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
-    """Get or create global ensemble detector instance with timeout (default from ENSEMBLE_INIT_TIMEOUT, else 300s)."""
+    """
+    Return the global ensemble detector. Init must have been done at worker startup via init_ensemble_blocking().
+    If called from main thread and not yet inited (e.g. no post_worker_init), runs init now (blocking).
+    """
     global _ensemble_instance, _ensemble_init_failed
-    
-    if timeout is None:
-        timeout = _ensemble_init_timeout_seconds()
-    
+    if _ensemble_instance is not None:
+        return _ensemble_instance
     if _ensemble_init_failed:
-        return None  # Don't retry if initialization already failed
-    
-    if _ensemble_instance is None:
-        try:
-            import threading
-            import queue
-            
-            init_queue = queue.Queue(maxsize=1)
-            error_queue = queue.Queue(maxsize=1)
-            
-            def init_ensemble():
-                try:
-                    detector = EnsembleDetector()
-                    init_queue.put(detector, block=False, timeout=0.1)
-                except queue.Full:
-                    pass  # Timeout occurred
-                except Exception as e:
-                    try:
-                        error_queue.put(e, block=False, timeout=0.1)
-                    except queue.Full:
-                        pass
-            
-            # Initialize with timeout (first load can take 2–5+ min with V13 + EfficientNet download)
-            init_thread = threading.Thread(target=init_ensemble, daemon=True)
-            init_thread.start()
-            init_thread.join(timeout=timeout)
-            
-            if init_thread.is_alive():
-                logger.warning(f"⚠️  EnsembleDetector initialization timed out (>={timeout}s). Disabling ensemble.")
-                _ensemble_init_failed = True
-                return None
-            
-            if not error_queue.empty():
-                error = error_queue.get()
-                logger.warning(f"⚠️  EnsembleDetector initialization failed: {error}. Disabling ensemble.")
-                _ensemble_init_failed = True
-                return None
-            
-            if not init_queue.empty():
-                _ensemble_instance = init_queue.get()
-                logger.info("✅ EnsembleDetector initialized successfully")
-            else:
-                logger.warning("⚠️  EnsembleDetector initialization returned no result. Disabling ensemble.")
-                _ensemble_init_failed = True
-                return None
-                
-        except Exception as e:
-            logger.error(f"❌ EnsembleDetector initialization error: {e}. Disabling ensemble.")
-            _ensemble_init_failed = True
-            return None
-    
-    return _ensemble_instance
+        return None
+    try:
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            return init_ensemble_blocking()
+    except Exception:
+        pass
+    return None
 
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
     """

@@ -272,6 +272,10 @@ export async function analyzeVideo(
           }
         } else if (response.status === 413) {
           errorMessage = 'File too large. Maximum size is 500MB.';
+        } else if (response.status === 503 && errorData.ensemble_unavailable) {
+          errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
+        } else if (response.status === 503) {
+          errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 500) {
           errorMessage = 'Server error. Please try again later.';
         }
@@ -333,7 +337,11 @@ export async function analyzeVideoFromUrl(
           throw err;
         }
         
-        if (response.status === 400) {
+        if (response.status === 503 && errorData.ensemble_unavailable) {
+          errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
+        } else if (response.status === 503) {
+          errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
+        } else if (response.status === 400) {
           if (errorData.error?.includes('Invalid video URL')) {
             errorMessage = 'Invalid video URL. Supported: YouTube, Twitter/X, Vimeo, or direct video URLs (.mp4, .avi, etc.)';
           } else if (errorData.error?.includes('Failed to download')) {

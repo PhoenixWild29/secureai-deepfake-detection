@@ -60,19 +60,16 @@ def on_exit(server):
     server.log.info("Shutting down SecureAI Guardian server...")
 
 def post_worker_init(worker):
-    """Eager-load the ensemble in this worker so first scan uses it and logs show init."""
-    import threading
-    def warmup():
-        try:
-            from ai_model.ensemble_detector import get_ensemble_detector
-            d = get_ensemble_detector()
-            if d is not None:
-                worker.log.info("Ensemble warm-up: EnsembleDetector ready for scans.")
-            else:
-                worker.log.warning("Ensemble warm-up: EnsembleDetector unavailable (init failed or timed out).")
-        except Exception as e:
-            worker.log.warning(f"Ensemble warm-up failed: {e}")
-    threading.Thread(target=warmup, daemon=True).start()
+    """Load the full ensemble in this worker's main thread before accepting requests. No timeout, no fallback."""
+    try:
+        from ai_model.ensemble_detector import init_ensemble_blocking
+        d = init_ensemble_blocking()
+        if d is not None:
+            worker.log.info("Ensemble loaded in worker; every scan will use the full ensemble.")
+        else:
+            worker.log.error("Ensemble failed to load in this worker. Scans will return 503 until restart.")
+    except Exception as e:
+        worker.log.exception(f"Ensemble load failed: {e}")
 
 # Preload app for better performance
 preload_app = True
