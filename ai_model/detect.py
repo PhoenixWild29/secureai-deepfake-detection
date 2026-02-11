@@ -119,7 +119,12 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
                         result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
                         result.setdefault('confidence', result.get('overall_confidence', result['ensemble_fake_probability']))
                         result['authenticity_score'] = 1 - result['ensemble_fake_probability']
-                except (TimeoutError, ValueError, Exception):
+                except (TimeoutError, ValueError, Exception) as e:
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        "Ensemble unavailable or timed out (%s), using enhanced detector for this scan.",
+                        e,
+                    )
                     result = detect_fake_enhanced(video_path)
             else:
                 result = detect_fake_enhanced(video_path)
@@ -180,6 +185,11 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
                         result['authenticity_score'] = 1 - result['ensemble_fake_probability']
                 except (TimeoutError, ValueError, Exception) as e:
                     # Fallback to enhanced if ensemble fails or times out
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        "Ensemble unavailable or timed out (%s), using enhanced detector for this scan.",
+                        e,
+                    )
                     result = detect_fake_enhanced(video_path)
             else:
                 # Fallback to enhanced if ensemble not available

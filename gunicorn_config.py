@@ -59,6 +59,21 @@ def on_exit(server):
     """Called just before exiting Gunicorn."""
     server.log.info("Shutting down SecureAI Guardian server...")
 
+def post_worker_init(worker):
+    """Eager-load the ensemble in this worker so first scan uses it and logs show init."""
+    import threading
+    def warmup():
+        try:
+            from ai_model.ensemble_detector import get_ensemble_detector
+            d = get_ensemble_detector()
+            if d is not None:
+                worker.log.info("Ensemble warm-up: EnsembleDetector ready for scans.")
+            else:
+                worker.log.warning("Ensemble warm-up: EnsembleDetector unavailable (init failed or timed out).")
+        except Exception as e:
+            worker.log.warning(f"Ensemble warm-up failed: {e}")
+    threading.Thread(target=warmup, daemon=True).start()
+
 # Preload app for better performance
 preload_app = True
 

@@ -178,9 +178,10 @@ export function transformBackendResponseToScanResult(
     };
   }
 
-  // Determine engine used
+  // Determine engine used (backend returns ultimate_ensemble_* when full ensemble ran, ensemble_unavailable when fallback)
+  const method = result.method || '';
   const engineUsed: 'CLIP Zero-Shot' | 'Full Ensemble (SOTA 2025)' = 
-    result.method === 'enhanced' || result.method === 'ensemble' 
+    method === 'ensemble' || method === 'enhanced' || method.startsWith('ultimate_ensemble_')
       ? 'Full Ensemble (SOTA 2025)' 
       : 'CLIP Zero-Shot';
 
