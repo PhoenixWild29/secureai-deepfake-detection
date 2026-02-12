@@ -93,6 +93,230 @@ docker compose -f docker-compose.https.yml up -d
 
 ---
 
+## Verify ensemble is running (on the server)
+
+After pulling and rebuilding, confirm the backend is up and the full ensemble is loaded.
+
+### 1. Health check
+
+```bash
+curl -s http://localhost:8000/api/health
+```
+
+Expected: `{"status":"healthy","timestamp":"...","version":"2.0.0"}` (or similar). If you use Nginx in front, use your domain and path, e.g. `curl -s https://your-domain.com/api/health`.
+
+### 2. Backend logs – ensemble loaded
+
+```bash
+docker logs secureai-backend 2>&1 | grep -E "Ensemble loaded|EnsembleDetector loaded|Ultimate EnsembleDetector"
+```
+
+You should see at least one of:
+
+- `Ensemble loaded in worker; every scan will use the full ensemble.`
+- `EnsembleDetector loaded successfully. Every scan will use the full ensemble.`
+- `Ultimate EnsembleDetector initialized`
+
+If the worker is still starting, wait 2–5 minutes (ensemble load is slow) and run the same `grep` again.
+
+### 3. Optional: run one scan and check the response
+
+From the SecureAI Guardian UI, run a single video scan. When it finishes, open the result and confirm the engine/method shows **Full Ensemble** or a method like **ultimate_ensemble_***. Alternatively, from the server (if you have a test video):
+
+```bash
+curl -s -X POST -F "file=@/path/to/short-video.mp4" http://localhost:8000/api/analyze | jq -r '.model_type, .result.method'
+```
+
+You should see the model type and a method string that indicates the ensemble (e.g. not `ensemble_unavailable`).
+
+---
+
+## Login flow and why the first load can take minutes
+
+When you clear cache/cookies and hard-reload (Ctrl+F5), or open the app right after a server restart, login can take **multiple minutes**. That delay is almost entirely from the **backend loading the ensemble**, not from the login logic itself.
+
+### What happens on login
+
+1. **Page load**  
+   The app loads. If there is no saved identity in localStorage (e.g. after clearing cache), you see the **Login** screen.
+
+2. **Auto device resolution**  
+   The Login component immediately calls **`/api/identity/resolve`** with your device fingerprint (no button click). That request:
+   - **If the backend worker is still starting:** The Gunicorn worker **does not accept any HTTP requests** until it has finished loading the full ensemble (in `post_worker_init`). So your request waits in the queue for **2–5 minutes** until the worker is ready. That’s the “multiple minutes to login to the device.”
+   - **Once the worker is ready:** The backend does a quick DB lookup (or creates a new device identity and in-memory Solana wallet). No ensemble, no blockchain call on this path — usually **under a second**.
+
+3. **Existing device**  
+   If the backend returns “existing device,” the app writes `nodeId`/alias/tier to localStorage and calls `onLogin()` → you go to the Dashboard. No “Provisioning ID” screen.
+
+4. **New device**  
+   If the backend returns “new device,” the app shows the **entry** screen (optional alias + “Initialize Neural Passport”). When you click the button:
+   - The app switches to the **“Provisioning ID”** screen (spinner + boot-style logs).
+   - It calls **`/api/identity/resolve`** again with your alias. If the worker is **already ready**, this second request is fast (again, DB + wallet only). The “Provisioning ID” screen is then just the short **animation** (a few seconds) plus that one fast API call.
+   - If the worker was **still** loading when you clicked (e.g. you clicked very soon after load), this second request also waits until the worker is ready, so you can see “multiple minutes for provisioning ID” as well.
+
+5. **After login**  
+   Identity is stored in localStorage. Later visits (same browser, same device) use that stored identity and skip the resolve call, so you go straight to the Dashboard with **no** multi‑minute wait — as long as you don’t clear storage or the server hasn’t just restarted and you’re the first request.
+
+### Summary
+
+| Question | Answer |
+|---------|--------|
+| Is the delay from the ensemble? | **Yes.** The worker won’t handle any request (including login) until the ensemble has finished loading. |
+| Is it a one-time thing? | **Yes, per worker startup.** After the ensemble is loaded, that worker serves all requests quickly. The next multi‑minute wait only happens after another **server/worker restart** (e.g. redeploy, `docker compose restart`). |
+| Is it only when I login and stay logged in? | The long wait happens on the **first** request(s) after a restart (e.g. the first login after clearing cache or right after deploy). Once you’re logged in and the worker is warm, staying logged in and using the app is fast. |
+
+So: **the multi‑minute login/provisioning delay is the backend loading the AI ensemble; it’s one-time per restart, and once the worker is ready, login and the rest of the app are fast.**
+
+---
+
+## "Backend service unavailable" when running a scan
+
+The Forensic Lab runs a **health check** (`GET /api/health`) before starting a scan. If that request fails or returns non‑OK, you see **"ANALYSIS ERROR – Backend service unavailable. Please ensure the API server is running."** So the issue is between the browser and the backend (or the backend not responding).
+
+### Likely causes
+
+1. **Backend container not running** – e.g. after a server reboot or failed deploy.
+2. **Backend still starting** – worker loading the ensemble (2–5 min); health is only answered once the worker is ready.
+3. **Backend crashed** – OOM, exception during ensemble load, or worker restart.
+4. **Nginx ↔ backend** – wrong proxy, backend host/port, or timeout.
+
+### Commands to run on the server (Bash)
+
+**1. Is the backend container up?**
+
+```bash
+docker ps --filter name=secureai-backend
+```
+
+If it’s missing or `Exited`, start the stack:
+
+```bash
+cd /root/secureai-deepfake-detection
+docker compose -f docker-compose.https.yml up -d secureai-backend
+```
+
+**2. Can the backend answer health locally?**
+
+```bash
+docker exec secureai-backend curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/health
+```
+
+Expect `200`. If you get nothing or 5xx, the app inside the container isn’t responding (still loading or crashed).
+
+**3. Recent backend logs (crash / ensemble load):**
+
+```bash
+docker logs secureai-backend --tail 100 2>&1
+```
+
+Look for `Ensemble loaded in worker` (ready) or Python tracebacks / OOM (crashed).
+
+**4. From your PC (optional) – does the public URL reach the API?**
+
+```powershell
+curl -s -o NUL -w "%{http_code}" https://guardian.secureai.dev/api/health
+```
+
+Expect `200`. If you get 502/503/504, Nginx is up but the backend isn’t responding or is timing out.
+
+### Quick fix
+
+If the container was down or restarted, start it and wait 2–5 minutes for the ensemble to load, then try the scan again. If the container is up but health still fails, use the logs (step 3) to see why the worker isn’t responding.
+
+### Container "unhealthy" and curl to /api/health gives no response
+
+If **command 2** (curl from inside the container) produces **no output**, the app inside the container is **not listening** on port 8000. That usually means the Gunicorn **worker never finished starting**: it blocks in **ensemble loading** (`post_worker_init`) until the full model is loaded. If that step hangs or crashes, the worker never accepts connections, so:
+
+- The healthcheck fails → container shows **unhealthy**.
+- `curl http://localhost:8000/api/health` gets no reply (connection refused or hang).
+
+**Do this next:**
+
+**A. See where startup stops (full logs from boot)**
+
+```bash
+docker logs secureai-backend 2>&1 | head -200
+```
+
+Look for, in order:
+
+- `Starting SecureAI Guardian server...`
+- `SecureAI Guardian server is ready. Spawning workers...`
+- `Loading full ensemble...` and then either `Ensemble loaded in worker` (success) or a **traceback** / error (failure or hang).
+
+If you see **"Loading full ensemble"** but never **"Ensemble loaded in worker"**, the worker is stuck or crashed during model load (e.g. OOM, missing file, or slow disk).
+
+**B. Confirm nothing is listening on 8000**
+
+```bash
+docker exec secureai-backend sh -c "ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null" | grep 8000
+```
+
+No output = nothing listening = worker never became ready.
+
+**C. Restart and watch logs live**
+
+```bash
+cd /root/secureai-deepfake-detection
+docker compose -f docker-compose.https.yml restart secureai-backend
+docker logs -f secureai-backend 2>&1
+```
+
+Wait 5–10 minutes. You should see **"Ensemble loaded in worker"** and then the healthcheck will start passing. If after 10 minutes you still don’t see that line, note the **last message** (e.g. which model or step it’s on) and check disk space / memory:
+
+```bash
+df -h
+free -m
+```
+
+**D. Healthcheck start period**
+
+The compose file uses **start_period: 600s** (10 minutes) for the backend so Docker doesn’t mark the container unhealthy during the 2–5 minute ensemble load. After a deploy, give the backend at least 5 minutes before treating "unhealthy" as a real failure.
+
+### Restart loop: same logs repeating, port 8000 never listens
+
+If you see the **same initialization block** (ResNet, Jetson, S3, etc.) **repeating** every minute or so and **nothing ever listens on port 8000**, the worker is almost certainly **crash‑looping**: it starts loading the ensemble, then the process is **killed** (often by the Linux **OOM killer** when RAM is too low), and Gunicorn respawns it, so the cycle repeats.
+
+**1. Confirm restart loop and OOM**
+
+```bash
+docker inspect secureai-backend --format 'RestartCount: {{.RestartCount}} ExitCode: {{.State.ExitCode}}'
+dmesg | tail -50 | grep -i "out of memory\|oom\|killed process"
+```
+
+If **RestartCount** is increasing and you see OOM messages, the server is running out of memory during ensemble load.
+
+**2. Check memory**
+
+```bash
+free -m
+```
+
+The full ensemble (CLIP, ResNet, V13, EfficientNet, etc.) can use **4–6+ GB** RAM. A **2 vCPU / 4 GB** droplet is often **too small**; the worker gets OOM‑killed and never reaches “Ensemble loaded in worker”.
+
+**3. Add swap (recommended on 4 GB instances)**
+
+```bash
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+free -m
+```
+
+Then restart the backend and watch logs again; the worker may complete ensemble load with swap.
+
+**4. After code fix: look for new log lines**
+
+After updating the repo, you should see in logs:
+
+- **"Worker starting: loading full ensemble..."** — worker entered `post_worker_init`.
+- Then either **"Ensemble loaded in worker"** (success) or **"Worker init complete; binding to socket"** (ensemble failed but worker still starts; scans will 503).
+- If you see **"Worker starting"** but **never** "Worker init complete" or "Ensemble loaded", the process is being killed (e.g. OOM) during model load. Add swap or use a larger instance (e.g. 8 GB RAM).
+
+---
+
 ## 1. Open PowerShell and go to the project folder
 
 1. Press **Win + X** → choose **Windows PowerShell** (or **Terminal**).

@@ -62,6 +62,10 @@ def on_exit(server):
 def post_worker_init(worker):
     """Load the full ensemble in this worker's main thread before accepting requests. No timeout, no fallback."""
     try:
+        worker.log.info("Worker starting: loading full ensemble (this may take 2-5 min or longer on small RAM)...")
+        import sys
+        sys.stdout.flush()
+        sys.stderr.flush()
         from ai_model.ensemble_detector import init_ensemble_blocking
         d = init_ensemble_blocking()
         if d is not None:
@@ -70,6 +74,8 @@ def post_worker_init(worker):
             worker.log.error("Ensemble failed to load in this worker. Scans will return 503 until restart.")
     except Exception as e:
         worker.log.exception(f"Ensemble load failed: {e}")
+    # Always allow worker to continue so it binds to port and /api/health works (container stays up)
+    worker.log.info("Worker init complete; binding to socket and accepting connections.")
 
 # Preload app for better performance
 preload_app = True
