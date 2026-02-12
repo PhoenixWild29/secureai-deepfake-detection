@@ -3,6 +3,9 @@ version: '3.8'
 # Quick Docker Deployment - Minimal Setup
 # This is a simplified version for quick cloud deployment
 # Run: docker-compose -f docker-compose.quick.yml up -d
+#
+# Data persistence: Postgres and results use named volumes (postgres_data, results_data).
+# To keep data: docker compose -f docker-compose.quick.yml down   (do NOT use -v).
 
 services:
   postgres:
@@ -56,7 +59,7 @@ services:
       - .env
     volumes:
       - ./uploads:/app/uploads
-      - ./results:/app/results
+      - results_data:/app/results
       - ./.env:/app/.env:ro
     depends_on:
       postgres:
@@ -89,6 +92,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  results_data:
     driver: local
   redis_data:
     driver: local

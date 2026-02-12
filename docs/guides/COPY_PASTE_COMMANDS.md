@@ -58,6 +58,41 @@ So: **PowerShell = local**. **Server console (SSH) = production.** Pick one path
 
 ---
 
+## Push to GitHub + Server commands (after any code changes)
+
+Use this sequence whenever you (or the assistant) make changes and you want them on GitHub and on the server.
+
+### Step 1 – On your PC (PowerShell): push to GitHub master
+
+Run from the project folder:
+
+```powershell
+cd "C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection"
+git add -A
+git status
+git commit -m "Describe your change here"
+git push origin master
+```
+
+If `git status` shows nothing to commit, your changes are already committed; run `git push origin master` only.
+
+### Step 2 – On the server (Bash): pull and rebuild backend
+
+After the push succeeds, SSH to the server and run (use your real project path if different):
+
+```bash
+cd /root/secureai-deepfake-detection
+git pull origin master
+git submodule update --init --recursive
+docker compose -f docker-compose.https.yml down
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+```
+
+**Important:** Use `down` **without** `-v` so the database and results volumes are kept.
+
+---
+
 ## 1. Open PowerShell and go to the project folder
 
 1. Press **Win + X** → choose **Windows PowerShell** (or **Terminal**).
@@ -272,6 +307,48 @@ docker compose -f docker-compose.https.yml up -d secureai-backend
 **Note:** Use `build --no-cache secureai-backend` so the container gets the latest code. Without a rebuild, the old image (and old code) keeps running.
 
 **If the build fails with "no space left on device":** Free disk space on the server (e.g. `docker system prune -a`, remove old images, clear `uploads/` or `results/` if acceptable), then rebuild. The repo’s `.dockerignore` excludes `uploads/`, `results/`, and large files so the build context stays small.
+
+---
+
+## 9. Data persistence (Docker): keep DB and results across reloads
+
+The Security Hub dashboard (Neutralized, Proofs, Total Analyses, etc.) reads from the **backend**: Postgres DB and the **results** folder. To keep those numbers across rebuilds/restarts:
+
+### 1. Persist the database
+
+Postgres already uses a **named volume** `postgres_data` in `docker-compose.https.yml`, `docker-compose.quick.yml`, and `docker-compose.prod.yml`. Data is kept as long as you **do not** remove volumes.
+
+**Commands (on the server, Bash):**
+
+```bash
+# Stop and remove containers but KEEP volumes (DB and results stay)
+docker compose -f docker-compose.https.yml down
+# Then rebuild/start as usual:
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+```
+
+**Do NOT run** `docker compose down -v` if you want to keep data. The `-v` flag deletes named volumes (`postgres_data`, `results_data`), so the DB and result JSONs would be wiped.
+
+### 2. Persist the results folder
+
+The compose files use a **named volume** `results_data` for `/app/results`, so result JSONs survive container restarts and rebuilds. No extra host directory is required.
+
+### 3. Repopulate after a one-time reset
+
+If you already ran `down -v` once and the hub shows 0:
+
+- Run new scans from the app. Each scan is stored in the current DB and in the results volume.
+- The hub will show the new totals after each scan (and after a short delay when the dashboard fetches `/api/dashboard/stats`).
+
+**Quick reference:**
+
+| Goal | Command |
+|------|--------|
+| Rebuild backend but **keep** DB and results | `docker compose -f docker-compose.https.yml down` then `build` and `up -d` (no `-v`) |
+| Full wipe (new DB, empty results) | `docker compose -f docker-compose.https.yml down -v` then `up -d` |
+
+For **production**: analyses and device data are **never auto-deleted** by default. See **DATA_RETENTION_AND_PRODUCTION_DB.md** for the full policy and opt-in retention.
 
 ---
 

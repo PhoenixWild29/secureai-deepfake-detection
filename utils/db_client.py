@@ -717,39 +717,49 @@ class DatabaseClient:
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }
     
-    # Cleanup
+    # Cleanup (production-safe: opt-in only; no deletion by default)
     
     def cleanup_old_records(self, days_old: int = 30) -> int:
         """
-        Clean up old analysis records.
+        Clean up old analysis records. PRODUCTION-SAFE: runs only when
+        DATA_RETENTION_DAYS is set in the environment. Otherwise returns 0
+        and deletes nothing (customer data is never auto-deleted by default).
         
         Args:
-            days_old: Number of days old to consider for cleanup
+            days_old: Number of days old to consider for cleanup (used only if
+                      DATA_RETENTION_DAYS is not set, for backward compatibility)
             
         Returns:
-            Number of records cleaned up
+            Number of records cleaned up (0 if retention not enabled)
         """
+        import os
+        retention_days = os.getenv('DATA_RETENTION_DAYS', '').strip()
+        if retention_days == '' or retention_days.lower() in ('0', 'false', 'off', 'never'):
+            logger.debug("Data retention cleanup skipped (DATA_RETENTION_DAYS not set or disabled)")
+            return 0
+        try:
+            days = int(retention_days)
+        except ValueError:
+            logger.warning("DATA_RETENTION_DAYS must be a positive integer; cleanup skipped")
+            return 0
+        if days <= 0:
+            return 0
         try:
             pool = self._get_sync_pool()
             conn = pool.getconn()
-            
             try:
                 with conn.cursor() as cursor:
-                    # Delete old analyses and related records
+                    # PostgreSQL: use make_interval for safe parameterized interval
                     cursor.execute("""
                         DELETE FROM analyses 
-                        WHERE created_at < NOW() - INTERVAL '%s days'
-                    """, (days_old,))
-                    
+                        WHERE created_at < NOW() - make_interval(days => %s)
+                    """, (days,))
                     deleted_count = cursor.rowcount
                     conn.commit()
-                    
-                    logger.info(f"Cleaned up {deleted_count} old analysis records")
+                    logger.info(f"Cleaned up {deleted_count} old analysis records (retention: {days} days)")
                     return deleted_count
-                    
             finally:
                 pool.putconn(conn)
-                
         except Exception as e:
             logger.error(f"Error cleaning up old records: {str(e)}")
             return 0

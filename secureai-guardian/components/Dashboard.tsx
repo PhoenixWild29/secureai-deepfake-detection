@@ -325,6 +325,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartScan, history, auditHistor
         </button>
       </header>
 
+      {/* Hint when server stats are 0 after a backend reload (DB/volume reset) */}
+      {dashboardStats && threatsNeutralized === 0 && blockchainProofs === 0 && (dashboardStats.total_analyses ?? 0) === 0 && history.length > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200/90 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+          Server stats reset (e.g. after backend redeploy). Hub shows server totals. Your device history below still has {history.length} scan{history.length !== 1 ? 's' : ''}. Run new scans to repopulate server metrics.
+        </div>
+      )}
+
       {/* Hero Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
         {[

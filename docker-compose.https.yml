@@ -2,6 +2,10 @@
 # Note: 'version' attribute is obsolete in Docker Compose v2+
 # This includes SSL certificate support
 # Prerequisites: Run HTTPS_SETUP_GUIDE.md first to get certificates
+#
+# Data persistence: Postgres and results use named volumes (postgres_data, results_data).
+# To keep data across rebuilds/restarts, run: docker compose down   (do NOT use -v).
+# To wipe data: docker compose down -v
 
 services:
   postgres:
@@ -71,7 +75,7 @@ services:
       - .env
     volumes:
       - ./uploads:/app/uploads
-      - ./results:/app/results
+      - results_data:/app/results
       - ./wallet:/app/wallet
       - ./.env:/app/.env:ro
       - ./test_videos:/app/test_videos  # For test video storage
@@ -111,6 +115,8 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  results_data:
     driver: local
   redis_data:
     driver: local

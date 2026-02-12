@@ -470,7 +470,7 @@ def _store_detection_results(
 
 @app.task(name='celery_app.tasks.cleanup_expired_results')
 def cleanup_expired_results():
-    """Clean up expired analysis results."""
+    """Clean up expired analysis results. DB cleanup is opt-in: set DATA_RETENTION_DAYS to enable."""
     try:
         logger.info("Starting cleanup of expired results")
         
@@ -478,7 +478,7 @@ def cleanup_expired_results():
         cleaned_keys = redis_client.cleanup_expired_keys('embed:*')
         logger.info(f"Cleaned up {cleaned_keys} expired cache keys")
         
-        # Clean up database records (older than 30 days)
+        # DB cleanup: runs only when DATA_RETENTION_DAYS is set (production default: no deletion)
         cleaned_records = db_client.cleanup_old_records(days_old=30)
         logger.info(f"Cleaned up {cleaned_records} old database records")
         

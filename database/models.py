@@ -23,8 +23,8 @@ class User(Base):
     last_login = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     
-    # Relationships
-    analyses = relationship("Analysis", back_populates="user", cascade="all, delete-orphan")
+    # Relationships (no cascade delete: analyses must never be auto-deleted when user is removed)
+    analyses = relationship("Analysis", back_populates="user", cascade="save-update")
     
     def to_dict(self):
         return {
