@@ -76,20 +76,27 @@ git push origin master
 
 If `git status` shows nothing to commit, your changes are already committed; run `git push origin master` only.
 
-### Step 2 – On the server (Bash): pull and rebuild backend
+### Step 2 – On the server (Bash): pull and rebuild backend + frontend
 
-After the push succeeds, SSH to the server and run (use your real project path if different):
+After the push succeeds, SSH to the server and run (use your real project path if different). Use **pull without submodules** so the broken submodule does not block the deploy:
 
 ```bash
 cd /root/secureai-deepfake-detection
-git pull origin master
-git submodule update --init --recursive
+git pull origin master --no-recurse-submodules
+cd secureai-guardian
+npm ci
+npm run build
+cd ..
 docker compose -f docker-compose.https.yml down
 docker compose -f docker-compose.https.yml build --no-cache secureai-backend
 docker compose -f docker-compose.https.yml up -d
 ```
 
-**Important:** Use `down` **without** `-v` so the database and results volumes are kept.
+- **`--no-recurse-submodules`** avoids the "No url found for submodule path 'external/laa_net'" error so the pull always succeeds.
+- **Frontend:** `npm ci` and `npm run build` update `secureai-guardian/dist` so Nginx serves the latest UI.
+- **Important:** Use `down` **without** `-v` so the database and results volumes are kept.
+
+If you prefer to update submodules (and have fixed `.gitmodules`), you can run `git submodule update --init --recursive` after the pull; if it fails, use the block above without it.
 
 ---
 

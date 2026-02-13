@@ -272,9 +272,9 @@ export async function analyzeVideo(
               errorMessage = errorData.error || `Invalid request: ${errorMessage}`;
             }
           } else if (response.status === 413) {
-          errorMessage = 'File too large. Maximum size is 500MB.';
-        } else if (response.status === 503 && errorData.ensemble_unavailable) {
-          errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
+            errorMessage = 'File too large. Maximum size is 500MB.';
+          } else if (response.status === 503 && errorData.ensemble_unavailable) {
+            errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 500) {
