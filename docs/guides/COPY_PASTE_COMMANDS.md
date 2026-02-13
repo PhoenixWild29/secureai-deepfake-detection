@@ -52,9 +52,30 @@ Do this when the app is deployed (e.g. Docker on DigitalOcean) and you want to u
    ```bash
    cd /root/secureai-deepfake-detection
    ```
-4. Pull latest code and rebuild/restart (section **8** – `git pull`, then `docker compose ...`).
+4. **After every update:** When the assistant (or you) pushes changes to GitHub, run the **Server deploy block** below so the server gets the latest code. The assistant will push and then give you this block with every update.
 
 So: **PowerShell = local**. **Server console (SSH) = production.** Pick one path per run.
+
+---
+
+### Server deploy block (run this on the server after every update)
+
+After a push to `master`, SSH to the server and run this **entire block** in order (Bash). Use your real project path if different from `/root/secureai-deepfake-detection`.
+
+```bash
+cd /root/secureai-deepfake-detection
+git pull origin master --no-recurse-submodules
+cd secureai-guardian
+npm ci
+npm run build
+cd ..
+docker compose -f docker-compose.https.yml down
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+```
+
+- **Do not** use `down -v` (that removes DB and results volumes).
+- If pull fails on submodules, the `--no-recurse-submodules` keeps the pull working; you can fix submodules later if needed.
 
 ---
 
