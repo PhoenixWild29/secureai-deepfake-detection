@@ -1118,9 +1118,26 @@ def analyze_video():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Lazy-load ensemble on first scan (main thread); then run analysis (tpool or same thread)
-        # Full ensemble only — no fallback. If ensemble unavailable, return 503.
-        if not _ensure_ensemble_loaded():
+        # Progress heartbeat while ensemble loads (first scan can take 2-5 min; keep UI from looking stuck)
+        _stop_heartbeat = threading.Event()
+        def _progress_heartbeat():
+            tick = 0
+            while not _stop_heartbeat.wait(15):
+                tick += 1
+                p = min(35 + (tick % 6), 44)
+                progress_manager.update_progress(unique_id, p, 'ALGORITHM_V3_BOOT_UP...', '[NEURAL] Loading detection models (first scan may take 2-5 min)...', step=2)
+                socketio.emit('progress', {
+                    'type': 'progress', 'analysis_id': unique_id, 'progress': p,
+                    'status': 'ALGORITHM_V3_BOOT_UP...',
+                    'message': '[NEURAL] Loading detection models (first scan may take 2-5 min)...'
+                }, room=unique_id)
+        _heartbeat_thread = threading.Thread(target=_progress_heartbeat, daemon=True)
+        _heartbeat_thread.start()
+        try:
+            ensemble_ok = _ensure_ensemble_loaded()
+        finally:
+            _stop_heartbeat.set()
+        if not ensemble_ok:
             return jsonify({
                 'error': 'Detection models failed to load. Please try again in a moment.',
                 'ensemble_unavailable': True
@@ -1500,8 +1517,26 @@ def analyze_video_from_url():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Lazy-load ensemble on first scan, then run full analysis
-        if not _ensure_ensemble_loaded():
+        # Progress heartbeat while ensemble loads (first scan can take 2-5 min)
+        _stop_heartbeat = threading.Event()
+        def _progress_heartbeat():
+            tick = 0
+            while not _stop_heartbeat.wait(15):
+                tick += 1
+                p = min(35 + (tick % 6), 44)
+                progress_manager.update_progress(unique_id, p, 'ALGORITHM_V3_BOOT_UP...', '[NEURAL] Loading detection models (first scan may take 2-5 min)...', step=2)
+                socketio.emit('progress', {
+                    'type': 'progress', 'analysis_id': unique_id, 'progress': p,
+                    'status': 'ALGORITHM_V3_BOOT_UP...',
+                    'message': '[NEURAL] Loading detection models (first scan may take 2-5 min)...'
+                }, room=unique_id)
+        _heartbeat_thread = threading.Thread(target=_progress_heartbeat, daemon=True)
+        _heartbeat_thread.start()
+        try:
+            ensemble_ok = _ensure_ensemble_loaded()
+        finally:
+            _stop_heartbeat.set()
+        if not ensemble_ok:
             return jsonify({
                 'error': 'Detection models failed to load. Please try again in a moment.',
                 'ensemble_unavailable': True

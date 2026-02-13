@@ -232,12 +232,19 @@ class EnsembleDetector:
                         logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
                         self.v13_detector = None
                 else:
-                    # Gunicorn/eventlet worker or tpool: signal.signal not allowed; load without timeout
-                    try:
-                        self.v13_detector = get_deepfake_detector_v13(device=self.device)
-                    except Exception as e:
-                        logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
-                        self.v13_detector = None
+                    # Gunicorn/eventlet worker: load V13 in thread with 2-min cap so first scan doesn't hang 5+ min
+                    v13_result = [None]
+                    def _load_v13():
+                        try:
+                            v13_result[0] = get_deepfake_detector_v13(device=self.device)
+                        except Exception as e:
+                            logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
+                    load_thread = threading.Thread(target=_load_v13, daemon=True)
+                    load_thread.start()
+                    load_thread.join(timeout=120.0)  # 2 min max so ensemble init finishes in reasonable time
+                    self.v13_detector = v13_result[0]
+                    if load_thread.is_alive():
+                        logger.warning("⚠️  V13 loading timed out (2 min). Ensemble will use CLIP + ResNet + XceptionNet.")
                     if self.v13_detector and self.v13_detector.model_loaded:
                         logger.info("✅ DeepFake Detector V13 loaded successfully!")
                     elif self.v13_detector is None:
