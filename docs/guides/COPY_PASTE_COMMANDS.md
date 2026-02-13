@@ -138,9 +138,9 @@ You should see the model type and a method string that indicates the ensemble (e
 
 ---
 
-## Login flow and why the first load can take minutes
+## Login flow — fast; models load on first scan
 
-When you clear cache/cookies and hard-reload (Ctrl+F5), or open the app right after a server restart, login can take **multiple minutes**. That delay is almost entirely from the **backend loading the ensemble**, not from the login logic itself.
+Workers **do not** load the detection ensemble at startup. Login and device authentication are **fast** (usually under a second). The ensemble loads **lazy** when the first **scan** is run.
 
 ### What happens on login
 
@@ -148,31 +148,26 @@ When you clear cache/cookies and hard-reload (Ctrl+F5), or open the app right af
    The app loads. If there is no saved identity in localStorage (e.g. after clearing cache), you see the **Login** screen.
 
 2. **Auto device resolution**  
-   The Login component immediately calls **`/api/identity/resolve`** with your device fingerprint (no button click). That request:
-   - **If the backend worker is still starting:** The Gunicorn worker **does not accept any HTTP requests** until it has finished loading the full ensemble (in `post_worker_init`). So your request waits in the queue for **2–5 minutes** until the worker is ready. That’s the “multiple minutes to login to the device.”
-   - **Once the worker is ready:** The backend does a quick DB lookup (or creates a new device identity and in-memory Solana wallet). No ensemble, no blockchain call on this path — usually **under a second**.
+   The Login component immediately calls **`/api/identity/resolve`** with your device fingerprint (no button click). The worker is **ready immediately** (no model load at startup), so that request is a quick DB lookup (or new device + in-memory Solana wallet) — usually **under a second**.
 
 3. **Existing device**  
    If the backend returns “existing device,” the app writes `nodeId`/alias/tier to localStorage and calls `onLogin()` → you go to the Dashboard. No “Provisioning ID” screen.
 
 4. **New device**  
-   If the backend returns “new device,” the app shows the **entry** screen (optional alias + “Initialize Neural Passport”). When you click the button:
-   - The app switches to the **“Provisioning ID”** screen (spinner + boot-style logs).
-   - It calls **`/api/identity/resolve`** again with your alias. If the worker is **already ready**, this second request is fast (again, DB + wallet only). The “Provisioning ID” screen is then just the short **animation** (a few seconds) plus that one fast API call.
-   - If the worker was **still** loading when you clicked (e.g. you clicked very soon after load), this second request also waits until the worker is ready, so you can see “multiple minutes for provisioning ID” as well.
+   If the backend returns “new device,” the app shows the **entry** screen (optional alias + “Initialize Neural Passport”). When you click the button, the app calls **`/api/identity/resolve`** again with your alias; that call is also fast (DB + wallet only). The “Provisioning ID” screen is just the short animation plus that one fast API call.
 
 5. **After login**  
-   Identity is stored in localStorage. Later visits (same browser, same device) use that stored identity and skip the resolve call, so you go straight to the Dashboard with **no** multi‑minute wait — as long as you don’t clear storage or the server hasn’t just restarted and you’re the first request.
+   Identity is stored in localStorage. Later visits use that stored identity and skip the resolve call, so you go straight to the Dashboard.
 
-### Summary
+### When do models load?
 
-| Question | Answer |
-|---------|--------|
-| Is the delay from the ensemble? | **Yes.** The worker won’t handle any request (including login) until the ensemble has finished loading. |
-| Is it a one-time thing? | **Yes, per worker startup.** After the ensemble is loaded, that worker serves all requests quickly. The next multi‑minute wait only happens after another **server/worker restart** (e.g. redeploy, `docker compose restart`). |
-| Is it only when I login and stay logged in? | The long wait happens on the **first** request(s) after a restart (e.g. the first login after clearing cache or right after deploy). Once you’re logged in and the worker is warm, staying logged in and using the app is fast. |
+| When | What happens |
+|------|----------------|
+| **Login / device auth** | No model load. Worker is ready; `/api/health` and `/api/identity/resolve` respond immediately. |
+| **First scan (upload or URL)** | The worker loads the full ensemble (CLIP, ResNet, V13, etc.) on that request. The **first** analysis may take **2–5 minutes** (model load + run). Subsequent scans in the same worker are fast (model already in memory). |
+| **After worker restart** | Again, login is fast; the next **first** scan in that worker triggers the 2–5 min load once. |
 
-So: **the multi‑minute login/provisioning delay is the backend loading the AI ensemble; it’s one-time per restart, and once the worker is ready, login and the rest of the app are fast.**
+So: **login and device auth are fast. The only long wait (2–5 min) is the first scan after a worker start, when the ensemble loads on demand.**
 
 ---
 
@@ -183,7 +178,7 @@ The Forensic Lab runs a **health check** (`GET /api/health`) before starting a s
 ### Likely causes
 
 1. **Backend container not running** – e.g. after a server reboot or failed deploy.
-2. **Backend still starting** – worker loading the ensemble (2–5 min); health is only answered once the worker is ready.
+2. **Backend still starting** – container or worker not yet listening; health is answered as soon as the worker binds (models load on first scan, not at startup).
 3. **Backend crashed** – OOM, exception during ensemble load, or worker restart.
 4. **Nginx ↔ backend** – wrong proxy, backend host/port, or timeout.
 

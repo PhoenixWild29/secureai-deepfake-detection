@@ -91,6 +91,21 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
+def _ensure_ensemble_loaded():
+    """
+    Load ensemble on this (main) thread if not yet loaded — lazy init on first scan.
+    Call this before dispatching to tpool so the first analyze loads models; login stays fast.
+    Returns True if ensemble is ready, False if init failed (caller should return 503).
+    """
+    try:
+        from ai_model.ensemble_detector import get_ensemble_detector
+        det = get_ensemble_detector()
+        return det is not None
+    except Exception as e:
+        logger.exception("Ensemble ensure load failed: %s", e)
+        return False
+
+
 def _make_json_serializable(obj):
     """Convert numpy/types to native Python so json.dump and jsonify work."""
     import numpy as np
@@ -1103,8 +1118,13 @@ def analyze_video():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Run full analysis in thread pool when using eventlet to avoid greenlet.error
+        # Lazy-load ensemble on first scan (main thread); then run analysis (tpool or same thread)
         # Full ensemble only — no fallback. If ensemble unavailable, return 503.
+        if not _ensure_ensemble_loaded():
+            return jsonify({
+                'error': 'Detection models failed to load. Please try again in a moment.',
+                'ensemble_unavailable': True
+            }), 503
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
@@ -1480,7 +1500,12 @@ def analyze_video_from_url():
             'message': '[NEURAL] Loading detection models (CLIP, ResNet, ...)'
         }, room=unique_id)
         
-        # Run full analysis — full ensemble only, no fallback
+        # Lazy-load ensemble on first scan, then run full analysis
+        if not _ensure_ensemble_loaded():
+            return jsonify({
+                'error': 'Detection models failed to load. Please try again in a moment.',
+                'ensemble_unavailable': True
+            }), 503
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore

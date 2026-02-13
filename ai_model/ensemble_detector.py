@@ -641,8 +641,9 @@ def init_ensemble_blocking() -> Optional[EnsembleDetector]:
 
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
     """
-    Return the global ensemble detector. Init must have been done at worker startup via init_ensemble_blocking().
-    If called from main thread and not yet inited (e.g. no post_worker_init), runs init now (blocking).
+    Return the global ensemble detector. Lazy init: if called from the worker main thread and
+    not yet loaded, runs init_ensemble_blocking() now (2–5 min first time). Used so login
+    stays fast and models load on first scan.
     """
     global _ensemble_instance, _ensemble_init_failed
     if _ensemble_instance is not None:

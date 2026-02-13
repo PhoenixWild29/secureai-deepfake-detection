@@ -60,24 +60,8 @@ def on_exit(server):
     server.log.info("Shutting down SecureAI Guardian server...")
 
 def post_worker_init(worker):
-    """Start worker immediately; load ensemble in background so /api/health works and container stays healthy."""
-    import threading
-
-    def _load_ensemble():
-        try:
-            worker.log.info("Background: loading full ensemble (2-5 min or more on low RAM)...")
-            from ai_model.ensemble_detector import init_ensemble_blocking
-            d = init_ensemble_blocking()
-            if d is not None:
-                worker.log.info("Ensemble loaded in worker; every scan will use the full ensemble.")
-            else:
-                worker.log.error("Ensemble failed to load. Scans will return 503 until it loads or worker restarts.")
-        except Exception as e:
-            worker.log.exception(f"Ensemble load failed: {e}")
-
-    t = threading.Thread(target=_load_ensemble, daemon=True)
-    t.start()
-    worker.log.info("Worker bound and accepting connections. Ensemble loading in background; /api/health is live.")
+    """Worker binds immediately. Models are loaded on first scan (lazy), so login and device auth stay fast."""
+    worker.log.info("Worker ready. Ensemble will load on first analysis request (login/health are instant).")
 
 # Preload app for better performance
 preload_app = True
