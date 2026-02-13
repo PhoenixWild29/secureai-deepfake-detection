@@ -357,13 +357,17 @@ export async function analyzeVideoFromUrl(
           }
         } else if (response.status === 500) {
           errorMessage = errorData.error || 'Server error. Please try again later.';
-        }
         } else if (response.status === 504) {
           errorMessage = 'Request timed out. The server took too long to respond. Try a shorter video or try again in a few minutes.';
         } else if (response.status === 502 || response.status === 503) {
           errorMessage = 'Backend unavailable or overloaded. Please try again in a minute.';
         }
       } catch (parseError) {
+        if (response.status === 504) {
+          errorMessage = 'Request timed out. The server took too long to respond. Try a shorter video or try again.';
+        } else if (response.status === 502 || response.status === 503) {
+          errorMessage = 'Backend unavailable or overloaded. Please try again.';
+        }
         console.error('Failed to parse error response:', parseError);
       }
       throw new Error(errorMessage);
