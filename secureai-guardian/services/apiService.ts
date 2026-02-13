@@ -263,15 +263,15 @@ export async function analyzeVideo(
           errorMessage = errorData.error || errorData.message || errorMessage;
           if (response.status === 400) {
             if (errorData.error?.includes('No video file')) {
-            errorMessage = 'No video file provided. Please select a file to upload.';
-          } else if (errorData.error?.includes('Unsupported file format')) {
-            errorMessage = `Unsupported file format. Please use: MP4, AVI, MOV, MKV, or WEBM.`;
-          } else if (errorData.error?.includes('file size')) {
-            errorMessage = `File too large. Maximum size is 500MB.`;
-          } else {
-            errorMessage = errorData.error || `Invalid request: ${errorMessage}`;
-          }
-        } else if (response.status === 413) {
+              errorMessage = 'No video file provided. Please select a file to upload.';
+            } else if (errorData.error?.includes('Unsupported file format')) {
+              errorMessage = `Unsupported file format. Please use: MP4, AVI, MOV, MKV, or WEBM.`;
+            } else if (errorData.error?.includes('file size')) {
+              errorMessage = `File too large. Maximum size is 500MB.`;
+            } else {
+              errorMessage = errorData.error || `Invalid request: ${errorMessage}`;
+            }
+          } else if (response.status === 413) {
           errorMessage = 'File too large. Maximum size is 500MB.';
         } else if (response.status === 503 && errorData.ensemble_unavailable) {
           errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
@@ -279,6 +279,7 @@ export async function analyzeVideo(
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 500) {
           errorMessage = 'Server error. Please try again later.';
+        }
         }
       } catch (parseError) {
         if (response.status === 504) {
