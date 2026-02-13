@@ -246,12 +246,18 @@ export async function analyzeVideo(
     formData.append('model_type', request.modelType);
   }
 
+  // Long timeout: first scan loads models (2–5 min) + analysis; allow up to 10 min
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 min
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
       method: 'POST',
       body: formData,
+      signal: controller.signal,
       // Note: Don't set Content-Type header, browser will set it with boundary
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let errorMessage = `Analysis failed: (${response.status})`;
@@ -306,7 +312,15 @@ export async function analyzeVideo(
       throw new Error(`Failed to process analysis results: ${transformError instanceof Error ? transformError.message : 'Unknown error'}`);
     }
   } catch (error) {
+    clearTimeout(timeoutId);
     console.error('Video analysis error:', error);
+    // Connection dropped after long run (e.g. timeout, network): backend may have finished
+    const msg = error instanceof Error ? error.message : '';
+    if (msg === 'Failed to fetch' || msg.includes('fetch') && msg.toLowerCase().includes('failed')) {
+      throw new Error(
+        'Connection closed before the response was received. The analysis may have completed—check the Security Hub for your result, or try again.'
+      );
+    }
     throw error;
   }
 }
@@ -317,6 +331,8 @@ export async function analyzeVideo(
 export async function analyzeVideoFromUrl(
   request: UrlAnalysisRequest
 ): Promise<ScanResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 min
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze-url`, {
       method: 'POST',
@@ -327,7 +343,9 @@ export async function analyzeVideoFromUrl(
         url: request.url,
         analysis_id: request.analysisId,
       }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       let errorMessage = `Analysis failed: ${response.statusText} (${response.status})`;
@@ -390,7 +408,14 @@ export async function analyzeVideoFromUrl(
       throw new Error(`Failed to process analysis results: ${transformError instanceof Error ? transformError.message : 'Unknown error'}`);
     }
   } catch (error) {
+    clearTimeout(timeoutId);
     console.error('Video URL analysis error:', error);
+    const msg = error instanceof Error ? error.message : '';
+    if (msg === 'Failed to fetch' || (msg.includes('fetch') && msg.toLowerCase().includes('failed'))) {
+      throw new Error(
+        'Connection closed before the response was received. The analysis may have completed—check the Security Hub for your result, or try again.'
+      );
+    }
     throw error;
   }
 }
