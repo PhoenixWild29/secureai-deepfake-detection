@@ -96,7 +96,7 @@ export class ReconnectingWebSocket {
         // but allow websocket upgrade if available.
         transports: ['polling', 'websocket'],
         withCredentials: true,
-        timeout: 20000,
+        timeout: 120000, // 2 min so server under load (model load) can still respond
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,

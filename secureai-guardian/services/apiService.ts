@@ -246,9 +246,9 @@ export async function analyzeVideo(
     formData.append('model_type', request.modelType);
   }
 
-  // Long timeout: first scan loads models (2–5 min) + analysis; allow up to 10 min
+  // Long timeout: model load + analysis; allow 15 min so backend can finish
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 min
+  const timeoutId = setTimeout(() => controller.abort(), 900000); // 15 min
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
@@ -314,11 +314,16 @@ export async function analyzeVideo(
   } catch (error) {
     clearTimeout(timeoutId);
     console.error('Video analysis error:', error);
-    // Connection dropped after long run (e.g. timeout, network): backend may have finished
+    // Connection dropped or aborted after long run: backend may have finished
     const msg = error instanceof Error ? error.message : '';
-    if (msg === 'Failed to fetch' || msg.includes('fetch') && msg.toLowerCase().includes('failed')) {
+    if (msg === 'Failed to fetch' || (msg.includes('fetch') && msg.toLowerCase().includes('failed'))) {
       throw new Error(
         'Connection closed before the response was received. The analysis may have completed—check the Security Hub for your result, or try again.'
+      );
+    }
+    if (msg.includes('aborted') || msg.includes('AbortError') || msg.includes('signal is aborted')) {
+      throw new Error(
+        'Request took too long and was cancelled. The analysis may have completed—check the Security Hub, or try again (first scan loads models and can take a few minutes).'
       );
     }
     throw error;
@@ -332,7 +337,7 @@ export async function analyzeVideoFromUrl(
   request: UrlAnalysisRequest
 ): Promise<ScanResult> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 600000); // 10 min
+  const timeoutId = setTimeout(() => controller.abort(), 900000); // 15 min
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze-url`, {
       method: 'POST',
@@ -414,6 +419,11 @@ export async function analyzeVideoFromUrl(
     if (msg === 'Failed to fetch' || (msg.includes('fetch') && msg.toLowerCase().includes('failed'))) {
       throw new Error(
         'Connection closed before the response was received. The analysis may have completed—check the Security Hub for your result, or try again.'
+      );
+    }
+    if (msg.includes('aborted') || msg.includes('AbortError') || msg.includes('signal is aborted')) {
+      throw new Error(
+        'Request took too long and was cancelled. The analysis may have completed—check the Security Hub, or try again (first scan loads models and can take a few minutes).'
       );
     }
     throw error;

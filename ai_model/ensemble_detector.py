@@ -108,173 +108,80 @@ class EnsembleDetector:
                 clip_pretrained=clip_pretrained
             )
         
-        # Initialize ResNet50 (with timeout to prevent hanging)
-        logger.info("📦 Loading ResNet50 detector...")
+        # Load ResNet, V13, Xception, EfficientNet IN PARALLEL to cut init from 10+ min to ~3 min
+        import threading
         self.resnet_model = None
-        
-        try:
-            # Try to create ResNet classifier with timeout
-            import threading
-            resnet_created = [False]
-            resnet_error = [None]
-            
-            def create_resnet():
-                try:
-                    resnet_created[0] = True
-                    return ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
-                except Exception as e:
-                    resnet_error[0] = e
-                    return None
-            
-            # Create ResNet with 10 second timeout
-            resnet_thread = threading.Thread(target=lambda: setattr(self, 'resnet_model', create_resnet()), daemon=True)
-            resnet_thread.start()
-            resnet_thread.join(timeout=10.0)
-            
-            if resnet_thread.is_alive():
-                logger.warning("⚠️  ResNet50 creation timed out (>10s). Skipping ResNet.")
-                self.resnet_model = None
-            elif resnet_error[0]:
-                logger.warning(f"⚠️  ResNet50 creation failed: {resnet_error[0]}. Skipping ResNet.")
-                self.resnet_model = None
-            elif self.resnet_model is None:
-                logger.warning("⚠️  ResNet50 not created. Ensemble will use CLIP only.")
-        except Exception as e:
-            logger.warning(f"⚠️  ResNet50 initialization error: {e}. Skipping ResNet.")
-            self.resnet_model = None
-        
-        # Load ResNet weights (only if model was created)
-        if self.resnet_model is not None:
-            resnet_paths = [
-                resnet_model_path,
-                'ai_model/resnet_resnet50_final.pth',
-                'ai_model/resnet_resnet50_best.pth',
-                'resnet_resnet50_final.pth',
-                'resnet_resnet50_best.pth'
-            ]
-            
-            resnet_loaded = False
-            for path in resnet_paths:
-                if path and os.path.exists(path):
-                    try:
-                        # Load with timeout
-                        import threading
-                        load_success = [False]
-                        
-                        def load_weights():
-                            try:
-                                self.resnet_model.load_state_dict(torch.load(path, map_location=self.device))
-                                self.resnet_model.to(self.device)
-                                self.resnet_model.eval()
-                                load_success[0] = True
-                            except Exception as e:
-                                logger.warning(f"Failed to load weights: {e}")
-                        
-                        load_thread = threading.Thread(target=load_weights, daemon=True)
-                        load_thread.start()
-                        load_thread.join(timeout=10.0)
-                        
-                        if load_thread.is_alive():
-                            logger.warning(f"⚠️  ResNet weight loading timed out for {path}")
-                            continue
-                        
-                        if load_success[0]:
-                            logger.info(f"✅ ResNet50 loaded from: {path}")
-                            resnet_loaded = True
-                            break
-                    except Exception as e:
-                        logger.warning(f"⚠️  Failed to load ResNet from {path}: {e}")
-                        continue
-            
-            if not resnet_loaded:
-                logger.warning("⚠️  ResNet50 weights not loaded. Ensemble will use CLIP only.")
-                self.resnet_model = None
-        
-        # Initialize DeepFake Detector V13 (BEST MODEL - Available on Hugging Face!)
-        # NOTE: V13 loading can hang on ConvNeXt-Large, so we use a timeout when in main thread (signal only works there)
-        logger.info("📦 Loading DeepFake Detector V13 (699M params, F1: 0.9586)...")
-        logger.info("   ⚠️  This may take 2-5 minutes or timeout if ConvNeXt-Large hangs")
         self.v13_detector = None
-        if V13_AVAILABLE:
-            try:
-                import threading
-                in_main_thread = threading.current_thread() is threading.main_thread()
-                if in_main_thread:
-                    import signal
-                    v13_instance = [None]
-                    def load_v13():
-                        try:
-                            v13_instance[0] = get_deepfake_detector_v13(device=self.device)
-                        except Exception as e:
-                            raise e
-                    def timeout_handler(signum, frame):
-                        raise TimeoutError("V13 loading timed out after 5 minutes")
-                    original_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                    signal.alarm(300)  # 5 minutes
-                    try:
-                        load_v13()
-                        signal.alarm(0)
-                        signal.signal(signal.SIGALRM, original_handler)
-                        self.v13_detector = v13_instance[0]
-                        if self.v13_detector and self.v13_detector.model_loaded:
-                            logger.info("✅ DeepFake Detector V13 loaded successfully!")
-                        elif self.v13_detector is None or not getattr(self.v13_detector, 'model_loaded', False):
-                            logger.info("⚠️  DeepFake Detector V13 not fully loaded (some models may have failed)")
-                    except TimeoutError:
-                        signal.alarm(0)
-                        signal.signal(signal.SIGALRM, original_handler)
-                        logger.warning("⚠️  DeepFake Detector V13 loading timed out (ConvNeXt-Large may be hanging)")
-                        logger.warning("   Ensemble will continue without V13 - still excellent with CLIP + ResNet + XceptionNet")
-                        self.v13_detector = None
-                    except Exception as e:
-                        signal.alarm(0)
-                        signal.signal(signal.SIGALRM, original_handler)
-                        logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
-                        self.v13_detector = None
-                else:
-                    # Gunicorn/eventlet worker: load V13 in thread with 2-min cap so first scan doesn't hang 5+ min
-                    v13_result = [None]
-                    def _load_v13():
-                        try:
-                            v13_result[0] = get_deepfake_detector_v13(device=self.device)
-                        except Exception as e:
-                            logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
-                    load_thread = threading.Thread(target=_load_v13, daemon=True)
-                    load_thread.start()
-                    load_thread.join(timeout=120.0)  # 2 min max so ensemble init finishes in reasonable time
-                    self.v13_detector = v13_result[0]
-                    if load_thread.is_alive():
-                        logger.warning("⚠️  V13 loading timed out (2 min). Ensemble will use CLIP + ResNet + XceptionNet.")
-                    if self.v13_detector and self.v13_detector.model_loaded:
-                        logger.info("✅ DeepFake Detector V13 loaded successfully!")
-                    elif self.v13_detector is None:
-                        logger.info("   Ensemble will continue without V13 - still excellent with CLIP + ResNet + XceptionNet")
-            except Exception as e:
-                logger.warning(f"⚠️  Could not load DeepFake Detector V13: {e}")
-                self.v13_detector = None
-        
-        # Initialize XceptionNet
-        logger.info("📦 Loading XceptionNet detector...")
         self.xception_detector = None
-        if XCEPTION_AVAILABLE:
-            try:
-                self.xception_detector = get_xception_detector(device=self.device)
-                if self.xception_detector:
-                    logger.info("✅ XceptionNet detector loaded successfully!")
-            except Exception as e:
-                logger.warning(f"⚠️  Could not load XceptionNet: {e}")
-
-        # Initialize EfficientNet (optional)
-        logger.info("📦 Loading EfficientNet detector...")
         self.efficientnet_detector = None
-        if EFFICIENTNET_AVAILABLE:
+        logger.info("📦 Loading ResNet50, V13, XceptionNet, EfficientNet in parallel...")
+        
+        def load_resnet():
             try:
-                # Will return None if efficientnet-pytorch isn't installed
-                self.efficientnet_detector = get_efficientnet_detector(device=self.device)
-                if self.efficientnet_detector:
-                    logger.info("✅ EfficientNet detector loaded successfully!")
+                model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
+                for path in [resnet_model_path, 'ai_model/resnet_resnet50_final.pth', 'ai_model/resnet_resnet50_best.pth',
+                             'resnet_resnet50_final.pth', 'resnet_resnet50_best.pth']:
+                    if path and os.path.exists(path):
+                        model.load_state_dict(torch.load(path, map_location=self.device))
+                        model.to(self.device)
+                        model.eval()
+                        logger.info(f"✅ ResNet50 loaded from: {path}")
+                        return model
+                logger.warning("⚠️  ResNet50 weights not found. Skipping ResNet.")
             except Exception as e:
-                logger.warning(f"⚠️  Could not load EfficientNet detector: {e}")
+                logger.warning(f"⚠️  ResNet50: {e}")
+            return None
+        
+        def load_v13_thread():
+            if not V13_AVAILABLE:
+                return None
+            try:
+                return get_deepfake_detector_v13(device=self.device)
+            except Exception as e:
+                logger.warning(f"⚠️  V13: {e}")
+                return None
+        
+        def load_xception_thread():
+            if not XCEPTION_AVAILABLE:
+                return None
+            try:
+                return get_xception_detector(device=self.device)
+            except Exception as e:
+                logger.warning(f"⚠️  XceptionNet: {e}")
+                return None
+        
+        def load_efficientnet_thread():
+            if not EFFICIENTNET_AVAILABLE:
+                return None
+            try:
+                return get_efficientnet_detector(device=self.device)
+            except Exception as e:
+                logger.warning(f"⚠️  EfficientNet: {e}")
+                return None
+        
+        resnet_result, v13_result, xception_result, eff_result = [None], [None], [None], [None]
+        t_resnet = threading.Thread(target=lambda: resnet_result.__setitem__(0, load_resnet()), daemon=True)
+        t_v13 = threading.Thread(target=lambda: v13_result.__setitem__(0, load_v13_thread()), daemon=True)
+        t_xception = threading.Thread(target=lambda: xception_result.__setitem__(0, load_xception_thread()), daemon=True)
+        t_eff = threading.Thread(target=lambda: eff_result.__setitem__(0, load_efficientnet_thread()), daemon=True)
+        t_resnet.start()
+        t_v13.start()
+        t_xception.start()
+        t_eff.start()
+        for t in (t_resnet, t_v13, t_xception, t_eff):
+            t.join(timeout=180.0)  # max 3 min for batch
+        self.resnet_model = resnet_result[0]
+        self.v13_detector = v13_result[0]
+        self.xception_detector = xception_result[0]
+        self.efficientnet_detector = eff_result[0]
+        if t_v13.is_alive():
+            logger.warning("⚠️  V13 loading timed out (3 min). Ensemble will use CLIP + ResNet + XceptionNet.")
+        if self.v13_detector and getattr(self.v13_detector, 'model_loaded', False):
+            logger.info("✅ DeepFake Detector V13 loaded successfully!")
+        if self.xception_detector:
+            logger.info("✅ XceptionNet detector loaded successfully!")
+        if self.efficientnet_detector:
+            logger.info("✅ EfficientNet detector loaded successfully!")
         
         # Ensemble weights (updated to include new models)
         self.ensemble_weights = ensemble_weights or {
