@@ -274,7 +274,7 @@ export async function analyzeVideo(
           } else if (response.status === 413) {
             errorMessage = 'File too large. Maximum size is 500MB.';
           } else if (response.status === 503 && errorData.ensemble_unavailable) {
-            errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
+            errorMessage = 'Models are loading or temporarily unavailable. The first scan after a restart can take 2–5 minutes—please wait and try again.';
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 500) {
@@ -344,7 +344,7 @@ export async function analyzeVideoFromUrl(
         }
         
         if (response.status === 503 && errorData.ensemble_unavailable) {
-          errorMessage = 'Full ensemble is loading or temporarily unavailable. Please retry in a minute or restart the backend.';
+          errorMessage = 'Models are loading or temporarily unavailable. The first scan after a restart can take 2–5 minutes—please wait and try again.';
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 400) {

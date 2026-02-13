@@ -641,22 +641,17 @@ def init_ensemble_blocking() -> Optional[EnsembleDetector]:
 
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
     """
-    Return the global ensemble detector. Lazy init: if called from the worker main thread and
-    not yet loaded, runs init_ensemble_blocking() now (2–5 min first time). Used so login
-    stays fast and models load on first scan.
+    Return the global ensemble detector. Lazy init: on first use (any thread), runs
+    init_ensemble_blocking() and blocks 2–5 min. Used so login stays fast and models
+    load on first scan. Call from request thread so first analyze waits for load.
     """
     global _ensemble_instance, _ensemble_init_failed
     if _ensemble_instance is not None:
         return _ensemble_instance
     if _ensemble_init_failed:
         return None
-    try:
-        import threading
-        if threading.current_thread() is threading.main_thread():
-            return init_ensemble_blocking()
-    except Exception:
-        pass
-    return None
+    # Load on first use from any thread (request handler may not be "main" with gevent/eventlet)
+    return init_ensemble_blocking()
 
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
     """
