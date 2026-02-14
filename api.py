@@ -93,12 +93,12 @@ logging.basicConfig(level=logging.INFO)
 
 def _ensure_ensemble_loaded():
     """
-    Load ensemble on this (main) thread if not yet loaded — lazy init on first scan.
-    Call this before dispatching to tpool so the first analyze loads models; login stays fast.
-    Returns True if ensemble is ready, False if init failed (caller should return 503).
+    Ensure ensemble load is started (in background) and return True only if already loaded.
+    Never blocks the request thread. First scan gets 503 "retry in 3 min"; next scan proceeds.
     """
     try:
-        from ai_model.ensemble_detector import get_ensemble_detector
+        from ai_model.ensemble_detector import get_ensemble_detector, start_background_ensemble_load
+        start_background_ensemble_load()  # no-op if already loaded or loading
         det = get_ensemble_detector()
         return det is not None
     except Exception as e:
@@ -1139,8 +1139,9 @@ def analyze_video():
             _stop_heartbeat.set()
         if not ensemble_ok:
             return jsonify({
-                'error': 'Detection models failed to load. Please try again in a moment.',
-                'ensemble_unavailable': True
+                'error': 'Models are loading (takes 2–4 min). Please click Scan again in 3 minutes.',
+                'ensemble_unavailable': True,
+                'retry_after_seconds': 180
             }), 503
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
@@ -1538,8 +1539,9 @@ def analyze_video_from_url():
             _stop_heartbeat.set()
         if not ensemble_ok:
             return jsonify({
-                'error': 'Detection models failed to load. Please try again in a moment.',
-                'ensemble_unavailable': True
+                'error': 'Models are loading (takes 2–4 min). Please click Scan again in 3 minutes.',
+                'ensemble_unavailable': True,
+                'retry_after_seconds': 180
             }), 503
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':

@@ -280,7 +280,7 @@ export async function analyzeVideo(
           } else if (response.status === 413) {
             errorMessage = 'File too large. Maximum size is 500MB.';
           } else if (response.status === 503 && errorData.ensemble_unavailable) {
-            errorMessage = 'Models are loading or temporarily unavailable. The first scan after a restart can take 2–5 minutes—please wait and try again.';
+            errorMessage = errorData.error || 'Models are loading (2–4 min). Please click Scan again in 3 minutes.';
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 500) {
@@ -367,7 +367,7 @@ export async function analyzeVideoFromUrl(
         }
         
         if (response.status === 503 && errorData.ensemble_unavailable) {
-          errorMessage = 'Models are loading or temporarily unavailable. The first scan after a restart can take 2–5 minutes—please wait and try again.';
+          errorMessage = errorData.error || 'Models are loading (2–4 min). Please click Scan again in 3 minutes.';
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 400) {

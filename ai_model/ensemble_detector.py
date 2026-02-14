@@ -544,22 +544,17 @@ class EnsembleDetector:
         }
 
 
-# Global instance; must be loaded in worker main thread at startup (no fallback, no timeout)
+# Global instance; loaded in background thread so the request thread never blocks
+import threading as _threading
 _ensemble_instance = None
 _ensemble_init_failed = False
-
-def _ensemble_init_timeout_seconds() -> float:
-    """Used for request timeout only; init itself is blocking at startup."""
-    try:
-        import os
-        return float(os.getenv("ENSEMBLE_INIT_TIMEOUT", "600"))
-    except (ValueError, TypeError):
-        return 600.0
+_ensemble_loading_started = False
+_ensemble_loading_lock = _threading.Lock()
 
 def init_ensemble_blocking() -> Optional[EnsembleDetector]:
     """
-    Load the full ensemble in the current thread (must be main thread for V13 signal).
-    Call this from worker startup (post_worker_init). No timeout - we load the best model, period.
+    Load the full ensemble in the current thread. Called only from the background
+    loader thread so the request thread never blocks for 10+ min.
     """
     global _ensemble_instance, _ensemble_init_failed
     if _ensemble_instance is not None:
@@ -576,19 +571,37 @@ def init_ensemble_blocking() -> Optional[EnsembleDetector]:
         _ensemble_init_failed = True
         return None
 
+def start_background_ensemble_load() -> None:
+    """
+    Start loading the ensemble in a background thread if not already loaded or loading.
+    Returns immediately. The request thread must never block on model load — so the
+    first scan returns 503 and the user retries in 3 min when the background load has finished.
+    """
+    global _ensemble_instance, _ensemble_init_failed, _ensemble_loading_started
+    with _ensemble_loading_lock:
+        if _ensemble_instance is not None:
+            return
+        if _ensemble_init_failed:
+            return
+        if _ensemble_loading_started:
+            return
+        _ensemble_loading_started = True
+    def _run():
+        try:
+            init_ensemble_blocking()
+        finally:
+            pass  # _ensemble_instance or _ensemble_init_failed is set
+    t = _threading.Thread(target=_run, daemon=True)
+    t.start()
+    logger.info("Ensemble load started in background. Next scan (in ~3 min) will use it.")
+
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
     """
-    Return the global ensemble detector. Lazy init: on first use (any thread), runs
-    init_ensemble_blocking() and blocks 2–5 min. Used so login stays fast and models
-    load on first scan. Call from request thread so first analyze waits for load.
+    Return the global ensemble detector if already loaded. Never blocks — if not loaded,
+    returns None so the API can return 503 and ask the user to retry in 3 min.
     """
-    global _ensemble_instance, _ensemble_init_failed
-    if _ensemble_instance is not None:
-        return _ensemble_instance
-    if _ensemble_init_failed:
-        return None
-    # Load on first use from any thread (request handler may not be "main" with gevent/eventlet)
-    return init_ensemble_blocking()
+    global _ensemble_instance
+    return _ensemble_instance
 
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
     """
