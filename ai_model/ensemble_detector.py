@@ -116,13 +116,33 @@ class EnsembleDetector:
         self.efficientnet_detector = None
         logger.info("📦 Loading ResNet50, V13, XceptionNet, EfficientNet in parallel...")
         
+        def _load_state_dict_resnet(path: str):
+            """Load state dict from .pth or .safetensors (safetensors is much faster)."""
+            base, ext = os.path.splitext(path)
+            # Prefer safetensors if available (faster load, no pickle)
+            if ext.lower() == '.pth':
+                safetensors_path = base + '.safetensors'
+                if os.path.exists(safetensors_path):
+                    try:
+                        from safetensors.torch import load_file
+                        return load_file(safetensors_path, device=self.device)
+                    except Exception:
+                        pass
+            # .pth: use weights_only=True when supported (PyTorch 2.0+, faster/safer)
+            try:
+                ckpt = torch.load(path, map_location=self.device, weights_only=True)
+            except (TypeError, Exception):
+                ckpt = torch.load(path, map_location=self.device)
+            return ckpt.get('state_dict', ckpt) if isinstance(ckpt, dict) else ckpt
+
         def load_resnet():
             try:
                 model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
                 for path in [resnet_model_path, 'ai_model/resnet_resnet50_final.pth', 'ai_model/resnet_resnet50_best.pth',
                              'resnet_resnet50_final.pth', 'resnet_resnet50_best.pth']:
                     if path and os.path.exists(path):
-                        model.load_state_dict(torch.load(path, map_location=self.device))
+                        state = _load_state_dict_resnet(path)
+                        model.load_state_dict(state, strict=False)
                         model.to(self.device)
                         model.eval()
                         logger.info(f"✅ ResNet50 loaded from: {path}")
@@ -169,13 +189,13 @@ class EnsembleDetector:
         t_xception.start()
         t_eff.start()
         for t in (t_resnet, t_v13, t_xception, t_eff):
-            t.join(timeout=180.0)  # max 3 min for batch
+            t.join(timeout=120.0)  # max 2 min for batch (keeps first scan ~2–4 min total)
         self.resnet_model = resnet_result[0]
         self.v13_detector = v13_result[0]
         self.xception_detector = xception_result[0]
         self.efficientnet_detector = eff_result[0]
         if t_v13.is_alive():
-            logger.warning("⚠️  V13 loading timed out (3 min). Ensemble will use CLIP + ResNet + XceptionNet.")
+            logger.warning("⚠️  V13 loading timed out (2 min). Ensemble will use CLIP + ResNet + XceptionNet.")
         if self.v13_detector and getattr(self.v13_detector, 'model_loaded', False):
             logger.info("✅ DeepFake Detector V13 loaded successfully!")
         if self.xception_detector:

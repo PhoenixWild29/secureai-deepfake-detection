@@ -185,8 +185,9 @@ Workers **do not** load the detection ensemble at startup. Login and device auth
 | When | What happens |
 |------|----------------|
 | **Login / device auth** | No model load. Worker is ready; `/api/health` and `/api/identity/resolve` respond immediately. |
-| **First scan (upload or URL)** | The worker loads the full ensemble (CLIP, ResNet, V13, etc.) on that request. The **first** analysis may take **2–5 minutes** (model load + run). Subsequent scans in the same worker are fast (model already in memory). |
-| **After worker restart** | Again, login is fast; the next **first** scan in that worker triggers the 2–5 min load once. |
+| **First scan (upload or URL)** | The worker loads the full ensemble in **parallel** (ResNet, V13, Xception, EfficientNet). Typical load: **2–4 minutes** (then analysis runs). Subsequent scans in the same worker are fast (model already in memory). |
+| **After worker restart** | Again, login is fast; the next **first** scan in that worker triggers the 2–4 min load once. |
+| **Faster ResNet load (optional)** | If you have `safetensors` installed and a `resnet_resnet50_best.safetensors` file next to the `.pth`, ResNet loads from that (faster). Convert once: `python scripts/utilities/convert_resnet_to_safetensors.py`. |
 
 So: **login and device auth are fast. The only long wait (2–5 min) is the first scan after a worker start, when the ensemble loads on demand.**
 
