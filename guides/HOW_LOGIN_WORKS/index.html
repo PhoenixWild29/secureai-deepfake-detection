@@ -1,0 +1,1458 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>How SecureAI Neural Passport Login Works - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-secureai-neural-passport-login-works" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              How SecureAI Neural Passport Login Works
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview-for-non-technical-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview for Non-Technical Users
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Overview for Non-Technical Users">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-neural-passport-process-simple-explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Neural Passport Process (Simple Explanation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works-step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works (Step-by-Step)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works (Step-by-Step)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-initialization-first-time-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Initialization (First Time Only)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-device-bonding-what-happens-behind-the-scenes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Device Bonding (What Happens Behind the Scenes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-persistent-access-return-visits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Persistent Access (Return Visits)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-logout-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Logout (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technical-details-for-developersinvestors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Details (For Developers/Investors)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Details (For Developers/Investors)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-cryptographic-device-bonding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture: Cryptographic Device Bonding
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture: Cryptographic Device Bonding">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identity-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Identity Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#localstorage-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LocalStorage Keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#power-user-override-system-architect-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Power User Override (System Architect Access)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#subscription-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Subscription Tiers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Subscription Tiers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sentinel-default-guest-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SENTINEL (Default - Guest Tier)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pro-guardian" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PRO GUARDIAN
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nexus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NEXUS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#power_user-architect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        POWER_USER (Architect)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advantages-of-neural-passport" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advantages of Neural Passport
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advantages of Neural Passport">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-users" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Users
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-developers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Developers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-investors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Investors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-and-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations and Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Limitations and Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Limitations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#future-enhancements-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Enhancements (Optional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-neural-passport-vs-traditional-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison: Neural Passport vs. Traditional Login
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="how-secureai-neural-passport-login-works">How SecureAI Neural Passport Login Works</h1>
+<h2 id="overview-for-non-technical-users">Overview for Non-Technical Users</h2>
+<p>SecureAI Guardian uses a revolutionary <strong>device-based authentication system</strong> called "Neural Passport" that eliminates the need for traditional passwords or registration. Your device becomes your identity key—simple, secure, and seamless.</p>
+<h3 id="the-neural-passport-process-simple-explanation">The Neural Passport Process (Simple Explanation)</h3>
+<ol>
+<li><strong>First Visit</strong>: You click "Initialize Neural Passport" and optionally enter an alias (like "AGENT_ZERO")</li>
+<li><strong>Device Bonding</strong>: The system creates a unique identity bonded to your browser/device</li>
+<li><strong>Instant Access</strong>: You're immediately logged in with no password needed</li>
+<li><strong>Persistent Access</strong>: Your device remembers you—return anytime and you're automatically authenticated</li>
+<li><strong>No Registration</strong>: No email, no password, no signup forms—just one click and you're in</li>
+</ol>
+<hr />
+<h2 id="how-it-works-step-by-step">How It Works (Step-by-Step)</h2>
+<h3 id="step-1-initialization-first-time-only">Step 1: Initialization (First Time Only)</h3>
+<p>When you first visit SecureAI Guardian:</p>
+<ol>
+<li>
+<p><strong>Open the Login Page</strong>: You see the SecureAI Guardian portal with "Initialize Neural Passport" button</p>
+</li>
+<li>
+<p><strong>Enter Optional Alias</strong> (Optional):</p>
+</li>
+<li>You can enter a custom alias like "AGENT_ZERO" or "FORENSIC_ANALYST"</li>
+<li>If you leave it blank, the system auto-generates one like "AGENT_1234"</li>
+<li>
+<p>This alias is your public identity on the forensic grid</p>
+</li>
+<li>
+<p><strong>Click "Initialize Neural Passport"</strong>:</p>
+</li>
+<li>System generates a unique <strong>Forensic UID</strong> (Forensic User Identifier)</li>
+<li>System allocates a <strong>Solana Shadow Node ID</strong> (like <code>SAI_ABC123XYZ</code>)</li>
+<li>System creates an encrypted identity bond with your device</li>
+<li>
+<p>System establishes a cryptographic signature for your session</p>
+</li>
+<li>
+<p><strong>Provisioning Animation</strong>:</p>
+</li>
+<li>
+<p>You see a boot sequence with messages like:</p>
+<ul>
+<li>"INITIALIZING_IDENTITY_BONDING..."</li>
+<li>"GENERATING_FORENSIC_UID..."</li>
+<li>"ALLOCATING_SOLANA_SHADOW_NODE: SAI_ABC12..."</li>
+<li>"MAPPING_ALIAS: AGENT_ZERO..."</li>
+<li>"ESTABLISHING_ENCRYPTED_RELAY..."</li>
+<li>"SIGNING_GENESIS_BLOCK..."</li>
+<li>"IDENTITY_SYNCHRONIZED_ACCESS_GRANTED"</li>
+</ul>
+</li>
+<li>
+<p><strong>Automatic Login</strong>: After provisioning (about 3-4 seconds), you're automatically taken to the Dashboard</p>
+</li>
+</ol>
+<h3 id="step-2-device-bonding-what-happens-behind-the-scenes">Step 2: Device Bonding (What Happens Behind the Scenes)</h3>
+<p>The system creates a <strong>Cryptographic Device Bond</strong>:</p>
+<ul>
+<li><strong>Forensic UID</strong>: A unique identifier for your forensic sessions</li>
+<li><strong>Node ID</strong>: A Solana shadow node address (like <code>SAI_XXXXXXXXX</code>)</li>
+<li><strong>Local Storage</strong>: Your identity is stored securely in your browser's localStorage</li>
+<li><strong>Integrity Signature</strong>: A cryptographic hash that ensures your session hasn't been tampered with</li>
+<li><strong>Tier Assignment</strong>: You're assigned the "SENTINEL" tier by default (guest access)</li>
+</ul>
+<p><strong>Important</strong>: All of this happens locally on your device. No server-side account creation needed!</p>
+<h3 id="step-3-persistent-access-return-visits">Step 3: Persistent Access (Return Visits)</h3>
+<p>When you return to SecureAI Guardian later:</p>
+<ol>
+<li><strong>Automatic Detection</strong>: The app checks your browser's localStorage for your Node ID</li>
+<li><strong>Instant Authentication</strong>: If found, you're immediately logged in—no password needed</li>
+<li><strong>Session Restoration</strong>: Your previous scan history, tier level, and audit logs are restored</li>
+<li><strong>Seamless Experience</strong>: You go straight to the Dashboard, as if you never left</li>
+</ol>
+<p><strong>This is the "Neural Passport" magic</strong>: Your device <strong>IS</strong> your passport. No login required on return visits!</p>
+<h3 id="step-4-logout-optional">Step 4: Logout (Optional)</h3>
+<p>If you want to log out (clear your device identity):</p>
+<ul>
+<li>Click the logout button in the navigation</li>
+<li>Your Node ID is removed from localStorage</li>
+<li>Next visit will require re-initialization (creates a new identity)</li>
+</ul>
+<hr />
+<h2 id="technical-details-for-developersinvestors">Technical Details (For Developers/Investors)</h2>
+<h3 id="architecture-cryptographic-device-bonding">Architecture: Cryptographic Device Bonding</h3>
+<p>The Neural Passport system uses <strong>localStorage-based device identity</strong> with cryptographic integrity:</p>
+<h4 id="identity-components">Identity Components</h4>
+<ol>
+<li><strong>Node ID</strong> (<code>secureai_node_id</code>): </li>
+<li>Format: <code>SAI_XXXXXXXXX</code> (9-character alphanumeric)</li>
+<li>Generated: <code>SAI_${Math.random().toString(36).substr(2, 9).toUpperCase()}</code></li>
+<li>Purpose: Unique device identifier</li>
+<li>
+<p>Storage: Browser localStorage</p>
+</li>
+<li>
+<p><strong>Forensic UID</strong> (Forensic User Identifier):</p>
+</li>
+<li>Generated during provisioning sequence</li>
+<li>Used internally for session tracking</li>
+<li>
+<p>Not stored separately (derived from Node ID)</p>
+</li>
+<li>
+<p><strong>Subscription Tier</strong> (<code>secureai_guardian_tier</code>):</p>
+</li>
+<li>Default: <code>'SENTINEL'</code> (guest tier)</li>
+<li>Options: <code>'SENTINEL'</code>, <code>'PRO'</code>, <code>'NEXUS'</code>, <code>'POWER_USER'</code></li>
+<li>Determines access level and features</li>
+<li>
+<p>Stored in localStorage</p>
+</li>
+<li>
+<p><strong>Alias</strong> (Optional):</p>
+</li>
+<li>User-provided or auto-generated (e.g., <code>AGENT_1234</code>)</li>
+<li>Displayed in UI as public identity</li>
+<li>
+<p>Not used for authentication (cosmetic only)</p>
+</li>
+<li>
+<p><strong>Integrity Signature</strong> (<code>secureai_system_sig</code>):</p>
+</li>
+<li>Format: Base64-encoded signature</li>
+<li>Formula: <code>btoa(sig-${tier}-${historyLength}-v42-managed)</code></li>
+<li>Purpose: Detects tampering with localStorage data</li>
+<li>Verification: Checked on app load</li>
+</ol>
+<h4 id="authentication-flow">Authentication Flow</h4>
+<pre><code>User Opens App
+    ↓
+Check localStorage for 'secureai_node_id'
+    ↓
+Node ID Found? 
+    ├─ YES → Load saved state (tier, history, audit logs)
+    │         Verify integrity signature
+    │         If valid → Go to Dashboard (authenticated)
+    │         If invalid → Clear state, show Login
+    │
+    └─ NO → Show Login Page
+              ↓
+         User clicks &quot;Initialize Neural Passport&quot;
+              ↓
+         Generate Node ID: SAI_XXXXXXXXX
+         Generate Alias: AGENT_XXXX or user-provided
+         Set Tier: 'SENTINEL'
+         Create Integrity Signature
+              ↓
+         Save to localStorage:
+           - secureai_node_id
+           - secureai_guardian_tier
+           - secureai_guardian_history (empty array)
+           - secureai_audit_logs (empty array)
+           - secureai_system_sig
+              ↓
+         Call onLogin(tier, nodeId)
+              ↓
+         Navigate to Dashboard
+              ↓
+         User is authenticated (no password!)
+</code></pre>
+<h4 id="code-implementation">Code Implementation</h4>
+<p><strong>Login Component</strong> (<code>secureai-guardian/components/Login.tsx</code>):</p>
+<pre><code class="language-typescript">const handleQuickStart = () =&gt; {
+  const finalAlias = alias.trim() || `AGENT_${Math.floor(Math.random() * 9000 + 1000)}`;
+  const systemWallet = `SAI_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  startProvisioning('SENTINEL', systemWallet, finalAlias);
+};
+
+const startProvisioning = (tier: SubscriptionTier, nodeId: string, userAlias: string) =&gt; {
+  // Show provisioning animation
+  // ... boot sequence messages ...
+  // After animation: onLogin(tier, nodeId)
+};
+</code></pre>
+<p><strong>App Component</strong> (<code>secureai-guardian/App.tsx</code>):</p>
+<pre><code class="language-typescript">// On app load, check for existing Node ID
+useEffect(() =&gt; {
+  const savedNodeId = localStorage.getItem(NODE_ID_KEY);
+  if (savedNodeId) {
+    setNodeId(savedNodeId);
+    setIsAuthenticated(true);
+    setView(ViewState.DASHBOARD);
+  }
+}, []);
+
+// On login, save Node ID to localStorage
+const handleLogin = (tier: SubscriptionTier, id: string) =&gt; {
+  setUserTier(tier);
+  setNodeId(id);
+  setIsAuthenticated(true);
+  localStorage.setItem(NODE_ID_KEY, id);
+  setView(ViewState.DASHBOARD);
+};
+
+// On logout, clear Node ID
+const handleLogout = () =&gt; {
+  setIsAuthenticated(false);
+  setNodeId(null);
+  localStorage.removeItem(NODE_ID_KEY);
+  setView(ViewState.LOGIN);
+};
+</code></pre>
+<h4 id="localstorage-keys">LocalStorage Keys</h4>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>secureai_node_id</code></td>
+<td>Device identifier</td>
+<td><code>SAI_XXXXXXXXX</code></td>
+</tr>
+<tr>
+<td><code>secureai_guardian_tier</code></td>
+<td>Subscription tier</td>
+<td><code>'SENTINEL' \| 'PRO' \| 'NEXUS' \| 'POWER_USER'</code></td>
+</tr>
+<tr>
+<td><code>secureai_guardian_history</code></td>
+<td>Scan results history</td>
+<td>JSON array of <code>ScanResult</code> objects</td>
+</tr>
+<tr>
+<td><code>secureai_audit_logs</code></td>
+<td>Security audit reports</td>
+<td>JSON array of <code>AuditReport</code> objects</td>
+</tr>
+<tr>
+<td><code>secureai_system_sig</code></td>
+<td>Integrity signature</td>
+<td>Base64 string</td>
+</tr>
+</tbody>
+</table>
+<h4 id="security-features">Security Features</h4>
+<ol>
+<li><strong>Integrity Verification</strong>:</li>
+<li>Signature calculated: <code>sig-${tier}-${historyLength}-v42-managed</code></li>
+<li>Verified on every app load</li>
+<li>
+<p>If mismatch detected → Clear state, reset to SENTINEL tier</p>
+</li>
+<li>
+<p><strong>Device Isolation</strong>:</p>
+</li>
+<li>Identity is device-specific (stored in browser localStorage)</li>
+<li>Cannot be transferred between devices (by design)</li>
+<li>
+<p>Each device gets its own unique identity</p>
+</li>
+<li>
+<p><strong>Tamper Detection</strong>:</p>
+</li>
+<li>If localStorage is modified externally, signature won't match</li>
+<li>App automatically resets to secure state</li>
+<li>
+<p>User must re-initialize Neural Passport</p>
+</li>
+<li>
+<p><strong>No Server-Side Authentication</strong>:</p>
+</li>
+<li>Identity is client-side only</li>
+<li>No backend user database</li>
+<li>No password storage (because there are no passwords!)</li>
+</ol>
+<h4 id="power-user-override-system-architect-access">Power User Override (System Architect Access)</h4>
+<p>There's a special "System Console Override" for administrators:</p>
+<ul>
+<li><strong>Access</strong>: Click "// SYSTEM_CONSOLE_OVERRIDE" on login page</li>
+<li><strong>Credentials</strong>:</li>
+<li>Username: <code>secureai</code></li>
+<li>Password: <code>G-NEXUS-777</code></li>
+<li><strong>Tier</strong>: <code>POWER_USER</code> (root-level access)</li>
+<li><strong>Node ID</strong>: <code>ARCHITECT_ROOT_01</code></li>
+<li><strong>Alias</strong>: <code>SYSTEM_ARCHITECT</code></li>
+</ul>
+<p>This is a hardcoded override for system maintenance and should not be used for regular users.</p>
+<hr />
+<h2 id="subscription-tiers">Subscription Tiers</h2>
+<p>The Neural Passport assigns you a <strong>Clearance Tier</strong> (framed as "Node Calibration"):</p>
+<h3 id="sentinel-default-guest-tier">SENTINEL (Default - Guest Tier)</h3>
+<ul>
+<li><strong>Assignment</strong>: Automatic on first initialization</li>
+<li><strong>Features</strong>: </li>
+<li>Standard forensic access</li>
+<li>Limited ledger history</li>
+<li>Local-only signatures</li>
+<li><strong>Use Case</strong>: Basic users, demos, testing</li>
+</ul>
+<h3 id="pro-guardian">PRO GUARDIAN</h3>
+<ul>
+<li><strong>Features</strong>:</li>
+<li>Unlimited ensemble scans</li>
+<li>LAA-Net artifact mapping</li>
+<li>5 monthly Blockchain Proof-of-Trust seals</li>
+<li><strong>Use Case</strong>: Professional investigators</li>
+</ul>
+<h3 id="nexus">NEXUS</h3>
+<ul>
+<li><strong>Features</strong>:</li>
+<li>Enterprise-grade node</li>
+<li>Multi-signature consensus</li>
+<li>White-glove support</li>
+<li><strong>Use Case</strong>: Enterprise clients</li>
+</ul>
+<h3 id="power_user-architect">POWER_USER (Architect)</h3>
+<ul>
+<li><strong>Features</strong>:</li>
+<li>Root-level access</li>
+<li>System-wide overrides</li>
+<li>Global topology monitoring</li>
+<li><strong>Use Case</strong>: System administrators only</li>
+</ul>
+<p><strong>Note</strong>: Tier upgrades are handled separately (not part of login flow).</p>
+<hr />
+<h2 id="advantages-of-neural-passport">Advantages of Neural Passport</h2>
+<h3 id="for-users">For Users</h3>
+<p>✅ <strong>Zero Friction</strong>: One click, no forms, no passwords<br />
+✅ <strong>Instant Access</strong>: No waiting for email verification<br />
+✅ <strong>Privacy First</strong>: No email collection, no personal data required<br />
+✅ <strong>Persistent Sessions</strong>: Never need to log in again on the same device<br />
+✅ <strong>Secure by Design</strong>: Device-bound identity prevents account theft  </p>
+<h3 id="for-developers">For Developers</h3>
+<p>✅ <strong>No Backend Auth</strong>: No user database, no password hashing, no session management<br />
+✅ <strong>Stateless</strong>: Each device manages its own identity<br />
+✅ <strong>Scalable</strong>: No server-side authentication bottleneck<br />
+✅ <strong>Simple</strong>: Less code, fewer bugs, easier maintenance  </p>
+<h3 id="for-investors">For Investors</h3>
+<p>✅ <strong>Differentiated UX</strong>: Unique "Identity 2.0" approach<br />
+✅ <strong>Lower Infrastructure Costs</strong>: No user authentication servers<br />
+✅ <strong>GDPR Friendly</strong>: Minimal data collection (only device ID)<br />
+✅ <strong>No Password Breaches</strong>: Impossible to leak what doesn't exist  </p>
+<hr />
+<h2 id="limitations-and-considerations">Limitations and Considerations</h2>
+<h3 id="current-limitations">Current Limitations</h3>
+<ol>
+<li><strong>Device-Specific</strong>: Identity is tied to browser/device</li>
+<li>Cannot access account from another device</li>
+<li>Clearing browser data = losing identity</li>
+<li>
+<p>Cannot recover identity if localStorage is cleared</p>
+</li>
+<li>
+<p><strong>No Account Recovery</strong>: </p>
+</li>
+<li>No email-based recovery</li>
+<li>No password reset (no passwords to reset!)</li>
+<li>
+<p>Lost device = new identity needed</p>
+</li>
+<li>
+<p><strong>No Multi-Device Sync</strong>:</p>
+</li>
+<li>Each device has separate identity</li>
+<li>Scan history is device-specific</li>
+<li>No cloud backup by default</li>
+</ol>
+<h3 id="future-enhancements-optional">Future Enhancements (Optional)</h3>
+<p>For production, consider adding:</p>
+<ul>
+<li><strong>Cloud Backup</strong>: Optional backup of identity to server</li>
+<li><strong>Multi-Device Sync</strong>: Link devices to same identity</li>
+<li><strong>Recovery Codes</strong>: Allow identity recovery via backup codes</li>
+<li><strong>Biometric Authentication</strong>: Use device fingerprinting for extra security</li>
+<li><strong>Session Timeout</strong>: Auto-logout after inactivity period</li>
+</ul>
+<hr />
+<h2 id="comparison-neural-passport-vs-traditional-login">Comparison: Neural Passport vs. Traditional Login</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Traditional Login</th>
+<th>Neural Passport</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Registration</strong></td>
+<td>Email + Password required</td>
+<td>None (one-click)</td>
+</tr>
+<tr>
+<td><strong>Login</strong></td>
+<td>Username + Password</td>
+<td>Automatic (device recognized)</td>
+</tr>
+<tr>
+<td><strong>Password Storage</strong></td>
+<td>Server-side (hashed)</td>
+<td>Not applicable</td>
+</tr>
+<tr>
+<td><strong>Account Recovery</strong></td>
+<td>Email-based reset</td>
+<td>Not available</td>
+</tr>
+<tr>
+<td><strong>Multi-Device</strong></td>
+<td>Same account on all devices</td>
+<td>Separate identity per device</td>
+</tr>
+<tr>
+<td><strong>Privacy</strong></td>
+<td>Email required</td>
+<td>No personal data</td>
+</tr>
+<tr>
+<td><strong>Friction</strong></td>
+<td>High (forms, verification)</td>
+<td>Low (one click)</td>
+</tr>
+<tr>
+<td><strong>Security Model</strong></td>
+<td>Password-based</td>
+<td>Device-based</td>
+</tr>
+<tr>
+<td><strong>Backend Complexity</strong></td>
+<td>High (user DB, sessions)</td>
+<td>Low (stateless)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p><strong>Q: I cleared my browser data and now I can't access my account. Can I recover it?</strong><br />
+A: Unfortunately, no. The Neural Passport is device-bound, so clearing localStorage creates a new identity. You'll need to initialize a new Neural Passport. Consider using browser sync to preserve localStorage across sessions.</p>
+<p><strong>Q: Can I use the same identity on multiple devices?</strong><br />
+A: Not currently. Each device gets its own unique identity. This is by design for security and privacy. Future versions may support identity synchronization.</p>
+<p><strong>Q: What happens if someone uses my computer?</strong><br />
+A: They would have access to your SecureAI Guardian identity if they use the same browser. For shared computers, use a private/incognito window or log out after use.</p>
+<p><strong>Q: Is my identity stored on SecureAI servers?</strong><br />
+A: No. Your identity (Node ID, tier, history) is stored only in your browser's localStorage. The system is designed to be stateless on the server side.</p>
+<p><strong>Q: Can I change my alias later?</strong><br />
+A: Currently, aliases are set during initialization and cannot be changed. You would need to log out and initialize a new Neural Passport. This may be added as a feature in future versions.</p>
+<p><strong>Q: What if I want to use a different tier?</strong><br />
+A: Tier upgrades are handled separately through the Tiers section of the app. Your Neural Passport initialization always starts with SENTINEL tier, but you can upgrade later.</p>
+<hr />
+<h2 id="summary">Summary</h2>
+<p>The SecureAI Neural Passport is a <strong>revolutionary device-based authentication system</strong> that:</p>
+<p>✅ <strong>Eliminates passwords</strong>: Your device is your key<br />
+✅ <strong>Zero registration friction</strong>: One-click initialization<br />
+✅ <strong>Instant authentication</strong>: Automatic login on return visits<br />
+✅ <strong>Privacy-first</strong>: No email, no personal data collection<br />
+✅ <strong>Stateless architecture</strong>: No backend user database needed<br />
+✅ <strong>Cryptographic integrity</strong>: Tamper detection and secure signatures<br />
+✅ <strong>Scalable design</strong>: Client-side identity management  </p>
+<p>This system represents <strong>"Identity 2.0"</strong>—moving beyond traditional username/password authentication to a device-bonded, cryptographic identity model that prioritizes user experience and privacy.</p>
+<hr />
+<p><strong>Document Version</strong>: 2.0<br />
+<strong>Last Updated</strong>: January 2025<br />
+<strong>System</strong>: SecureAI Guardian v4.2.0-STABLE<br />
+<strong>For Questions</strong>: Contact the development team</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

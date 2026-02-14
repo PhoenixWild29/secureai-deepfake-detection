@@ -1,0 +1,1264 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>X/Twitter Server-Side Authentication Setup - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#xtwitter-server-side-authentication-setup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              X/Twitter Server-Side Authentication Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Process
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-export-x-cookies-from-your-browser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Export X Cookies from Your Browser
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Export X Cookies from Your Browser">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-using-chrome-extension-easiest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Using Chrome Extension (Easiest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-using-firefox-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Using Firefox Extension
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-c-manual-export-advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option C: Manual Export (Advanced)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-upload-cookies-file-to-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Upload Cookies File to Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Upload Cookies File to Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-scp-from-your-local-computer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using SCP (from your local computer):
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-digitalocean-console" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using DigitalOcean Console:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-verify-cookies-file-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Verify Cookies File Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-set-file-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Set File Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-update-docker-compose-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Update Docker Compose Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-restart-backend-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Restart Backend Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-7-test-the-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 7: Test the Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 7: Test the Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-1-verify-cookies-file-is-accessible-in-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 1: Verify cookies file is accessible in container
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-2-test-x-link-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 2: Test X link analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-3-check-backend-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test 3: Check backend logs
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-8-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 8: Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 8: Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-x_auth_required-error-still-appears" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "X_AUTH_REQUIRED" error still appears
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-failed-to-download-video-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "Failed to download video" error
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-cookies-file-not-found-in-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: Cookies file not found in container
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-9-maintain-cookies-important" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 9: Maintain Cookies (Important!)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 9: Maintain Cookies (Important!)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-features-setup-once" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Features (Setup Once)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-steps-monthly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Manual Steps (Monthly)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check-cookie-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Check Cookie Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="xtwitter-server-side-authentication-setup">X/Twitter Server-Side Authentication Setup</h1>
+<p>This guide shows you how to configure server-side X/Twitter authentication so users can paste X links directly in SecureAI Guardian and have the server download videos using authenticated cookies.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Access to your DigitalOcean droplet/server</li>
+<li>A browser with X/Twitter logged in</li>
+<li>SSH access to your server</li>
+</ul>
+<h2 id="step-by-step-process">Step-by-Step Process</h2>
+<h3 id="step-1-export-x-cookies-from-your-browser">Step 1: Export X Cookies from Your Browser</h3>
+<h4 id="option-a-using-chrome-extension-easiest">Option A: Using Chrome Extension (Easiest)</h4>
+<ol>
+<li><strong>Install "Get cookies.txt LOCALLY" extension:</strong></li>
+<li>Go to Chrome Web Store: https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc</li>
+<li>Click "Add to Chrome"</li>
+<li>
+<p>Click "Add Extension"</p>
+</li>
+<li>
+<p><strong>Export X cookies:</strong></p>
+</li>
+<li>Go to https://x.com (make sure you're logged in)</li>
+<li>Click the extension icon in your toolbar</li>
+<li>Click "Export" button</li>
+<li>Save the file as <code>x_cookies.txt</code> on your computer</li>
+</ol>
+<h4 id="option-b-using-firefox-extension">Option B: Using Firefox Extension</h4>
+<ol>
+<li><strong>Install "cookies.txt" extension:</strong></li>
+<li>Go to Firefox Add-ons: https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/</li>
+<li>
+<p>Click "Add to Firefox"</p>
+</li>
+<li>
+<p><strong>Export X cookies:</strong></p>
+</li>
+<li>Go to https://x.com (make sure you're logged in)</li>
+<li>Click the extension icon</li>
+<li>Click "Export" button</li>
+<li>Save the file as <code>x_cookies.txt</code></li>
+</ol>
+<h4 id="option-c-manual-export-advanced">Option C: Manual Export (Advanced)</h4>
+<p>If extensions don't work, you can manually export cookies using browser DevTools, but this is more complex. The extension method is recommended.</p>
+<h3 id="step-2-upload-cookies-file-to-server">Step 2: Upload Cookies File to Server</h3>
+<h4 id="using-scp-from-your-local-computer">Using SCP (from your local computer):</h4>
+<pre><code class="language-bash"># Upload cookies file to server
+scp x_cookies.txt root@guardian.secureai.dev:/root/secureai-deepfake-detection/secrets/x_cookies.txt
+</code></pre>
+<p><strong>Your server:</strong> <code>root@guardian.secureai.dev</code></p>
+<h4 id="using-digitalocean-console">Using DigitalOcean Console:</h4>
+<ol>
+<li>
+<p><strong>Create the secrets directory on server:</strong>
+   <code>bash
+   ssh root@guardian.secureai.dev
+   cd ~/secureai-deepfake-detection
+   mkdir -p secrets</code></p>
+</li>
+<li>
+<p><strong>Upload the file:</strong></p>
+</li>
+<li>In DigitalOcean console, go to your droplet</li>
+<li>Click "Access" → "Launch Droplet Console"</li>
+<li>Or use the file upload feature if available</li>
+<li>Or copy/paste the contents:
+     <code>bash
+     nano secrets/x_cookies.txt
+     # Paste your cookies content here
+     # Press Ctrl+X, then Y, then Enter to save</code></li>
+</ol>
+<h3 id="step-3-verify-cookies-file-format">Step 3: Verify Cookies File Format</h3>
+<p>The cookies file should be in Netscape format (used by <code>yt-dlp</code>). It should look like:</p>
+<pre><code># Netscape HTTP Cookie File
+# This file was generated by cookies.txt extension
+x.com   TRUE    /   FALSE   1735689600  session_id  abc123...
+x.com   TRUE    /   FALSE   1735689600  auth_token  xyz789...
+</code></pre>
+<p><strong>Important:</strong> Make sure the file:
+- Has proper domain entries (x.com, .x.com, twitter.com, .twitter.com)
+- Contains authentication cookies (not just session cookies)
+- Is in Netscape format (tab-separated)</p>
+<h3 id="step-4-set-file-permissions">Step 4: Set File Permissions</h3>
+<pre><code class="language-bash"># On your server
+chmod 600 secrets/x_cookies.txt  # Only owner can read/write
+chown root:root secrets/x_cookies.txt  # Or app:app if using app user
+</code></pre>
+<h3 id="step-5-update-docker-compose-configuration">Step 5: Update Docker Compose Configuration</h3>
+<p>The <code>docker-compose.https.yml</code> should already have the volume mount configured. Verify it:</p>
+<pre><code class="language-bash"># Check if the volume mount exists
+grep -A 5 &quot;secrets&quot; docker-compose.https.yml
+</code></pre>
+<p>It should show:</p>
+<pre><code class="language-yaml">volumes:
+  - ./secrets:/app/secrets:ro
+</code></pre>
+<p>And in environment:</p>
+<pre><code class="language-yaml">environment:
+  - X_COOKIES_FILE=/app/secrets/x_cookies.txt
+</code></pre>
+<p>If it's not there, add it:</p>
+<pre><code class="language-bash"># Edit docker-compose.https.yml
+nano docker-compose.https.yml
+</code></pre>
+<p>Add to <code>secureai-backend</code> service:</p>
+<pre><code class="language-yaml">secureai-backend:
+  # ... existing config ...
+  environment:
+    # ... existing env vars ...
+    - X_COOKIES_FILE=/app/secrets/x_cookies.txt
+  volumes:
+    # ... existing volumes ...
+    - ./secrets:/app/secrets:ro
+</code></pre>
+<h3 id="step-6-restart-backend-service">Step 6: Restart Backend Service</h3>
+<pre><code class="language-bash"># SSH into your server
+ssh root@guardian.secureai.dev
+
+cd ~/secureai-deepfake-detection
+
+# Restart backend to pick up new environment variable
+docker compose -f docker-compose.https.yml up -d --force-recreate secureai-backend
+
+# Verify it's running
+docker ps | grep secureai-backend
+
+# Check logs to ensure no errors
+docker logs secureai-backend --tail 50
+</code></pre>
+<h3 id="step-7-test-the-configuration">Step 7: Test the Configuration</h3>
+<h4 id="test-1-verify-cookies-file-is-accessible-in-container">Test 1: Verify cookies file is accessible in container</h4>
+<pre><code class="language-bash"># Check if file exists in container
+docker exec secureai-backend ls -la /app/secrets/x_cookies.txt
+
+# Check if environment variable is set
+docker exec secureai-backend env | grep X_COOKIES_FILE
+</code></pre>
+<p>Should show:</p>
+<pre><code>X_COOKIES_FILE=/app/secrets/x_cookies.txt
+</code></pre>
+<h4 id="test-2-test-x-link-analysis">Test 2: Test X link analysis</h4>
+<ol>
+<li><strong>Open SecureAI Guardian:</strong> https://guardian.secureai.dev</li>
+<li><strong>Go to STREAM_INTEL tab</strong></li>
+<li><strong>Paste an X link</strong> (e.g., <code>https://x.com/username/status/1234567890</code>)</li>
+<li><strong>Click "Authorize Multi-Layer Analysis"</strong></li>
+<li><strong>Should work without errors!</strong></li>
+</ol>
+<h4 id="test-3-check-backend-logs">Test 3: Check backend logs</h4>
+<pre><code class="language-bash"># Watch logs during analysis
+docker logs -f secureai-backend
+</code></pre>
+<p>You should see:
+- Video download starting
+- No authentication errors
+- Analysis proceeding normally</p>
+<h3 id="step-8-troubleshooting">Step 8: Troubleshooting</h3>
+<h4 id="issue-x_auth_required-error-still-appears">Issue: "X_AUTH_REQUIRED" error still appears</h4>
+<p><strong>Check:</strong>
+1. Cookies file exists: <code>ls -la secrets/x_cookies.txt</code>
+2. Environment variable is set: <code>docker exec secureai-backend env | grep X_COOKIES</code>
+3. File is readable: <code>docker exec secureai-backend cat /app/secrets/x_cookies.txt | head -5</code>
+4. Backend was restarted after adding the file</p>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-bash"># Restart backend
+docker compose -f docker-compose.https.yml restart secureai-backend
+</code></pre>
+<h4 id="issue-failed-to-download-video-error">Issue: "Failed to download video" error</h4>
+<p><strong>Possible causes:</strong>
+1. Cookies expired (X cookies typically expire after 30 days)
+2. Cookies file format is incorrect
+3. Missing required cookies</p>
+<p><strong>Fix:</strong>
+1. Re-export cookies from browser (make sure you're logged in)
+2. Re-upload to server
+3. Restart backend</p>
+<h4 id="issue-cookies-file-not-found-in-container">Issue: Cookies file not found in container</h4>
+<p><strong>Check:</strong>
+1. File exists on host: <code>ls -la ~/secureai-deepfake-detection/secrets/x_cookies.txt</code>
+2. Volume mount is correct in docker-compose.https.yml
+3. File permissions are correct: <code>chmod 600 secrets/x_cookies.txt</code></p>
+<p><strong>Fix:</strong></p>
+<pre><code class="language-bash"># Ensure directory exists
+mkdir -p secrets
+
+# Set correct permissions
+chmod 600 secrets/x_cookies.txt
+
+# Restart container
+docker compose -f docker-compose.https.yml up -d --force-recreate secureai-backend
+</code></pre>
+<h3 id="step-9-maintain-cookies-important">Step 9: Maintain Cookies (Important!)</h3>
+<p><strong>X cookies expire after ~30 days.</strong> We've automated the checking and reminders, but you still need to manually export and upload cookies.</p>
+<h4 id="automated-features-setup-once">Automated Features (Setup Once)</h4>
+<p>Run this setup script to enable automated cookie monitoring:</p>
+<pre><code class="language-bash">cd ~/secureai-deepfake-detection
+bash scripts/setup_cookie_automation.sh
+</code></pre>
+<p>This sets up:
+- <strong>Daily cookie expiration check</strong> (9 AM) - checks if cookies are expired or expiring soon
+- <strong>Monthly reminder</strong> (1st of month, 9 AM) - reminds you to refresh cookies
+- <strong>Logs</strong> saved to <code>logs/cookie_check.log</code></p>
+<h4 id="manual-steps-monthly">Manual Steps (Monthly)</h4>
+<p><strong>Cannot be automated</strong> - requires browser interaction:</p>
+<ol>
+<li><strong>Export cookies from browser:</strong></li>
+<li>Go to https://x.com (logged in)</li>
+<li>Click extension → Export</li>
+<li>
+<p>Save as <code>x_cookies.txt</code></p>
+</li>
+<li>
+<p><strong>Upload to server:</strong>
+   <code>bash
+   # From your local computer
+   scp x_cookies.txt root@guardian.secureai.dev:/tmp/x_cookies.txt</code></p>
+</li>
+<li>
+<p><strong>Update on server:</strong>
+   <code>bash
+   # On server
+   cd ~/secureai-deepfake-detection
+   bash scripts/update_x_cookies.sh /tmp/x_cookies.txt</code></p>
+</li>
+</ol>
+<p>The <code>update_x_cookies.sh</code> script will:
+- Backup old cookies
+- Copy new cookies
+- Set correct permissions
+- Verify cookies are valid
+- Restart backend automatically</p>
+<h4 id="check-cookie-status">Check Cookie Status</h4>
+<pre><code class="language-bash"># Check if cookies are expired or expiring soon
+python3 scripts/check_cookie_expiration.py
+
+# View cookie check logs
+tail -f logs/cookie_check.log
+</code></pre>
+<h2 id="security-considerations">Security Considerations</h2>
+<ol>
+<li><strong>Keep cookies file secure:</strong></li>
+<li>Use <code>chmod 600</code> (only owner can read)</li>
+<li>Don't commit to git (should be in .gitignore)</li>
+<li>
+<p>Don't share publicly</p>
+</li>
+<li>
+<p><strong>Rotate cookies regularly:</strong></p>
+</li>
+<li>Export fresh cookies monthly</li>
+<li>
+<p>Revoke old sessions if possible</p>
+</li>
+<li>
+<p><strong>Monitor usage:</strong></p>
+</li>
+<li>Check backend logs for authentication errors</li>
+<li>Set up alerts for failed downloads</li>
+</ol>
+<h2 id="verification-checklist">Verification Checklist</h2>
+<ul>
+<li>[ ] Cookies file exported from browser</li>
+<li>[ ] Cookies file uploaded to server at <code>secrets/x_cookies.txt</code></li>
+<li>[ ] File permissions set to <code>600</code></li>
+<li>[ ] <code>X_COOKIES_FILE</code> environment variable set in docker-compose</li>
+<li>[ ] Volume mount configured in docker-compose</li>
+<li>[ ] Backend restarted</li>
+<li>[ ] Environment variable verified in container</li>
+<li>[ ] Test X link analysis works</li>
+<li>[ ] No errors in backend logs</li>
+</ul>
+<h2 id="next-steps">Next Steps</h2>
+<p>Once configured:
+1. Users can paste X links directly in SecureAI Guardian
+2. No need for Chrome extension
+3. Server handles authentication automatically
+4. Works for all users (not just the one who exported cookies)</p>
+<h2 id="support">Support</h2>
+<p>If you encounter issues:
+1. Check backend logs: <code>docker logs secureai-backend</code>
+2. Verify cookies file format
+3. Test cookies manually: <code>yt-dlp --cookies secrets/x_cookies.txt "https://x.com/username/status/123"</code>
+4. Check X account is still logged in</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

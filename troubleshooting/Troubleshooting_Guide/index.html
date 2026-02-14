@@ -1,0 +1,2388 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Common Issues &amp; Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#critical-system-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Critical System Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚨 Critical System Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-unavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Unavailable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Unavailable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-memory-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Memory Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="High Memory Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔐 Authentication Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔐 Authentication Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#login-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Login Failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Login Failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permission Denied Errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Permission Denied Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#video-analysis-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎥 Video Analysis Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎥 Video Analysis Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analysis-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analysis Failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Analysis Failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#low-detection-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Low Detection Accuracy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Low Detection Accuracy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-integration-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔌 API Integration Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔌 API Integration Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-timeouts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Timeouts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Timeouts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rate-limiting-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rate Limiting Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗄️ Database Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗄️ Database Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔒 Security Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔒 Security Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-control-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access Control Problems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Access Control Problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssltls-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SSL/TLS Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SSL/TLS Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#symptoms_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Symptoms
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagnostic-steps_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#solutions_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Monitoring &amp; Diagnostics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Monitoring &amp; Diagnostics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-health-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Health Checks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Health Checks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-health-check-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comprehensive Health Check Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Log Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-log-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Log Patterns
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-escalation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Support &amp; Escalation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Support &amp; Escalation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-escalate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Escalate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When to Escalate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-issues-escalate-immediately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critical Issues (Escalate Immediately)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-priority-issues-escalate-within-2-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High Priority Issues (Escalate within 2 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#medium-priority-issues-escalate-within-8-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Medium Priority Issues (Escalate within 8 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#escalation-contacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Escalation Contacts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Escalation Contacts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internal-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#external-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#information-to-include-in-support-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Information to Include in Support Requests
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Information to Include in Support Requests">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Required Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Additional Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tools-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tools &amp; Scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="troubleshooting-guide">Troubleshooting Guide</h2>
+<h3 id="common-issues-solutions">🔧 Common Issues &amp; Solutions</h3>
+<p>This comprehensive troubleshooting guide covers common issues, error messages, and step-by-step solutions for the SecureAI DeepFake Detection System.</p>
+<hr />
+<h2 id="overview">🎯 Overview</h2>
+<p>The Troubleshooting Guide provides solutions for:
+- <strong>System Issues</strong>: Performance, connectivity, and service problems
+- <strong>Authentication Issues</strong>: Login, permissions, and access problems
+- <strong>Analysis Issues</strong>: Video processing and deepfake detection problems
+- <strong>API Issues</strong>: Integration and connectivity problems
+- <strong>Database Issues</strong>: Connection and data problems
+- <strong>Security Issues</strong>: Access control and security-related problems</p>
+<hr />
+<h2 id="critical-system-issues">🚨 Critical System Issues</h2>
+<h3 id="system-unavailable"><strong>System Unavailable</strong></h3>
+<h4 id="symptoms"><strong>Symptoms</strong></h4>
+<ul>
+<li>Dashboard shows "Service Unavailable" error</li>
+<li>API endpoints return 503 errors</li>
+<li>All video analysis requests fail</li>
+</ul>
+<h4 id="diagnostic-steps"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check service status
+kubectl get pods -n secureai
+kubectl get services -n secureai
+kubectl get ingress -n secureai
+
+# 2. Check service logs
+kubectl logs -f deployment/secureai-backend -n secureai
+kubectl logs -f deployment/secureai-frontend -n secureai
+
+# 3. Check resource usage
+kubectl top pods -n secureai
+kubectl top nodes
+
+# 4. Check network connectivity
+kubectl exec -it deployment/secureai-backend -n secureai -- ping database
+kubectl exec -it deployment/secureai-backend -n secureai -- ping redis
+</code></pre>
+<h4 id="common-solutions"><strong>Common Solutions</strong></h4>
+<p><strong>Solution 1: Restart Services</strong></p>
+<pre><code class="language-bash"># Restart backend service
+kubectl rollout restart deployment/secureai-backend -n secureai
+
+# Restart frontend service
+kubectl rollout restart deployment/secureai-frontend -n secureai
+
+# Wait for rollout to complete
+kubectl rollout status deployment/secureai-backend -n secureai
+</code></pre>
+<p><strong>Solution 2: Check Resource Limits</strong></p>
+<pre><code class="language-bash"># Check if pods are being evicted due to resource limits
+kubectl describe pods -n secureai | grep -A 5 &quot;Events:&quot;
+
+# If memory issues, increase limits
+kubectl patch deployment secureai-backend -n secureai -p '{&quot;spec&quot;:{&quot;template&quot;:{&quot;spec&quot;:{&quot;containers&quot;:[{&quot;name&quot;:&quot;secureai-backend&quot;,&quot;resources&quot;:{&quot;limits&quot;:{&quot;memory&quot;:&quot;2Gi&quot;}}}]}}}}'
+</code></pre>
+<p><strong>Solution 3: Database Connection Issues</strong></p>
+<pre><code class="language-bash"># Check database connectivity
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h database -U secureai_admin -d secureai_production -c &quot;SELECT 1;&quot;
+
+# If connection fails, check database service
+kubectl get svc database -n secureai
+kubectl describe svc database -n secureai
+</code></pre>
+<h3 id="high-memory-usage"><strong>High Memory Usage</strong></h3>
+<h4 id="symptoms_1"><strong>Symptoms</strong></h4>
+<ul>
+<li>System becomes slow and unresponsive</li>
+<li>Pods getting evicted due to OOMKilled</li>
+<li>Analysis requests timing out</li>
+</ul>
+<h4 id="diagnostic-steps_1"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check memory usage
+kubectl top pods -n secureai --sort-by=memory
+kubectl describe pods -n secureai | grep -A 10 &quot;Limits:&quot;
+
+# 2. Check for memory leaks
+kubectl exec -it deployment/secureai-backend -n secureai -- ps aux --sort=-%mem | head -10
+
+# 3. Check garbage collection
+kubectl exec -it deployment/secureai-backend -n secureai -- jstat -gc 1 1s
+</code></pre>
+<h4 id="solutions"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Increase Memory Limits</strong></p>
+<pre><code class="language-bash"># Update deployment with higher memory limits
+kubectl patch deployment secureai-backend -n secureai -p '{
+  &quot;spec&quot;: {
+    &quot;template&quot;: {
+      &quot;spec&quot;: {
+        &quot;containers&quot;: [{
+          &quot;name&quot;: &quot;secureai-backend&quot;,
+          &quot;resources&quot;: {
+            &quot;requests&quot;: {&quot;memory&quot;: &quot;1Gi&quot;},
+            &quot;limits&quot;: {&quot;memory&quot;: &quot;4Gi&quot;}
+          }
+        }]
+      }
+    }
+  }
+}'
+</code></pre>
+<p><strong>Solution 2: Optimize Application Settings</strong></p>
+<pre><code class="language-yaml"># Update application configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: secureai-config
+data:
+  application.yml: |
+    processing:
+      max-concurrent-analyses: 50  # Reduce from 100
+      analysis-timeout: 180s      # Reduce from 300s
+    cache:
+      redis:
+        max-connections: 50       # Reduce from 100
+</code></pre>
+<p><strong>Solution 3: Restart Services</strong></p>
+<pre><code class="language-bash"># Restart services to clear memory
+kubectl rollout restart deployment/secureai-backend -n secureai
+kubectl rollout restart deployment/secureai-worker -n secureai
+</code></pre>
+<hr />
+<h2 id="authentication-issues">🔐 Authentication Issues</h2>
+<h3 id="login-failures"><strong>Login Failures</strong></h3>
+<h4 id="symptoms_2"><strong>Symptoms</strong></h4>
+<ul>
+<li>Users cannot log in to the system</li>
+<li>"Invalid credentials" error messages</li>
+<li>SSO authentication failures</li>
+</ul>
+<h4 id="diagnostic-steps_2"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check authentication service logs
+kubectl logs -f deployment/secureai-auth -n secureai
+
+# 2. Check database connectivity
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h database -U secureai_admin -d secureai_production -c &quot;SELECT COUNT(*) FROM users;&quot;
+
+# 3. Check JWT token validation
+curl -H &quot;Authorization: Bearer INVALID_TOKEN&quot; https://api.secureai.com/api/v1/user/profile
+</code></pre>
+<h4 id="solutions_1"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Reset User Password</strong></p>
+<pre><code class="language-bash"># Reset password via API
+curl -X POST https://api.secureai.com/api/v1/auth/reset-password \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;email&quot;: &quot;user@company.com&quot;}'
+
+# Or reset via database (emergency only)
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h database -U secureai_admin -d secureai_production -c &quot;
+UPDATE users SET password_hash = crypt('new_password', gen_salt('bf')) WHERE email = 'user@company.com';&quot;
+</code></pre>
+<p><strong>Solution 2: Check SSO Configuration</strong></p>
+<pre><code class="language-bash"># Verify SSO settings
+kubectl get configmap sso-config -n secureai -o yaml
+
+# Check SSO service connectivity
+kubectl exec -it deployment/secureai-backend -n secureai -- curl -v https://sso.company.com/.well-known/openid_configuration
+</code></pre>
+<p><strong>Solution 3: Clear Authentication Cache</strong></p>
+<pre><code class="language-bash"># Clear Redis authentication cache
+kubectl exec -it deployment/redis -n secureai -- redis-cli FLUSHDB
+
+# Restart authentication service
+kubectl rollout restart deployment/secureai-auth -n secureai
+</code></pre>
+<h3 id="permission-denied-errors"><strong>Permission Denied Errors</strong></h3>
+<h4 id="symptoms_3"><strong>Symptoms</strong></h4>
+<ul>
+<li>Users get "Access Denied" errors</li>
+<li>API requests return 403 Forbidden</li>
+<li>Features not accessible despite proper login</li>
+</ul>
+<h4 id="diagnostic-steps_3"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check user permissions
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h database -U secureai_admin -d secureai_production -c &quot;
+SELECT u.email, u.role, p.permissions FROM users u 
+LEFT JOIN user_permissions p ON u.id = p.user_id 
+WHERE u.email = 'user@company.com';&quot;
+
+# 2. Check API key permissions
+curl -H &quot;Authorization: Bearer API_KEY&quot; https://api.secureai.com/api/v1/user/permissions
+
+# 3. Check role-based access control
+kubectl logs -f deployment/secureai-backend -n secureai | grep &quot;permission&quot;
+</code></pre>
+<h4 id="solutions_2"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Update User Permissions</strong></p>
+<pre><code class="language-bash"># Grant additional permissions via API
+curl -X PUT https://api.secureai.com/api/v1/admin/users/USER_ID/permissions \
+  -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;permissions&quot;: [&quot;video:analyze&quot;, &quot;dashboard:access&quot;, &quot;reports:generate&quot;]}'
+</code></pre>
+<p><strong>Solution 2: Check Role Configuration</strong></p>
+<pre><code class="language-bash"># Verify role permissions in database
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h database -U secureai_admin -d secureai_production -c &quot;
+SELECT role, permissions FROM role_permissions WHERE role = 'security_professional';&quot;
+</code></pre>
+<p><strong>Solution 3: Update Role Permissions</strong></p>
+<pre><code class="language-bash"># Update role permissions via API
+curl -X PUT https://api.secureai.com/api/v1/admin/roles/security_professional \
+  -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;permissions&quot;: [&quot;video:analyze&quot;, &quot;dashboard:access&quot;, &quot;reports:generate&quot;, &quot;incidents:create&quot;]}'
+</code></pre>
+<hr />
+<h2 id="video-analysis-issues">🎥 Video Analysis Issues</h2>
+<h3 id="analysis-failures"><strong>Analysis Failures</strong></h3>
+<h4 id="symptoms_4"><strong>Symptoms</strong></h4>
+<ul>
+<li>Video uploads fail</li>
+<li>Analysis requests timeout</li>
+<li>"Processing Error" messages</li>
+<li>Inconsistent detection results</li>
+</ul>
+<h4 id="diagnostic-steps_4"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check analysis service logs
+kubectl logs -f deployment/secureai-analysis -n secureai
+
+# 2. Check video storage
+kubectl exec -it deployment/secureai-backend -n secureai -- ls -la /var/lib/secureai/videos/
+
+# 3. Check AI model status
+kubectl exec -it deployment/secureai-analysis -n secureai -- curl http://localhost:8080/health
+
+# 4. Check GPU availability (if using GPU)
+kubectl exec -it deployment/secureai-analysis -n secureai -- nvidia-smi
+</code></pre>
+<h4 id="solutions_3"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Restart Analysis Service</strong></p>
+<pre><code class="language-bash"># Restart analysis service
+kubectl rollout restart deployment/secureai-analysis -n secureai
+
+# Check service health
+kubectl get pods -n secureai -l app=secureai-analysis
+</code></pre>
+<p><strong>Solution 2: Check Video File Format</strong></p>
+<pre><code class="language-bash"># Verify video format support
+kubectl exec -it deployment/secureai-backend -n secureai -- ffprobe -v quiet -print_format json -show_format -show_streams /path/to/video.mp4
+
+# Check file size limits
+curl -X POST https://api.secureai.com/api/v1/config/system | jq '.max_file_size_mb'
+</code></pre>
+<p><strong>Solution 3: Clear Analysis Queue</strong></p>
+<pre><code class="language-bash"># Clear stuck analysis jobs
+kubectl exec -it deployment/redis -n secureai -- redis-cli DEL analysis_queue
+
+# Restart worker processes
+kubectl rollout restart deployment/secureai-worker -n secureai
+</code></pre>
+<h3 id="low-detection-accuracy"><strong>Low Detection Accuracy</strong></h3>
+<h4 id="symptoms_5"><strong>Symptoms</strong></h4>
+<ul>
+<li>High false positive rate</li>
+<li>Missed deepfake detections</li>
+<li>Inconsistent confidence scores</li>
+</ul>
+<h4 id="diagnostic-steps_5"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check model performance metrics
+curl https://api.secureai.com/api/v1/analytics/model-performance
+
+# 2. Check analysis configuration
+kubectl get configmap analysis-config -n secureai -o yaml
+
+# 3. Check model version
+kubectl exec -it deployment/secureai-analysis -n secureai -- curl http://localhost:8080/models
+</code></pre>
+<h4 id="solutions_4"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Update AI Models</strong></p>
+<pre><code class="language-bash"># Update to latest model version
+kubectl set image deployment/secureai-analysis secureai-analysis=secureai/analysis:v2.1.0 -n secureai
+
+# Wait for rollout
+kubectl rollout status deployment/secureai-analysis -n secureai
+</code></pre>
+<p><strong>Solution 2: Adjust Detection Thresholds</strong></p>
+<pre><code class="language-bash"># Update detection sensitivity
+curl -X PUT https://api.secureai.com/api/v1/config/detection \
+  -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;confidence_threshold&quot;: 0.90, &quot;sensitivity_level&quot;: &quot;high&quot;}'
+</code></pre>
+<p><strong>Solution 3: Retrain Models</strong></p>
+<pre><code class="language-bash"># Trigger model retraining
+curl -X POST https://api.secureai.com/api/v1/admin/models/retrain \
+  -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;training_data&quot;: &quot;latest&quot;, &quot;validation_split&quot;: 0.2}'
+</code></pre>
+<hr />
+<h2 id="api-integration-issues">🔌 API Integration Issues</h2>
+<h3 id="connection-timeouts"><strong>Connection Timeouts</strong></h3>
+<h4 id="symptoms_6"><strong>Symptoms</strong></h4>
+<ul>
+<li>API requests timing out</li>
+<li>"Connection refused" errors</li>
+<li>Intermittent connectivity issues</li>
+</ul>
+<h4 id="diagnostic-steps_6"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check API service health
+curl -v https://api.secureai.com/health
+
+# 2. Check network connectivity
+kubectl exec -it deployment/secureai-backend -n secureai -- curl -v https://api.secureai.com/health
+
+# 3. Check load balancer status
+kubectl get ingress -n secureai
+kubectl describe ingress secureai-api -n secureai
+
+# 4. Check DNS resolution
+nslookup api.secureai.com
+</code></pre>
+<h4 id="solutions_5"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Increase Timeout Settings</strong></p>
+<pre><code class="language-bash"># Update API gateway timeout
+kubectl patch ingress secureai-api -n secureai -p '{
+  &quot;metadata&quot;: {
+    &quot;annotations&quot;: {
+      &quot;nginx.ingress.kubernetes.io/proxy-read-timeout&quot;: &quot;300&quot;,
+      &quot;nginx.ingress.kubernetes.io/proxy-send-timeout&quot;: &quot;300&quot;
+    }
+  }
+}'
+</code></pre>
+<p><strong>Solution 2: Check Load Balancer</strong></p>
+<pre><code class="language-bash"># Check load balancer health
+kubectl get endpoints secureai-backend-service -n secureai
+
+# Restart load balancer if needed
+kubectl rollout restart deployment/nginx-ingress-controller -n ingress-nginx
+</code></pre>
+<p><strong>Solution 3: Scale API Services</strong></p>
+<pre><code class="language-bash"># Scale up API services
+kubectl scale deployment secureai-backend --replicas=5 -n secureai
+
+# Check scaling status
+kubectl get pods -n secureai -l app=secureai-backend
+</code></pre>
+<h3 id="rate-limiting-issues"><strong>Rate Limiting Issues</strong></h3>
+<h4 id="symptoms_7"><strong>Symptoms</strong></h4>
+<ul>
+<li>"Rate limit exceeded" errors</li>
+<li>429 HTTP status codes</li>
+<li>API requests being throttled</li>
+</ul>
+<h4 id="diagnostic-steps_7"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check current rate limits
+curl https://api.secureai.com/api/v1/config/system | jq '.security_settings.api_rate_limits'
+
+# 2. Check rate limit headers
+curl -I https://api.secureai.com/api/v1/analyze/video
+
+# 3. Check Redis rate limiting
+kubectl exec -it deployment/redis -n secureai -- redis-cli KEYS &quot;rate_limit:*&quot;
+</code></pre>
+<h4 id="solutions_6"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Increase Rate Limits</strong></p>
+<pre><code class="language-bash"># Update rate limits for specific user
+curl -X PUT https://api.secureai.com/api/v1/admin/users/USER_ID/rate-limits \
+  -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;requests_per_minute&quot;: 200, &quot;requests_per_hour&quot;: 2000}'
+</code></pre>
+<p><strong>Solution 2: Implement Exponential Backoff</strong></p>
+<pre><code class="language-python"># Example client implementation
+import time
+import requests
+
+def api_request_with_backoff(url, headers, data, max_retries=3):
+    for attempt in range(max_retries):
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code != 429:
+            return response
+
+        if attempt &lt; max_retries - 1:
+            wait_time = 2 ** attempt  # Exponential backoff
+            time.sleep(wait_time)
+
+    return response
+</code></pre>
+<p><strong>Solution 3: Clear Rate Limit Cache</strong></p>
+<pre><code class="language-bash"># Clear rate limiting cache
+kubectl exec -it deployment/redis -n secureai -- redis-cli DEL rate_limit:USER_ID
+</code></pre>
+<hr />
+<h2 id="database-issues">🗄️ Database Issues</h2>
+<h3 id="connection-failures"><strong>Connection Failures</strong></h3>
+<h4 id="symptoms_8"><strong>Symptoms</strong></h4>
+<ul>
+<li>"Database connection failed" errors</li>
+<li>Application cannot connect to database</li>
+<li>Database timeout errors</li>
+</ul>
+<h4 id="diagnostic-steps_8"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check database service status
+kubectl get pods -n secureai -l app=postgres
+kubectl describe pod postgres-0 -n secureai
+
+# 2. Check database connectivity
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h postgres -U secureai_admin -d secureai_production -c &quot;SELECT 1;&quot;
+
+# 3. Check database logs
+kubectl logs -f postgres-0 -n secureai
+
+# 4. Check connection pool
+kubectl exec -it deployment/secureai-backend -n secureai -- netstat -an | grep 5432
+</code></pre>
+<h4 id="solutions_7"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Restart Database Service</strong></p>
+<pre><code class="language-bash"># Restart database pod
+kubectl delete pod postgres-0 -n secureai
+
+# Wait for pod to restart
+kubectl get pods -n secureai -l app=postgres -w
+</code></pre>
+<p><strong>Solution 2: Increase Connection Pool</strong></p>
+<pre><code class="language-bash"># Update connection pool settings
+kubectl patch configmap secureai-config -n secureai -p '{
+  &quot;data&quot;: {
+    &quot;application.yml&quot;: &quot;database:\n  connection-pool:\n    max-size: 100\n    min-size: 10&quot;
+  }
+}'
+
+# Restart application
+kubectl rollout restart deployment/secureai-backend -n secureai
+</code></pre>
+<p><strong>Solution 3: Check Database Resources</strong></p>
+<pre><code class="language-bash"># Check database resource usage
+kubectl top pod postgres-0 -n secureai
+
+# Increase database resources if needed
+kubectl patch statefulset postgres -n secureai -p '{
+  &quot;spec&quot;: {
+    &quot;template&quot;: {
+      &quot;spec&quot;: {
+        &quot;containers&quot;: [{
+          &quot;name&quot;: &quot;postgres&quot;,
+          &quot;resources&quot;: {
+            &quot;requests&quot;: {&quot;memory&quot;: &quot;2Gi&quot;, &quot;cpu&quot;: &quot;1&quot;},
+            &quot;limits&quot;: {&quot;memory&quot;: &quot;4Gi&quot;, &quot;cpu&quot;: &quot;2&quot;}
+          }
+        }]
+      }
+    }
+  }
+}'
+</code></pre>
+<h3 id="performance-issues"><strong>Performance Issues</strong></h3>
+<h4 id="symptoms_9"><strong>Symptoms</strong></h4>
+<ul>
+<li>Slow database queries</li>
+<li>High database CPU usage</li>
+<li>Application timeouts</li>
+</ul>
+<h4 id="diagnostic-steps_9"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check active connections
+kubectl exec -it postgres-0 -n secureai -- psql -U secureai_admin -d secureai_production -c &quot;
+SELECT count(*) as active_connections FROM pg_stat_activity;&quot;
+
+# 2. Check slow queries
+kubectl exec -it postgres-0 -n secureai -- psql -U secureai_admin -d secureai_production -c &quot;
+SELECT query, mean_time, calls, total_time FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;&quot;
+
+# 3. Check database size
+kubectl exec -it postgres-0 -n secureai -- psql -U secureai_admin -d secureai_production -c &quot;
+SELECT pg_size_pretty(pg_database_size('secureai_production'));&quot;
+</code></pre>
+<h4 id="solutions_8"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Optimize Database Queries</strong></p>
+<pre><code class="language-sql">-- Analyze table statistics
+ANALYZE;
+
+-- Reindex tables
+REINDEX DATABASE secureai_production;
+
+-- Check for unused indexes
+SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch
+FROM pg_stat_user_indexes
+WHERE idx_scan = 0
+ORDER BY schemaname, tablename, indexname;
+</code></pre>
+<p><strong>Solution 2: Increase Database Resources</strong></p>
+<pre><code class="language-bash"># Increase database memory
+kubectl patch statefulset postgres -n secureai -p '{
+  &quot;spec&quot;: {
+    &quot;template&quot;: {
+      &quot;spec&quot;: {
+        &quot;containers&quot;: [{
+          &quot;name&quot;: &quot;postgres&quot;,
+          &quot;resources&quot;: {
+            &quot;requests&quot;: {&quot;memory&quot;: &quot;4Gi&quot;},
+            &quot;limits&quot;: {&quot;memory&quot;: &quot;8Gi&quot;}
+          }
+        }]
+      }
+    }
+  }
+}'
+</code></pre>
+<p><strong>Solution 3: Database Maintenance</strong></p>
+<pre><code class="language-bash"># Run database maintenance
+kubectl exec -it postgres-0 -n secureai -- psql -U secureai_admin -d secureai_production -c &quot;
+VACUUM ANALYZE;&quot;
+</code></pre>
+<hr />
+<h2 id="security-issues">🔒 Security Issues</h2>
+<h3 id="access-control-problems"><strong>Access Control Problems</strong></h3>
+<h4 id="symptoms_10"><strong>Symptoms</strong></h4>
+<ul>
+<li>Users accessing unauthorized resources</li>
+<li>API endpoints accessible without authentication</li>
+<li>Permission escalation issues</li>
+</ul>
+<h4 id="diagnostic-steps_10"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check authentication logs
+kubectl logs -f deployment/secureai-backend -n secureai | grep &quot;auth&quot;
+
+# 2. Check access control configuration
+kubectl get configmap auth-config -n secureai -o yaml
+
+# 3. Test unauthorized access
+curl -X GET https://api.secureai.com/api/v1/admin/users
+</code></pre>
+<h4 id="solutions_9"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Review Access Control Rules</strong></p>
+<pre><code class="language-bash"># Check current access control configuration
+kubectl get configmap auth-config -n secureai -o yaml
+
+# Update access control rules
+kubectl patch configmap auth-config -n secureai -p '{
+  &quot;data&quot;: {
+    &quot;access-control.yml&quot;: &quot;rules:\n  - path: /api/v1/admin/*\n    methods: [GET, POST, PUT, DELETE]\n    roles: [admin]\n    require_auth: true&quot;
+  }
+}'
+</code></pre>
+<p><strong>Solution 2: Audit User Permissions</strong></p>
+<pre><code class="language-bash"># Check all user permissions
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h postgres -U secureai_admin -d secureai_production -c &quot;
+SELECT u.email, u.role, p.permissions FROM users u 
+LEFT JOIN user_permissions p ON u.id = p.user_id 
+ORDER BY u.email;&quot;
+</code></pre>
+<p><strong>Solution 3: Implement Additional Security</strong></p>
+<pre><code class="language-bash"># Enable additional security headers
+kubectl patch ingress secureai-api -n secureai -p '{
+  &quot;metadata&quot;: {
+    &quot;annotations&quot;: {
+      &quot;nginx.ingress.kubernetes.io/configuration-snippet&quot;: &quot;add_header X-Frame-Options DENY; add_header X-Content-Type-Options nosniff;&quot;
+    }
+  }
+}'
+</code></pre>
+<h3 id="ssltls-issues"><strong>SSL/TLS Issues</strong></h3>
+<h4 id="symptoms_11"><strong>Symptoms</strong></h4>
+<ul>
+<li>SSL certificate errors</li>
+<li>"Connection not secure" warnings</li>
+<li>TLS handshake failures</li>
+</ul>
+<h4 id="diagnostic-steps_11"><strong>Diagnostic Steps</strong></h4>
+<pre><code class="language-bash"># 1. Check SSL certificate
+openssl s_client -connect api.secureai.com:443 -servername api.secureai.com
+
+# 2. Check certificate expiration
+kubectl get secret secureai-tls -n secureai -o yaml | grep tls.crt | cut -d' ' -f4 | base64 -d | openssl x509 -text -noout | grep &quot;Not After&quot;
+
+# 3. Check TLS configuration
+curl -v https://api.secureai.com/health
+</code></pre>
+<h4 id="solutions_10"><strong>Solutions</strong></h4>
+<p><strong>Solution 1: Renew SSL Certificate</strong></p>
+<pre><code class="language-bash"># Renew certificate using Let's Encrypt
+kubectl apply -f - &lt;&lt;EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: secureai-tls
+  namespace: secureai
+spec:
+  secretName: secureai-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - api.secureai.com
+  - dashboard.secureai.com
+EOF
+</code></pre>
+<p><strong>Solution 2: Update TLS Configuration</strong></p>
+<pre><code class="language-bash"># Update TLS settings
+kubectl patch ingress secureai-api -n secureai -p '{
+  &quot;metadata&quot;: {
+    &quot;annotations&quot;: {
+      &quot;nginx.ingress.kubernetes.io/ssl-protocols&quot;: &quot;TLSv1.2 TLSv1.3&quot;,
+      &quot;nginx.ingress.kubernetes.io/ssl-ciphers&quot;: &quot;ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512&quot;
+    }
+  }
+}'
+</code></pre>
+<hr />
+<h2 id="monitoring-diagnostics">📊 Monitoring &amp; Diagnostics</h2>
+<h3 id="system-health-checks"><strong>System Health Checks</strong></h3>
+<h4 id="comprehensive-health-check-script"><strong>Comprehensive Health Check Script</strong></h4>
+<pre><code class="language-bash">#!/bin/bash
+# Comprehensive system health check
+
+echo &quot;=== SecureAI System Health Check ===&quot;
+echo &quot;Timestamp: $(date)&quot;
+echo
+
+# 1. Check Kubernetes cluster
+echo &quot;1. Kubernetes Cluster Status:&quot;
+kubectl get nodes
+kubectl get pods -n secureai
+echo
+
+# 2. Check service endpoints
+echo &quot;2. Service Endpoints:&quot;
+kubectl get endpoints -n secureai
+echo
+
+# 3. Check resource usage
+echo &quot;3. Resource Usage:&quot;
+kubectl top nodes
+kubectl top pods -n secureai
+echo
+
+# 4. Check database connectivity
+echo &quot;4. Database Connectivity:&quot;
+kubectl exec -it deployment/secureai-backend -n secureai -- psql -h postgres -U secureai_admin -d secureai_production -c &quot;SELECT 1;&quot; 2&gt;/dev/null &amp;&amp; echo &quot;Database: OK&quot; || echo &quot;Database: FAILED&quot;
+echo
+
+# 5. Check Redis connectivity
+echo &quot;5. Redis Connectivity:&quot;
+kubectl exec -it deployment/secureai-backend -n secureai -- redis-cli -h redis ping 2&gt;/dev/null &amp;&amp; echo &quot;Redis: OK&quot; || echo &quot;Redis: FAILED&quot;
+echo
+
+# 6. Check API health
+echo &quot;6. API Health:&quot;
+curl -s https://api.secureai.com/health | jq . 2&gt;/dev/null || echo &quot;API: FAILED&quot;
+echo
+
+# 7. Check disk space
+echo &quot;7. Disk Space:&quot;
+df -h | grep -E &quot;(Filesystem|/dev/)&quot;
+echo
+
+# 8. Check network connectivity
+echo &quot;8. Network Connectivity:&quot;
+ping -c 1 google.com &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;Internet: OK&quot; || echo &quot;Internet: FAILED&quot;
+echo
+
+echo &quot;=== Health Check Complete ===&quot;
+</code></pre>
+<h3 id="log-analysis"><strong>Log Analysis</strong></h3>
+<h4 id="common-log-patterns"><strong>Common Log Patterns</strong></h4>
+<pre><code class="language-bash"># Error patterns to look for
+kubectl logs -f deployment/secureai-backend -n secureai | grep -E &quot;(ERROR|FATAL|Exception)&quot;
+
+# Performance issues
+kubectl logs -f deployment/secureai-backend -n secureai | grep -E &quot;(timeout|slow|performance)&quot;
+
+# Security issues
+kubectl logs -f deployment/secureai-backend -n secureai | grep -E &quot;(unauthorized|forbidden|security)&quot;
+
+# Database issues
+kubectl logs -f deployment/secureai-backend -n secureai | grep -E &quot;(database|connection|sql)&quot;
+</code></pre>
+<hr />
+<h2 id="support-escalation">📞 Support &amp; Escalation</h2>
+<h3 id="when-to-escalate"><strong>When to Escalate</strong></h3>
+<h4 id="critical-issues-escalate-immediately"><strong>Critical Issues (Escalate Immediately)</strong></h4>
+<ul>
+<li>System completely down</li>
+<li>Data breach or security incident</li>
+<li>Data loss or corruption</li>
+<li>Multiple users affected</li>
+</ul>
+<h4 id="high-priority-issues-escalate-within-2-hours"><strong>High Priority Issues (Escalate within 2 hours)</strong></h4>
+<ul>
+<li>Significant service degradation</li>
+<li>Security vulnerabilities</li>
+<li>Performance issues affecting users</li>
+<li>API integration failures</li>
+</ul>
+<h4 id="medium-priority-issues-escalate-within-8-hours"><strong>Medium Priority Issues (Escalate within 8 hours)</strong></h4>
+<ul>
+<li>Minor service issues</li>
+<li>Non-critical bugs</li>
+<li>Performance optimization needed</li>
+<li>User access problems</li>
+</ul>
+<h3 id="escalation-contacts"><strong>Escalation Contacts</strong></h3>
+<h4 id="internal-support"><strong>Internal Support</strong></h4>
+<ul>
+<li><strong>Level 1 Support</strong>: support@secureai.com</li>
+<li><strong>Level 2 Support</strong>: technical@secureai.com</li>
+<li><strong>Level 3 Support</strong>: engineering@secureai.com</li>
+<li><strong>Emergency Hotline</strong>: +1-800-SECURE-AI</li>
+</ul>
+<h4 id="external-support"><strong>External Support</strong></h4>
+<ul>
+<li><strong>Cloud Provider</strong>: AWS Support</li>
+<li><strong>Database</strong>: PostgreSQL Support</li>
+<li><strong>Monitoring</strong>: Grafana Support</li>
+</ul>
+<h3 id="information-to-include-in-support-requests"><strong>Information to Include in Support Requests</strong></h3>
+<h4 id="required-information"><strong>Required Information</strong></h4>
+<ul>
+<li><strong>Issue Description</strong>: Clear description of the problem</li>
+<li><strong>Steps to Reproduce</strong>: Exact steps that lead to the issue</li>
+<li><strong>Error Messages</strong>: Full error messages and stack traces</li>
+<li><strong>System Information</strong>: OS, browser, application version</li>
+<li><strong>Logs</strong>: Relevant log entries and timestamps</li>
+<li><strong>Screenshots</strong>: Visual evidence of the issue</li>
+</ul>
+<h4 id="optional-information"><strong>Optional Information</strong></h4>
+<ul>
+<li><strong>Impact Assessment</strong>: Number of users affected</li>
+<li><strong>Workaround</strong>: Any temporary solutions found</li>
+<li><strong>Previous Occurrences</strong>: If this issue has happened before</li>
+<li><strong>Recent Changes</strong>: Any recent system or configuration changes</li>
+</ul>
+<hr />
+<h2 id="additional-resources">📚 Additional Resources</h2>
+<h3 id="documentation"><strong>Documentation</strong></h3>
+<ul>
+<li>System Architecture Guide</li>
+<li>API Documentation</li>
+<li>User Guides</li>
+<li>Administrator Guide</li>
+<li>Security Policies</li>
+</ul>
+<h3 id="tools-scripts"><strong>Tools &amp; Scripts</strong></h3>
+<ul>
+<li>Health Check Scripts: <code>scripts/health/</code></li>
+<li>Diagnostic Scripts: <code>scripts/diagnostic/</code></li>
+<li>Fix Scripts: <code>scripts/fixes/</code></li>
+<li>Monitoring Scripts: <code>scripts/monitoring/</code></li>
+</ul>
+<h3 id="community-resources"><strong>Community Resources</strong></h3>
+<ul>
+<li>Support Forum: https://support.secureai.com</li>
+<li>Knowledge Base: https://kb.secureai.com</li>
+<li>Status Page: https://status.secureai.com</li>
+<li>Release Notes: https://releases.secureai.com</li>
+</ul>
+<hr />
+<p><em>This troubleshooting guide is regularly updated. For the latest version and additional troubleshooting resources, visit the support portal at https://support.secureai.com</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

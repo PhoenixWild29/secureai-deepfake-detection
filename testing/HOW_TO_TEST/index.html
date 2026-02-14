@@ -1,0 +1,1128 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>How to Test the Ensemble Detector - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#how-to-test-the-ensemble-detector" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              How to Test the Ensemble Detector
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-test-easiest-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Test (Easiest Method)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Test (Easiest Method)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-run-the-test-script-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Run the Test Script (Recommended)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-quick-python-test" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Quick Python Test
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-test-with-your-own-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: Test with Your Own Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Verify Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-initialize-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Initialize Detector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-test-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Test Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-the-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding the Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding the Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#result-dictionary-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Result Dictionary Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interpreting-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpreting Scores
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-videos-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Videos Available
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-modulenotfounderror-no-module-named-open_clip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "ModuleNotFoundError: No module named 'open_clip'"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-clip-model-download-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "CLIP model download fails"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-no-test-videos-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "No test videos found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-cuda-out-of-memory-or-slow-on-cpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "CUDA out of memory" or slow on CPU
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-video-file-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue: "Video file not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Testing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-multiple-videos" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test Multiple Videos
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-with-different-frame-counts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test with Different Frame Counts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-test-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Test Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#expected-first-run-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expected First Run Behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success Indicators
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps-after-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps After Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="how-to-test-the-ensemble-detector">How to Test the Ensemble Detector</h1>
+<h2 id="quick-test-easiest-method">Quick Test (Easiest Method)</h2>
+<h3 id="option-1-run-the-test-script-recommended">Option 1: Run the Test Script (Recommended)</h3>
+<pre><code class="language-cmd">python test_ensemble_detector.py
+</code></pre>
+<p>This will:
+- Automatically find test videos in your project directory
+- Run detection on each video
+- Show detailed results</p>
+<p><strong>Expected Output:</strong></p>
+<pre><code>Testing Enhanced Ensemble Detector (Priority 1 MVP)
+======================================================================
+✓ Successfully imported EnhancedDetector
+✓ Detector initialized on device: cuda (or cpu)
+✓ CLIP model: Loaded
+✓ LAA-Net: Not available (submodule setup required)
+
+Found 3 test video(s)
+
+Test 1/3: sample_video.mp4
+----------------------------------------------------------------------
+  Method: clip_only
+  Is Deepfake: False
+  Ensemble Probability: 0.3245
+  CLIP Probability: 0.3245
+  LAA-Net Probability: 0.5000
+  Frames Analyzed: 16
+  LAA-Net Available: False
+</code></pre>
+<hr />
+<h3 id="option-2-quick-python-test">Option 2: Quick Python Test</h3>
+<p>Open Python and run:</p>
+<pre><code class="language-python">from ai_model.enhanced_detector import EnhancedDetector
+
+# Initialize detector
+detector = EnhancedDetector()
+
+# Test with a video
+result = detector.detect('sample_video.mp4')
+
+# Print results
+print(f&quot;Is Deepfake: {result['is_deepfake']}&quot;)
+print(f&quot;Confidence: {result['ensemble_fake_probability']:.4f}&quot;)
+print(f&quot;CLIP Score: {result['clip_fake_probability']:.4f}&quot;)
+</code></pre>
+<hr />
+<h3 id="option-3-test-with-your-own-video">Option 3: Test with Your Own Video</h3>
+<pre><code class="language-python">from ai_model.enhanced_detector import EnhancedDetector
+
+detector = EnhancedDetector()
+result = detector.detect('path/to/your/video.mp4')
+print(result)
+</code></pre>
+<hr />
+<h2 id="step-by-step-testing">Step-by-Step Testing</h2>
+<h3 id="step-1-verify-installation">Step 1: Verify Installation</h3>
+<p>First, make sure everything is installed:</p>
+<pre><code class="language-cmd">python -c &quot;import open_clip; print('✓ open-clip-torch installed')&quot;
+python -c &quot;from ai_model.enhanced_detector import EnhancedDetector; print('✓ Detector can be imported')&quot;
+</code></pre>
+<h3 id="step-2-initialize-detector">Step 2: Initialize Detector</h3>
+<pre><code class="language-python">from ai_model.enhanced_detector import EnhancedDetector
+
+detector = EnhancedDetector()
+</code></pre>
+<p><strong>Expected:</strong> 
+- CLIP model loads (first time downloads ~600MB)
+- Detector initializes on CPU or CUDA
+- May take 1-2 minutes on first run</p>
+<h3 id="step-3-test-detection">Step 3: Test Detection</h3>
+<pre><code class="language-python"># Test with sample video
+result = detector.detect('sample_video.mp4', num_frames=16)
+
+# View results
+print(&quot;Detection Results:&quot;)
+print(f&quot;  Method: {result['method']}&quot;)
+print(f&quot;  Is Deepfake: {result['is_deepfake']}&quot;)
+print(f&quot;  Ensemble Probability: {result['ensemble_fake_probability']:.4f}&quot;)
+print(f&quot;  CLIP Probability: {result['clip_fake_probability']:.4f}&quot;)
+print(f&quot;  LAA-Net Probability: {result['laa_fake_probability']:.4f}&quot;)
+print(f&quot;  Frames Analyzed: {result['num_frames_analyzed']}&quot;)
+</code></pre>
+<hr />
+<h2 id="understanding-the-results">Understanding the Results</h2>
+<h3 id="result-dictionary-structure">Result Dictionary Structure</h3>
+<pre><code class="language-python">{
+    'ensemble_fake_probability': 0.75,  # Combined score (0=real, 1=fake)
+    'clip_fake_probability': 0.70,      # CLIP-only score
+    'laa_fake_probability': 0.50,      # LAA-Net score (0.5 = neutral if unavailable)
+    'is_deepfake': True,                # Boolean prediction (&gt;0.5 = fake)
+    'method': 'clip_only',              # or 'ensemble_clip_laa' if LAA-Net available
+    'num_frames_analyzed': 16,          # Number of frames processed
+    'laa_available': False              # Whether LAA-Net is loaded
+}
+</code></pre>
+<h3 id="interpreting-scores">Interpreting Scores</h3>
+<ul>
+<li><strong>ensemble_fake_probability &lt; 0.5</strong>: Likely REAL</li>
+<li><strong>ensemble_fake_probability &gt; 0.5</strong>: Likely FAKE</li>
+<li><strong>ensemble_fake_probability ≈ 0.5</strong>: Uncertain</li>
+</ul>
+<p>Higher values (closer to 1.0) = higher confidence it's fake
+Lower values (closer to 0.0) = higher confidence it's real</p>
+<hr />
+<h2 id="test-videos-available">Test Videos Available</h2>
+<p>The test script automatically looks for:
+- <code>sample_video.mp4</code>
+- <code>test_video_1.mp4</code>
+- <code>test_video_2.mp4</code>
+- <code>test_video_3.mp4</code></p>
+<p>If these exist in your project directory, they'll be tested automatically.</p>
+<hr />
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="issue-modulenotfounderror-no-module-named-open_clip">Issue: "ModuleNotFoundError: No module named 'open_clip'"</h3>
+<p><strong>Solution:</strong> Install open-clip-torch:</p>
+<pre><code class="language-cmd">python -m pip install open-clip-torch&gt;=2.20.0
+</code></pre>
+<h3 id="issue-clip-model-download-fails">Issue: "CLIP model download fails"</h3>
+<p><strong>Solution:</strong> 
+- Check internet connection
+- First run downloads ~600MB
+- May take several minutes</p>
+<h3 id="issue-no-test-videos-found">Issue: "No test videos found"</h3>
+<p><strong>Solution:</strong>
+- Use your own video: <code>detector.detect('path/to/video.mp4')</code>
+- Or download test videos to project directory</p>
+<h3 id="issue-cuda-out-of-memory-or-slow-on-cpu">Issue: "CUDA out of memory" or slow on CPU</h3>
+<p><strong>Solution:</strong>
+- Reduce frames: <code>detector.detect('video.mp4', num_frames=8)</code>
+- Use CPU (automatic if CUDA unavailable)
+- CLIP works on CPU, just slower</p>
+<h3 id="issue-video-file-not-found">Issue: "Video file not found"</h3>
+<p><strong>Solution:</strong>
+- Use full path: <code>detector.detect(r'C:\full\path\to\video.mp4')</code>
+- Or use relative path from project directory</p>
+<hr />
+<h2 id="advanced-testing">Advanced Testing</h2>
+<h3 id="test-multiple-videos">Test Multiple Videos</h3>
+<pre><code class="language-python">from ai_model.enhanced_detector import EnhancedDetector
+
+detector = EnhancedDetector()
+
+videos = ['video1.mp4', 'video2.mp4', 'video3.mp4']
+
+for video in videos:
+    try:
+        result = detector.detect(video)
+        print(f&quot;{video}: {'FAKE' if result['is_deepfake'] else 'REAL'} ({result['ensemble_fake_probability']:.3f})&quot;)
+    except Exception as e:
+        print(f&quot;{video}: Error - {e}&quot;)
+</code></pre>
+<h3 id="test-with-different-frame-counts">Test with Different Frame Counts</h3>
+<pre><code class="language-python">detector = EnhancedDetector()
+
+# More frames = more accurate but slower
+result_8 = detector.detect('video.mp4', num_frames=8)
+result_16 = detector.detect('video.mp4', num_frames=16)
+result_32 = detector.detect('video.mp4', num_frames=32)
+
+print(f&quot;8 frames: {result_8['ensemble_fake_probability']:.3f}&quot;)
+print(f&quot;16 frames: {result_16['ensemble_fake_probability']:.3f}&quot;)
+print(f&quot;32 frames: {result_32['ensemble_fake_probability']:.3f}&quot;)
+</code></pre>
+<hr />
+<h2 id="quick-test-commands">Quick Test Commands</h2>
+<pre><code class="language-cmd">REM Test 1: Import check
+python -c &quot;from ai_model.enhanced_detector import EnhancedDetector; print('Import OK')&quot;
+
+REM Test 2: Initialization check
+python -c &quot;from ai_model.enhanced_detector import EnhancedDetector; d = EnhancedDetector(); print(f'Detector ready on {d.device}')&quot;
+
+REM Test 3: Full test
+python test_ensemble_detector.py
+</code></pre>
+<hr />
+<h2 id="expected-first-run-behavior">Expected First Run Behavior</h2>
+<ol>
+<li><strong>First import:</strong> May take 10-30 seconds (loading CLIP)</li>
+<li><strong>First detection:</strong> Downloads CLIP weights (~600MB) - may take 5-10 minutes</li>
+<li><strong>Subsequent runs:</strong> Fast (weights cached)</li>
+</ol>
+<hr />
+<h2 id="success-indicators">Success Indicators</h2>
+<p>✅ <strong>Detector initializes:</strong> "CLIP model loaded successfully"
+✅ <strong>Detection runs:</strong> No errors, returns results dictionary
+✅ <strong>Results make sense:</strong> Scores between 0.0 and 1.0
+✅ <strong>Method shows:</strong> "clip_only" (or "ensemble_clip_laa" if LAA-Net set up)</p>
+<hr />
+<h2 id="next-steps-after-testing">Next Steps After Testing</h2>
+<ol>
+<li><strong>If tests pass:</strong> Ready to integrate with your API</li>
+<li><strong>If LAA-Net needed:</strong> Run <code>setup_laa_net_complete.bat</code></li>
+<li><strong>For production:</strong> Integrate into <code>api.py</code> endpoints</li>
+</ol>
+<hr />
+<p><strong>Ready to test?</strong> Run: <code>python test_ensemble_detector.py</code></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

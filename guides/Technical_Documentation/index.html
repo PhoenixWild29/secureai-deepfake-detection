@@ -1,0 +1,2547 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#technical-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Documentation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Technical Documentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-architecture-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 System Architecture &amp; Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🏗️ System Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🏗️ System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#component-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Component Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#frontend-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#backend-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Services
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Technology Stack
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Technology Stack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backend-technologies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend Technologies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backend Technologies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-storage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database &amp; Storage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aiml-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI/ML Stack
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blockchain-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blockchain Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frontend-technologies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frontend Technologies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Frontend Technologies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#web-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mobile-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mobile Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-devops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure &amp; DevOps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Infrastructure &amp; DevOps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#containerization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Containerization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Platform
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring &amp; Observability
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deepfake-detection-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🧠 Deepfake Detection Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧠 Deepfake Detection Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-modal-detection-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Modal Detection Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#visual-deepfake-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Visual Deepfake Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audio-deepfake-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audio Deepfake Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#model-performance-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model Performance Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Model Performance Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detection-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detection Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Processing Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔗 API Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔗 API Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rest-api-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        REST API Design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="REST API Design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-gateway-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Gateway Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#websocket-real-time-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WebSocket Real-time Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🗄️ Database Schema
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🗄️ Database Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Tables
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#users-and-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Users and Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Video Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#audit-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Audit Trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-indexes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Indexes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔐 Security Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔐 Security Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Authorization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication &amp; Authorization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jwt-token-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JWT Token Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#role-based-access-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role-Based Access Control
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-encryption" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Encryption
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data Encryption">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#encryption-at-rest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encryption at Rest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encryption-in-transit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Encryption in Transit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deployment-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Deployment Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Deployment Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Kubernetes Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Kubernetes Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#application-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#service-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#horizontal-pod-autoscaler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Horizontal Pod Autoscaler
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cicd-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CI/CD Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CI/CD Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-observability_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Monitoring &amp; Observability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Monitoring &amp; Observability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metrics-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics Collection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Metrics Collection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#application-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Dashboards
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#logging-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Logging Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structured-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Structured Logging
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Development Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Development Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local Development Environment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Local Development Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Scripts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Additional Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#development-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deployment-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deployment Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Dashboards
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="technical-documentation">Technical Documentation</h2>
+<h3 id="system-architecture-implementation">🔧 System Architecture &amp; Implementation</h3>
+<p>This comprehensive technical documentation covers the system architecture, implementation details, deployment procedures, and technical specifications for the SecureAI DeepFake Detection System.</p>
+<hr />
+<h2 id="system-architecture">🏗️ System Architecture</h2>
+<h3 id="high-level-architecture"><strong>High-Level Architecture</strong></h3>
+<pre><code class="language-mermaid">graph TB
+    subgraph &quot;Client Layer&quot;
+        A[Web Dashboard] --&gt; B[Mobile App]
+        B --&gt; C[API Client]
+    end
+
+    subgraph &quot;API Gateway&quot;
+        D[Load Balancer] --&gt; E[API Gateway]
+        E --&gt; F[Authentication Service]
+    end
+
+    subgraph &quot;Application Layer&quot;
+        G[Video Processing Service] --&gt; H[Deepfake Detection Engine]
+        H --&gt; I[Analytics Service]
+        I --&gt; J[Reporting Service]
+    end
+
+    subgraph &quot;Data Layer&quot;
+        K[Video Storage] --&gt; L[Analysis Database]
+        L --&gt; M[Audit Trail Database]
+        M --&gt; N[Blockchain Network]
+    end
+
+    subgraph &quot;Infrastructure&quot;
+        O[Container Orchestration] --&gt; P[Monitoring &amp; Logging]
+        P --&gt; Q[Security Services]
+    end
+
+    A --&gt; D
+    C --&gt; E
+    E --&gt; G
+    G --&gt; K
+    I --&gt; L
+    J --&gt; M
+    M --&gt; N
+    O --&gt; G
+    P --&gt; Q
+</code></pre>
+<h3 id="component-overview"><strong>Component Overview</strong></h3>
+<h4 id="frontend-components"><strong>Frontend Components</strong></h4>
+<ul>
+<li><strong>Web Dashboard</strong>: React-based user interface</li>
+<li><strong>Mobile Application</strong>: React Native cross-platform app</li>
+<li><strong>Admin Panel</strong>: Administrative interface for system management</li>
+</ul>
+<h4 id="backend-services"><strong>Backend Services</strong></h4>
+<ul>
+<li><strong>API Gateway</strong>: Kong-based API management</li>
+<li><strong>Authentication Service</strong>: OAuth2/JWT-based authentication</li>
+<li><strong>Video Processing Service</strong>: Core video analysis engine</li>
+<li><strong>Deepfake Detection Engine</strong>: AI/ML model inference service</li>
+<li><strong>Analytics Service</strong>: Data analytics and reporting</li>
+<li><strong>Notification Service</strong>: Real-time notifications and alerts</li>
+</ul>
+<h4 id="data-storage"><strong>Data Storage</strong></h4>
+<ul>
+<li><strong>Video Storage</strong>: AWS S3 with lifecycle policies</li>
+<li><strong>Analysis Database</strong>: PostgreSQL with read replicas</li>
+<li><strong>Audit Trail Database</strong>: Immutable blockchain storage</li>
+<li><strong>Cache Layer</strong>: Redis for session and data caching</li>
+</ul>
+<h4 id="infrastructure"><strong>Infrastructure</strong></h4>
+<ul>
+<li><strong>Container Orchestration</strong>: Kubernetes on AWS EKS</li>
+<li><strong>Monitoring</strong>: Prometheus, Grafana, and ELK stack</li>
+<li><strong>Security</strong>: AWS Security Hub, GuardDuty, and WAF</li>
+</ul>
+<hr />
+<h2 id="technology-stack">🔧 Technology Stack</h2>
+<h3 id="backend-technologies"><strong>Backend Technologies</strong></h3>
+<h4 id="core-framework"><strong>Core Framework</strong></h4>
+<pre><code class="language-yaml">Runtime: Python 3.11
+Framework: FastAPI 0.104.1
+ASGI Server: Uvicorn 0.24.0
+WSGI Server: Gunicorn 21.2.0
+</code></pre>
+<h4 id="database-storage"><strong>Database &amp; Storage</strong></h4>
+<pre><code class="language-yaml">Primary Database: PostgreSQL 15.4
+Cache: Redis 7.2.0
+Object Storage: AWS S3
+Message Queue: Apache Kafka 3.5.0
+</code></pre>
+<h4 id="aiml-stack"><strong>AI/ML Stack</strong></h4>
+<pre><code class="language-yaml">Deep Learning: PyTorch 2.1.0
+Computer Vision: OpenCV 4.8.0
+Image Processing: PIL/Pillow 10.0.0
+Model Serving: TorchServe 0.8.0
+</code></pre>
+<h4 id="blockchain-integration"><strong>Blockchain Integration</strong></h4>
+<pre><code class="language-yaml">Blockchain: Solana
+Smart Contracts: Anchor Framework
+Web3 Library: Solana Web3.py
+</code></pre>
+<h3 id="frontend-technologies"><strong>Frontend Technologies</strong></h3>
+<h4 id="web-application"><strong>Web Application</strong></h4>
+<pre><code class="language-yaml">Framework: React 18.2.0
+State Management: Redux Toolkit 1.9.7
+UI Components: Material-UI 5.14.0
+Charts: Chart.js 4.4.0
+</code></pre>
+<h4 id="mobile-application"><strong>Mobile Application</strong></h4>
+<pre><code class="language-yaml">Framework: React Native 0.72.0
+Navigation: React Navigation 6.1.0
+State Management: Redux Toolkit
+UI Components: NativeBase 3.4.0
+</code></pre>
+<h3 id="infrastructure-devops"><strong>Infrastructure &amp; DevOps</strong></h3>
+<h4 id="containerization"><strong>Containerization</strong></h4>
+<pre><code class="language-yaml">Container Runtime: Docker 24.0.0
+Orchestration: Kubernetes 1.28.0
+Service Mesh: Istio 1.19.0
+</code></pre>
+<h4 id="cloud-platform"><strong>Cloud Platform</strong></h4>
+<pre><code class="language-yaml">Cloud Provider: AWS
+Compute: EKS (Elastic Kubernetes Service)
+Storage: S3, EBS, EFS
+Database: RDS PostgreSQL, ElastiCache Redis
+</code></pre>
+<h4 id="monitoring-observability"><strong>Monitoring &amp; Observability</strong></h4>
+<pre><code class="language-yaml">Metrics: Prometheus 2.47.0
+Visualization: Grafana 10.1.0
+Logging: Elasticsearch 8.10.0, Logstash 8.10.0
+Tracing: Jaeger 1.49.0
+</code></pre>
+<hr />
+<h2 id="deepfake-detection-engine">🧠 Deepfake Detection Engine</h2>
+<h3 id="model-architecture"><strong>Model Architecture</strong></h3>
+<h4 id="multi-modal-detection-pipeline"><strong>Multi-Modal Detection Pipeline</strong></h4>
+<pre><code class="language-python">class DeepfakeDetectionPipeline:
+    def __init__(self):
+        self.visual_analyzer = VisualDeepfakeDetector()
+        self.audio_analyzer = AudioDeepfakeDetector()
+        self.temporal_analyzer = TemporalConsistencyDetector()
+        self.metadata_analyzer = MetadataAnalyzer()
+
+    async def analyze_video(self, video_path: str) -&gt; DetectionResult:
+        # Visual analysis
+        visual_results = await self.visual_analyzer.analyze(video_path)
+
+        # Audio analysis
+        audio_results = await self.audio_analyzer.analyze(video_path)
+
+        # Temporal consistency analysis
+        temporal_results = await self.temporal_analyzer.analyze(video_path)
+
+        # Metadata analysis
+        metadata_results = await self.metadata_analyzer.analyze(video_path)
+
+        # Ensemble prediction
+        final_result = self.ensemble_prediction([
+            visual_results, audio_results, 
+            temporal_results, metadata_results
+        ])
+
+        return final_result
+</code></pre>
+<h4 id="visual-deepfake-detection"><strong>Visual Deepfake Detection</strong></h4>
+<pre><code class="language-python">class VisualDeepfakeDetector:
+    def __init__(self):
+        self.face_detector = MTCNN()
+        self.landmark_detector = FAN()
+        self.deepfake_classifier = EfficientNetB7()
+
+    async def analyze(self, video_path: str) -&gt; VisualAnalysisResult:
+        # Extract frames
+        frames = self.extract_frames(video_path)
+
+        # Detect faces and landmarks
+        face_analysis = []
+        for frame in frames:
+            faces = self.face_detector.detect(frame)
+            landmarks = self.landmark_detector.predict(frame, faces)
+            face_analysis.append(self.analyze_facial_features(landmarks))
+
+        # Temporal consistency analysis
+        temporal_features = self.analyze_temporal_consistency(face_analysis)
+
+        # Deepfake classification
+        classification_score = self.deepfake_classifier.predict(frames)
+
+        return VisualAnalysisResult(
+            face_consistency=temporal_features,
+            classification_score=classification_score,
+            anomalies=self.detect_anomalies(face_analysis)
+        )
+</code></pre>
+<h4 id="audio-deepfake-detection"><strong>Audio Deepfake Detection</strong></h4>
+<pre><code class="language-python">class AudioDeepfakeDetector:
+    def __init__(self):
+        self.voice_extractor = Wav2Vec2FeatureExtractor()
+        self.speaker_verifier = SpeakerVerificationModel()
+        self.synthetic_detector = SyntheticVoiceDetector()
+
+    async def analyze(self, video_path: str) -&gt; AudioAnalysisResult:
+        # Extract audio
+        audio = self.extract_audio(video_path)
+
+        # Extract voice features
+        voice_features = self.voice_extractor.extract(audio)
+
+        # Speaker verification
+        speaker_score = self.speaker_verifier.verify(voice_features)
+
+        # Synthetic voice detection
+        synthetic_score = self.synthetic_detector.detect(audio)
+
+        return AudioAnalysisResult(
+            speaker_consistency=speaker_score,
+            synthetic_indicators=synthetic_score,
+            acoustic_features=self.extract_acoustic_features(audio)
+        )
+</code></pre>
+<h3 id="model-performance-metrics"><strong>Model Performance Metrics</strong></h3>
+<h4 id="detection-accuracy"><strong>Detection Accuracy</strong></h4>
+<pre><code class="language-json">{
+  &quot;model_performance&quot;: {
+    &quot;overall_accuracy&quot;: 0.95,
+    &quot;precision&quot;: 0.97,
+    &quot;recall&quot;: 0.93,
+    &quot;f1_score&quot;: 0.95,
+    &quot;auc_roc&quot;: 0.98,
+    &quot;specificity&quot;: 0.97
+  },
+  &quot;per_technique_accuracy&quot;: {
+    &quot;face_swap&quot;: 0.96,
+    &quot;voice_cloning&quot;: 0.94,
+    &quot;lip_sync&quot;: 0.93,
+    &quot;expression_transfer&quot;: 0.95,
+    &quot;attribute_manipulation&quot;: 0.92
+  },
+  &quot;performance_by_quality&quot;: {
+    &quot;high_quality&quot;: 0.98,
+    &quot;medium_quality&quot;: 0.94,
+    &quot;low_quality&quot;: 0.89
+  }
+}
+</code></pre>
+<h4 id="processing-performance"><strong>Processing Performance</strong></h4>
+<pre><code class="language-json">{
+  &quot;processing_speed&quot;: {
+    &quot;average_processing_time&quot;: &quot;1.2 seconds&quot;,
+    &quot;p95_processing_time&quot;: &quot;2.1 seconds&quot;,
+    &quot;p99_processing_time&quot;: &quot;3.5 seconds&quot;,
+    &quot;max_processing_time&quot;: &quot;5.0 seconds&quot;
+  },
+  &quot;throughput&quot;: {
+    &quot;concurrent_analyses&quot;: 100,
+    &quot;videos_per_hour&quot;: 3000,
+    &quot;peak_throughput&quot;: 5000
+  },
+  &quot;resource_utilization&quot;: {
+    &quot;cpu_usage&quot;: &quot;65%&quot;,
+    &quot;memory_usage&quot;: &quot;4.2GB&quot;,
+    &quot;gpu_usage&quot;: &quot;78%&quot;
+  }
+}
+</code></pre>
+<hr />
+<h2 id="api-architecture">🔗 API Architecture</h2>
+<h3 id="rest-api-design"><strong>REST API Design</strong></h3>
+<h4 id="api-gateway-configuration"><strong>API Gateway Configuration</strong></h4>
+<pre><code class="language-yaml">apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: secureai-api
+spec:
+  hosts:
+  - api.secureai.com
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1/
+    route:
+    - destination:
+        host: secureai-backend
+        port:
+          number: 8000
+    timeout: 30s
+    retries:
+      attempts: 3
+      perTryTimeout: 10s
+</code></pre>
+<h4 id="service-architecture"><strong>Service Architecture</strong></h4>
+<pre><code class="language-python">from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer
+
+app = FastAPI(
+    title=&quot;SecureAI DeepFake Detection API&quot;,
+    version=&quot;1.0.0&quot;,
+    description=&quot;API for deepfake detection and analysis&quot;
+)
+
+# Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[&quot;*&quot;],
+    allow_credentials=True,
+    allow_methods=[&quot;*&quot;],
+    allow_headers=[&quot;*&quot;],
+)
+
+# Authentication
+security = HTTPBearer()
+
+@app.post(&quot;/api/v1/analyze/video&quot;)
+async def analyze_video(
+    video: UploadFile = File(...),
+    analysis_type: str = &quot;comprehensive&quot;,
+    current_user: User = Depends(get_current_user)
+):
+    &quot;&quot;&quot;Analyze video for deepfake detection&quot;&quot;&quot;
+    try:
+        # Validate file
+        await validate_video_file(video)
+
+        # Queue analysis job
+        job_id = await queue_analysis_job(video, analysis_type, current_user)
+
+        # Return job ID for tracking
+        return {
+            &quot;job_id&quot;: job_id,
+            &quot;status&quot;: &quot;queued&quot;,
+            &quot;estimated_completion&quot;: await get_estimated_completion()
+        }
+
+    except ValidationError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f&quot;Analysis error: {str(e)}&quot;)
+        raise HTTPException(status_code=500, detail=&quot;Internal server error&quot;)
+</code></pre>
+<h4 id="websocket-real-time-updates"><strong>WebSocket Real-time Updates</strong></h4>
+<pre><code class="language-python">from fastapi import WebSocket, WebSocketDisconnect
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: List[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket, user_id: str):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    async def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_analysis_update(self, user_id: str, analysis_id: str, status: str):
+        for connection in self.active_connections:
+            await connection.send_json({
+                &quot;type&quot;: &quot;analysis_update&quot;,
+                &quot;analysis_id&quot;: analysis_id,
+                &quot;status&quot;: status,
+                &quot;timestamp&quot;: datetime.utcnow().isoformat()
+            })
+
+@app.websocket(&quot;/ws/{user_id}&quot;)
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    await manager.connect(websocket, user_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Handle incoming messages
+            await handle_websocket_message(websocket, data)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+</code></pre>
+<hr />
+<h2 id="database-schema">🗄️ Database Schema</h2>
+<h3 id="core-tables"><strong>Core Tables</strong></h3>
+<h4 id="users-and-authentication"><strong>Users and Authentication</strong></h4>
+<pre><code class="language-sql">-- Users table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    role user_role NOT NULL DEFAULT 'user',
+    is_active BOOLEAN DEFAULT true,
+    email_verified BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- User sessions
+CREATE TABLE user_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    session_token VARCHAR(255) UNIQUE NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- API keys
+CREATE TABLE api_keys (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    key_name VARCHAR(255) NOT NULL,
+    key_hash VARCHAR(255) UNIQUE NOT NULL,
+    permissions JSONB DEFAULT '[]',
+    expires_at TIMESTAMP WITH TIME ZONE,
+    last_used_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+</code></pre>
+<h4 id="video-analysis"><strong>Video Analysis</strong></h4>
+<pre><code class="language-sql">-- Video analyses
+CREATE TABLE video_analyses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    video_filename VARCHAR(255) NOT NULL,
+    video_hash VARCHAR(64) NOT NULL,
+    video_size_bytes BIGINT NOT NULL,
+    analysis_type analysis_type NOT NULL,
+    status analysis_status DEFAULT 'pending',
+    confidence_score DECIMAL(5,4),
+    is_deepfake BOOLEAN,
+    processing_time_ms INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    started_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    error_message TEXT
+);
+
+-- Analysis results
+CREATE TABLE analysis_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    analysis_id UUID REFERENCES video_analyses(id) ON DELETE CASCADE,
+    technique VARCHAR(100) NOT NULL,
+    confidence_score DECIMAL(5,4) NOT NULL,
+    details JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Forensic data
+CREATE TABLE forensic_data (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    analysis_id UUID REFERENCES video_analyses(id) ON DELETE CASCADE,
+    frame_analysis JSONB,
+    audio_analysis JSONB,
+    metadata_analysis JSONB,
+    temporal_analysis JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+</code></pre>
+<h4 id="audit-trail"><strong>Audit Trail</strong></h4>
+<pre><code class="language-sql">-- Audit trail
+CREATE TABLE audit_trail (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id),
+    action VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(50) NOT NULL,
+    resource_id UUID,
+    details JSONB,
+    ip_address INET,
+    user_agent TEXT,
+    blockchain_hash VARCHAR(66),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Blockchain transactions
+CREATE TABLE blockchain_transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    audit_trail_id UUID REFERENCES audit_trail(id),
+    transaction_hash VARCHAR(66) UNIQUE NOT NULL,
+    block_number BIGINT NOT NULL,
+    network VARCHAR(50) NOT NULL,
+    status transaction_status DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    confirmed_at TIMESTAMP WITH TIME ZONE
+);
+</code></pre>
+<h3 id="database-indexes"><strong>Database Indexes</strong></h3>
+<pre><code class="language-sql">-- Performance indexes
+CREATE INDEX idx_video_analyses_user_id ON video_analyses(user_id);
+CREATE INDEX idx_video_analyses_status ON video_analyses(status);
+CREATE INDEX idx_video_analyses_created_at ON video_analyses(created_at);
+CREATE INDEX idx_analysis_results_analysis_id ON analysis_results(analysis_id);
+CREATE INDEX idx_audit_trail_user_id ON audit_trail(user_id);
+CREATE INDEX idx_audit_trail_created_at ON audit_trail(created_at);
+CREATE INDEX idx_blockchain_transactions_hash ON blockchain_transactions(transaction_hash);
+</code></pre>
+<hr />
+<h2 id="security-implementation">🔐 Security Implementation</h2>
+<h3 id="authentication-authorization"><strong>Authentication &amp; Authorization</strong></h3>
+<h4 id="jwt-token-implementation"><strong>JWT Token Implementation</strong></h4>
+<pre><code class="language-python">from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from passlib.context import CryptContext
+
+class AuthService:
+    def __init__(self):
+        self.secret_key = settings.SECRET_KEY
+        self.algorithm = &quot;HS256&quot;
+        self.access_token_expire_minutes = 30
+        self.pwd_context = CryptContext(schemes=[&quot;bcrypt&quot;], deprecated=&quot;auto&quot;)
+
+    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)
+
+        to_encode.update({&quot;exp&quot;: expire})
+        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        return encoded_jwt
+
+    def verify_token(self, token: str):
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            user_id: str = payload.get(&quot;sub&quot;)
+            if user_id is None:
+                raise HTTPException(status_code=401, detail=&quot;Invalid token&quot;)
+            return user_id
+        except JWTError:
+            raise HTTPException(status_code=401, detail=&quot;Invalid token&quot;)
+</code></pre>
+<h4 id="role-based-access-control"><strong>Role-Based Access Control</strong></h4>
+<pre><code class="language-python">from enum import Enum
+from functools import wraps
+
+class UserRole(str, Enum):
+    ADMIN = &quot;admin&quot;
+    SECURITY_PROFESSIONAL = &quot;security_professional&quot;
+    COMPLIANCE_OFFICER = &quot;compliance_officer&quot;
+    CONTENT_MODERATOR = &quot;content_moderator&quot;
+    USER = &quot;user&quot;
+
+def require_role(required_roles: List[UserRole]):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            current_user = kwargs.get('current_user')
+            if not current_user:
+                raise HTTPException(status_code=401, detail=&quot;Authentication required&quot;)
+
+            if current_user.role not in required_roles:
+                raise HTTPException(status_code=403, detail=&quot;Insufficient permissions&quot;)
+
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+# Usage example
+@app.post(&quot;/api/v1/admin/users&quot;)
+@require_role([UserRole.ADMIN])
+async def create_user(user_data: UserCreate, current_user: User = Depends(get_current_user)):
+    # Admin-only functionality
+    pass
+</code></pre>
+<h3 id="data-encryption"><strong>Data Encryption</strong></h3>
+<h4 id="encryption-at-rest"><strong>Encryption at Rest</strong></h4>
+<pre><code class="language-python">from cryptography.fernet import Fernet
+import base64
+
+class EncryptionService:
+    def __init__(self):
+        self.key = Fernet.generate_key()
+        self.cipher_suite = Fernet(self.key)
+
+    def encrypt_data(self, data: str) -&gt; str:
+        &quot;&quot;&quot;Encrypt sensitive data before storage&quot;&quot;&quot;
+        encrypted_data = self.cipher_suite.encrypt(data.encode())
+        return base64.b64encode(encrypted_data).decode()
+
+    def decrypt_data(self, encrypted_data: str) -&gt; str:
+        &quot;&quot;&quot;Decrypt data for processing&quot;&quot;&quot;
+        decoded_data = base64.b64decode(encrypted_data.encode())
+        decrypted_data = self.cipher_suite.decrypt(decoded_data)
+        return decrypted_data.decode()
+</code></pre>
+<h4 id="encryption-in-transit"><strong>Encryption in Transit</strong></h4>
+<pre><code class="language-yaml"># TLS Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tls-config
+data:
+  tls.conf: |
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+</code></pre>
+<hr />
+<h2 id="deployment-architecture">🚀 Deployment Architecture</h2>
+<h3 id="kubernetes-configuration"><strong>Kubernetes Configuration</strong></h3>
+<h4 id="application-deployment"><strong>Application Deployment</strong></h4>
+<pre><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secureai-backend
+  labels:
+    app: secureai-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: secureai-backend
+  template:
+    metadata:
+      labels:
+        app: secureai-backend
+    spec:
+      containers:
+      - name: secureai-backend
+        image: secureai/backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: url
+        resources:
+          requests:
+            memory: &quot;512Mi&quot;
+            cpu: &quot;250m&quot;
+          limits:
+            memory: &quot;1Gi&quot;
+            cpu: &quot;500m&quot;
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+</code></pre>
+<h4 id="service-configuration"><strong>Service Configuration</strong></h4>
+<pre><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: secureai-backend-service
+spec:
+  selector:
+    app: secureai-backend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: ClusterIP
+</code></pre>
+<h4 id="horizontal-pod-autoscaler"><strong>Horizontal Pod Autoscaler</strong></h4>
+<pre><code class="language-yaml">apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: secureai-backend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: secureai-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+</code></pre>
+<h3 id="cicd-pipeline"><strong>CI/CD Pipeline</strong></h3>
+<h4 id="github-actions-workflow"><strong>GitHub Actions Workflow</strong></h4>
+<pre><code class="language-yaml">name: SecureAI CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: secureai/deepfake-detection
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=src --cov-report=xml
+
+    - name: Run security scan
+      run: |
+        bandit -r src/
+        safety check
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} .
+        docker build -t $REGISTRY/$IMAGE_NAME:latest .
+
+    - name: Push to registry
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login $REGISTRY -u ${{ github.actor }} --password-stdin
+        docker push $REGISTRY/$IMAGE_NAME:${{ github.sha }}
+        docker push $REGISTRY/$IMAGE_NAME:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Deploy to Kubernetes
+      run: |
+        echo &quot;${{ secrets.KUBECONFIG }}&quot; | base64 -d &gt; kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl set image deployment/secureai-backend secureai-backend=$REGISTRY/$IMAGE_NAME:${{ github.sha }}
+        kubectl rollout status deployment/secureai-backend
+</code></pre>
+<hr />
+<h2 id="monitoring-observability_1">📊 Monitoring &amp; Observability</h2>
+<h3 id="metrics-collection"><strong>Metrics Collection</strong></h3>
+<h4 id="application-metrics"><strong>Application Metrics</strong></h4>
+<pre><code class="language-python">from prometheus_client import Counter, Histogram, Gauge, start_http_server
+
+# Metrics definitions
+VIDEO_ANALYSES_TOTAL = Counter('secureai_video_analyses_total', 'Total video analyses', ['status', 'analysis_type'])
+ANALYSIS_DURATION = Histogram('secureai_analysis_duration_seconds', 'Analysis duration', ['analysis_type'])
+ACTIVE_CONNECTIONS = Gauge('secureai_active_connections', 'Active WebSocket connections')
+QUEUE_SIZE = Gauge('secureai_queue_size', 'Analysis queue size')
+
+class MetricsCollector:
+    def __init__(self):
+        start_http_server(8000)  # Prometheus metrics endpoint
+
+    def record_analysis(self, status: str, analysis_type: str, duration: float):
+        VIDEO_ANALYSES_TOTAL.labels(status=status, analysis_type=analysis_type).inc()
+        ANALYSIS_DURATION.labels(analysis_type=analysis_type).observe(duration)
+
+    def update_connections(self, count: int):
+        ACTIVE_CONNECTIONS.set(count)
+
+    def update_queue_size(self, size: int):
+        QUEUE_SIZE.set(size)
+</code></pre>
+<h4 id="custom-dashboards"><strong>Custom Dashboards</strong></h4>
+<pre><code class="language-json">{
+  &quot;dashboard&quot;: {
+    &quot;title&quot;: &quot;SecureAI System Metrics&quot;,
+    &quot;panels&quot;: [
+      {
+        &quot;title&quot;: &quot;Analysis Throughput&quot;,
+        &quot;type&quot;: &quot;graph&quot;,
+        &quot;targets&quot;: [
+          {
+            &quot;expr&quot;: &quot;rate(secureai_video_analyses_total[5m])&quot;,
+            &quot;legendFormat&quot;: &quot;Analyses per second&quot;
+          }
+        ]
+      },
+      {
+        &quot;title&quot;: &quot;Analysis Duration&quot;,
+        &quot;type&quot;: &quot;graph&quot;,
+        &quot;targets&quot;: [
+          {
+            &quot;expr&quot;: &quot;histogram_quantile(0.95, rate(secureai_analysis_duration_seconds_bucket[5m]))&quot;,
+            &quot;legendFormat&quot;: &quot;95th percentile&quot;
+          }
+        ]
+      },
+      {
+        &quot;title&quot;: &quot;System Health&quot;,
+        &quot;type&quot;: &quot;stat&quot;,
+        &quot;targets&quot;: [
+          {
+            &quot;expr&quot;: &quot;up{job=\&quot;secureai-backend\&quot;}&quot;,
+            &quot;legendFormat&quot;: &quot;Service Status&quot;
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<h3 id="logging-configuration"><strong>Logging Configuration</strong></h3>
+<h4 id="structured-logging"><strong>Structured Logging</strong></h4>
+<pre><code class="language-python">import structlog
+import logging
+from pythonjsonlogger import jsonlogger
+
+# Configure structured logging
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt=&quot;iso&quot;),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.processors.JSONRenderer()
+    ],
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
+logger = structlog.get_logger()
+
+# Usage
+logger.info(&quot;Video analysis started&quot;, 
+           analysis_id=&quot;analysis_123&quot;, 
+           user_id=&quot;user_456&quot;, 
+           video_size_mb=25.4)
+</code></pre>
+<hr />
+<h2 id="development-setup">🔧 Development Setup</h2>
+<h3 id="local-development-environment"><strong>Local Development Environment</strong></h3>
+<h4 id="docker-compose-setup"><strong>Docker Compose Setup</strong></h4>
+<pre><code class="language-yaml">version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: secureai_dev
+      POSTGRES_USER: secureai
+      POSTGRES_PASSWORD: secureai_password
+    ports:
+      - &quot;5432:5432&quot;
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - &quot;6379:6379&quot;
+
+  backend:
+    build: .
+    ports:
+      - &quot;8000:8000&quot;
+    environment:
+      - DATABASE_URL=postgresql://secureai:secureai_password@postgres:5432/secureai_dev
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build: ./frontend
+    ports:
+      - &quot;3000:3000&quot;
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+</code></pre>
+<h4 id="development-scripts"><strong>Development Scripts</strong></h4>
+<pre><code class="language-bash">#!/bin/bash
+
+# Setup development environment
+setup_dev() {
+    echo &quot;Setting up development environment...&quot;
+
+    # Create virtual environment
+    python -m venv venv
+    source venv/bin/activate
+
+    # Install dependencies
+    pip install -r requirements.txt
+    pip install -r requirements-dev.txt
+
+    # Setup pre-commit hooks
+    pre-commit install
+
+    # Start services
+    docker-compose up -d
+
+    # Run database migrations
+    alembic upgrade head
+
+    echo &quot;Development environment ready!&quot;
+}
+
+# Run tests
+run_tests() {
+    echo &quot;Running tests...&quot;
+    pytest tests/ --cov=src --cov-report=html
+}
+
+# Run linting
+run_lint() {
+    echo &quot;Running linting...&quot;
+    flake8 src/
+    black --check src/
+    isort --check-only src/
+}
+
+# Format code
+format_code() {
+    echo &quot;Formatting code...&quot;
+    black src/
+    isort src/
+}
+
+# Start development server
+start_dev() {
+    echo &quot;Starting development server...&quot;
+    uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+}
+</code></pre>
+<hr />
+<h2 id="additional-resources">📚 Additional Resources</h2>
+<h3 id="api-documentation"><strong>API Documentation</strong></h3>
+<ul>
+<li>Interactive API documentation: <code>/docs</code> (Swagger UI)</li>
+<li>ReDoc documentation: <code>/redoc</code></li>
+<li>OpenAPI specification: <code>/openapi.json</code></li>
+</ul>
+<h3 id="development-tools"><strong>Development Tools</strong></h3>
+<ul>
+<li>Code formatting: Black, isort</li>
+<li>Linting: flake8, pylint</li>
+<li>Type checking: mypy</li>
+<li>Testing: pytest, coverage</li>
+<li>Security scanning: bandit, safety</li>
+</ul>
+<h3 id="deployment-resources"><strong>Deployment Resources</strong></h3>
+<ul>
+<li>Kubernetes manifests: <code>k8s/</code></li>
+<li>Helm charts: <code>helm/</code></li>
+<li>Terraform infrastructure: <code>terraform/</code></li>
+<li>Docker configurations: <code>Dockerfile</code></li>
+</ul>
+<h3 id="monitoring-dashboards"><strong>Monitoring Dashboards</strong></h3>
+<ul>
+<li>Grafana dashboards: <code>monitoring/dashboards/</code></li>
+<li>Prometheus rules: <code>monitoring/rules/</code></li>
+<li>Alert configurations: <code>monitoring/alerts/</code></li>
+</ul>
+<hr />
+<p><em>This technical documentation is regularly updated. For the latest version and additional technical resources, visit the developer portal at https://developers.secureai.com</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

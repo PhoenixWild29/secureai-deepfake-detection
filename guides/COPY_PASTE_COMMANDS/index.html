@@ -1,0 +1,1787 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Copy-paste commands (PowerShell) - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#copy-paste-commands-powershell" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Copy-paste commands (PowerShell)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-how-to-run-the-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-step: How to run the app
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-step: How to run the app">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-a-run-locally-your-pc-powershell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path A – Run locally (your PC, PowerShell)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-b-run-on-the-server-production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path B – Run on the server (production)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-deploy-block-run-this-on-the-server-after-every-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server deploy block (run this on the server after every update)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#push-to-github-server-commands-after-any-code-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push to GitHub + Server commands (after any code changes)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Push to GitHub + Server commands (after any code changes)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-on-your-pc-powershell-push-to-github-master" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 – On your PC (PowerShell): push to GitHub master
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-on-the-server-bash-pull-and-rebuild-backend-frontend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 – On the server (Bash): pull and rebuild backend + frontend
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verify-ensemble-is-running-on-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify ensemble is running (on the server)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Verify ensemble is running (on the server)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-health-check" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Health check
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-backend-logs-ensemble-loaded" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Backend logs – ensemble loaded
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-optional-run-one-scan-and-check-the-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Optional: run one scan and check the response
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#login-flow-fast-models-load-on-first-scan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Login flow — fast; models load on first scan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Login flow — fast; models load on first scan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-happens-on-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What happens on login
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-do-models-load" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When do models load?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend-service-unavailable-when-running-a-scan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Backend service unavailable" when running a scan
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="&#34;Backend service unavailable&#34; when running a scan">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#likely-causes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Likely causes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-to-run-on-the-server-bash" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands to run on the server (Bash)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quick-fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick fix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-unhealthy-and-curl-to-apihealth-gives-no-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container "unhealthy" and curl to /api/health gives no response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#restart-loop-same-logs-repeating-port-8000-never-listens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restart loop: same logs repeating, port 8000 never listens
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-open-powershell-and-go-to-the-project-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Open PowerShell and go to the project folder
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-in-class-setup-one-time-for-best-deepfake-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best-in-class setup (one-time, for best deepfake detection)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-activate-the-virtual-environment-when-running-python-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Activate the virtual environment (when running Python locally)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-check-model-status-clip-resnet50-laa-net" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Check model status (CLIP, ResNet50, LAA-Net)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-set-laa-net-weights-optional-for-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Set LAA-Net weights (optional, for detection)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-quick-test-that-laa-net-loads-python-one-liner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Quick test that LAA-Net loads (Python one-liner)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-run-the-api-flask-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Run the API (Flask) locally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deploy-workflow-push-from-your-pc-then-update-the-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Deploy workflow: push from your PC, then update the server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Deploy workflow: push from your PC, then update the server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-on-your-pc-powershell-commit-and-push-to-github" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1 – On your PC (PowerShell): commit and push to GitHub
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-on-the-server-bash-pull-and-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2 – On the server (Bash): pull and rebuild
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-git-pull-latest-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Git: pull latest code
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-server-eg-digitalocean-pull-and-rebuild-backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Server (e.g. DigitalOcean): pull and rebuild backend
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-data-persistence-docker-keep-db-and-results-across-reloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Data persistence (Docker): keep DB and results across reloads
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Data persistence (Docker): keep DB and results across reloads">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-persist-the-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Persist the database
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-persist-the-results-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Persist the results folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-repopulate-after-a-one-time-reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Repopulate after a one-time reset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#success-checklist-what-to-expect-when-everything-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Success checklist (what to expect when everything works)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optional-hf_token-and-mtcnn-do-they-improve-the-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: HF_TOKEN and MTCNN (do they improve the model?)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optional: HF_TOKEN and MTCNN (do they improve the model?)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hf_token-hugging-face-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HF_TOKEN (Hugging Face token)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mtcnn-face-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MTCNN (face detection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-mtcnn-install-fails-windows-path-too-long" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting: MTCNN install fails (Windows “path too long”)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting: MTCNN install fails (Windows “path too long”)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-enable-long-paths-try-first-may-need-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A – Enable long paths (try first; may need restart)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-c-short-path-venv-guaranteed-fix-no-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option C – Short-path venv (guaranteed fix; no restart)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-keep-using-opencv-haar-no-tensorflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B – Keep using OpenCV Haar (no TensorFlow)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="copy-paste-commands-powershell">Copy-paste commands (PowerShell)</h1>
+<p>Use this page whenever you need to run project commands. <strong>Always run in PowerShell</strong> and <strong>start in the project folder</strong> unless a section says otherwise.</p>
+<hr />
+<h2 id="step-by-step-how-to-run-the-app">Step-by-step: How to run the app</h2>
+<p><strong>Two places you can run things:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>When to use it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PowerShell (your PC)</strong></td>
+<td>Developing, testing, running the API <strong>locally</strong>, running diagnostics.</td>
+</tr>
+<tr>
+<td><strong>Server console (e.g. DigitalOcean)</strong></td>
+<td>Running the app in <strong>production</strong> (after you deploy with Docker).</td>
+</tr>
+</tbody>
+</table>
+<p>You <strong>don’t</strong> switch from PowerShell to the server in the middle of one run. You either run everything <strong>locally in PowerShell</strong> or everything <strong>on the server</strong> (SSH in, then use Bash there).</p>
+<hr />
+<h3 id="path-a-run-locally-your-pc-powershell">Path A – Run locally (your PC, PowerShell)</h3>
+<p>Do this when you want to test or run the API on your machine.</p>
+<p><strong>One-time (if you haven’t already):</strong></p>
+<ol>
+<li>Open <strong>PowerShell</strong>.</li>
+<li>Go to the project folder and activate the venv (sections 1 and 2 below).</li>
+<li>Optionally do the <strong>Best-in-class setup</strong> (HF_TOKEN, MTCNN, LAA_NET_WEIGHTS) and run the diagnostic once (section 3).</li>
+</ol>
+<p><strong>Every time you want to run the API locally:</strong></p>
+<ol>
+<li>Open <strong>PowerShell</strong>.</li>
+<li>Copy-paste and run in order:</li>
+<li>Section <strong>1</strong> (go to project folder).</li>
+<li>Section <strong>2</strong> (activate venv).</li>
+<li>Optional: set <strong>LAA_NET_WEIGHTS</strong> and <strong>HF_TOKEN</strong> (section 4 and Best-in-class) if you want full models.</li>
+<li>Start the API (section <strong>6</strong> – e.g. <code>python -m api.app</code>).</li>
+<li>Use the app in the browser (e.g. http://localhost:5000 or whatever port the API uses).</li>
+</ol>
+<p>All of that stays in <strong>PowerShell</strong>; you don’t move to the server.</p>
+<hr />
+<h3 id="path-b-run-on-the-server-production">Path B – Run on the server (production)</h3>
+<p>Do this when the app is deployed (e.g. Docker on DigitalOcean) and you want to update or check it.</p>
+<ol>
+<li><strong>Connect to the server</strong> (e.g. SSH):</li>
+<li>Example: <code>ssh root@guardian.secureai.dev</code> or <code>ssh root@your-server-ip</code> (use your real host and user).</li>
+<li>On the server you’re in a <strong>Linux/Bash</strong> console (not PowerShell).</li>
+<li>Go to the project directory. The path used in this project’s deployment/HTTPS docs is <strong><code>/root/secureai-deepfake-detection</code></strong> (if you use <code>/opt/secureai-deepfake-detection</code>, use that instead):
+   <code>bash
+   cd /root/secureai-deepfake-detection</code></li>
+<li><strong>After every update:</strong> When the assistant (or you) pushes changes to GitHub, run the <strong>Server deploy block</strong> below so the server gets the latest code. The assistant will push and then give you this block with every update.</li>
+</ol>
+<p>So: <strong>PowerShell = local</strong>. <strong>Server console (SSH) = production.</strong> Pick one path per run.</p>
+<hr />
+<h3 id="server-deploy-block-run-this-on-the-server-after-every-update">Server deploy block (run this on the server after every update)</h3>
+<p>After a push to <code>master</code>, SSH to the server and run this <strong>entire block</strong> in order (Bash). Use your real project path if different from <code>/root/secureai-deepfake-detection</code>.</p>
+<pre><code class="language-bash">cd /root/secureai-deepfake-detection
+git pull origin master --no-recurse-submodules
+cd secureai-guardian
+npm ci
+npm run build
+cd ..
+docker compose -f docker-compose.https.yml down
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+</code></pre>
+<ul>
+<li><strong>Do not</strong> use <code>down -v</code> (that removes DB and results volumes).</li>
+<li>If pull fails on submodules, the <code>--no-recurse-submodules</code> keeps the pull working; you can fix submodules later if needed.</li>
+</ul>
+<hr />
+<h2 id="push-to-github-server-commands-after-any-code-changes">Push to GitHub + Server commands (after any code changes)</h2>
+<p>Use this sequence whenever you (or the assistant) make changes and you want them on GitHub and on the server.</p>
+<h3 id="step-1-on-your-pc-powershell-push-to-github-master">Step 1 – On your PC (PowerShell): push to GitHub master</h3>
+<p>Run from the project folder:</p>
+<pre><code class="language-powershell">cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+git add -A
+git status
+git commit -m &quot;Describe your change here&quot;
+git push origin master
+</code></pre>
+<p>If <code>git status</code> shows nothing to commit, your changes are already committed; run <code>git push origin master</code> only.</p>
+<h3 id="step-2-on-the-server-bash-pull-and-rebuild-backend-frontend">Step 2 – On the server (Bash): pull and rebuild backend + frontend</h3>
+<p>After the push succeeds, SSH to the server and run (use your real project path if different). Use <strong>pull without submodules</strong> so the broken submodule does not block the deploy:</p>
+<pre><code class="language-bash">cd /root/secureai-deepfake-detection
+git pull origin master --no-recurse-submodules
+cd secureai-guardian
+npm ci
+npm run build
+cd ..
+docker compose -f docker-compose.https.yml down
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+</code></pre>
+<ul>
+<li><strong><code>--no-recurse-submodules</code></strong> avoids the "No url found for submodule path 'external/laa_net'" error so the pull always succeeds.</li>
+<li><strong>Frontend:</strong> <code>npm ci</code> and <code>npm run build</code> update <code>secureai-guardian/dist</code> so Nginx serves the latest UI.</li>
+<li><strong>Important:</strong> Use <code>down</code> <strong>without</strong> <code>-v</code> so the database and results volumes are kept.</li>
+</ul>
+<p>If you prefer to update submodules (and have fixed <code>.gitmodules</code>), you can run <code>git submodule update --init --recursive</code> after the pull; if it fails, use the block above without it.</p>
+<hr />
+<h2 id="verify-ensemble-is-running-on-the-server">Verify ensemble is running (on the server)</h2>
+<p>After pulling and rebuilding, confirm the backend is up and the full ensemble is loaded.</p>
+<h3 id="1-health-check">1. Health check</h3>
+<pre><code class="language-bash">curl -s http://localhost:8000/api/health
+</code></pre>
+<p>Expected: <code>{"status":"healthy","timestamp":"...","version":"2.0.0"}</code> (or similar). If you use Nginx in front, use your domain and path, e.g. <code>curl -s https://your-domain.com/api/health</code>.</p>
+<h3 id="2-backend-logs-ensemble-loaded">2. Backend logs – ensemble loaded</h3>
+<pre><code class="language-bash">docker logs secureai-backend 2&gt;&amp;1 | grep -E &quot;Ensemble loaded|EnsembleDetector loaded|Ultimate EnsembleDetector&quot;
+</code></pre>
+<p>You should see at least one of:</p>
+<ul>
+<li><code>Ensemble loaded in worker; every scan will use the full ensemble.</code></li>
+<li><code>EnsembleDetector loaded successfully. Every scan will use the full ensemble.</code></li>
+<li><code>Ultimate EnsembleDetector initialized</code></li>
+</ul>
+<p>If the worker is still starting, wait 2–5 minutes (ensemble load is slow) and run the same <code>grep</code> again.</p>
+<h3 id="3-optional-run-one-scan-and-check-the-response">3. Optional: run one scan and check the response</h3>
+<p>From the SecureAI Guardian UI, run a single video scan. When it finishes, open the result and confirm the engine/method shows <strong>Full Ensemble</strong> or a method like <strong>ultimate_ensemble_</strong>*. Alternatively, from the server (if you have a test video):</p>
+<pre><code class="language-bash">curl -s -X POST -F &quot;file=@/path/to/short-video.mp4&quot; http://localhost:8000/api/analyze | jq -r '.model_type, .result.method'
+</code></pre>
+<p>You should see the model type and a method string that indicates the ensemble (e.g. not <code>ensemble_unavailable</code>).</p>
+<hr />
+<h2 id="login-flow-fast-models-load-on-first-scan">Login flow — fast; models load on first scan</h2>
+<p>Workers <strong>do not</strong> load the detection ensemble at startup. Login and device authentication are <strong>fast</strong> (usually under a second). The ensemble loads <strong>lazy</strong> when the first <strong>scan</strong> is run.</p>
+<h3 id="what-happens-on-login">What happens on login</h3>
+<ol>
+<li>
+<p><strong>Page load</strong><br />
+   The app loads. If there is no saved identity in localStorage (e.g. after clearing cache), you see the <strong>Login</strong> screen.</p>
+</li>
+<li>
+<p><strong>Auto device resolution</strong><br />
+   The Login component immediately calls <strong><code>/api/identity/resolve</code></strong> with your device fingerprint (no button click). The worker is <strong>ready immediately</strong> (no model load at startup), so that request is a quick DB lookup (or new device + in-memory Solana wallet) — usually <strong>under a second</strong>.</p>
+</li>
+<li>
+<p><strong>Existing device</strong><br />
+   If the backend returns “existing device,” the app writes <code>nodeId</code>/alias/tier to localStorage and calls <code>onLogin()</code> → you go to the Dashboard. No “Provisioning ID” screen.</p>
+</li>
+<li>
+<p><strong>New device</strong><br />
+   If the backend returns “new device,” the app shows the <strong>entry</strong> screen (optional alias + “Initialize Neural Passport”). When you click the button, the app calls <strong><code>/api/identity/resolve</code></strong> again with your alias; that call is also fast (DB + wallet only). The “Provisioning ID” screen is just the short animation plus that one fast API call.</p>
+</li>
+<li>
+<p><strong>After login</strong><br />
+   Identity is stored in localStorage. Later visits use that stored identity and skip the resolve call, so you go straight to the Dashboard.</p>
+</li>
+</ol>
+<h3 id="when-do-models-load">When do models load?</h3>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Login / device auth</strong></td>
+<td>No model load. Worker is ready; <code>/api/health</code> and <code>/api/identity/resolve</code> respond immediately.</td>
+</tr>
+<tr>
+<td><strong>First scan (upload or URL)</strong></td>
+<td>The worker loads the full ensemble in <strong>parallel</strong> (ResNet, V13, Xception, EfficientNet). Typical load: <strong>2–4 minutes</strong> (then analysis runs). Subsequent scans in the same worker are fast (model already in memory).</td>
+</tr>
+<tr>
+<td><strong>After worker restart</strong></td>
+<td>Again, login is fast; the next <strong>first</strong> scan in that worker triggers the 2–4 min load once.</td>
+</tr>
+<tr>
+<td><strong>Faster ResNet load (optional)</strong></td>
+<td>If you have <code>safetensors</code> installed and a <code>resnet_resnet50_best.safetensors</code> file next to the <code>.pth</code>, ResNet loads from that (faster). Convert once: <code>python scripts/utilities/convert_resnet_to_safetensors.py</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>So: <strong>login and device auth are fast. The only long wait (2–5 min) is the first scan after a worker start, when the ensemble loads on demand.</strong></p>
+<hr />
+<h2 id="backend-service-unavailable-when-running-a-scan">"Backend service unavailable" when running a scan</h2>
+<p>The Forensic Lab runs a <strong>health check</strong> (<code>GET /api/health</code>) before starting a scan. If that request fails or returns non‑OK, you see <strong>"ANALYSIS ERROR – Backend service unavailable. Please ensure the API server is running."</strong> So the issue is between the browser and the backend (or the backend not responding).</p>
+<h3 id="likely-causes">Likely causes</h3>
+<ol>
+<li><strong>Backend container not running</strong> – e.g. after a server reboot or failed deploy.</li>
+<li><strong>Backend still starting</strong> – container or worker not yet listening; health is answered as soon as the worker binds (models load on first scan, not at startup).</li>
+<li><strong>Backend crashed</strong> – OOM, exception during ensemble load, or worker restart.</li>
+<li><strong>Nginx ↔ backend</strong> – wrong proxy, backend host/port, or timeout.</li>
+</ol>
+<h3 id="commands-to-run-on-the-server-bash">Commands to run on the server (Bash)</h3>
+<p><strong>1. Is the backend container up?</strong></p>
+<pre><code class="language-bash">docker ps --filter name=secureai-backend
+</code></pre>
+<p>If it’s missing or <code>Exited</code>, start the stack:</p>
+<pre><code class="language-bash">cd /root/secureai-deepfake-detection
+docker compose -f docker-compose.https.yml up -d secureai-backend
+</code></pre>
+<p><strong>2. Can the backend answer health locally?</strong></p>
+<pre><code class="language-bash">docker exec secureai-backend curl -s -o /dev/null -w &quot;%{http_code}&quot; http://localhost:8000/api/health
+</code></pre>
+<p>Expect <code>200</code>. If you get nothing or 5xx, the app inside the container isn’t responding (still loading or crashed).</p>
+<p><strong>3. Recent backend logs (crash / ensemble load):</strong></p>
+<pre><code class="language-bash">docker logs secureai-backend --tail 100 2&gt;&amp;1
+</code></pre>
+<p>Look for <code>Ensemble loaded in worker</code> (ready) or Python tracebacks / OOM (crashed).</p>
+<p><strong>4. From your PC (optional) – does the public URL reach the API?</strong></p>
+<pre><code class="language-powershell">curl -s -o NUL -w &quot;%{http_code}&quot; https://guardian.secureai.dev/api/health
+</code></pre>
+<p>Expect <code>200</code>. If you get 502/503/504, Nginx is up but the backend isn’t responding or is timing out.</p>
+<h3 id="quick-fix">Quick fix</h3>
+<p>If the container was down or restarted, start it and wait 2–5 minutes for the ensemble to load, then try the scan again. If the container is up but health still fails, use the logs (step 3) to see why the worker isn’t responding.</p>
+<h3 id="container-unhealthy-and-curl-to-apihealth-gives-no-response">Container "unhealthy" and curl to /api/health gives no response</h3>
+<p>If <strong>command 2</strong> (curl from inside the container) produces <strong>no output</strong>, the app inside the container is <strong>not listening</strong> on port 8000. That usually means the Gunicorn <strong>worker never finished starting</strong>: it blocks in <strong>ensemble loading</strong> (<code>post_worker_init</code>) until the full model is loaded. If that step hangs or crashes, the worker never accepts connections, so:</p>
+<ul>
+<li>The healthcheck fails → container shows <strong>unhealthy</strong>.</li>
+<li><code>curl http://localhost:8000/api/health</code> gets no reply (connection refused or hang).</li>
+</ul>
+<p><strong>Do this next:</strong></p>
+<p><strong>A. See where startup stops (full logs from boot)</strong></p>
+<pre><code class="language-bash">docker logs secureai-backend 2&gt;&amp;1 | head -200
+</code></pre>
+<p>Look for, in order:</p>
+<ul>
+<li><code>Starting SecureAI Guardian server...</code></li>
+<li><code>SecureAI Guardian server is ready. Spawning workers...</code></li>
+<li><code>Loading full ensemble...</code> and then either <code>Ensemble loaded in worker</code> (success) or a <strong>traceback</strong> / error (failure or hang).</li>
+</ul>
+<p>If you see <strong>"Loading full ensemble"</strong> but never <strong>"Ensemble loaded in worker"</strong>, the worker is stuck or crashed during model load (e.g. OOM, missing file, or slow disk).</p>
+<p><strong>B. Confirm nothing is listening on 8000</strong></p>
+<pre><code class="language-bash">docker exec secureai-backend sh -c &quot;ss -tlnp 2&gt;/dev/null || netstat -tlnp 2&gt;/dev/null&quot; | grep 8000
+</code></pre>
+<p>No output = nothing listening = worker never became ready.</p>
+<p><strong>C. Restart and watch logs live</strong></p>
+<pre><code class="language-bash">cd /root/secureai-deepfake-detection
+docker compose -f docker-compose.https.yml restart secureai-backend
+docker logs -f secureai-backend 2&gt;&amp;1
+</code></pre>
+<p>Wait 5–10 minutes. You should see <strong>"Ensemble loaded in worker"</strong> and then the healthcheck will start passing. If after 10 minutes you still don’t see that line, note the <strong>last message</strong> (e.g. which model or step it’s on) and check disk space / memory:</p>
+<pre><code class="language-bash">df -h
+free -m
+</code></pre>
+<p><strong>D. Healthcheck start period</strong></p>
+<p>The compose file uses <strong>start_period: 600s</strong> (10 minutes) for the backend so Docker doesn’t mark the container unhealthy during the 2–5 minute ensemble load. After a deploy, give the backend at least 5 minutes before treating "unhealthy" as a real failure.</p>
+<h3 id="restart-loop-same-logs-repeating-port-8000-never-listens">Restart loop: same logs repeating, port 8000 never listens</h3>
+<p>If you see the <strong>same initialization block</strong> (ResNet, Jetson, S3, etc.) <strong>repeating</strong> every minute or so and <strong>nothing ever listens on port 8000</strong>, the worker is almost certainly <strong>crash‑looping</strong>: it starts loading the ensemble, then the process is <strong>killed</strong> (often by the Linux <strong>OOM killer</strong> when RAM is too low), and Gunicorn respawns it, so the cycle repeats.</p>
+<p><strong>1. Confirm restart loop and OOM</strong></p>
+<pre><code class="language-bash">docker inspect secureai-backend --format 'RestartCount: {{.RestartCount}} ExitCode: {{.State.ExitCode}}'
+dmesg | tail -50 | grep -i &quot;out of memory\|oom\|killed process&quot;
+</code></pre>
+<p>If <strong>RestartCount</strong> is increasing and you see OOM messages, the server is running out of memory during ensemble load.</p>
+<p><strong>2. Check memory</strong></p>
+<pre><code class="language-bash">free -m
+</code></pre>
+<p>The full ensemble (CLIP, ResNet, V13, EfficientNet, etc.) can use <strong>4–6+ GB</strong> RAM. A <strong>2 vCPU / 4 GB</strong> droplet is often <strong>too small</strong>; the worker gets OOM‑killed and never reaches “Ensemble loaded in worker”.</p>
+<p><strong>3. Add swap (recommended on 4 GB instances)</strong></p>
+<pre><code class="language-bash">sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+free -m
+</code></pre>
+<p>Then restart the backend and watch logs again; the worker may complete ensemble load with swap.</p>
+<p><strong>4. After code fix: look for new log lines</strong></p>
+<p>After updating the repo, you should see in logs:</p>
+<ul>
+<li><strong>"Worker starting: loading full ensemble..."</strong> — worker entered <code>post_worker_init</code>.</li>
+<li>Then either <strong>"Ensemble loaded in worker"</strong> (success) or <strong>"Worker init complete; binding to socket"</strong> (ensemble failed but worker still starts; scans will 503).</li>
+<li>If you see <strong>"Worker starting"</strong> but <strong>never</strong> "Worker init complete" or "Ensemble loaded", the process is being killed (e.g. OOM) during model load. Add swap or use a larger instance (e.g. 8 GB RAM).</li>
+</ul>
+<hr />
+<h2 id="1-open-powershell-and-go-to-the-project-folder">1. Open PowerShell and go to the project folder</h2>
+<ol>
+<li>Press <strong>Win + X</strong> → choose <strong>Windows PowerShell</strong> (or <strong>Terminal</strong>).</li>
+<li>Copy and paste this line, then press <strong>Enter</strong>:</li>
+</ol>
+<pre><code class="language-powershell">cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+</code></pre>
+<ol>
+<li>Confirm you’re in the right place (optional):</li>
+</ol>
+<pre><code class="language-powershell">dir
+</code></pre>
+<p>You should see folders like <code>ai_model</code>, <code>api</code>, <code>external</code>, <code>scripts</code>, etc.</p>
+<hr />
+<h2 id="best-in-class-setup-one-time-for-best-deepfake-detection">Best-in-class setup (one-time, for best deepfake detection)</h2>
+<p>Do this once to enable <strong>HF_TOKEN</strong> (reliable CLIP downloads, higher rate limits) and <strong>MTCNN</strong> (best face detection). Run in <strong>PowerShell</strong> from the project folder.</p>
+<p><strong>Step 1 – Go to project folder and activate venv</strong></p>
+<pre><code class="language-powershell">cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+.venv\Scripts\Activate.ps1
+</code></pre>
+<p><strong>Step 2 – Set your Hugging Face token (get one at https://huggingface.co/settings/tokens, “Read” access)</strong></p>
+<p>Replace <code>your_hugging_face_token_here</code> with your real token, then paste:</p>
+<pre><code class="language-powershell">$env:HF_TOKEN = &quot;your_hugging_face_token_here&quot;
+</code></pre>
+<p>To make it permanent for your user account (optional):<br />
+<code>[System.Environment]::SetEnvironmentVariable('HF_TOKEN', 'your_hugging_face_token_here', 'User')</code></p>
+<p><strong>Step 3 – Install MTCNN for best face detection (needs TensorFlow)</strong></p>
+<p>MTCNN requires TensorFlow. Use the <code>[tensorflow]</code> extra so it installs correctly:</p>
+<pre><code class="language-powershell">pip install &quot;mtcnn[tensorflow]&quot;
+</code></pre>
+<p>If you only ran <code>pip install mtcnn</code> before, run the line above; the diagnostic will then show <strong>✔ MTCNN available</strong>.<br />
+To install all project dependencies (then MTCNN may still need the line above if TensorFlow isn’t in requirements):</p>
+<pre><code class="language-powershell">pip install -r requirements.txt
+pip install &quot;mtcnn[tensorflow]&quot;
+</code></pre>
+<p><strong>Step 4 – Set LAA-Net weights for this session (pick one)</strong></p>
+<pre><code class="language-powershell">$env:LAA_NET_WEIGHTS = &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection\external\laa_net\weights\PoseEfficientNet_EFN_hm10_EFPN_NoBasedCLS_Focal_C3_256Cst100_8SBI_SAM(Adam)_ADV_Era1_OutSigmoid_1e7_boost500_UnFZ_model_best.pth&quot;
+</code></pre>
+<p><strong>Step 5 – Verify everything (Success checklist)</strong></p>
+<pre><code class="language-powershell">$env:PYTHONIOENCODING = &quot;utf-8&quot;
+python scripts\diagnostic\CHECK_MODEL_STATUS.py
+</code></pre>
+<p>You should see: <strong>CLIP ✔</strong>, <strong>ResNet50 ✔</strong>, <strong>LAA-Net ✔</strong>, <strong>MTCNN ✔</strong> (or Haar fallback), <strong>Ensemble active with: CLIP, ResNet50, LAA-Net</strong>. When you start the API in the same session, you should see in the logs: <strong>Using Hugging Face token for CLIP</strong> and <strong>MTCNN face detection initialized successfully</strong> (if MTCNN installed correctly).</p>
+<hr />
+<h2 id="2-activate-the-virtual-environment-when-running-python-locally">2. Activate the virtual environment (when running Python locally)</h2>
+<p>Run this <strong>after</strong> the <code>cd</code> in section 1:</p>
+<pre><code class="language-powershell">.venv\Scripts\Activate.ps1
+</code></pre>
+<p>Your prompt should start with <code>(.venv)</code>.</p>
+<hr />
+<h2 id="3-check-model-status-clip-resnet50-laa-net">3. Check model status (CLIP, ResNet50, LAA-Net)</h2>
+<p><strong>Where:</strong> Project folder. <strong>After:</strong> section 1 and 2 (venv activated).</p>
+<p>To avoid Windows console Unicode errors with emojis, set UTF-8 then run the script:</p>
+<pre><code class="language-powershell">$env:PYTHONIOENCODING = &quot;utf-8&quot;
+python scripts\diagnostic\CHECK_MODEL_STATUS.py
+</code></pre>
+<hr />
+<h2 id="4-set-laa-net-weights-optional-for-detection">4. Set LAA-Net weights (optional, for detection)</h2>
+<p>If you want the app to use LAA-Net, set the weights path. Run <strong>after</strong> the <code>cd</code> in section 1 (same PowerShell session or new one).</p>
+<p><strong>Option A – temporary (this session only):</strong></p>
+<pre><code class="language-powershell">$env:LAA_NET_WEIGHTS = &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection\external\laa_net\weights\PoseEfficientNet_EFN_hm10_EFPN_NoBasedCLS_Focal_C3_256Cst100_8SBI_SAM(Adam)_ADV_Era1_OutSigmoid_1e7_boost500_UnFZ_model_best.pth&quot;
+</code></pre>
+<p><strong>Option B – use the other weights file:</strong></p>
+<pre><code class="language-powershell">$env:LAA_NET_WEIGHTS = &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection\external\laa_net\weights\PoseEfficientNet_EFN_hm100_EFPN_NoBasedCLS_Focal_C3_256Cstency100_32BI_SAM(Adam)_ADV_Erasing1_OutSigmoid_model_best.pth&quot;
+</code></pre>
+<p>Then start your API or run your detection script in the <strong>same</strong> PowerShell window.</p>
+<hr />
+<h2 id="5-quick-test-that-laa-net-loads-python-one-liner">5. Quick test that LAA-Net loads (Python one-liner)</h2>
+<p><strong>Where:</strong> Project folder. <strong>After:</strong> section 1 and 2 (venv activated).</p>
+<pre><code class="language-powershell">python -c &quot;import sys; sys.path.insert(0, '.'); from ai_model.laa_net_loader import load_laa_net; from pathlib import Path; w = next(Path('external/laa_net/weights').glob('*.pth')); m, p, d = load_laa_net(weights_path=str(w)); print('LAA-Net loaded:', m is not None)&quot;
+</code></pre>
+<p>You should see: <code>LAA-Net loaded: True</code>.</p>
+<hr />
+<h2 id="6-run-the-api-flask-locally">6. Run the API (Flask) locally</h2>
+<p><strong>Where:</strong> Project folder. <strong>After:</strong> section 1 and 2 (venv activated).</p>
+<pre><code class="language-powershell">python -m api.app
+</code></pre>
+<p>Or, if you use a run script:</p>
+<pre><code class="language-powershell">python run_api.py
+</code></pre>
+<p>(Use whichever file you normally use to start the API.)</p>
+<hr />
+<h2 id="deploy-workflow-push-from-your-pc-then-update-the-server">Deploy workflow: push from your PC, then update the server</h2>
+<p>Use this <strong>every time you (or the AI) change code</strong> and you want GitHub updated and the server running the latest version.</p>
+<h3 id="step-1-on-your-pc-powershell-commit-and-push-to-github">Step 1 – On your PC (PowerShell): commit and push to GitHub</h3>
+<p>Run these in <strong>PowerShell</strong> from the project folder. Replace the commit message with a short description of what changed.</p>
+<pre><code class="language-powershell">cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+git status
+git add -A
+git commit -m &quot;Your commit message here (e.g. Add audio pipeline for vocal authenticity)&quot;
+git push origin master
+</code></pre>
+<p>If <code>git push</code> asks for credentials, use your GitHub username and a <strong>Personal Access Token</strong> (not your GitHub password). If you use SSH, <code>git push</code> may use your SSH key automatically.</p>
+<h3 id="step-2-on-the-server-bash-pull-and-rebuild">Step 2 – On the server (Bash): pull and rebuild</h3>
+<p>SSH into the server, then run:</p>
+<pre><code class="language-bash">cd /root/secureai-deepfake-detection
+git pull origin master
+git submodule update --init --recursive
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d secureai-backend
+</code></pre>
+<p><strong>Important:</strong> You must <strong>rebuild</strong> the backend image (<code>build --no-cache secureai-backend</code>) after pulling code changes. Restarting the container without rebuilding keeps the old code inside the image. If you only run <code>up -d</code> without <code>build</code>, the server will still run the previous version.</p>
+<p>(If your server project path is different, e.g. <code>/opt/secureai-deepfake-detection</code>, use that instead of <code>/root/secureai-deepfake-detection</code>.)</p>
+<p>That’s the full flow: <strong>local push</strong> → <strong>server pull + rebuild</strong>.</p>
+<hr />
+<h2 id="7-git-pull-latest-code">7. Git: pull latest code</h2>
+<p><strong>Where:</strong> Project folder. <strong>After:</strong> section 1 (no need to activate venv).</p>
+<pre><code class="language-powershell">git pull origin master
+</code></pre>
+<hr />
+<h2 id="8-server-eg-digitalocean-pull-and-rebuild-backend">8. Server (e.g. DigitalOcean): pull and rebuild backend</h2>
+<p><strong>Where:</strong> On the server, in the project directory (e.g. after <code>ssh</code> in). Run in <strong>Bash</strong>, not PowerShell.</p>
+<p>Typical server project path (used in this project’s deployment and HTTPS docs): <strong><code>/root/secureai-deepfake-detection</code></strong>. If your deploy uses a different path (e.g. <code>/opt/secureai-deepfake-detection</code>), use that instead.</p>
+<pre><code class="language-bash">cd /root/secureai-deepfake-detection
+git pull origin master
+git submodule update --init --recursive
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d secureai-backend
+</code></pre>
+<p><strong>Note:</strong> Use <code>build --no-cache secureai-backend</code> so the container gets the latest code. Without a rebuild, the old image (and old code) keeps running.</p>
+<p><strong>If the build fails with "no space left on device":</strong> Free disk space on the server (e.g. <code>docker system prune -a</code>, remove old images, clear <code>uploads/</code> or <code>results/</code> if acceptable), then rebuild. The repo’s <code>.dockerignore</code> excludes <code>uploads/</code>, <code>results/</code>, and large files so the build context stays small.</p>
+<hr />
+<h2 id="9-data-persistence-docker-keep-db-and-results-across-reloads">9. Data persistence (Docker): keep DB and results across reloads</h2>
+<p>The Security Hub dashboard (Neutralized, Proofs, Total Analyses, etc.) reads from the <strong>backend</strong>: Postgres DB and the <strong>results</strong> folder. To keep those numbers across rebuilds/restarts:</p>
+<h3 id="1-persist-the-database">1. Persist the database</h3>
+<p>Postgres already uses a <strong>named volume</strong> <code>postgres_data</code> in <code>docker-compose.https.yml</code>, <code>docker-compose.quick.yml</code>, and <code>docker-compose.prod.yml</code>. Data is kept as long as you <strong>do not</strong> remove volumes.</p>
+<p><strong>Commands (on the server, Bash):</strong></p>
+<pre><code class="language-bash"># Stop and remove containers but KEEP volumes (DB and results stay)
+docker compose -f docker-compose.https.yml down
+# Then rebuild/start as usual:
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+</code></pre>
+<p><strong>Do NOT run</strong> <code>docker compose down -v</code> if you want to keep data. The <code>-v</code> flag deletes named volumes (<code>postgres_data</code>, <code>results_data</code>), so the DB and result JSONs would be wiped.</p>
+<h3 id="2-persist-the-results-folder">2. Persist the results folder</h3>
+<p>The compose files use a <strong>named volume</strong> <code>results_data</code> for <code>/app/results</code>, so result JSONs survive container restarts and rebuilds. No extra host directory is required.</p>
+<h3 id="3-repopulate-after-a-one-time-reset">3. Repopulate after a one-time reset</h3>
+<p>If you already ran <code>down -v</code> once and the hub shows 0:</p>
+<ul>
+<li>Run new scans from the app. Each scan is stored in the current DB and in the results volume.</li>
+<li>The hub will show the new totals after each scan (and after a short delay when the dashboard fetches <code>/api/dashboard/stats</code>).</li>
+</ul>
+<p><strong>Quick reference:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rebuild backend but <strong>keep</strong> DB and results</td>
+<td><code>docker compose -f docker-compose.https.yml down</code> then <code>build</code> and <code>up -d</code> (no <code>-v</code>)</td>
+</tr>
+<tr>
+<td>Full wipe (new DB, empty results)</td>
+<td><code>docker compose -f docker-compose.https.yml down -v</code> then <code>up -d</code></td>
+</tr>
+</tbody>
+</table>
+<p>For <strong>production</strong>: analyses and device data are <strong>never auto-deleted</strong> by default. See <strong>DATA_RETENTION_AND_PRODUCTION_DB.md</strong> for the full policy and opt-in retention.</p>
+<hr />
+<h2 id="success-checklist-what-to-expect-when-everything-works">Success checklist (what to expect when everything works)</h2>
+<p>After running the model status script (section 3), you should see something like this. Use it to confirm the stack is healthy.</p>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Expected result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CLIP</strong></td>
+<td>✔ CLIP model available (pretrained, zero-shot)</td>
+</tr>
+<tr>
+<td><strong>ResNet50</strong></td>
+<td>✔ Found model file: ai_model/resnet_resnet50_final.pth, Parameters: 23,565,303, Has classifier head: True</td>
+</tr>
+<tr>
+<td><strong>LAA-Net</strong></td>
+<td>✔ LAA-Net available (and "Constructing the heatmap Decoder!" may appear)</td>
+</tr>
+<tr>
+<td><strong>MTCNN</strong></td>
+<td>Either ✔ MTCNN available, or ▲ MTCNN not available, using OpenCV Haar cascades (both OK)</td>
+</tr>
+<tr>
+<td><strong>Ensemble</strong></td>
+<td>✔ Ensemble active with: CLIP, ResNet50, LAA-Net</td>
+</tr>
+</tbody>
+</table>
+<p>The script also prints a JSON summary at the end. Confirm:</p>
+<ul>
+<li><code>"clip": { "status": "✅ Available" }</code></li>
+<li><code>"resnet50": { "status": "✅ Available" }</code></li>
+<li><code>"laa_net": { "status": "✅ Available" }</code></li>
+<li><code>"ensemble": { "status": "✅ Active", "details": { "models": ["CLIP", "ResNet50", "LAA-Net"] } }</code></li>
+</ul>
+<p>If all of the above match, your setup is correct.</p>
+<hr />
+<h2 id="optional-hf_token-and-mtcnn-do-they-improve-the-model">Optional: HF_TOKEN and MTCNN (do they improve the model?)</h2>
+<p><strong>To enable both for best-in-class detection,</strong> use the <strong>Best-in-class setup</strong> section above (one-time steps with copy-paste commands). Below is the “why” and minimal commands if you only want one.</p>
+<h3 id="hf_token-hugging-face-token">HF_TOKEN (Hugging Face token)</h3>
+<ul>
+<li><strong>What it does:</strong> Lets you send <em>authenticated</em> requests to the Hugging Face Hub when loading CLIP. You get higher rate limits and more reliable downloads.</li>
+<li><strong>Does it make the model better?</strong> <strong>No.</strong> Same CLIP model, same accuracy. It only affects <em>how</em> you download it (fewer rate-limit errors, faster if you hit limits).</li>
+<li><strong>Should you set it?</strong> Optional. Set it if you often load CLIP or see "unauthenticated requests" / rate-limit warnings. Not required for normal use.</li>
+</ul>
+<p><strong>How to set (PowerShell, this session only):</strong></p>
+<pre><code class="language-powershell">$env:HF_TOKEN = &quot;your_hugging_face_token_here&quot;
+</code></pre>
+<p>Get a token at: https://huggingface.co/settings/tokens (create with "Read" access).</p>
+<hr />
+<h3 id="mtcnn-face-detection">MTCNN (face detection)</h3>
+<ul>
+<li><strong>What it does:</strong> MTCNN is a more accurate face detector than OpenCV's Haar cascades. The pipeline <em>already supports both</em>: it tries MTCNN first, then falls back to Haar.</li>
+<li><strong>Does it make the model better?</strong> <strong>It can.</strong> Better face boxes → better cropped regions → potentially better inputs to CLIP/ResNet50/LAA-Net when the pipeline uses face crops. Most noticeable with non-frontal faces, small faces, or difficult lighting.</li>
+<li><strong>Should you install it?</strong> Optional. Install if you want the best face-detection quality and are OK with the extra dependency (the <code>mtcnn</code> package pulls in TensorFlow, which is heavier than OpenCV alone).</li>
+</ul>
+<p><strong>How to enable MTCNN (PowerShell, project folder, venv activated):</strong></p>
+<pre><code class="language-powershell">pip install &quot;mtcnn&gt;=0.1.1&quot;
+</code></pre>
+<p>Then run the model status script again (section 3). You should see <strong>✔ MTCNN available</strong> instead of the Haar fallback message. No code changes needed; the detector already uses MTCNN when available.</p>
+<hr />
+<h3 id="summary">Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Improves model accuracy?</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>HF_TOKEN</strong></td>
+<td>No (same model, better download/rate limits)</td>
+<td>Set only if you hit rate limits or want faster/reliable CLIP downloads.</td>
+</tr>
+<tr>
+<td><strong>MTCNN</strong></td>
+<td>Can help (better face detection → better crops → better inputs)</td>
+<td>Install if you want the best face-detection quality and accept the TensorFlow dependency.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="troubleshooting-mtcnn-install-fails-windows-path-too-long">Troubleshooting: MTCNN install fails (Windows “path too long”)</h2>
+<p>If <code>pip install "mtcnn[tensorflow]"</code> fails with <strong>OSError: [Errno 2] No such file or directory</strong> and a very long path, Windows is hitting the <strong>260-character path limit</strong>. Your project path plus TensorFlow’s deep folders go over that limit. <strong>Use Option C (short-path venv) for a guaranteed fix.</strong></p>
+<h3 id="option-a-enable-long-paths-try-first-may-need-restart">Option A – Enable long paths (try first; may need restart)</h3>
+<ol>
+<li><strong>Open PowerShell as Administrator:</strong> Right-click <strong>Start</strong> → <strong>Windows PowerShell (Admin)</strong> or <strong>Terminal (Admin)</strong>.</li>
+<li>Run this once (copy-paste the whole line):</li>
+</ol>
+<pre><code class="language-powershell">New-ItemProperty -Path &quot;HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem&quot; -Name &quot;LongPathsEnabled&quot; -Value 1 -PropertyType DWORD -Force
+</code></pre>
+<ol>
+<li><strong>Restart your PC</strong> (needed for the setting to apply).</li>
+<li>After restart, in a new PowerShell:</li>
+</ol>
+<pre><code class="language-powershell">cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+.venv\Scripts\Activate.ps1
+pip install &quot;mtcnn[tensorflow]&quot;
+</code></pre>
+<ol>
+<li>To confirm long paths are on (in Admin PowerShell):<br />
+<code>Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name LongPathsEnabled</code><br />
+   You should see <code>LongPathsEnabled : 1</code>. If not, use <strong>Option C</strong>.</li>
+</ol>
+<h3 id="option-c-short-path-venv-guaranteed-fix-no-restart">Option C – Short-path venv (guaranteed fix; no restart)</h3>
+<p>Put the virtual environment in a <strong>short path</strong> so TensorFlow never hits the limit. Your <strong>project stays where it is</strong>; you just use a venv at e.g. <code>C:\SA-venv</code>.</p>
+<p><strong>Step 1 – Create the venv (run in PowerShell):</strong></p>
+<pre><code class="language-powershell">python -m venv C:\SA-venv
+</code></pre>
+<p><strong>Step 2 – Activate it, go to project, install everything including MTCNN:</strong></p>
+<pre><code class="language-powershell">C:\SA-venv\Scripts\Activate.ps1
+cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install &quot;mtcnn[tensorflow]&quot;
+</code></pre>
+<p><strong>Step 3 – From now on, use this venv for the project.</strong> Activate <code>C:\SA-venv</code> (not <code>.venv</code>), then run your commands from the project folder:</p>
+<pre><code class="language-powershell">cd &quot;C:\Users\ssham\OneDrive\New Business - SecureAI\DeepFake Detection Model\SecureAI-DeepFake-Detection&quot;
+C:\SA-venv\Scripts\Activate.ps1
+$env:PYTHONIOENCODING = &quot;utf-8&quot;
+python scripts\diagnostic\CHECK_MODEL_STATUS.py
+</code></pre>
+<p>You should see <strong>✔ MTCNN available</strong>. To run the API: same <code>cd</code> and activate, then <code>python -m api.app</code>.<br />
+In Cursor/VS Code you can select the interpreter <code>C:\SA-venv\Scripts\python.exe</code> so the IDE uses this venv.</p>
+<h3 id="option-b-keep-using-opencv-haar-no-tensorflow">Option B – Keep using OpenCV Haar (no TensorFlow)</h3>
+<p>You can skip MTCNN and keep using the OpenCV Haar cascades. The app and ensemble (CLIP, ResNet50, LAA-Net) work the same; only face-detection quality may be slightly lower in some cases. No extra steps; the diagnostic will show “MTCNN not available, using OpenCV Haar cascades” and that’s OK.</p>
+<hr />
+<h2 id="summary-checklist">Summary checklist</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Open PowerShell, <code>cd</code> to project folder (section 1).</td>
+</tr>
+<tr>
+<td>2</td>
+<td>For Python/API: run section 2 to activate <code>.venv</code>.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>For model check: run section 3.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>For LAA-Net: set <code>LAA_NET_WEIGHTS</code> (section 4) in the same session before starting the API.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>For API: run section 6.</td>
+</tr>
+</tbody>
+</table>
+<p>All commands above are meant to be <strong>copied and pasted</strong> as-is (except where you must replace a path). Run them in <strong>PowerShell</strong> on your PC unless the section says “on the server” or “Bash”.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

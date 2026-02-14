@@ -1,0 +1,1056 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>🚀 Getting Started with Deployment - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#getting-started-with-deployment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              🚀 Getting Started with Deployment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#important-you-need-a-cloud-server-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ Important: You Need a Cloud Server First!
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-get-a-cloud-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Get a Cloud Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Get a Cloud Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-digitalocean-easiest-recommended-for-beginners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: DigitalOcean (Easiest - Recommended for Beginners)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-aws-ec2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: AWS EC2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-c-linode-vultr-or-other-vps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option C: Linode, Vultr, or Other VPS
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-connect-to-your-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Connect to Your Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Connect to Your Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#on-windows-using-powershell-or-command-prompt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On Windows (using PowerShell or Command Prompt):
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-install-docker-and-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Install Docker and Docker Compose
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-deploy-your-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Deploy Your App
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 4: Deploy Your App">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-a-automated-easiest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option A: Automated (Easiest) ⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-b-manual-step-by-step" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option B: Manual Step-by-Step
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-access-your-app" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Access Your App
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-open-firewall-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Open Firewall Port
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Quick Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🆘 Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🆘 Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i-dont-have-a-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "I don't have a server"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#i-cant-connect-via-ssh" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "I can't connect via SSH"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Docker command not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose-command-not-found" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "docker-compose: command not found"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-denied" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Permission denied"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="getting-started-with-deployment">🚀 Getting Started with Deployment</h1>
+<p><strong>Step-by-step guide to deploy your SecureAI app to the cloud</strong></p>
+<h2 id="important-you-need-a-cloud-server-first">⚠️ Important: You Need a Cloud Server First!</h2>
+<p>Before you can deploy, you need a <strong>cloud server</strong> (not your local PC). </p>
+<p><strong>👉 START HERE</strong>: See <code>CREATE_CLOUD_SERVER.md</code> for detailed instructions on creating a server.</p>
+<p><strong>Quick version</strong>: See <code>DIGITALOCEAN_SETUP_GUIDE.md</code> for step-by-step DigitalOcean setup.</p>
+<p>Here's a quick overview:</p>
+<hr />
+<h2 id="step-1-get-a-cloud-server">Step 1: Get a Cloud Server</h2>
+<h3 id="option-a-digitalocean-easiest-recommended-for-beginners">Option A: DigitalOcean (Easiest - Recommended for Beginners)</h3>
+<ol>
+<li><strong>Sign up</strong>: Go to <a href="https://www.digitalocean.com">digitalocean.com</a></li>
+<li><strong>Create Droplet</strong>:</li>
+<li>Click "Create" → "Droplets"</li>
+<li>Choose: <strong>Ubuntu 22.04</strong></li>
+<li>Plan: <strong>$12/month</strong> (2GB RAM) or <strong>$24/month</strong> (4GB RAM) - recommended</li>
+<li>Region: Choose closest to you</li>
+<li>Authentication: Add your SSH key or use password</li>
+<li>Click "Create Droplet"</li>
+<li><strong>Get your server IP</strong>: </li>
+<li>After creation, you'll see an IP address like <code>157.230.123.45</code></li>
+<li><strong>This is your server!</strong></li>
+</ol>
+<h3 id="option-b-aws-ec2">Option B: AWS EC2</h3>
+<ol>
+<li><strong>Sign up</strong>: Go to <a href="https://aws.amazon.com">aws.amazon.com</a></li>
+<li><strong>Launch Instance</strong>:</li>
+<li>Go to EC2 → Launch Instance</li>
+<li>Choose: <strong>Ubuntu Server 22.04</strong></li>
+<li>Instance type: <strong>t3.small</strong> (2GB RAM) or <strong>t3.medium</strong> (4GB RAM)</li>
+<li>Create key pair for SSH access</li>
+<li>Launch instance</li>
+<li><strong>Get your server IP</strong>: </li>
+<li>In EC2 dashboard, find "Public IPv4 address"</li>
+<li><strong>This is your server!</strong></li>
+</ol>
+<h3 id="option-c-linode-vultr-or-other-vps">Option C: Linode, Vultr, or Other VPS</h3>
+<ul>
+<li>Similar process: Sign up, create server, get IP address</li>
+</ul>
+<hr />
+<h2 id="step-2-connect-to-your-server">Step 2: Connect to Your Server</h2>
+<h3 id="on-windows-using-powershell-or-command-prompt">On Windows (using PowerShell or Command Prompt):</h3>
+<pre><code class="language-bash"># Replace with your actual server IP and username
+ssh root@your-server-ip
+
+# Or if you created a user:
+ssh username@your-server-ip
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre><code class="language-bash">ssh root@157.230.123.45
+</code></pre>
+<p><strong>First time?</strong> You'll see a security warning - type <code>yes</code> to continue.</p>
+<p><strong>Password?</strong> Enter the password you set when creating the server.</p>
+<hr />
+<h2 id="step-3-install-docker-and-docker-compose">Step 3: Install Docker and Docker Compose</h2>
+<p>Once connected to your server, run:</p>
+<pre><code class="language-bash"># Update system
+sudo apt update &amp;&amp; sudo apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Install Docker Compose (newer method - works with &quot;docker compose&quot;)
+sudo apt install docker-compose-plugin
+
+# OR install standalone Docker Compose (older method)
+sudo curl -L &quot;https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)&quot; -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Add your user to docker group (so you don't need sudo)
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify installation
+docker --version
+docker compose version
+# OR if using standalone: docker-compose --version
+</code></pre>
+<p><strong>Note</strong>: Newer Docker installations use <code>docker compose</code> (with space), older ones use <code>docker-compose</code> (with hyphen). Both work!</p>
+<hr />
+<h2 id="step-4-deploy-your-app">Step 4: Deploy Your App</h2>
+<h3 id="option-a-automated-easiest">Option A: Automated (Easiest) ⭐</h3>
+<pre><code class="language-bash"># Clone your repository
+git clone &lt;your-repo-url&gt; ~/secureai
+cd ~/secureai
+
+# Make script executable
+chmod +x quick-deploy-docker.sh
+
+# Run deployment
+./quick-deploy-docker.sh
+</code></pre>
+<h3 id="option-b-manual-step-by-step">Option B: Manual Step-by-Step</h3>
+<p>Follow the instructions in <code>QUICK_DOCKER_DEPLOY.md</code></p>
+<hr />
+<h2 id="step-5-access-your-app">Step 5: Access Your App</h2>
+<p>After deployment, your app will be available at:</p>
+<pre><code>http://your-server-ip:8000
+</code></pre>
+<p><strong>Example:</strong></p>
+<pre><code>http://157.230.123.45:8000
+</code></pre>
+<p><strong>Health check:</strong></p>
+<pre><code>http://157.230.123.45:8000/api/health
+</code></pre>
+<hr />
+<h2 id="step-6-open-firewall-port">Step 6: Open Firewall Port</h2>
+<pre><code class="language-bash"># Allow port 8000
+sudo ufw allow 8000/tcp
+
+# Enable firewall
+sudo ufw enable
+</code></pre>
+<hr />
+<h2 id="quick-checklist">📋 Quick Checklist</h2>
+<ul>
+<li>[ ] Created cloud server (DigitalOcean, AWS, etc.)</li>
+<li>[ ] Got server IP address</li>
+<li>[ ] Connected via SSH</li>
+<li>[ ] Installed Docker</li>
+<li>[ ] Installed Docker Compose</li>
+<li>[ ] Cloned repository</li>
+<li>[ ] Ran deployment script</li>
+<li>[ ] Opened firewall port</li>
+<li>[ ] Tested app at <code>http://your-ip:8000</code></li>
+</ul>
+<hr />
+<h2 id="troubleshooting">🆘 Troubleshooting</h2>
+<h3 id="i-dont-have-a-server">"I don't have a server"</h3>
+<p>→ Go to Step 1 above and create one (DigitalOcean is easiest)</p>
+<h3 id="i-cant-connect-via-ssh">"I can't connect via SSH"</h3>
+<p>→ Make sure:
+- You're using the correct IP address
+- Firewall allows SSH (port 22)
+- You're using the correct username (usually <code>root</code> or <code>ubuntu</code>)</p>
+<h3 id="docker-command-not-found">"Docker command not found"</h3>
+<p>→ You need to install Docker (see Step 3)</p>
+<h3 id="docker-compose-command-not-found">"docker-compose: command not found"</h3>
+<p>→ Try <code>docker compose</code> (with space) instead, or install Docker Compose (see Step 3)</p>
+<h3 id="permission-denied">"Permission denied"</h3>
+<p>→ Add your user to docker group: <code>sudo usermod -aG docker $USER</code> then <code>newgrp docker</code></p>
+<hr />
+<h2 id="next-steps">📚 Next Steps</h2>
+<p>Once your app is running:</p>
+<ol>
+<li><strong>Set up domain</strong> (optional): Point your domain to server IP</li>
+<li><strong>Configure SSL</strong> (optional): Use Let's Encrypt for HTTPS</li>
+<li><strong>Set up AWS S3</strong> (optional): For cloud storage</li>
+<li><strong>Configure monitoring</strong> (optional): Set up Sentry</li>
+</ol>
+<p>See <code>QUICK_DOCKER_DEPLOY.md</code> for detailed next steps.</p>
+<hr />
+<h2 id="summary">🎯 Summary</h2>
+<ol>
+<li><strong>Get server</strong> → DigitalOcean/AWS/etc.</li>
+<li><strong>Connect</strong> → <code>ssh root@your-ip</code></li>
+<li><strong>Install Docker</strong> → Follow Step 3</li>
+<li><strong>Deploy</strong> → Run <code>quick-deploy-docker.sh</code></li>
+<li><strong>Access</strong> → <code>http://your-ip:8000</code></li>
+</ol>
+<p><strong>That's it!</strong> Your app is now in the cloud! 🎉</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

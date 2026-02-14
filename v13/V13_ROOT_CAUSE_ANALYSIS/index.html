@@ -1,0 +1,974 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>V13 Root Cause Analysis - Complete Investigation - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#v13-root-cause-analysis-complete-investigation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              V13 Root Cause Analysis - Complete Investigation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#critical-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critical Evidence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-all-fixes-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why All Fixes Failed
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Why All Fixes Failed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-timeout-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Timeout Protection ❌
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-memory-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Memory Cleanup ❌
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-loading-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Loading Order ❌
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-alternative-creation-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Alternative Creation Methods ❌
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-real-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Real Problem
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Real Problem">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#memory-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Requirements:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-keeps-happening" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why This Keeps Happening
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#solutions-ranked-by-feasibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Solutions (Ranked by Feasibility)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Solutions (Ranked by Feasibility)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-increase-system-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Increase System Memory ⭐⭐⭐⭐⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-lazy-loading-load-models-on-demand" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Lazy Loading (Load Models On-Demand) ⭐⭐⭐⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-3-model-quantization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: Model Quantization ⭐⭐⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-4-load-only-2-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 4: Load Only 2 Models ⭐⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-5-use-smaller-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 5: Use Smaller Models ⭐
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-solution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Solution
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="v13-root-cause-analysis-complete-investigation">V13 Root Cause Analysis - Complete Investigation</h1>
+<h2 id="executive-summary">Executive Summary</h2>
+<p><strong>The problem is NOT a code bug - it's a fundamental hardware limitation.</strong></p>
+<p>The system has <strong>4 GB total RAM</strong>, but V13 requires <strong>6-8 GB</strong> to load all 3 models simultaneously. This is physically impossible.</p>
+<h2 id="critical-evidence">Critical Evidence</h2>
+<p>From the logs:</p>
+<pre><code>Memory after cleanup: 0.1 GB available (98.0% used)
+</code></pre>
+<p><strong>After ViT-Large loads:</strong>
+- System: 4 GB total RAM
+- ViT-Large: ~2-3 GB consumed
+- OS + Python: ~1 GB
+- <strong>Available: 0.1 GB</strong> ❌
+- <strong>ConvNeXt-Large needs: 1-2 GB</strong> ❌</p>
+<h2 id="why-all-fixes-failed">Why All Fixes Failed</h2>
+<h3 id="1-timeout-protection">1. Timeout Protection ❌</h3>
+<ul>
+<li><strong>What we tried</strong>: Signal-based timeouts (SIGALRM)</li>
+<li><strong>Why it failed</strong>: <code>timm.create_model()</code> calls into PyTorch C++ code</li>
+<li><strong>The problem</strong>: When C code blocks on memory allocation, Python signals can't interrupt it</li>
+<li><strong>Result</strong>: Process hangs indefinitely waiting for memory that will never be available</li>
+</ul>
+<h3 id="2-memory-cleanup">2. Memory Cleanup ❌</h3>
+<ul>
+<li><strong>What we tried</strong>: <code>gc.collect()</code>, <code>torch.cuda.empty_cache()</code>, multiple passes</li>
+<li><strong>Why it failed</strong>: </li>
+<li>ViT-Large model is still in <code>self.models</code> list (line 579)</li>
+<li>PyTorch tensors aren't freed by Python GC</li>
+<li>PyTorch's C++ memory allocator doesn't release memory to OS immediately</li>
+<li><strong>Result</strong>: Memory cleanup only frees ~100-200 MB, not enough for ConvNeXt-Large</li>
+</ul>
+<h3 id="3-loading-order">3. Loading Order ❌</h3>
+<ul>
+<li><strong>What we tried</strong>: Load ViT-Large first (when memory is available)</li>
+<li><strong>Why it failed</strong>: ViT-Large consumes all available memory, leaving nothing for ConvNeXt-Large</li>
+<li><strong>Result</strong>: ViT-Large loads successfully, but ConvNeXt-Large has no memory to allocate</li>
+</ul>
+<h3 id="4-alternative-creation-methods">4. Alternative Creation Methods ❌</h3>
+<ul>
+<li><strong>What we tried</strong>: Standard vs scriptable creation</li>
+<li><strong>Why it failed</strong>: Both methods need the same amount of memory</li>
+<li><strong>Result</strong>: Both hang because there's no memory available</li>
+</ul>
+<h2 id="the-real-problem">The Real Problem</h2>
+<p><strong>We're trying to fit 6-8 GB of models into a 4 GB system.</strong></p>
+<h3 id="memory-requirements">Memory Requirements:</h3>
+<ul>
+<li><strong>ViT-Large</strong>: ~2-3 GB (model + weights + activations)</li>
+<li><strong>ConvNeXt-Large</strong>: ~1-2 GB</li>
+<li><strong>Swin-Large</strong>: ~1 GB</li>
+<li><strong>OS + Python</strong>: ~1 GB</li>
+<li><strong>Total needed</strong>: ~6-8 GB</li>
+<li><strong>Total available</strong>: ~4 GB</li>
+<li><strong>Deficit</strong>: ~2-4 GB ❌</li>
+</ul>
+<h2 id="why-this-keeps-happening">Why This Keeps Happening</h2>
+<ol>
+<li><strong>ViT-Large loads first</strong> → Consumes 2-3 GB → Success ✅</li>
+<li><strong>Memory cleanup runs</strong> → Frees ~100-200 MB → Still only 0.1 GB free ❌</li>
+<li><strong>ConvNeXt-Large tries to allocate 1-2 GB</strong> → No memory available → Hangs indefinitely ❌</li>
+<li><strong>Timeout fires</strong> → But C code is blocked → Can't interrupt → Still hangs ❌</li>
+</ol>
+<h2 id="solutions-ranked-by-feasibility">Solutions (Ranked by Feasibility)</h2>
+<h3 id="option-1-increase-system-memory">Option 1: Increase System Memory ⭐⭐⭐⭐⭐</h3>
+<p><strong>Best solution - addresses root cause</strong>
+- Upgrade to 8 GB or 16 GB RAM
+- Allows all 3 models to load simultaneously
+- No code changes needed
+- <strong>Cost</strong>: ~$10-20/month for cloud instance upgrade</p>
+<h3 id="option-2-lazy-loading-load-models-on-demand">Option 2: Lazy Loading (Load Models On-Demand) ⭐⭐⭐⭐</h3>
+<p><strong>Good solution - works with current hardware</strong>
+- Load models one at a time when needed
+- Unload previous model before loading next
+- Use model only during inference, then unload
+- <strong>Pros</strong>: Works with 4 GB RAM
+- <strong>Cons</strong>: Slower inference (need to reload models), more complex code</p>
+<h3 id="option-3-model-quantization">Option 3: Model Quantization ⭐⭐⭐</h3>
+<p><strong>Good solution - reduces memory footprint</strong>
+- Use INT8 quantization (reduces memory by 4x)
+- Load quantized models instead of FP32
+- <strong>Pros</strong>: Fits in 4 GB RAM, faster inference
+- <strong>Cons</strong>: Slight accuracy loss (~1-2%), requires quantization setup</p>
+<h3 id="option-4-load-only-2-models">Option 4: Load Only 2 Models ⭐⭐</h3>
+<p><strong>Workaround - partial functionality</strong>
+- Skip one model (e.g., skip ConvNeXt-Large)
+- Use ViT-Large + Swin-Large only
+- <strong>Pros</strong>: Works with current hardware
+- <strong>Cons</strong>: Lower accuracy (missing one model), not "best model on planet"</p>
+<h3 id="option-5-use-smaller-models">Option 5: Use Smaller Models ⭐</h3>
+<p><strong>Last resort - significant accuracy loss</strong>
+- Replace Large models with Base models
+- <strong>Pros</strong>: Fits in 4 GB
+- <strong>Cons</strong>: Much lower accuracy, defeats the purpose</p>
+<h2 id="recommended-solution">Recommended Solution</h2>
+<p><strong>Option 1: Upgrade to 8 GB RAM</strong> is the best solution because:
+1. ✅ Addresses root cause (insufficient memory)
+2. ✅ No code changes needed
+3. ✅ All 3 models load successfully
+4. ✅ Best accuracy (full ensemble)
+5. ✅ Low cost (~$10-20/month)</p>
+<p><strong>Option 2: Lazy Loading</strong> is the best code-based solution if hardware upgrade isn't possible:
+1. ✅ Works with current 4 GB RAM
+2. ✅ All 3 models can be used (just not simultaneously)
+3. ✅ Maintains accuracy
+4. ⚠️ Requires significant code refactoring
+5. ⚠️ Slower inference (model reload overhead)</p>
+<h2 id="next-steps">Next Steps</h2>
+<ol>
+<li><strong>Decide on solution</strong>: Hardware upgrade vs lazy loading</li>
+<li><strong>If hardware upgrade</strong>: No code changes needed, just upgrade instance</li>
+<li><strong>If lazy loading</strong>: Refactor V13 to load/unload models on-demand</li>
+<li><strong>Test</strong>: Verify all 3 models load successfully</li>
+</ol>
+<h2 id="conclusion">Conclusion</h2>
+<p><strong>The issue is NOT a code bug - it's a hardware limitation.</strong></p>
+<p>All the timeout, memory cleanup, and loading order fixes were correct approaches, but they can't solve a fundamental problem: <strong>trying to load 6-8 GB of models into a 4 GB system is physically impossible.</strong></p>
+<p>The solution requires either:
+- <strong>More memory</strong> (hardware upgrade), OR
+- <strong>Smarter memory management</strong> (lazy loading)</p>
+<p>No amount of code fixes will make 6-8 GB fit into 4 GB.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

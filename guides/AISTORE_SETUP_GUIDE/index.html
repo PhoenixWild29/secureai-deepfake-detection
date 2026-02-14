@@ -1,0 +1,1034 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>AIStore Setup Guide - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aistore-setup-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AIStore Setup Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-aistore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is AIStore?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current Status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-1-use-aws-s3-recommended-already-configured" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Use AWS S3 (Recommended - Already Configured)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-2-install-aistore-python-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Install AIStore Python Client
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2: Install AIStore Python Client">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-python-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install Python Client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild-docker-container" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rebuild Docker Container
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-3-set-up-your-own-aistore-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 3: Set Up Your Own AIStore Cluster
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 3: Set Up Your Own AIStore Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-start-with-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start with Docker
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-aistore-is-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verify AIStore is Running
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-bucket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Bucket
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-steps-for-your-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation Steps for Your Server
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation Steps for Your Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-install-aistore-python-client" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Install AIStore Python Client
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-update-env-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Update .env File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-rebuild-and-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Rebuild and Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aistore-library-not-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "AIStore library not available"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aistore-not-available-connection-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "AIStore not available: Connection refused"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-store-in-aistore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        "Failed to store in AIStore"
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommendation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aistore-setup-guide">AIStore Setup Guide</h1>
+<p>AIStore is a distributed object storage system that provides high-performance, scalable storage for video files and other large data.</p>
+<h2 id="what-is-aistore">What is AIStore?</h2>
+<p>AIStore is an open-source, lightweight object storage system designed for AI/ML workloads. It provides:
+- Distributed storage across multiple nodes
+- High-performance data access
+- S3-compatible API
+- Replication and redundancy</p>
+<h2 id="current-status">Current Status</h2>
+<p>Your application currently shows:</p>
+<pre><code>[WARNING] AIStore library not available. Running in local storage mode only.
+</code></pre>
+<p>This is <strong>normal</strong> if AIStore is not set up. The application will:
+- ✅ Continue working with local storage
+- ✅ Use AWS S3 if configured (which you already have)
+- ✅ Automatically use AIStore if installed and configured</p>
+<h2 id="option-1-use-aws-s3-recommended-already-configured">Option 1: Use AWS S3 (Recommended - Already Configured)</h2>
+<p>Since you already have AWS S3 configured, you can use it as your distributed storage. The application will automatically use S3 for distributed storage when AIStore is not available.</p>
+<p><strong>No additional setup needed</strong> - your S3 configuration is already working!</p>
+<h2 id="option-2-install-aistore-python-client">Option 2: Install AIStore Python Client</h2>
+<p>If you want to use AIStore specifically, you need:</p>
+<ol>
+<li><strong>An AIStore cluster/server running</strong> (separate from your app)</li>
+<li><strong>The Python client library</strong></li>
+</ol>
+<h3 id="install-python-client">Install Python Client</h3>
+<p>The AIStore Python client is available from GitHub:</p>
+<pre><code class="language-bash">pip install git+https://github.com/NVIDIA/aistore.git
+</code></pre>
+<p>Or add to <code>requirements.txt</code>:</p>
+<pre><code># AIStore Python client (install from GitHub)
+git+https://github.com/NVIDIA/aistore.git
+</code></pre>
+<h3 id="configure-environment-variables">Configure Environment Variables</h3>
+<p>Add to your <code>.env</code> file:</p>
+<pre><code class="language-env">AISTORE_ENDPOINT=http://your-aistore-server:8080
+AISTORE_BUCKET=secureai-videos
+</code></pre>
+<h3 id="rebuild-docker-container">Rebuild Docker Container</h3>
+<pre><code class="language-bash">cd ~/secureai-deepfake-detection
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+</code></pre>
+<h2 id="option-3-set-up-your-own-aistore-cluster">Option 3: Set Up Your Own AIStore Cluster</h2>
+<h3 id="quick-start-with-docker">Quick Start with Docker</h3>
+<pre><code class="language-bash"># Pull AIStore image
+docker pull aistore/aisnode:latest
+
+# Run AIStore cluster (single node for testing)
+docker run -d \
+  --name aistore \
+  -p 8080:8080 \
+  -p 5108:5108 \
+  -v /tmp/ais:/ais \
+  aistore/aisnode:latest
+</code></pre>
+<h3 id="verify-aistore-is-running">Verify AIStore is Running</h3>
+<pre><code class="language-bash">curl http://localhost:8080/v1/health
+</code></pre>
+<p>Should return: <code>{"status": "healthy"}</code></p>
+<h3 id="create-bucket">Create Bucket</h3>
+<pre><code class="language-bash">curl -X PUT http://localhost:8080/v1/buckets/secureai-videos
+</code></pre>
+<h2 id="installation-steps-for-your-server">Installation Steps for Your Server</h2>
+<h3 id="step-1-install-aistore-python-client">Step 1: Install AIStore Python Client</h3>
+<p>On your server, inside the Docker container or locally:</p>
+<pre><code class="language-bash"># Option A: Install directly
+pip install git+https://github.com/NVIDIA/aistore.git
+
+# Option B: Add to requirements.txt and rebuild
+# (We've already added a comment in requirements.txt)
+</code></pre>
+<h3 id="step-2-update-env-file">Step 2: Update .env File</h3>
+<p>Add these lines to your <code>.env</code> file on the server:</p>
+<pre><code class="language-env"># AIStore Configuration (optional - only if you have an AIStore cluster)
+AISTORE_ENDPOINT=http://localhost:8080
+AISTORE_BUCKET=secureai-videos
+</code></pre>
+<p><strong>Note:</strong> If you don't have an AIStore cluster, leave these commented out or don't add them. The app will use S3 or local storage.</p>
+<h3 id="step-3-rebuild-and-restart">Step 3: Rebuild and Restart</h3>
+<pre><code class="language-bash">cd ~/secureai-deepfake-detection
+git pull origin master
+docker compose -f docker-compose.https.yml down
+docker compose -f docker-compose.https.yml build --no-cache secureai-backend
+docker compose -f docker-compose.https.yml up -d
+</code></pre>
+<h2 id="verification">Verification</h2>
+<p>After setup, check the logs:</p>
+<pre><code class="language-bash">docker logs secureai-backend | grep -i aistore
+</code></pre>
+<p><strong>Success indicators:</strong>
+- <code>[OK] Connected to AIStore at http://...</code>
+- No "AIStore library not available" warnings
+- Videos are stored with <code>storage_type: 'distributed'</code></p>
+<p><strong>If AIStore is not available:</strong>
+- <code>[WARNING] AIStore library not available. Running in local storage mode only.</code>
+- This is <strong>OK</strong> - the app will use S3 or local storage instead</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="aistore-library-not-available">"AIStore library not available"</h3>
+<p><strong>Solution:</strong> Install the Python client:</p>
+<pre><code class="language-bash">pip install git+https://github.com/NVIDIA/aistore.git
+</code></pre>
+<p>Then rebuild the Docker container.</p>
+<h3 id="aistore-not-available-connection-refused">"AIStore not available: Connection refused"</h3>
+<p><strong>Causes:</strong>
+- AIStore server is not running
+- Wrong endpoint URL
+- Network/firewall blocking connection</p>
+<p><strong>Solutions:</strong>
+1. Check if AIStore server is running: <code>curl http://localhost:8080/v1/health</code>
+2. Verify endpoint URL in <code>.env</code> file
+3. Check Docker network connectivity
+4. <strong>Recommendation:</strong> Use AWS S3 instead (already configured)</p>
+<h3 id="failed-to-store-in-aistore">"Failed to store in AIStore"</h3>
+<p><strong>Causes:</strong>
+- Bucket doesn't exist
+- Permission issues
+- Network connectivity</p>
+<p><strong>Solutions:</strong>
+1. Create bucket: <code>curl -X PUT http://localhost:8080/v1/buckets/secureai-videos</code>
+2. Check permissions
+3. Verify endpoint is accessible from container</p>
+<h2 id="recommendation">Recommendation</h2>
+<p><strong>For production use, I recommend using AWS S3</strong> (which you already have configured) instead of setting up a separate AIStore cluster. S3 provides:
+- ✅ Already configured and working
+- ✅ Enterprise-grade reliability
+- ✅ Automatic backups and redundancy
+- ✅ No additional infrastructure to manage
+- ✅ Cost-effective for your use case</p>
+<p>The AIStore integration is useful if you:
+- Already have an AIStore cluster
+- Need specific AIStore features
+- Want to use on-premises storage</p>
+<h2 id="summary">Summary</h2>
+<ul>
+<li><strong>Current status:</strong> App works fine with local storage and S3</li>
+<li><strong>AIStore is optional:</strong> Not required for the app to function</li>
+<li><strong>S3 is recommended:</strong> Already configured and working</li>
+<li><strong>AIStore setup:</strong> Only needed if you specifically want to use AIStore</li>
+</ul>
+<p>The warnings you see are <strong>informational only</strong> - your application is fully functional without AIStore!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
