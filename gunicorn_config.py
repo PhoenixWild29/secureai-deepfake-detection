@@ -15,7 +15,7 @@ backlog = 2048
 workers = int(os.getenv('GUNICORN_WORKERS', multiprocessing.cpu_count() * 2 + 1))
 worker_class = os.getenv('GUNICORN_WORKER_CLASS', "gevent")
 worker_connections = 1000
-timeout = int(os.getenv('GUNICORN_TIMEOUT', '600'))  # 10 min: first scan loads models (2–5 min) + analysis
+timeout = int(os.getenv('GUNICORN_TIMEOUT', '900'))  # 15 min: first scan loads models + analysis (do not kill at 10 min)
 keepalive = 5
 
 # Logging - Use /app/logs for Docker compatibility

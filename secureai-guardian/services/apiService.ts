@@ -246,9 +246,9 @@ export async function analyzeVideo(
     formData.append('model_type', request.modelType);
   }
 
-  // Long timeout: model load + analysis; allow 15 min so backend can finish
+  // Long timeout: model load (2-4 min) + analysis; allow 20 min so backend is not killed by server
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 900000); // 15 min
+  const timeoutId = setTimeout(() => controller.abort(), 1200000); // 20 min
 
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze`, {
@@ -337,7 +337,7 @@ export async function analyzeVideoFromUrl(
   request: UrlAnalysisRequest
 ): Promise<ScanResult> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 900000); // 15 min
+  const timeoutId = setTimeout(() => controller.abort(), 1200000); // 20 min
   try {
     const response = await fetch(`${API_BASE_URL}/api/analyze-url`, {
       method: 'POST',
