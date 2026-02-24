@@ -1,0 +1,22 @@
+[Unit]
+Description=SecureAI DeepFake Detection API
+After=network.target
+Requires=network.target
+
+[Service]
+Type=exec
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/secureai-deepfake-detection
+Environment="PATH=/path/to/secureai-deepfake-detection/.venv/bin"
+Environment="PYTHONPATH=/path/to/secureai-deepfake-detection"
+ExecStart=/path/to/secureai-deepfake-detection/.venv/bin/gunicorn --config gunicorn.conf.py wsgi:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+RestartSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

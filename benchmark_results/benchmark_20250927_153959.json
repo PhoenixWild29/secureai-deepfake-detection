@@ -1,0 +1,27 @@
+{
+  "timestamp": "20250927_153959",
+  "total_videos": 3,
+  "results": [
+    {
+      "filename": "test_video_1.mp4",
+      "is_fake": false,
+      "confidence": 0.5,
+      "processing_time": 1.667431116104126,
+      "model": "CNN"
+    },
+    {
+      "filename": "test_video_2.mp4",
+      "is_fake": false,
+      "confidence": 0.5,
+      "processing_time": 1.5562984943389893,
+      "model": "CNN"
+    },
+    {
+      "filename": "test_video_3.mp4",
+      "is_fake": false,
+      "confidence": 0.5,
+      "processing_time": 1.6690633296966553,
+      "model": "CNN"
+    }
+  ]
+}

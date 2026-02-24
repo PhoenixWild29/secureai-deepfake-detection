@@ -1,0 +1,734 @@
+#!/usr/bin/env python3
+"""
+DeepFake Detector V13 Integration
+699M parameter ensemble model from Hugging Face
+F1 Score: 0.9586 (95.86%) - Better than LAA-Net!
+
+Model Structure:
+- Ensemble of 3 models: ConvNeXt-Large, ViT-Large, Swin-Large
+- Uses safetensors format
+- Requires timm library for backbones
+"""
+import os
+import sys
+import torch
+import torch.nn as nn
+import numpy as np
+from typing import Dict, List, Any, Optional
+from PIL import Image
+import cv2
+import logging
+import time
+
+logger = logging.getLogger(__name__)
+
+
+def _signal_ok():
+    """signal.signal() only works in the main thread; use timeouts only there (e.g. avoid in gunicorn workers)."""
+    try:
+        import threading
+        return threading.current_thread() is threading.main_thread()
+    except Exception:
+        return False
+
+# Force CPU mode if needed
+if os.getenv('CUDA_VISIBLE_DEVICES') == '':
+    os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
+try:
+    import timm
+    TIMM_AVAILABLE = True
+except ImportError:
+    TIMM_AVAILABLE = False
+    logger.warning("timm library not available. Install with: pip install timm")
+
+try:
+    from safetensors.torch import load_file
+    SAFETENSORS_AVAILABLE = True
+except ImportError:
+    SAFETENSORS_AVAILABLE = False
+    logger.warning("safetensors library not available. Install with: pip install safetensors")
+
+try:
+    from huggingface_hub import hf_hub_download
+    from huggingface_hub.utils import HfHubHTTPError
+    HF_HUB_AVAILABLE = True
+except ImportError:
+    HF_HUB_AVAILABLE = False
+    logger.warning("huggingface_hub not available. Install with: pip install huggingface-hub")
+
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+
+class DeepfakeDetector(nn.Module):
+    """
+    Deepfake detector model architecture
+    Uses timm backbone with custom classifier
+    """
+    def __init__(self, backbone_name: str, dropout: float = 0.3):
+        """
+        Initialize DeepfakeDetector
+        
+        Args:
+            backbone_name: Name of timm backbone model
+            dropout: Dropout rate for classifier
+        """
+        super().__init__()
+        # Create backbone using timm with explicit error handling
+        # For ViT-Large, try multiple approaches to avoid hanging
+        try:
+            logger.info(f"Creating timm model '{backbone_name}'...")
+            start_time = time.time()
+            
+            # For ViT-Large, try different approaches to avoid hanging
+            if 'vit_large' in backbone_name.lower():
+                logger.info(f"   ViT-Large detected - trying optimized creation...")
+                
+                # Approach 1: Standard (most common)
+                try:
+                    logger.info(f"   Attempt 1: Standard creation...")
+                    self.backbone = timm.create_model(
+                        backbone_name, 
+                        pretrained=False, 
+                        num_classes=0,
+                        in_chans=3
+                    )
+                    elapsed = time.time() - start_time
+                    logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds (standard)")
+                except Exception as e1:
+                    logger.warning(f"   Standard creation failed: {e1}")
+                    
+                    # Approach 2: With scriptable=True (sometimes helps)
+                    try:
+                        logger.info(f"   Attempt 2: With scriptable=True...")
+                        self.backbone = timm.create_model(
+                            backbone_name, 
+                            pretrained=False, 
+                            num_classes=0,
+                            in_chans=3,
+                            scriptable=True
+                        )
+                        elapsed = time.time() - start_time
+                        logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds (scriptable)")
+                    except Exception as e2:
+                        logger.warning(f"   Scriptable creation failed: {e2}")
+                        
+                        # Approach 3: Try alternative ViT variant
+                        logger.info(f"   Attempt 3: Trying alternative ViT variant...")
+                        all_models = timm.list_models(pretrained=False)
+                        alternatives = [
+                            'vit_large_patch16_224_in21k',
+                            'vit_large_patch14_224',
+                            'vit_large_patch16_384',
+                        ]
+                        
+                        for alt in alternatives:
+                            if alt in all_models:
+                                try:
+                                    logger.info(f"   Trying '{alt}' as alternative...")
+                                    self.backbone = timm.create_model(
+                                        alt, 
+                                        pretrained=False, 
+                                        num_classes=0,
+                                        in_chans=3
+                                    )
+                                    elapsed = time.time() - start_time
+                                    logger.info(f"✅ Model '{alt}' created in {elapsed:.1f} seconds (alternative)")
+                                    logger.warning(f"   ⚠️  Using alternative '{alt}' instead of '{backbone_name}'")
+                                    break
+                                except Exception as e3:
+                                    logger.warning(f"   Alternative '{alt}' also failed: {e3}")
+                                    continue
+                        else:
+                            # All approaches failed
+                            raise RuntimeError(
+                                f"All creation approaches failed for ViT-Large. "
+                                f"Standard: {e1}, Scriptable: {e2}, Alternatives: all failed. "
+                                f"This might be a timm bug or memory issue."
+                            )
+            elif 'convnext_large' in backbone_name.lower():
+                # ConvNeXt-Large can also hang - use timeout and alternative approaches
+                logger.info(f"   ConvNeXt-Large detected - trying optimized creation...")
+                
+                # Try standard creation first (with timeout)
+                try:
+                    import signal
+                    def timeout_handler(signum, frame):
+                        raise TimeoutError("ConvNeXt-Large creation timed out")
+                    use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                    if use_alarm:
+                        signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(180)  # 3 minute timeout
+                    try:
+                        logger.info(f"   Attempt 1: Standard creation.")
+                        self.backbone = timm.create_model(
+                            backbone_name, 
+                            pretrained=False, 
+                            num_classes=0,
+                            in_chans=3
+                        )
+                        elapsed = time.time() - start_time
+                        logger.info(f"   ✔ Model '{backbone_name}' created in {elapsed:.1f} seconds (standard)")
+                    finally:
+                        if use_alarm:
+                            signal.alarm(0)
+                            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                except TimeoutError:
+                    logger.warning(f"   ⚠️  Standard creation timed out, trying scriptable...")
+                    # Try scriptable version
+                    try:
+                        use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                        if use_alarm:
+                            signal.signal(signal.SIGALRM, timeout_handler)
+                            signal.alarm(180)
+                        try:
+                            logger.info(f"   Attempt 2: Scriptable creation.")
+                            self.backbone = timm.create_model(
+                                backbone_name, 
+                                pretrained=False, 
+                                num_classes=0,
+                                in_chans=3,
+                                scriptable=True
+                            )
+                            elapsed = time.time() - start_time
+                            logger.info(f"   ✔ Model '{backbone_name}' created in {elapsed:.1f} seconds (scriptable)")
+                        finally:
+                            if use_alarm:
+                                signal.alarm(0)
+                                signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                    except (TimeoutError, Exception) as e2:
+                        logger.error(f"   ❌ Scriptable creation also failed: {e2}")
+                        raise RuntimeError(f"ConvNeXt-Large creation failed: standard timed out, scriptable failed: {e2}")
+            else:
+                # For other models, use standard creation with timeout (only in main thread)
+                try:
+                    import signal
+                    def timeout_handler(signum, frame):
+                        raise TimeoutError(f"Model '{backbone_name}' creation timed out")
+                    use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                    if use_alarm:
+                        signal.signal(signal.SIGALRM, timeout_handler)
+                        signal.alarm(120)  # 2 minute timeout for other models
+                    try:
+                        self.backbone = timm.create_model(
+                            backbone_name, 
+                            pretrained=False, 
+                            num_classes=0,
+                            in_chans=3
+                        )
+                        elapsed = time.time() - start_time
+                        logger.info(f"✅ Model '{backbone_name}' created in {elapsed:.1f} seconds")
+                    finally:
+                        if use_alarm:
+                            signal.alarm(0)
+                            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                except TimeoutError:
+                    logger.error(f"❌ Model '{backbone_name}' creation timed out after 2 minutes")
+                    raise
+                
+        except RuntimeError:
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Failed to create timm model '{backbone_name}': {e}. "
+                             f"Check if model name is correct: timm.list_models('*{backbone_name.split('_')[0]}*')")
+        
+        # Get feature dimension (avoid forward pass for large models - it can hang)
+        feat_dim = None
+        
+        # Try direct attribute access first
+        if hasattr(self.backbone, 'num_features'):
+            feat_dim = self.backbone.num_features
+        elif hasattr(self.backbone, 'head') and hasattr(self.backbone.head, 'in_features'):
+            feat_dim = self.backbone.head.in_features
+        elif hasattr(self.backbone, 'fc') and hasattr(self.backbone.fc, 'in_features'):
+            feat_dim = self.backbone.fc.in_features
+        elif hasattr(self.backbone, 'classifier') and hasattr(self.backbone.classifier, 'in_features'):
+            feat_dim = self.backbone.classifier.in_features
+        
+        # If still not found, use known defaults for large models
+        if feat_dim is None:
+            if 'vit_large' in backbone_name.lower():
+                feat_dim = 1024  # ViT-Large standard
+            elif 'convnext_large' in backbone_name.lower():
+                feat_dim = 1536  # ConvNeXt-Large standard
+            elif 'swin_large' in backbone_name.lower():
+                feat_dim = 1536  # Swin-Large standard
+            else:
+                feat_dim = 1024  # Default fallback
+            logger.info(f"Using default feature dim {feat_dim} for {backbone_name}")
+        
+        logger.debug(f"Feature dimension: {feat_dim}")
+        
+        # Custom classifier
+        self.classifier = nn.Sequential(
+            nn.Linear(feat_dim, 512),
+            nn.BatchNorm1d(512),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(512, 128),
+            nn.BatchNorm1d(128),
+            nn.GELU(),
+            nn.Dropout(dropout * 0.5),
+            nn.Linear(128, 1)
+        )
+
+    def forward(self, x):
+        features = self.backbone(x)
+        return self.classifier(features).squeeze(-1)
+
+class DeepFakeDetectorV13:
+    """
+    DeepFake Detector V13 from Hugging Face
+    Ensemble of ConvNeXt-Large, ViT-Large, Swin-Large
+    699M parameters, F1: 0.9586
+    """
+    
+    def __init__(self, device: Optional[str] = None):
+        """
+        Initialize DeepFake Detector V13
+        
+        Args:
+            device: Device to use ('cuda', 'cpu', or None for auto)
+        """
+        if not TIMM_AVAILABLE:
+            raise ImportError("timm library required. Install with: pip install timm")
+        if not SAFETENSORS_AVAILABLE:
+            raise ImportError("safetensors library required. Install with: pip install safetensors")
+        if not HF_HUB_AVAILABLE:
+            raise ImportError("huggingface_hub required. Install with: pip install huggingface-hub")
+        
+        # Force CPU if CUDA_VISIBLE_DEVICES is set to empty
+        if os.getenv('CUDA_VISIBLE_DEVICES') == '':
+            self.device = 'cpu'
+        else:
+            self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
+        
+        logger.info(f"🔧 Initializing DeepFake Detector V13 on device: {self.device}")
+        
+        self.models = []  # List of 3 ensemble models
+        self.processor = None
+        self.model_loaded = False
+        
+        try:
+            self._load_model()
+        except Exception as e:
+            logger.error(f"❌ Failed to load DeepFake Detector V13: {e}")
+            logger.info("Continuing without V13 model")
+            self.model_loaded = False
+    
+    def _load_model(self):
+        """Load ensemble models from Hugging Face"""
+        logger.info("📦 Loading DeepFake Detector V13 from Hugging Face...")
+        logger.info("   Model: ash12321/deepfake-detector-v13")
+        logger.info("   This may take a few minutes on first download...")
+        logger.info("   Ensemble: ConvNeXt-Large + ViT-Large + Swin-Large")
+        
+        model_name = "ash12321/deepfake-detector-v13"
+        
+        # Model configurations: backbone name and safetensors file
+        # Note: Using timm model names - these must exist in timm
+        # IMPORTANT: Load ViT-Large FIRST (when memory is available) since it needs the most memory
+        # This prevents hanging when loading after ConvNeXt-Large (which consumes memory)
+        model_configs = [
+            {
+                'backbone': 'vit_large_patch16_224',  # ✅ Load FIRST - needs most memory (~2-3 GB)
+                'file': 'model_2.safetensors',
+                'name': 'ViT-Large'
+            },
+            {
+                'backbone': 'convnext_large',  # Load second - less memory needed
+                'file': 'model_1.safetensors',
+                'name': 'ConvNeXt-Large'
+            },
+            {
+                'backbone': 'swin_large_patch4_window7_224',  # Load last - smallest
+                'file': 'model_3.safetensors',
+                'name': 'Swin-Large'
+            }
+        ]
+        
+        # Try to find correct backbone names if defaults don't work
+        all_models = timm.list_models(pretrained=False)
+        for config in model_configs:
+            if config['backbone'] not in all_models:
+                logger.warning(f"   ⚠️  Backbone '{config['backbone']}' not found, searching for alternatives...")
+                # Try to find similar
+                base_name = config['backbone'].split('.')[0].split('_')[0]  # e.g., 'convnext' from 'convnext_large'
+                similar = [m for m in all_models if base_name in m.lower() and 'large' in m.lower()]
+                if similar:
+                    # Prefer exact match or closest
+                    exact = [m for m in similar if config['name'].lower().replace('-', '').replace('_', '') in m.lower()]
+                    if exact:
+                        logger.info(f"   ✅ Found alternative: {exact[0]}")
+                        config['backbone'] = exact[0]
+                    else:
+                        logger.info(f"   ✅ Using closest match: {similar[0]}")
+                        config['backbone'] = similar[0]
+                else:
+                    logger.error(f"   ❌ No alternatives found for {config['backbone']}")
+                    raise RuntimeError(f"Backbone '{config['backbone']}' not found in timm and no alternatives available")
+        
+        # Track which models loaded successfully
+        loaded_models = []
+        
+        try:
+            for i, config in enumerate(model_configs, 1):
+                logger.info(f"   Loading {config['name']} ({i}/3)...")
+                logger.info(f"      Downloading {config['file']} (this may take several minutes)...")
+                
+                try:
+                    # Download safetensors file with retry logic
+                    max_retries = 3
+                    safetensors_path = None
+                    
+                    for attempt in range(max_retries):
+                        try:
+                            logger.info(f"      Attempt {attempt + 1}/{max_retries}...")
+                            logger.info(f"      Downloading from Hugging Face (this may take 2-5 minutes per file)...")
+                            
+                            # Download file (hf_hub_download shows progress automatically)
+                            # Add timeout and better error handling
+                            import time
+                            start_time = time.time()
+                            
+                            logger.info(f"      Starting download of {config['file']}...")
+                            logger.info(f"      (File size: ~700MB, may take 2-5 minutes)")
+                            
+                            safetensors_path = hf_hub_download(
+                                repo_id=model_name,
+                                filename=config['file'],
+                                cache_dir=None,  # Use default cache
+                                local_files_only=False  # Force download
+                            )
+                            
+                            elapsed = time.time() - start_time
+                            logger.info(f"      Download completed in {elapsed:.1f} seconds")
+                            
+                            # Verify file exists and has size
+                            import os
+                            if os.path.exists(safetensors_path):
+                                file_size = os.path.getsize(safetensors_path) / (1024 * 1024)  # MB
+                                logger.info(f"      File downloaded: {file_size:.1f}MB")
+                            else:
+                                raise RuntimeError(f"Downloaded file not found: {safetensors_path}")
+                            
+                            break  # Success!
+                        except (HfHubHTTPError, ConnectionError, TimeoutError) as e:
+                            if attempt < max_retries - 1:
+                                logger.warning(f"      Download failed, retrying in 5 seconds... ({e})")
+                                import time
+                                time.sleep(5)
+                            else:
+                                raise
+                    
+                    if not safetensors_path:
+                        raise RuntimeError(f"Failed to download {config['file']} after {max_retries} attempts")
+                    
+                    logger.info(f"      ✅ Downloaded {config['file']}")
+                    logger.info(f"      Loading model weights...")
+                    
+                    # Create model with backbone (with timeout to prevent infinite hang)
+                    logger.info(f"      Creating {config['name']} architecture...")
+                    logger.info(f"      Backbone: {config['backbone']}")
+                    
+                    # First verify backbone exists
+                    try:
+                        all_models = timm.list_models(pretrained=False)
+                        if config['backbone'] not in all_models:
+                            logger.error(f"      ❌ Backbone '{config['backbone']}' not found in timm")
+                            similar = [m for m in all_models if config['backbone'].split('_')[0] in m.lower()]
+                            if similar:
+                                logger.info(f"      Similar models found: {similar[:5]}")
+                            raise RuntimeError(f"Backbone '{config['backbone']}' not found in timm")
+                        logger.info(f"      ✅ Backbone verified in timm")
+                    except Exception as e:
+                        logger.error(f"      ❌ Backbone verification failed: {e}")
+                        raise
+                    
+                    # Create model (may take 30-120 seconds for large models like ViT-Large)
+                    logger.info(f"      Creating model (may take 30-120 seconds for large models like ViT-Large)...")
+                    logger.info(f"      Please wait - this is normal for ViT-Large (1.1GB model)")
+                    
+                    # Free memory before creating next model (especially important for ConvNeXt-Large after ViT-Large)
+                    if i > 1:  # Not the first model
+                        logger.info(f"      Freeing memory before {config['name']} creation...")
+                        import gc
+                        # Aggressive memory cleanup before ConvNeXt-Large
+                        if 'ConvNeXt-Large' in config['name']:
+                            logger.info(f"      Aggressive memory cleanup for ConvNeXt-Large...")
+                            # Force garbage collection multiple times
+                            for _ in range(3):
+                                gc.collect()
+                            if torch.cuda.is_available():
+                                torch.cuda.empty_cache()
+                                torch.cuda.synchronize()
+                            # Log memory status
+                            if PSUTIL_AVAILABLE:
+                                mem = psutil.virtual_memory()
+                                logger.info(f"      Memory after cleanup: {mem.available / (1024**3):.1f} GB available ({mem.percent}% used)")
+                        else:
+                            gc.collect()
+                            if torch.cuda.is_available():
+                                torch.cuda.empty_cache()
+                    
+                    start_time = time.time()
+                    
+                    # Create model - if ViT-Large fails, we'll skip it and continue with other models
+                    try:
+                        logger.info(f"      Initializing {config['name']} architecture...")
+                        
+                        # For ViT-Large, add signal-based timeout (3 minutes) when in main thread
+                        if 'ViT-Large' in config['name']:
+                            import signal
+                            def timeout_handler(signum, frame):
+                                raise TimeoutError(f"Model creation timed out after 180 seconds")
+                            use_alarm = _signal_ok() and hasattr(signal, 'SIGALRM')
+                            if use_alarm:
+                                signal.signal(signal.SIGALRM, timeout_handler)
+                                signal.alarm(180)
+                            try:
+                                model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                                elapsed = time.time() - start_time
+                                logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                            except TimeoutError as te:
+                                elapsed = time.time() - start_time
+                                logger.error(f"      ❌ Model creation TIMED OUT after {elapsed:.1f} seconds")
+                                if PSUTIL_AVAILABLE:
+                                    mem = psutil.virtual_memory()
+                                    logger.error(f"      This is likely due to low memory (only {mem.available / (1024**3):.1f} GB available)")
+                                else:
+                                    logger.error(f"      This is likely due to low memory")
+                                logger.error(f"      ViT-Large needs ~2-3 GB but system has insufficient memory")
+                                raise
+                            finally:
+                                if use_alarm:
+                                    signal.alarm(0)
+                                    signal.signal(signal.SIGALRM, signal.SIG_DFL)
+                        else:
+                            # For non-ViT models (including ConvNeXt-Large), create with timeout protection
+                            # ConvNeXt-Large has timeout protection built into DeepfakeDetector.__init__
+                            model = DeepfakeDetector(config['backbone'], dropout=0.3)
+                            elapsed = time.time() - start_time
+                            logger.info(f"      ✅ Architecture created in {elapsed:.1f} seconds")
+                            
+                    except (TimeoutError, RuntimeError) as e:
+                        elapsed = time.time() - start_time
+                        logger.error(f"      ❌ Failed to create {config['name']} after {elapsed:.1f} seconds: {e}")
+                        
+                        # If ViT-Large fails, make it optional and continue
+                        if 'ViT-Large' in config['name']:
+                            logger.warning(f"      ⚠️  ViT-Large failed to load - continuing without it")
+                            logger.warning(f"      Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
+                            continue  # Skip this model and continue with next
+                        else:
+                            # For other models, raise the error
+                            import traceback
+                            logger.error(traceback.format_exc())
+                            raise
+                    except Exception as e:
+                        elapsed = time.time() - start_time
+                        logger.error(f"      ❌ Failed to create {config['name']} after {elapsed:.1f} seconds: {e}")
+                        
+                        # If ViT-Large fails, make it optional and continue
+                        if 'ViT-Large' in config['name']:
+                            logger.warning(f"      ⚠️  ViT-Large failed to load - continuing without it")
+                            logger.warning(f"      Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
+                            continue  # Skip this model and continue with next
+                        else:
+                            # For other models, raise the error
+                            import traceback
+                            logger.error(traceback.format_exc())
+                            raise
+                    
+                    # Load state dict from safetensors
+                    logger.info(f"      Loading weights from safetensors...")
+                    logger.info(f"      File: {safetensors_path}")
+                    logger.info(f"      File size: {os.path.getsize(safetensors_path) / (1024*1024):.1f}MB")
+                    
+                    try:
+                        state_dict = load_file(safetensors_path)
+                        logger.info(f"      ✅ Safetensors loaded ({len(state_dict)} keys)")
+                    except Exception as e:
+                        logger.error(f"      ❌ Failed to load safetensors: {e}")
+                        raise
+                    
+                    logger.info(f"      Loading state dict into model...")
+                    try:
+                        # Try strict loading first
+                        try:
+                            model.load_state_dict(state_dict, strict=True)
+                            logger.info(f"      ✅ State dict loaded (strict mode)")
+                        except RuntimeError as e:
+                            # If strict fails, try non-strict (some keys might not match)
+                            logger.warning(f"      ⚠️  Strict loading failed: {e}")
+                            logger.info(f"      Trying non-strict loading...")
+                            missing, unexpected = model.load_state_dict(state_dict, strict=False)
+                            if missing:
+                                logger.warning(f"      Missing keys: {len(missing)} (first 5: {missing[:5]})")
+                            if unexpected:
+                                logger.warning(f"      Unexpected keys: {len(unexpected)} (first 5: {unexpected[:5]})")
+                            logger.info(f"      ✅ State dict loaded (non-strict mode)")
+                    except Exception as e:
+                        logger.error(f"      ❌ Failed to load state dict: {e}")
+                        logger.error(f"      This might be a model architecture mismatch")
+                        import traceback
+                        logger.error(traceback.format_exc())
+                        raise
+                    
+                    logger.info(f"      Moving model to {self.device}...")
+                    model.to(self.device)
+                    model.eval()
+                    
+                    self.models.append(model)
+                    logger.info(f"   ✅ {config['name']} loaded successfully!")
+                    
+                    # Free up memory between models (especially important for ViT-Large)
+                    if 'ViT-Large' in config['name'] or i < len(model_configs):
+                        logger.debug(f"      Freeing memory before next model...")
+                        import gc
+                        gc.collect()
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
+                        logger.debug(f"      Memory cleanup complete")
+                    
+                except Exception as e:
+                    logger.error(f"   ❌ Failed to load {config['name']}: {e}")
+                    import traceback
+                    logger.debug(traceback.format_exc())
+                    
+                    # If ViT-Large or ConvNeXt-Large fails, make it optional and continue
+                    if 'ViT-Large' in config['name']:
+                        logger.warning(f"   ⚠️  ViT-Large failed to load - continuing without it")
+                        logger.warning(f"   Ensemble will use ConvNeXt-Large + Swin-Large (still excellent!)")
+                        continue  # Skip this model and continue with next
+                    elif 'ConvNeXt-Large' in config['name']:
+                        logger.warning(f"   ⚠️  ConvNeXt-Large failed to load - continuing without it")
+                        logger.warning(f"   Ensemble will use ViT-Large + Swin-Large (still excellent!)")
+                        continue  # Skip this model and continue with next
+                    else:
+                        # For Swin-Large, raise the error (we need at least 2 models)
+                        raise RuntimeError(f"Failed to load {config['name']}: {e}. Make sure you have internet connection and Hugging Face access.")
+            
+            if not self.models:
+                raise RuntimeError("No models loaded from ensemble")
+            
+            # Create image processor (use timm's default preprocessing)
+            from torchvision import transforms
+            self.processor = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+            
+            self.model_loaded = True
+            num_params = sum(sum(p.numel() for p in m.parameters()) for m in self.models)
+            logger.info("✅ DeepFake Detector V13 loaded successfully!")
+            logger.info(f"   Models loaded: {len(self.models)}/3")
+            logger.info(f"   Total parameters: {num_params:,} ({num_params/1e6:.1f}M)")
+            logger.info(f"   F1 Score: 0.9586 (95.86%)")
+            
+        except Exception as e:
+            logger.error(f"❌ Error loading DeepFake Detector V13: {e}")
+            logger.info("   Make sure timm, safetensors, and huggingface-hub are installed:")
+            logger.info("   pip install timm safetensors huggingface-hub")
+            raise
+    
+    def preprocess_frame(self, frame: Image.Image) -> torch.Tensor:
+        """
+        Preprocess frame for V13 model
+        
+        Args:
+            frame: PIL Image
+            
+        Returns:
+            Preprocessed tensor
+        """
+        if not self.processor:
+            raise RuntimeError("Model not loaded")
+        
+        # Process with transforms
+        input_tensor = self.processor(frame).unsqueeze(0).to(self.device)
+        return input_tensor
+    
+    def detect_frame(self, frame: Image.Image) -> float:
+        """
+        Detect deepfake probability for a single frame using ensemble
+        
+        Args:
+            frame: PIL Image
+            
+        Returns:
+            Fake probability (0.0 = real, 1.0 = fake)
+        """
+        if not self.model_loaded or not self.models:
+            return 0.5  # Neutral if model not loaded
+        
+        try:
+            with torch.no_grad():
+                # Preprocess
+                input_tensor = self.preprocess_frame(frame)
+                
+                # Get predictions from all models in ensemble
+                predictions = []
+                for model in self.models:
+                    output = model(input_tensor)
+                    # Apply sigmoid to get probability
+                    prob = torch.sigmoid(output).item()
+                    predictions.append(prob)
+                
+                # Ensemble: average predictions
+                ensemble_prob = np.mean(predictions)
+                
+                return float(ensemble_prob)
+                
+        except Exception as e:
+            logger.warning(f"⚠️  Error in V13 detection: {e}")
+            return 0.5  # Neutral on error
+    
+    def detect_frames(self, frames: List[Image.Image]) -> float:
+        """
+        Detect deepfake probability for multiple frames
+        
+        Args:
+            frames: List of PIL Images
+            
+        Returns:
+            Average fake probability
+        """
+        if not frames:
+            return 0.5
+        
+        probs = []
+        for frame in frames:
+            prob = self.detect_frame(frame)
+            probs.append(prob)
+        
+        return float(np.mean(probs))
+
+
+# Global instance for singleton pattern
+_v13_instance = None
+
+def get_deepfake_detector_v13(device: Optional[str] = None) -> Optional[DeepFakeDetectorV13]:
+    """
+    Get or create global DeepFake Detector V13 instance (singleton)
+    
+    Args:
+        device: Device to use
+        
+    Returns:
+        DeepFakeDetectorV13 instance or None if not available
+    """
+    global _v13_instance
+    
+    if _v13_instance is None:
+        try:
+            _v13_instance = DeepFakeDetectorV13(device=device)
+        except Exception as e:
+            logger.warning(f"Could not create DeepFake Detector V13: {e}")
+            return None
+    
+    return _v13_instance if _v13_instance.model_loaded else None

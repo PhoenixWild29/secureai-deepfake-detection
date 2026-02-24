@@ -1,0 +1,450 @@
+/**
+ * ResultExportInterface Component Styles
+ * Work Order #39 - Multi-Format Export Capabilities
+ */
+
+.resultExportInterface {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.exportHeader {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.exportHeader h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.exportHeader p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.exportContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: 600px;
+}
+
+.exportConfiguration {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.exportSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Format Selection Styles */
+.formatSelection h3 {
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.formatGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.formatOption {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.formatOption:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+  transform: translateY(-1px);
+}
+
+.formatOptionSelected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.formatIcon {
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.formatInfo {
+  flex: 1;
+}
+
+.formatInfo h4 {
+  margin: 0 0 0.25rem 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.formatInfo p {
+  margin: 0;
+  color: #718096;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.unsupportedBadge {
+  display: inline-block;
+  background: #fed7d7;
+  color: #c53030;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+/* Export Options Styles */
+.exportOptions h3 {
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.optionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.optionItem:hover {
+  border-color: #667eea;
+  background: #f7fafc;
+}
+
+.optionCheckbox {
+  margin: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #667eea;
+}
+
+.optionContent {
+  flex: 1;
+}
+
+.optionLabel {
+  display: block;
+  color: #2d3748;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.optionDescription {
+  display: block;
+  color: #718096;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+/* Batch Info Styles */
+.batchInfo {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.batchInfo h3 {
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.batchStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.batchStat {
+  text-align: center;
+}
+
+.batchStatLabel {
+  display: block;
+  color: #718096;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.batchStatValue {
+  display: block;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Action Buttons Styles */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.previewButton {
+  padding: 0.75rem 1.5rem;
+  background: #f7fafc;
+  color: #4a5568;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.previewButton:hover:not(:disabled) {
+  border-color: #cbd5e0;
+  background: #edf2f7;
+}
+
+.previewButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.exportButton {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.exportButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.exportButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Error Message Styles */
+.errorMessage {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fed7d7;
+  border: 1px solid #feb2b2;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.errorIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.errorContent h4 {
+  margin: 0 0 0.25rem 0;
+  color: #c53030;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.errorContent p {
+  margin: 0;
+  color: #e53e3e;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Export History Styles */
+.exportHistory {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.exportHistory h3 {
+  margin: 0 0 1rem 0;
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.historyItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.historyInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.historyFormat {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.historyDate {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.historyStatus {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.historyStatus.completed {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.historyStatus.processing {
+  background: #bee3f8;
+  color: #2a4365;
+}
+
+.historyStatus.failed {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .exportContent {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .exportHeader {
+    padding: 1.5rem;
+  }
+  
+  .exportHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .batchStats {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+  }
+  
+  .exportButton,
+  .previewButton {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.exportButton:disabled {
+  animation: pulse 2s infinite;
+}
+
+/* Focus styles for accessibility */
+.formatOption:focus,
+.optionItem:focus,
+.exportButton:focus,
+.previewButton:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .formatOption,
+  .optionItem,
+  .batchInfo,
+  .exportHistory {
+    border-width: 2px;
+  }
+  
+  .formatOptionSelected {
+    border-width: 3px;
+  }
+}

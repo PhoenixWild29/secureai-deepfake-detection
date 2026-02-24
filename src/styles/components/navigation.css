@@ -1,0 +1,318 @@
+/**
+ * Navigation Component Styles
+ * Specific styles for navigation components with smooth animations and responsive design
+ */
+
+/* Navigation Item Styles */
+.navigation-item {
+  @apply relative;
+}
+
+.navigation-item button {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.navigation-item button:hover {
+  @apply transform scale-[1.02];
+}
+
+.navigation-item button:focus {
+  @apply ring-2 ring-blue-500 ring-offset-2;
+}
+
+.navigation-item button:active {
+  @apply transform scale-[0.98];
+}
+
+/* Active state indicator */
+.navigation-item button[aria-current="page"] {
+  @apply relative;
+}
+
+.navigation-item button[aria-current="page"]::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full;
+}
+
+/* Badge animations */
+.navigation-item .badge {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.navigation-item:hover .badge {
+  @apply transform scale-110;
+}
+
+/* Icon animations */
+.navigation-item .icon {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.navigation-item:hover .icon {
+  @apply transform scale-110;
+}
+
+/* Navigation Item Group Styles */
+.navigation-item-group {
+  @apply relative;
+}
+
+.navigation-item-group button {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.navigation-item-group button:hover {
+  @apply bg-gray-50 dark:bg-gray-800;
+}
+
+/* Collapsible group animations */
+.navigation-item-group .group-content {
+  @apply transition-all duration-300 ease-in-out;
+  overflow: hidden;
+}
+
+.navigation-item-group .group-content.collapsed {
+  @apply max-h-0 opacity-0;
+}
+
+.navigation-item-group .group-content.expanded {
+  @apply max-h-screen opacity-100;
+}
+
+/* Dashboard Navigation Styles */
+.dashboard-navigation {
+  @apply relative;
+}
+
+/* Sidebar animations */
+.dashboard-navigation .sidebar {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.dashboard-navigation .sidebar.collapsed {
+  @apply -translate-x-full lg:translate-x-0 lg:w-16;
+}
+
+.dashboard-navigation .sidebar.expanded {
+  @apply translate-x-0;
+}
+
+/* Mobile overlay */
+.dashboard-navigation .mobile-overlay {
+  @apply transition-opacity duration-300 ease-in-out;
+}
+
+.dashboard-navigation .mobile-overlay.open {
+  @apply opacity-100;
+}
+
+.dashboard-navigation .mobile-overlay.closed {
+  @apply opacity-0 pointer-events-none;
+}
+
+/* Header animations */
+.dashboard-navigation .header {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.dashboard-navigation .header.collapsed {
+  @apply justify-center;
+}
+
+.dashboard-navigation .header.expanded {
+  @apply justify-between;
+}
+
+/* Logo animations */
+.dashboard-navigation .logo {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.dashboard-navigation .logo.collapsed {
+  @apply scale-75;
+}
+
+.dashboard-navigation .logo.expanded {
+  @apply scale-100;
+}
+
+/* Navigation content animations */
+.dashboard-navigation .nav-content {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.dashboard-navigation .nav-content.collapsed {
+  @apply px-2;
+}
+
+.dashboard-navigation .nav-content.expanded {
+  @apply px-3;
+}
+
+/* Footer animations */
+.dashboard-navigation .footer {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.dashboard-navigation .footer.collapsed {
+  @apply hidden;
+}
+
+.dashboard-navigation .footer.expanded {
+  @apply block;
+}
+
+/* Mobile menu button */
+.dashboard-navigation .mobile-toggle {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.dashboard-navigation .mobile-toggle:hover {
+  @apply transform scale-110;
+}
+
+.dashboard-navigation .mobile-toggle:active {
+  @apply transform scale-95;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  .dashboard-navigation .sidebar {
+    @apply w-full;
+  }
+  
+  .dashboard-navigation .sidebar.collapsed {
+    @apply -translate-x-full;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-navigation .mobile-toggle {
+    @apply hidden;
+  }
+  
+  .dashboard-navigation .mobile-overlay {
+    @apply hidden;
+  }
+}
+
+/* Dark mode specific styles */
+@media (prefers-color-scheme: dark) {
+  .navigation-item button[aria-current="page"]::before {
+    @apply bg-blue-400;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .navigation-item button {
+    @apply border border-transparent;
+  }
+  
+  .navigation-item button:hover {
+    @apply border-gray-300 dark:border-gray-600;
+  }
+  
+  .navigation-item button[aria-current="page"] {
+    @apply border-blue-500 bg-blue-50 dark:bg-blue-900;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .navigation-item button,
+  .navigation-item-group button,
+  .dashboard-navigation .sidebar,
+  .dashboard-navigation .mobile-overlay,
+  .dashboard-navigation .header,
+  .dashboard-navigation .logo,
+  .dashboard-navigation .nav-content,
+  .dashboard-navigation .footer,
+  .dashboard-navigation .mobile-toggle {
+    @apply transition-none;
+  }
+  
+  .navigation-item button:hover {
+    @apply transform-none;
+  }
+  
+  .navigation-item:hover .badge,
+  .navigation-item:hover .icon {
+    @apply transform-none;
+  }
+  
+  .dashboard-navigation .mobile-toggle:hover {
+    @apply transform-none;
+  }
+}
+
+/* Focus management */
+.navigation-item button:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.navigation-item-group button:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.dashboard-navigation .mobile-toggle:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Loading states */
+.navigation-item.loading button {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.navigation-item.loading .icon {
+  @apply animate-pulse;
+}
+
+/* Error states */
+.navigation-item.error button {
+  @apply border border-red-300 bg-red-50 text-red-700 dark:border-red-600 dark:bg-red-900 dark:text-red-200;
+}
+
+/* Success states */
+.navigation-item.success button {
+  @apply border border-green-300 bg-green-50 text-green-700 dark:border-green-600 dark:bg-green-900 dark:text-green-200;
+}
+
+/* Custom scrollbar for navigation */
+.dashboard-navigation .nav-content::-webkit-scrollbar {
+  @apply w-2;
+}
+
+.dashboard-navigation .nav-content::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.dashboard-navigation .nav-content::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+.dashboard-navigation .nav-content::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Print styles */
+@media print {
+  .dashboard-navigation {
+    @apply hidden;
+  }
+}
+
+/* Accessibility improvements */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  @apply absolute top-0 left-0 bg-blue-600 text-white px-4 py-2 rounded-br-md transform -translate-y-full focus:translate-y-0 transition-transform duration-200;
+}
+
+.skip-link:focus {
+  @apply z-50;
+}

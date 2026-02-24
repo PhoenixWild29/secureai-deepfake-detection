@@ -1,0 +1,162 @@
+/**
+ * Feedback Demo Styles
+ * CSS styles for the feedback integration demo component
+ */
+
+.feedback-demo {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feedback-demo-container {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.feedback-demo h2 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.feedback-demo p {
+  margin: 0 0 2rem 0;
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.demo-section {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.demo-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.demo-section h3 {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.demo-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.demo-btn:hover {
+  background-color: #2563eb;
+}
+
+.demo-btn:active {
+  transform: scale(0.98);
+}
+
+.context-info {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.context-info p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.context-info p:last-child {
+  margin-bottom: 0;
+}
+
+.context-info strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.demo-performance-reporter {
+  margin-top: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .feedback-demo {
+    padding: 1rem;
+  }
+  
+  .feedback-demo-container {
+    padding: 1.5rem;
+  }
+  
+  .demo-buttons {
+    flex-direction: column;
+  }
+  
+  .demo-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .feedback-demo-container {
+    background-color: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .feedback-demo h2 {
+    color: #f9fafb;
+  }
+  
+  .feedback-demo p {
+    color: #d1d5db;
+  }
+  
+  .demo-section h3 {
+    color: #e5e7eb;
+  }
+  
+  .demo-section {
+    border-bottom-color: #4b5563;
+  }
+  
+  .context-info {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+  
+  .context-info p {
+    color: #d1d5db;
+  }
+  
+  .context-info strong {
+    color: #f9fafb;
+  }
+}

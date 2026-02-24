@@ -1,0 +1,595 @@
+/* Video Upload Component Styles */
+
+/* Root container */
+.videoUploadContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Upload zone styles */
+.uploadZone {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploadZone:hover {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1), 0 10px 10px -5px rgba(99, 102, 241, 0.04);
+}
+
+/* Active drag state */
+.uploadZone.dragActive {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  transform: scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1), 0 10px 10px -5px rgba(16, 185, 129, 0.04);
+}
+
+/* Reject drag state */
+.uploadZone.dragReject {
+  border-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Upload zone content */
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.uploadIcon {
+  font-size: 3rem;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.uploadZone:hover .uploadIcon {
+  color: #6366f1;
+  transform: scale(1.1);
+}
+
+.uploadZone.dragActive .uploadIcon {
+  color: #10b981;
+  transform: scale(1.2);
+}
+
+.uploadZone.dragReject .uploadIcon {
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+.uploadText {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #374151;
+  margin: 0;
+}
+
+.uploadSubtext {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* File input (hidden) */
+.fileInput {
+  display: none;
+}
+
+/* Preview container */
+.previewContainer {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.previewTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.removeButton {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeButton:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Video preview */
+.videoPreview {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.thumbnail {
+  width: 120px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.videoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.videoName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+  word-break: break-word;
+}
+
+.videoMetadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.metadataItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Progress container */
+.progressContainer {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.progressLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.progressPercentage {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6366f1;
+}
+
+/* Progress bar */
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Progress details */
+.progressDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.progressSpeed {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.progressTime {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Error container */
+.errorContainer {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+}
+
+.errorTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.errorMessage {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Success container */
+.successContainer {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #166534;
+}
+
+.successTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.successMessage {
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Upload button */
+.uploadButton {
+  width: 100%;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1.5rem;
+}
+
+.uploadButton:hover:not(:disabled) {
+  background: #4f46e5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.uploadButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Cancel button */
+.cancelButton {
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  margin-right: 1rem;
+}
+
+.cancelButton:hover {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+/* Button group */
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* Loading spinner */
+.loadingSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .videoUploadContainer {
+    padding: 1rem;
+  }
+
+  .uploadZone {
+    padding: 2rem 1rem;
+    min-height: 150px;
+  }
+
+  .uploadIcon {
+    font-size: 2.5rem;
+  }
+
+  .uploadText {
+    font-size: 1rem;
+  }
+
+  .uploadSubtext {
+    font-size: 0.8125rem;
+  }
+
+  .videoPreview {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .thumbnail {
+    width: 100%;
+    height: 120px;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .videoMetadata {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .cancelButton {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .videoUploadContainer {
+    padding: 0.5rem;
+  }
+
+  .uploadZone {
+    padding: 1.5rem 0.75rem;
+    min-height: 120px;
+  }
+
+  .uploadIcon {
+    font-size: 2rem;
+  }
+
+  .uploadText {
+    font-size: 0.9375rem;
+  }
+
+  .uploadSubtext {
+    font-size: 0.75rem;
+  }
+
+  .previewContainer {
+    padding: 1rem;
+  }
+
+  .progressContainer {
+    padding: 0.75rem;
+  }
+
+  .progressDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .uploadZone {
+    min-height: 160px;
+    padding: 2.5rem 1.5rem;
+  }
+
+  .uploadZone:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .uploadButton:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .cancelButton:hover {
+    transform: none;
+  }
+
+  .removeButton:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .uploadZone {
+    border-width: 3px;
+  }
+
+  .uploadZone.dragActive {
+    border-width: 4px;
+  }
+
+  .uploadZone.dragReject {
+    border-width: 4px;
+  }
+
+  .progressFill {
+    background: #000;
+  }
+
+  .uploadButton {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .uploadZone {
+    transition: none;
+  }
+
+  .uploadZone:hover {
+    transform: none;
+  }
+
+  .uploadZone.dragActive {
+    transform: none;
+  }
+
+  .uploadZone.dragReject {
+    animation: none;
+  }
+
+  .progressFill {
+    transition: none;
+  }
+
+  .progressFill::after {
+    animation: none;
+  }
+
+  .loadingSpinner {
+    animation: none;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .videoUploadContainer {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .uploadZone {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+    border-color: #6b7280;
+  }
+
+  .uploadZone:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+    border-color: #6366f1;
+  }
+
+  .uploadZone.dragActive {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+    border-color: #10b981;
+  }
+
+  .uploadZone.dragReject {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    border-color: #ef4444;
+  }
+
+  .previewContainer {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .progressContainer {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}

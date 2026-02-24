@@ -1,0 +1,429 @@
+/**
+ * ComprehensiveResultsViewer Component Styles
+ * Multi-mode visualization viewer with responsive design and smooth animations
+ */
+
+/* ============================================================================
+   Main Container
+   ============================================================================ */
+
+.comprehensiveViewer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* ============================================================================
+   Mode Toggle Controls
+   ============================================================================ */
+
+.modeToggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  position: relative;
+}
+
+.toggleContainer {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 0.25rem;
+}
+
+.modeButton {
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.modeButton:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+.modeButton.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.modeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.blockchainIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.statusLabel {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.statusValue {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.statusValue.verified {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.statusValue.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.statusValue.failed {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* ============================================================================
+   Visualization Content
+   ============================================================================ */
+
+.visualizationContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.visualizationContent.transitioning {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+/* ============================================================================
+   Loading States
+   ============================================================================ */
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  z-index: 200;
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loadingMessage {
+  font-size: 1rem;
+  color: #4b5563;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ============================================================================
+   Error States
+   ============================================================================ */
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
+}
+
+.errorIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.errorMessage {
+  font-size: 1.125rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 2rem;
+  max-width: 400px;
+}
+
+.errorActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.retryButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.retryButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+/* ============================================================================
+   Debug Information
+   ============================================================================ */
+
+.debugInfo {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.75rem;
+  z-index: 300;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .comprehensiveViewer {
+    height: 100vh;
+  }
+  
+  .modeToggle {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .toggleContainer {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .modeButton {
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .blockchainIndicator {
+    justify-content: center;
+    font-size: 0.8125rem;
+  }
+  
+  .errorContainer,
+  .loadingContainer {
+    padding: 1rem;
+  }
+  
+  .errorMessage {
+    font-size: 1rem;
+  }
+  
+  .debugInfo {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.6875rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modeButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .toggleContainer {
+    padding: 0.125rem;
+  }
+  
+  .statusValue {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ============================================================================
+   Accessibility & Focus States
+   ============================================================================ */
+
+.modeButton:focus-visible,
+.retryButton:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.modeButton:focus:not(:focus-visible),
+.retryButton:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================================================
+   High Contrast Mode Support
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+  .comprehensiveViewer {
+    background: white;
+  }
+  
+  .modeToggle {
+    background: white;
+    border-bottom: 2px solid #000;
+  }
+  
+  .modeButton.active {
+    background: #000;
+    color: white;
+  }
+  
+  .errorContainer,
+  .loadingContainer {
+    background: white;
+  }
+}
+
+/* ============================================================================
+   Reduced Motion Support
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .modeButton,
+  .loadableBlock,
+  .retryButton {
+    transition: none;
+    animation: none;
+  }
+  
+  .loadingSpinner {
+    animation: none;
+    border-top-color: #3b82f6;
+    border-color: #e5e7eb;
+  }
+  
+  .visualizationContent.transitioning {
+    transition: none;
+    transform: none;
+  }
+}

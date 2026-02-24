@@ -1,0 +1,107 @@
+{
+  "security_professionals": {
+    "executive_impersonation": {
+      "name": "Executive Impersonation Test",
+      "description": "Test detection of deepfake videos impersonating executives",
+      "duration_minutes": 120,
+      "test_files": ["exec_001", "exec_002"],
+      "success_criteria": {
+        "detection_accuracy": 0.95,
+        "processing_time": 30,
+        "false_positive_rate": 0.02
+      }
+    },
+    "zero_day_attack": {
+      "name": "Zero-Day Attack Simulation",
+      "description": "Test system resilience against unknown deepfake techniques",
+      "duration_minutes": 90,
+      "test_files": ["zero_001"],
+      "success_criteria": {
+        "adaptation_score": 0.80,
+        "fallback_effectiveness": 0.85,
+        "learning_activation": true
+      }
+    },
+    "multi_vector_campaign": {
+      "name": "Multi-Vector Campaign Detection",
+      "description": "Test coordinated attack detection using multiple techniques",
+      "duration_minutes": 150,
+      "test_files": ["camp_001"],
+      "success_criteria": {
+        "campaign_detection": 0.90,
+        "technique_identification": 0.85,
+        "forensic_metadata": 0.95
+      }
+    }
+  },
+  "compliance_officers": {
+    "gdpr_compliance": {
+      "name": "GDPR Compliance Test",
+      "description": "Test GDPR compliance for EU citizen data processing",
+      "duration_minutes": 120,
+      "test_files": ["gdpr_001"],
+      "success_criteria": {
+        "compliance_score": 1.00,
+        "audit_trail_completeness": 0.95,
+        "data_protection": 1.00
+      }
+    },
+    "sox_compliance": {
+      "name": "SOX Compliance Test",
+      "description": "Test SOX compliance for financial communications",
+      "duration_minutes": 120,
+      "test_files": ["sox_001"],
+      "success_criteria": {
+        "internal_controls": 1.00,
+        "management_certification": 1.00,
+        "audit_requirements": 1.00
+      }
+    },
+    "hipaa_compliance": {
+      "name": "HIPAA Compliance Test",
+      "description": "Test HIPAA compliance for healthcare data protection",
+      "duration_minutes": 120,
+      "test_files": ["hipaa_001"],
+      "success_criteria": {
+        "phi_protection": 1.00,
+        "safeguards_implementation": 1.00,
+        "breach_procedures": 1.00
+      }
+    }
+  },
+  "content_moderators": {
+    "misinformation_detection": {
+      "name": "Misinformation Detection Test",
+      "description": "Test detection of misinformation deepfakes",
+      "duration_minutes": 90,
+      "test_files": ["mis_001"],
+      "success_criteria": {
+        "detection_accuracy": 0.85,
+        "processing_speed": 30,
+        "user_experience": 0.85
+      }
+    },
+    "harmful_content": {
+      "name": "Harmful Content Detection Test",
+      "description": "Test detection and removal of harmful deepfake content",
+      "duration_minutes": 75,
+      "test_files": ["harm_001"],
+      "success_criteria": {
+        "detection_accuracy": 0.95,
+        "removal_effectiveness": 0.90,
+        "user_safety": 0.95
+      }
+    },
+    "bulk_operations": {
+      "name": "Bulk Operations Test",
+      "description": "Test high-volume content processing efficiency",
+      "duration_minutes": 60,
+      "test_files": ["bulk_001"],
+      "success_criteria": {
+        "processing_speed": 4.0,
+        "batch_accuracy": 0.95,
+        "system_stability": 0.99
+      }
+    }
+  }
+}

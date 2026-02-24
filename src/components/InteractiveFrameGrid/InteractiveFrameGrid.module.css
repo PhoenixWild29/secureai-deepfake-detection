@@ -1,0 +1,499 @@
+/**
+ * InteractiveFrameGrid Styles
+ * Main grid component styling with advanced interactions and animations
+ */
+
+/* ============================================================================
+   Main Container
+   ============================================================================ */
+
+.interactiveFrameGrid {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+               'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+               sans-serif;
+  color: #1a202c;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Grid Header
+   ============================================================================ */
+
+.gridHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.headerInfo h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.frameCount {
+  font-size: 0.875rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.headerStats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+}
+
+.statLabel {
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.statValue {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+/* ============================================================================
+   Navigation Indicators
+   ============================================================================ */
+
+.navigationIndicators {
+  padding: 0.75rem 1.5rem;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.navigationPrompt {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #3182ce;
+  animation: pulse 0.5s ease-in-out;
+}
+
+.navigationPrompt.left {
+  transform: translateX(-10px);
+}
+
+.navigationPrompt.right {
+  transform: translateX(10px);
+}
+
+.navigationPrompt.up {
+  transform: translateY(-10px);
+}
+
+.navigationPrompt.down {
+  transform: translateY(10px);
+}
+
+.navigationInfo {
+  font-size: 0.875rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ============================================================================
+   Grid Content
+   ============================================================================ */
+
+.gridContent {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.gridSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.detailedSection {
+  width: 400px;
+  min-width: 400px;
+  border-left: 1px solid #e2e8f0;
+  background: white;
+  flex-shrink: 0;
+}
+
+.detailedView {
+  height: 100%;
+}
+
+/* ============================================================================
+   Scroll Container
+   ============================================================================ */
+
+.scrollContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1rem;
+  background: #f7fafc;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* ============================================================================
+   Frame Grid
+   ============================================================================ */
+
+.frameGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+  padding: 0.5rem 0;
+  justify-items: center;
+}
+
+.frameGrid.virtualized {
+  /* Virtualized grid specific styles */
+  contain: layout style paint;
+}
+
+/* ============================================================================
+   Individual Frame Thumbnail
+   ============================================================================ */
+
+.frameThumbnail {
+  position: relative;
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  outline: none;
+}
+
+.frameThumbnail:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.frameThumbnail.selected {
+  border: 3px solid #3182ce;
+  transform: scale(1.05);
+  z-index: 3;
+}
+
+.frameThumbnail.selected::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(45deg, #3182ce, #2b6cb0, #2c5282);
+  border-radius: 0.75rem;
+  z-index: -1;
+  animation: selectedGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes selectedGlow {
+  from {
+    box-shadow: 0 0 20px rgba(49, 130, 206, 0.5);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(49, 130, 206, 0.8);
+  }
+}
+
+/* ============================================================================
+   Focus States for Accessibility
+   ============================================================================ */
+
+.frameThumbnail:focus {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+.frameThumbnail:focus-visible {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Navigation Animation Keyframes
+   ============================================================================ */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   Empty State
+   ============================================================================ */
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.emptyState h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 1rem;
+  max-width: 400px;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 1200px) {
+  .detailedSection {
+    width: 350px;
+    min-width: 350px;
+  }
+}
+
+@media (max-width: 992px) {
+  .gridContent {
+    flex-direction: column;
+  }
+  
+  .detailedSection {
+    width: 100%;
+    min-width: unset;
+    height: 300px;
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .headerStats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .statItem {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .frameGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .gridHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .headerInfo {
+    text-align: center;
+  }
+  
+  .headerStats {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .frameGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .scrollContainer {
+    padding: 0.75rem;
+  }
+  
+  .frameThumbnail.selected {
+    transform: scale(1.02);
+  }
+}
+
+/* ============================================================================
+   Performance Optimizations
+   ============================================================================ */
+
+.frameGrid {
+  will-change: contents;
+}
+
+.frameThumbnail {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .frameThumbnail,
+  .navigationPrompt,
+  .frameThumbnail.selected::before {
+    transition: none;
+    animation: none;
+  }
+  
+  .frameThumbnail:hover {
+    transform: none;
+  }
+  
+  .frameThumbnail.selected {
+    transform: none;
+  }
+}
+
+/* ============================================================================
+   High Contrast Mode Support
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+  .frameThumbnail {
+    border: 2px solid #000000;
+  }
+  
+  .frameThumbnail.selected {
+    border: 3px solid #0000ff;
+    background: #ffffff;
+  }
+  
+  .frameThumbnail:hover {
+    border-color: #333333;
+  }
+}
+
+/* ============================================================================
+   Print Styles
+   ============================================================================ */
+
+@media print {
+  .interactiveFrameGrid {
+    background: white;
+    color: black;
+  }
+  
+  .gridHeader,
+  .navigationIndicators {
+    border-bottom: 2px solid #000000;
+  }
+  
+  .detailedSection {
+    display: none;
+  }
+  
+  .frameThumbnail {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+}

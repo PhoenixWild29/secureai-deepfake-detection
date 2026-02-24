@@ -44,7 +44,7 @@ Under `federated/`:
 
 ## Development & Testing
 * `morpheus_ext/featurizer.py` – turns common auth/netflow fields into the `EVENT_TENSOR` using categorical hashing and normalization.
-* `scripts/synthetic_logs.py` – generates synthetic auth/log events with ~2 % anomalies for local testing.
+* `scripts/synthetic_logs.py` – generates synthetic auth/log events with ~2 % anomalies for local testing.
 * `docker-compose.yml` – composes Redpanda (Kafka), Triton, Morpheus app, FL coordinator, Prometheus and Grafana for a one‑command smoke test.  
   * Traefik or another reverse proxy can be added as needed.
 

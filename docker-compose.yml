@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  secureai:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - S3_RESULTS_BUCKET_NAME=${S3_RESULTS_BUCKET_NAME}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./users.json:/app/users.json
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./static:/app/static
+    depends_on:
+      - secureai
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  results:
