@@ -2648,4 +2648,5 @@ if __name__ == '__main__':
     print("🔗 API Endpoints: http://localhost:5000/api/*")
     # Use environment variable for debug mode, default to False for security
     debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
+    # Use socketio.run for WebSocket support
+    socketio.run(app, debug=debug_mode, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
