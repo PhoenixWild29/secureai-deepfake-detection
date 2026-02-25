@@ -695,11 +695,8 @@ def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any
         }
 
 
-# ---------------------------------------------------------------------------
-# AUTO-START: Begin loading immediately when this module is imported.
-# This runs during app startup (api.py import), so by the time a user logs in
-# and navigates to Forensics the models are likely already loaded.
-# It is a daemon thread — zero impact on login, health checks, or any endpoint.
-# ---------------------------------------------------------------------------
-start_background_ensemble_load()
+# NOTE: Do NOT auto-start at module import. With gunicorn preload_app=True,
+# the import runs in the master process; threads die when workers are forked.
+# Instead, api.py triggers start_background_ensemble_load() on the first
+# HTTP request (any endpoint), when the worker and eventlet hub are alive.
 
