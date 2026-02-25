@@ -1,0 +1,72 @@
+{
+  "datasets/train": {
+    "accuracy": 1.0,
+    "samples_tested": 3,
+    "avg_processing_time": 1.6354269981384277,
+    "predictions": [
+      0,
+      0,
+      0
+    ],
+    "labels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    ]
+  },
+  "datasets/val": {
+    "accuracy": 1.0,
+    "samples_tested": 3,
+    "avg_processing_time": 1.716638406117757,
+    "predictions": [
+      0,
+      0,
+      0
+    ],
+    "labels": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0
+    ]
+  }
+}

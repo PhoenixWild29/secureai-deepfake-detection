@@ -1,0 +1,11 @@
+{
+  "epochs": 5,
+  "batch_size": 4,
+  "learning_rate": 0.0001,
+  "weight_decay": 0.0001,
+  "frame_count": 30,
+  "output_dir": "training_runs",
+  "use_laa": true,
+  "use_clip": true,
+  "use_dm_aware": true
+}

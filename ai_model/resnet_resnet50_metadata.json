@@ -1,0 +1,18 @@
+{
+  "model_name": "resnet50",
+  "architecture": "ResNet",
+  "epochs_trained": 1,
+  "best_accuracy": 100.0,
+  "training_date": "20250927_163904",
+  "hyperparameters": {
+    "learning_rate": 0.0001,
+    "batch_size": 16,
+    "epochs": 10
+  },
+  "final_metrics": {
+    "train_accuracy": 84.55882352941177,
+    "val_accuracy": 100.0,
+    "train_loss": 0.49189451336860657,
+    "val_loss": 0.3793138936161995
+  }
+}

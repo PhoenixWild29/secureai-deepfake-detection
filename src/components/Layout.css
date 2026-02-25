@@ -1,0 +1,368 @@
+/* Layout.css */
+
+/* Layout Container */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+/* Mobile Navigation Container */
+.layout-mobile-nav {
+  display: block;
+}
+
+/* Desktop Navigation Container */
+.layout-desktop-nav {
+  display: none;
+}
+
+/* Main Content Area */
+.layout-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.layout-content {
+  flex: 1;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Logo Component */
+.layout-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  color: white;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.2;
+}
+
+/* User Menu Component */
+.layout-user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.2;
+}
+
+/* Desktop Navigation Styles */
+.desktop-navigation {
+  width: 280px;
+  background-color: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+.desktop-nav-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.desktop-nav-header .layout-logo {
+  padding: 0;
+}
+
+.desktop-nav-header .logo-title {
+  color: white;
+}
+
+.desktop-nav-header .logo-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.desktop-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 16px 0;
+  flex: 1;
+}
+
+.desktop-nav-item {
+  margin: 0;
+}
+
+.desktop-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #374151;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+}
+
+.desktop-nav-link:hover {
+  background-color: #f3f4f6;
+  color: #1d4ed8;
+}
+
+.desktop-nav-link.active {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-left-color: #3b82f6;
+}
+
+.desktop-nav-link:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+.desktop-nav-icon {
+  margin-right: 12px;
+  font-size: 1.125rem;
+  width: 20px;
+  text-align: center;
+}
+
+.desktop-nav-label {
+  flex: 1;
+}
+
+.desktop-nav-badge {
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+.desktop-nav-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+/* Responsive Breakpoints */
+
+/* Small screens (sm) - Mobile */
+@media (max-width: 639px) {
+  .layout-mobile-nav {
+    display: block;
+  }
+  
+  .layout-desktop-nav {
+    display: none;
+  }
+  
+  .layout-main {
+    margin-left: 0;
+  }
+}
+
+/* Medium screens (md) - Tablet and Desktop */
+@media (min-width: 768px) {
+  .layout-mobile-nav {
+    display: none;
+  }
+  
+  .layout-desktop-nav {
+    display: block;
+  }
+  
+  .layout-main {
+    margin-left: 0;
+  }
+}
+
+/* Large screens (lg) and up */
+@media (min-width: 1024px) {
+  .desktop-navigation {
+    width: 320px;
+  }
+  
+  .desktop-nav-link {
+    padding: 14px 24px;
+  }
+}
+
+/* Extra large screens (xl) and up */
+@media (min-width: 1280px) {
+  .desktop-navigation {
+    width: 360px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .layout {
+    background-color: #111827;
+  }
+  
+  .desktop-navigation {
+    background-color: #1f2937;
+    border-right-color: #374151;
+  }
+  
+  .desktop-nav-link {
+    color: #d1d5db;
+  }
+  
+  .desktop-nav-link:hover {
+    background-color: #374151;
+    color: #60a5fa;
+  }
+  
+  .desktop-nav-link.active {
+    background-color: #1e3a8a;
+    color: #60a5fa;
+  }
+  
+  .desktop-nav-footer {
+    background-color: #111827;
+    border-top-color: #374151;
+  }
+  
+  .logo-title {
+    color: #f9fafb;
+  }
+  
+  .logo-subtitle {
+    color: #9ca3af;
+  }
+  
+  .user-name {
+    color: #f9fafb;
+  }
+  
+  .user-role {
+    color: #9ca3af;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .desktop-nav-link {
+    border: 1px solid transparent;
+  }
+  
+  .desktop-nav-link:hover,
+  .desktop-nav-link.active {
+    border-color: #000;
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .desktop-nav-link:focus {
+    border-color: #000;
+    outline: 2px solid #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .desktop-nav-link {
+    transition: none;
+  }
+}
+
+/* Debug information (development only) */
+.layout-debug {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  z-index: 9999;
+  display: none;
+}
+
+.layout-debug .debug-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.layout-debug .debug-info span {
+  white-space: nowrap;
+}
+
+/* Print styles */
+@media print {
+  .layout-mobile-nav,
+  .layout-desktop-nav {
+    display: none;
+  }
+  
+  .layout-main {
+    margin-left: 0;
+  }
+  
+  .layout-debug {
+    display: none;
+  }
+}

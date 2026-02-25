@@ -1,0 +1,4 @@
+# Optional: LAA-Net weights (clone manually if needed: cd external && git clone https://github.com/10Ring/LAA-Net laa_net)
+[submodule "external/laa_net"]
+	path = external/laa_net
+	url = https://github.com/10Ring/LAA-Net.git

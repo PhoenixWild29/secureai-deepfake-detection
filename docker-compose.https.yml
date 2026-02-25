@@ -1,0 +1,129 @@
+# Docker Compose for HTTPS Deployment
+# Note: 'version' attribute is obsolete in Docker Compose v2+
+# This includes SSL certificate support
+# Prerequisites: Run HTTPS_SETUP_GUIDE.md first to get certificates
+#
+# Data persistence: Postgres and results use named volumes (postgres_data, results_data).
+# To keep data across rebuilds/restarts, run: docker compose down   (do NOT use -v).
+# To wipe data: docker compose down -v
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: secureai-postgres
+    environment:
+      POSTGRES_DB: secureai_db
+      POSTGRES_USER: secureai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-SecureAI2024!DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U secureai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - secureai-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: secureai-redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - secureai-network
+
+  secureai-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secureai-backend
+    expose:
+      - "8000"
+    environment:
+      - DATABASE_URL=postgresql://secureai:${DB_PASSWORD:-SecureAI2024!DB}@postgres:5432/secureai_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      - DEBUG=false
+      - FLASK_ENV=production
+      - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
+      - LOG_DIR=/app/logs
+      # NNPACK optional; on cloud VMs it often fails (Unsupported hardware). PyTorch uses oneDNN/default CPU.
+      # See docs/troubleshooting/NNPACK_AND_CPU_BACKENDS.md
+      - USE_NNPACK=0
+      # Solana: put keypair at ./wallet/id.json on host (or set SOLANA_WALLET_PATH)
+      - SOLANA_WALLET_PATH=/app/wallet/id.json
+      # Socket.IO / progress updates (recommended defaults)
+      - SOCKETIO_ASYNC_MODE=eventlet
+      - GUNICORN_WORKERS=1
+      - GUNICORN_WORKER_CLASS=eventlet
+      # X/Twitter URL analysis (optional). Provide a Netscape cookies.txt file via volume mount.
+      # If not set, X/Twitter URLs will fail fast with a clear message (no hanging downloads).
+      - X_COOKIES_FILE=/app/secrets/x_cookies.txt
+      # SecureSage AI consultant (Google Gemini API)
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Ensemble init can take 2–5+ min (V13, EfficientNet). Increase if init times out.
+      - ENSEMBLE_INIT_TIMEOUT=${ENSEMBLE_INIT_TIMEOUT:-300}
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+      - results_data:/app/results
+      - ./wallet:/app/wallet
+      - ./.env:/app/.env:ro
+      - ./test_videos:/app/test_videos  # For test video storage
+      - ./secrets:/app/secrets  # Writable (yt-dlp needs to write cookies back)
+      - ./scripts:/app/scripts:ro  # Scripts directory (read-only)
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-s", "--max-time", "15", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 600s
+    networks:
+      - secureai-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: secureai-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./secureai-guardian/dist:/usr/share/nginx/html
+      - ./nginx.https.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/ssl:ro
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - secureai-backend
+    restart: unless-stopped
+    networks:
+      - secureai-network
+
+volumes:
+  postgres_data:
+    driver: local
+  results_data:
+    driver: local
+  redis_data:
+    driver: local
+  certbot_www:
+    driver: local
+
+networks:
+  secureai-network:
+    driver: bridge
+

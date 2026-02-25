@@ -1,0 +1,56 @@
+{
+  "batch_info": {
+    "total_files": 3,
+    "completed": 3,
+    "failed": 0,
+    "processing_time": 3.0851190090179443,
+    "timestamp": "2025-09-27T14:25:22.285903"
+  },
+  "results": [
+    {
+      "is_fake": false,
+      "confidence": 0.5,
+      "video_hash": "075c52c5f00a7fdbbc5592309c216b57dae819cbad6c20b07f3a2d11db782bce",
+      "authenticity_score": 1.0,
+      "frame_count": 30,
+      "fake_ratio": 0.0,
+      "method": "cnn_classifier",
+      "processing_time": "3.01 seconds",
+      "filename": "test_video_2.mp4",
+      "filepath": "test_batch_videos\\test_video_2.mp4",
+      "file_size": 93776,
+      "timestamp": "2025-09-27T14:25:22.215715",
+      "blockchain_tx": "tx_075c52c5_1758997522"
+    },
+    {
+      "is_fake": false,
+      "confidence": 0.5,
+      "video_hash": "14e30317509129dfd2365f453b5e13b95ccae67a103622939219509c0202761c",
+      "authenticity_score": 1.0,
+      "frame_count": 30,
+      "fake_ratio": 0.0,
+      "method": "cnn_classifier",
+      "processing_time": "3.05 seconds",
+      "filename": "test_video_1.mp4",
+      "filepath": "test_batch_videos\\test_video_1.mp4",
+      "file_size": 253217,
+      "timestamp": "2025-09-27T14:25:22.253093",
+      "blockchain_tx": "tx_14e30317_1758997522"
+    },
+    {
+      "is_fake": false,
+      "confidence": 0.5,
+      "video_hash": "5eedbc0db99ea7a598e9d65282bffd8d7ed468f0e150b2df3117b05561bfee3b",
+      "authenticity_score": 1.0,
+      "frame_count": 30,
+      "fake_ratio": 0.0,
+      "method": "cnn_classifier",
+      "processing_time": "3.08 seconds",
+      "filename": "test_video_3.mp4",
+      "filepath": "test_batch_videos\\test_video_3.mp4",
+      "file_size": 201109,
+      "timestamp": "2025-09-27T14:25:22.282576",
+      "blockchain_tx": "tx_5eedbc0d_1758997522"
+    }
+  ]
+}

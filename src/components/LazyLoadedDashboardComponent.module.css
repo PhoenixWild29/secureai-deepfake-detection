@@ -1,0 +1,264 @@
+/**
+ * Lazy Loaded Dashboard Component CSS Module
+ * Styles for lazy loading with loading indicators and error states
+ */
+
+.container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.placeholder {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--muted-background, #f8fafc);
+  border: 2px dashed var(--border-color, #e2e8f0);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-normal) var(--ease-in-out);
+}
+
+.placeholderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+}
+
+.placeholderIcon {
+  font-size: var(--font-size-3xl);
+  opacity: 0.6;
+}
+
+.placeholderText {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground, #64748b);
+  margin: 0;
+  font-weight: 500;
+}
+
+.component {
+  width: 100%;
+  height: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  height: 200px;
+  background: var(--background);
+  border-radius: var(--radius-lg);
+}
+
+.loadingSpinner {
+  width: var(--loading-spinner-size);
+  height: var(--loading-spinner-size);
+  border: 3px solid var(--loading-skeleton-bg);
+  border-top: 3px solid var(--focus-ring-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--space-md);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: var(--font-size-sm);
+  color: var(--muted-foreground, #64748b);
+  margin: 0;
+  font-weight: 500;
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  height: 200px;
+  background: var(--error-bg-color, #fef2f2);
+  border: 1px solid var(--error-border-color, #fecaca);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-md);
+}
+
+.errorTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--error-text-color, #dc2626);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.errorMessage {
+  font-size: var(--font-size-sm);
+  color: var(--error-text-color, #dc2626);
+  margin: 0 0 var(--space-md) 0;
+  max-width: 300px;
+}
+
+.retryButton {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--focus-ring-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-in-out);
+}
+
+.retryButton:hover {
+  background: var(--hover-background, #2563eb);
+  transform: translateY(-1px);
+}
+
+.retryButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .placeholder {
+    height: 150px;
+  }
+  
+  .placeholderIcon {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .placeholderText {
+    font-size: var(--font-size-xs);
+  }
+  
+  .loadingContainer,
+  .errorContainer {
+    height: 150px;
+    padding: var(--space-lg);
+  }
+  
+  .errorTitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .errorMessage {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .placeholder {
+    height: 120px;
+  }
+  
+  .placeholderIcon {
+    font-size: var(--font-size-xl);
+  }
+  
+  .loadingContainer,
+  .errorContainer {
+    height: 120px;
+    padding: var(--space-md);
+  }
+  
+  .loadingSpinner {
+    width: var(--loading-spinner-size-small);
+    height: var(--loading-spinner-size-small);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .retryButton {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-base);
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .placeholder {
+    border-width: 3px;
+  }
+  
+  .errorContainer {
+    border-width: 2px;
+  }
+  
+  .retryButton {
+    border: 2px solid var(--focus-ring-color);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .placeholder,
+  .retryButton {
+    transition: none;
+  }
+  
+  .loadingSpinner {
+    animation: none;
+    border-top-color: var(--focus-ring-color);
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .placeholder {
+    background: var(--muted-background, #1e293b);
+    border-color: var(--border-color, #334155);
+  }
+  
+  .loadingContainer {
+    background: var(--background, #0f172a);
+  }
+  
+  .errorContainer {
+    background: var(--error-bg-color, #1f2937);
+    border-color: var(--error-border-color, #f87171);
+  }
+  
+  .errorTitle,
+  .errorMessage {
+    color: var(--error-text-color, #fca5a5);
+  }
+}
+
+/* Print styles */
+@media print {
+  .placeholder,
+  .loadingContainer,
+  .errorContainer {
+    border: 1px solid #000;
+    background: white !important;
+    color: black !important;
+  }
+  
+  .loadingSpinner {
+    display: none;
+  }
+  
+  .placeholderIcon,
+  .errorIcon {
+    display: none;
+  }
+}

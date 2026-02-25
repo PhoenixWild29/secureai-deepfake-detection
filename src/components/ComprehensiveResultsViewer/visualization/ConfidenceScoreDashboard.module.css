@@ -1,0 +1,15 @@
+.confidenceDashboard { padding: 1rem; background: white; border-radius: 8px; }
+.confidenceDashboard h3 { margin: 0 0 1rem 0; color: #374151; }
+.distributionChart { height: 150px; display: flex; align-items: flex-end; gap: 0.5rem; margin-bottom: 1rem; }
+.chartBar { display: flex; gap: 0.25rem; height: 100%; width: 80%; }
+.bar { flex: 1; border-radius: 3px; min-height: 20px; transition: all 0.3s ease; }
+.bar.low { background: #10b981; }
+.bar.medium { background: #f59e0b; }
+.bar.high { background: #3b82f6; }
+.bar.critical { background: #ef4444; }
+.bar:hover { transform: scaleY(1.1); }
+.labels { display: flex; gap: 0.25rem; width: 80%; }
+.label { flex: 1; font-size: 0.75rem; text-align: center; color: #6b7280; }
+.frameDetails { border-top: 1px solid #e5e7eb; padding-top: 0.5rem; }
+.frameDetails h4 { margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #6b7280; }
+.confidenceScore { font-size: 1.5rem; font-weight: 700; color: #ef4444; text-align: center; }

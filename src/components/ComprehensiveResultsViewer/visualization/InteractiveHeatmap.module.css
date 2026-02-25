@@ -1,0 +1,16 @@
+.interactiveHeatmap { display: flex; flex-direction: column; height: 100%; padding: 1rem; }
+.heatmapHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; }
+.heatmapHeader h3 { margin: 0; color: #374151; }
+.heatmapControls { display: flex; gap: 1rem; font-size: 0.875rem; color: #6b7280; }
+.heatmapContainer { flex: 1; overflow: auto; padding: 1rem; background: #f8fafc; border-radius: 8px; }
+.heatmapGrid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; transform-origin: top left; }
+.heatmapCell { position: relative; cursor: pointer; border-radius: 2px; transition: all 0.2s ease; }
+.heatmapCell:hover { transform: scale(1.1); z-index: 10; }
+.highConfidence { border: 1px solid #ef4444; }
+.lowConfidence { border: 1px solid #e5e7eb; }
+.confidenceTooltip { position: absolute; background: rgba(0, 0, 0, 0.8); color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem; top: -25px; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s ease; }
+.heatmapCell:hover .confidenceTooltip { opacity: 1; }
+.selectedRegions { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }
+.selectedRegions h4 { margin: 0 0 0.5rem 0; font-size: 0.875rem; color: #6b7280; }
+.selectedRegion { padding: 0.25rem 0.5rem; background: rgba(59, 130, 246, 0.1); border-radius: 4px; font-size: 0.75rem; margin-bottom: 0.25rem; }
+.noData { text-align: center; padding: 2rem; color: #9ca3af; font-style: italic; }
