@@ -23,7 +23,7 @@ mkdir -p uploads results logs run
 python3 api.py
 ```
 
-The first video analysis request triggers model loading (2-4 min on CPU). Subsequent requests are ~10-20 seconds. Health check: `curl http://localhost:5000/api/health`.
+Ensemble models auto-preload in a background thread at startup (~50-60s on CPU). Login/health/dashboard work instantly during this time. Poll `/api/ensemble-status` for per-model progress. Health check: `curl http://localhost:5000/api/health`.
 
 ### Starting the frontend
 
