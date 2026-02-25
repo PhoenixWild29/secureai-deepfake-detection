@@ -2,6 +2,16 @@
 
 This project implements a comprehensive deepfake detection system combining AI analysis with blockchain security. It uses advanced ensemble models incorporating SOTA techniques from leading research repositories for superior deepfake detection accuracy.
 
+## Guardian Web Hardening
+
+For the guardian.secureai.dev single-page app, include the following production assets:
+- `robots.txt` for crawler policy
+- `.well-known/security.txt` for vulnerability disclosure contact
+- `404.html` for a branded not-found page
+- `deploy/nginx.conf` for baseline security headers and static asset caching
+
+If you deploy with a different web server or CDN, mirror the same headers and 404 handling in that platform.
+
 ## 🚀 Enhanced Features (2025 SOTA)
 
 - **Ensemble Detection**: Combines LAA-Net, CLIP-based detection, and diffusion model awareness
