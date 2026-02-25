@@ -544,87 +544,131 @@ class EnsembleDetector:
         }
 
 
-# Global instance; loaded in background thread so the request thread never blocks
+# ---------------------------------------------------------------------------
+# Global ensemble lifecycle: background preload, per-model status, resilient retry
+# ---------------------------------------------------------------------------
 import threading as _threading
-_ensemble_instance = None
-_ensemble_init_failed = False
+import time as _time
+
+_ensemble_instance: Optional[EnsembleDetector] = None
 _ensemble_loading_started = False
 _ensemble_loading_lock = _threading.Lock()
+_ensemble_load_start_time: Optional[float] = None
+
+# Per-model status tracking so the frontend can show a real progress bar
+_MODEL_NAMES = ['clip', 'resnet', 'v13', 'xception', 'efficientnet']
+_model_status: Dict[str, str] = {m: 'pending' for m in _MODEL_NAMES}  # pending | loading | loaded | failed
+_ensemble_overall_status = 'idle'  # idle | loading | ready | failed
+_ensemble_fail_count = 0
+_RETRY_COOLDOWN = 30  # seconds before allowing retry after failure
+_last_fail_time: Optional[float] = None
+
+
+def get_ensemble_status() -> Dict[str, Any]:
+    """Return detailed loading status for the /api/ensemble-status endpoint.
+    Never blocks. Safe to call from any thread at any time."""
+    elapsed = round(_time.time() - _ensemble_load_start_time, 1) if _ensemble_load_start_time else 0
+    models = dict(_model_status)
+    loaded_count = sum(1 for s in models.values() if s == 'loaded')
+    total = len(models)
+    if _ensemble_overall_status == 'ready':
+        pct = 100
+    elif _ensemble_overall_status == 'loading':
+        pct = max(5, int(loaded_count / total * 90))  # 5-90% while loading
+    else:
+        pct = 0
+    return {
+        'status': _ensemble_overall_status,
+        'progress_pct': pct,
+        'models': models,
+        'models_loaded': loaded_count,
+        'models_total': total,
+        'elapsed_seconds': elapsed,
+        'ready': _ensemble_overall_status == 'ready',
+    }
+
 
 def init_ensemble_blocking() -> Optional[EnsembleDetector]:
-    """
-    Load the full ensemble in the current thread. Called only from the background
-    loader thread so the request thread never blocks for 10+ min.
-    """
-    global _ensemble_instance, _ensemble_init_failed
+    """Load the full ensemble in the current thread (called from background thread only)."""
+    global _ensemble_instance, _ensemble_overall_status, _ensemble_fail_count
+    global _last_fail_time, _ensemble_load_start_time
     if _ensemble_instance is not None:
         return _ensemble_instance
-    if _ensemble_init_failed:
-        return None
+    _ensemble_overall_status = 'loading'
+    _ensemble_load_start_time = _time.time()
+    for m in _MODEL_NAMES:
+        _model_status[m] = 'loading'
     try:
-        logger.info("Loading full ensemble (CLIP + ResNet + V13 + XceptionNet + EfficientNet + ...) — this may take 2–5 minutes.")
-        _ensemble_instance = EnsembleDetector()
-        logger.info("✅ EnsembleDetector loaded successfully. Every scan will use the full ensemble.")
-        return _ensemble_instance
+        logger.info("Loading full ensemble (CLIP + ResNet + V13 + XceptionNet + EfficientNet) — this may take 2–4 minutes.")
+        det = EnsembleDetector()
+        _ensemble_instance = det
+        _ensemble_overall_status = 'ready'
+        # Update per-model status from actual detector state
+        _model_status['clip'] = 'loaded' if det.clip_detector else 'failed'
+        _model_status['resnet'] = 'loaded' if det.resnet_model else 'failed'
+        _model_status['v13'] = 'loaded' if (det.v13_detector and getattr(det.v13_detector, 'model_loaded', False)) else 'failed'
+        _model_status['xception'] = 'loaded' if det.xception_detector else 'failed'
+        _model_status['efficientnet'] = 'loaded' if det.efficientnet_detector else 'failed'
+        elapsed = round(_time.time() - _ensemble_load_start_time, 1)
+        logger.info(f"✅ EnsembleDetector loaded in {elapsed}s. Models: {_model_status}")
+        return det
     except Exception as e:
         logger.exception(f"EnsembleDetector initialization failed: {e}")
-        _ensemble_init_failed = True
+        _ensemble_overall_status = 'failed'
+        _ensemble_fail_count += 1
+        _last_fail_time = _time.time()
+        for m in _MODEL_NAMES:
+            if _model_status[m] == 'loading':
+                _model_status[m] = 'failed'
         return None
 
+
 def start_background_ensemble_load() -> None:
-    """
-    Start loading the ensemble in a background thread if not already loaded or loading.
-    Returns immediately. The request thread must never block on model load — so the
-    first scan returns 503 and the user retries in 3 min when the background load has finished.
-    """
-    global _ensemble_instance, _ensemble_init_failed, _ensemble_loading_started
+    """Start loading the ensemble in a background thread. Returns immediately.
+    Safe to call multiple times — subsequent calls are no-ops unless a retry is due."""
+    global _ensemble_loading_started, _ensemble_overall_status
     with _ensemble_loading_lock:
         if _ensemble_instance is not None:
             return
-        if _ensemble_init_failed:
-            return
-        if _ensemble_loading_started:
-            return
+        if _ensemble_loading_started and _ensemble_overall_status == 'loading':
+            return  # already in progress
+        # Allow retry after cooldown on failure
+        if _ensemble_overall_status == 'failed':
+            if _last_fail_time and (_time.time() - _last_fail_time) < _RETRY_COOLDOWN:
+                return  # too soon to retry
+            logger.info(f"Retrying ensemble load (attempt {_ensemble_fail_count + 1}) after cooldown...")
+            _ensemble_overall_status = 'loading'
         _ensemble_loading_started = True
+
     def _run():
         try:
             init_ensemble_blocking()
-        finally:
-            pass  # _ensemble_instance or _ensemble_init_failed is set
-    t = _threading.Thread(target=_run, daemon=True)
+        except Exception:
+            pass  # status already set inside init_ensemble_blocking
+    t = _threading.Thread(target=_run, daemon=True, name='ensemble-loader')
     t.start()
-    logger.info("Ensemble load started in background. Next scan (in ~3 min) will use it.")
+    logger.info("Ensemble load started in background thread.")
+
 
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
-    """
-    Return the global ensemble detector if already loaded. Never blocks — if not loaded,
-    returns None so the API can return 503 and ask the user to retry in 3 min.
-    """
-    global _ensemble_instance
+    """Return the global ensemble detector if already loaded. Never blocks."""
     return _ensemble_instance
 
+
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
-    """
-    Convenience function for ensemble detection with timeout protection
-    
-    Args:
-        video_path: Path to video file
-        num_frames: Number of frames to sample
-        
-    Returns:
-        Detection results or error dict if ensemble unavailable
-    """
-    detector = get_ensemble_detector()  # uses ENSEMBLE_INIT_TIMEOUT (default 300s)
+    """Convenience function for ensemble detection. Returns error dict if not ready."""
+    detector = get_ensemble_detector()
     if detector is None:
-        # Ensemble unavailable - return error result
+        start_background_ensemble_load()  # ensure loading is in progress
+        status = get_ensemble_status()
         return {
-            'error': 'Ensemble detector unavailable (initialization failed or timed out)',
+            'error': 'Ensemble detector is still loading. It will be ready shortly.',
             'is_deepfake': False,
             'confidence': 0.0,
             'ensemble_fake_probability': 0.5,
-            'method': 'ensemble_unavailable'
+            'method': 'ensemble_unavailable',
+            'ensemble_status': status,
         }
-    
     try:
         return detector.detect(video_path, num_frames)
     except Exception as e:
@@ -636,4 +680,13 @@ def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any
             'ensemble_fake_probability': 0.5,
             'method': 'ensemble_error'
         }
+
+
+# ---------------------------------------------------------------------------
+# AUTO-START: Begin loading immediately when this module is imported.
+# This runs during app startup (api.py import), so by the time a user logs in
+# and navigates to Forensics the models are likely already loaded.
+# It is a daemon thread — zero impact on login, health checks, or any endpoint.
+# ---------------------------------------------------------------------------
+start_background_ensemble_load()
 

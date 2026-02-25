@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ScanResult } from '../types';
-import { analyzeVideo, analyzeVideoFromUrl, checkBackendHealth } from '../services/apiService';
+import { analyzeVideo, analyzeVideoFromUrl, checkBackendHealth, waitForEnsemble, EnsembleStatus } from '../services/apiService';
 import { ReconnectingWebSocket, isWebSocketSupported } from '../services/websocketService';
 
 interface ScannerProps {
@@ -247,12 +247,50 @@ const Scanner: React.FC<ScannerProps> = ({ onComplete }) => {
       // Otherwise, WebSocket will handle completion via onComplete callback
 
     } catch (err) {
+      // ---- Ensemble still loading: show progress and auto-retry ----
+      if (err instanceof Error && err.message === '__ENSEMBLE_LOADING__') {
+        setTerminalLogs(prev => [...prev.slice(-6),
+          '[SYS] Detection models are warming up in the background...',
+          '[SYS] Your scan will start automatically when ready.',
+        ]);
+        setScanStatus('LOADING_NEURAL_MODELS...');
+        setProgress(5);
+
+        try {
+          await waitForEnsemble((status: EnsembleStatus) => {
+            const pct = Math.max(5, Math.min(status.progress_pct, 90));
+            setProgress(pct);
+            const loaded = Object.entries(status.models)
+              .filter(([, s]) => s === 'loaded')
+              .map(([n]) => n.toUpperCase());
+            if (loaded.length > 0) {
+              setTerminalLogs(prev => [...prev.slice(-6),
+                `[NEURAL] ${loaded.join(', ')} online (${status.models_loaded}/${status.models_total}) — ${Math.round(status.elapsed_seconds)}s`,
+              ]);
+            }
+            setScanStatus(`LOADING_NEURAL_MODELS... ${pct}%`);
+          });
+          // Models ready — auto-retry the scan
+          setTerminalLogs(prev => [...prev.slice(-6), '[SYS] Models ready. Starting analysis...']);
+          setScanStatus('UPLOADING_MEDIA...');
+          setProgress(10);
+          // Re-run the analysis (recursive call, but ensemble is now loaded so it won't loop)
+          await startAnalysis();
+          return;
+        } catch (waitErr) {
+          const msg = waitErr instanceof Error ? waitErr.message : 'Model loading failed.';
+          setError(msg);
+          setIsScanning(false);
+          setTerminalLogs(prev => [...prev.slice(-6), `[ERROR] ${msg}`]);
+          return;
+        }
+      }
+
       if (wsConnection) {
         wsConnection.close();
       }
       const errorMessage = err instanceof Error ? err.message : 'Analysis failed. Please try again.';
       setError(errorMessage);
-      // Carry through structured error codes (e.g., X_AUTH_REQUIRED)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setErrorCode((err as any)?.code || null);
       setIsScanning(false);

@@ -94,7 +94,7 @@ logging.basicConfig(level=logging.INFO)
 def _ensure_ensemble_loaded():
     """
     Ensure ensemble load is started (in background) and return True only if already loaded.
-    Never blocks the request thread. First scan gets 503 "retry in 3 min"; next scan proceeds.
+    Never blocks the request thread.
     """
     try:
         from ai_model.ensemble_detector import get_ensemble_detector, start_background_ensemble_load
@@ -466,6 +466,18 @@ def health_check():
         'timestamp': datetime.now().isoformat(),
         'version': '2.0.0'
     })
+
+
+@app.route('/api/ensemble-status')
+def ensemble_status():
+    """Return ensemble model loading status (lightweight, no auth required).
+    Frontend polls this to show progress and auto-retry scans."""
+    try:
+        from ai_model.ensemble_detector import get_ensemble_status
+        return jsonify(get_ensemble_status())
+    except Exception as e:
+        logger.warning("ensemble-status error: %s", e)
+        return jsonify({'status': 'unknown', 'ready': False, 'progress_pct': 0, 'models': {}})
 
 
 # =============================================================================
@@ -1138,10 +1150,16 @@ def analyze_video():
         finally:
             _stop_heartbeat.set()
         if not ensemble_ok:
+            try:
+                from ai_model.ensemble_detector import get_ensemble_status
+                status = get_ensemble_status()
+            except Exception:
+                status = {'status': 'loading', 'progress_pct': 0, 'ready': False}
             return jsonify({
-                'error': 'Models are loading (takes 2–4 min). Please click Scan again in 3 minutes.',
+                'error': 'Models are loading. The scan will start automatically when ready.',
                 'ensemble_unavailable': True,
-                'retry_after_seconds': 180
+                'retry_after_seconds': 10,
+                'ensemble_status': status,
             }), 503
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
@@ -1538,10 +1556,16 @@ def analyze_video_from_url():
         finally:
             _stop_heartbeat.set()
         if not ensemble_ok:
+            try:
+                from ai_model.ensemble_detector import get_ensemble_status
+                status = get_ensemble_status()
+            except Exception:
+                status = {'status': 'loading', 'progress_pct': 0, 'ready': False}
             return jsonify({
-                'error': 'Models are loading (takes 2–4 min). Please click Scan again in 3 minutes.',
+                'error': 'Models are loading. The scan will start automatically when ready.',
                 'ensemble_unavailable': True,
-                'retry_after_seconds': 180
+                'retry_after_seconds': 10,
+                'ensemble_status': status,
             }), 503
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
