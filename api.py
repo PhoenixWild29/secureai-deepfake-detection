@@ -458,6 +458,26 @@ def index():
     #     return redirect(url_for('login'))
     return render_template('index.html')
 
+# ---------------------------------------------------------------------------
+# Trigger ensemble preload on the FIRST request to ANY endpoint (health, login,
+# dashboard, etc.). By the time the user navigates to Forensics, models are
+# likely loaded. Runs once, never blocks — just kicks off the background thread.
+# ---------------------------------------------------------------------------
+_ensemble_preload_triggered = False
+
+@app.before_request
+def _trigger_ensemble_preload():
+    global _ensemble_preload_triggered
+    if not _ensemble_preload_triggered:
+        _ensemble_preload_triggered = True
+        try:
+            from ai_model.ensemble_detector import start_background_ensemble_load
+            start_background_ensemble_load()
+            logger.info("Ensemble background preload triggered by first request.")
+        except Exception as e:
+            logger.warning("Ensemble preload trigger failed: %s", e)
+
+
 @app.route('/api/health')
 def health_check():
     """Health check endpoint"""
