@@ -83,7 +83,12 @@ class EnsembleDetector:
         logger.info(f"🔧 Initializing EnsembleDetector on device: {self.device}")
         
         # Load CLIP + ResNet + V13 + Xception + EfficientNet ALL IN PARALLEL so total time ~2-4 min (not 10+)
-        import threading
+        # Use real OS threads (not eventlet green threads) so heavy I/O doesn't deadlock
+        try:
+            import eventlet.patcher as _ep_inner
+            threading = _ep_inner.original('threading')
+        except (ImportError, AttributeError):
+            import threading
         clip_result = [None]
         def load_clip_thread():
             try:
@@ -547,8 +552,16 @@ class EnsembleDetector:
 # ---------------------------------------------------------------------------
 # Global ensemble lifecycle: background preload, per-model status, resilient retry
 # ---------------------------------------------------------------------------
-import threading as _threading
 import time as _time
+
+# Use REAL OS threads, not eventlet green threads.
+# When eventlet monkey-patches threading, green threads can't do heavy CPU/IO
+# (model downloads, PyTorch loads) without blocking the hub and deadlocking.
+try:
+    import eventlet.patcher as _ep
+    _threading = _ep.original('threading')  # real OS threading module
+except (ImportError, AttributeError):
+    import threading as _threading
 
 _ensemble_instance: Optional[EnsembleDetector] = None
 _ensemble_loading_started = False
