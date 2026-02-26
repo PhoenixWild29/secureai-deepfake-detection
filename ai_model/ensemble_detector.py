@@ -82,128 +82,94 @@ class EnsembleDetector:
             self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"🔧 Initializing EnsembleDetector on device: {self.device}")
         
-        # Load CLIP + ResNet + V13 + Xception + EfficientNet ALL IN PARALLEL so total time ~2-4 min (not 10+)
-        # Use real OS threads (not eventlet green threads) so heavy I/O doesn't deadlock
-        try:
-            import eventlet.patcher as _ep_inner
-            threading = _ep_inner.original('threading')
-        except (ImportError, AttributeError):
-            import threading
-        clip_result = [None]
-        def load_clip_thread():
-            try:
-                from .enhanced_detector import _detector_instance as enhanced_singleton
-                if enhanced_singleton is not None:
-                    clip_result[0] = enhanced_singleton
-                    logger.info("✅ Reusing existing CLIP detector (singleton)")
-                    return
-                from .enhanced_detector import get_enhanced_detector
-                clip_result[0] = get_enhanced_detector(
-                    device=self.device,
-                    clip_model_name=clip_model_name,
-                    clip_pretrained=clip_pretrained
-                )
-                logger.info("✅ CLIP detector loaded")
-            except (ImportError, AttributeError, Exception) as e:
-                logger.warning(f"⚠️  CLIP: {e}")
-        
-        # Load ResNet, V13, Xception, EfficientNet in parallel with CLIP
+        # Load models SEQUENTIALLY — no child threads.
+        # This runs inside eventlet.tpool.execute() so it's already in a real
+        # OS thread. Child threads deadlock under eventlet; sequential is reliable.
+        import time as _t
         self.resnet_model = None
         self.v13_detector = None
         self.xception_detector = None
         self.efficientnet_detector = None
-        logger.info("📦 Loading CLIP, ResNet50, V13, XceptionNet, EfficientNet in parallel (max 4 min)...")
-        
-        def _load_state_dict_resnet(path: str):
-            """Load state dict from .pth or .safetensors (safetensors is much faster)."""
-            base, ext = os.path.splitext(path)
-            # Prefer safetensors if available (faster load, no pickle)
-            if ext.lower() == '.pth':
-                safetensors_path = base + '.safetensors'
-                if os.path.exists(safetensors_path):
-                    try:
-                        from safetensors.torch import load_file
-                        return load_file(safetensors_path, device=self.device)
-                    except Exception:
-                        pass
-            # .pth: use weights_only=True when supported (PyTorch 2.0+, faster/safer)
-            try:
-                ckpt = torch.load(path, map_location=self.device, weights_only=True)
-            except (TypeError, Exception):
-                ckpt = torch.load(path, map_location=self.device)
-            return ckpt.get('state_dict', ckpt) if isinstance(ckpt, dict) else ckpt
+        logger.info("📦 Loading ensemble models sequentially (CLIP → ResNet → V13 → EfficientNet)...")
 
-        def load_resnet():
-            try:
-                model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
-                for path in [resnet_model_path, 'ai_model/resnet_resnet50_final.pth', 'ai_model/resnet_resnet50_best.pth',
-                             'resnet_resnet50_final.pth', 'resnet_resnet50_best.pth']:
-                    if path and os.path.exists(path):
-                        state = _load_state_dict_resnet(path)
-                        model.load_state_dict(state, strict=False)
-                        model.to(self.device)
-                        model.eval()
-                        logger.info(f"✅ ResNet50 loaded from: {path}")
-                        return model
-                logger.warning("⚠️  ResNet50 weights not found. Skipping ResNet.")
-            except Exception as e:
-                logger.warning(f"⚠️  ResNet50: {e}")
-            return None
-        
-        def load_v13_thread():
-            if not V13_AVAILABLE:
-                return None
-            try:
-                return get_deepfake_detector_v13(device=self.device)
-            except Exception as e:
-                logger.warning(f"⚠️  V13: {e}")
-                return None
-        
-        def load_xception_thread():
-            if not XCEPTION_AVAILABLE:
-                return None
-            try:
-                return get_xception_detector(device=self.device)
-            except Exception as e:
-                logger.warning(f"⚠️  XceptionNet: {e}")
-                return None
-        
-        def load_efficientnet_thread():
-            if not EFFICIENTNET_AVAILABLE:
-                return None
-            try:
-                return get_efficientnet_detector(device=self.device)
-            except Exception as e:
-                logger.warning(f"⚠️  EfficientNet: {e}")
-                return None
-        
-        resnet_result, v13_result, xception_result, eff_result = [None], [None], [None], [None]
-        t_clip = threading.Thread(target=load_clip_thread, daemon=True)
-        t_resnet = threading.Thread(target=lambda: resnet_result.__setitem__(0, load_resnet()), daemon=True)
-        t_v13 = threading.Thread(target=lambda: v13_result.__setitem__(0, load_v13_thread()), daemon=True)
-        t_xception = threading.Thread(target=lambda: xception_result.__setitem__(0, load_xception_thread()), daemon=True)
-        t_eff = threading.Thread(target=lambda: eff_result.__setitem__(0, load_efficientnet_thread()), daemon=True)
-        t_clip.start()
-        t_resnet.start()
-        t_v13.start()
-        t_xception.start()
-        t_eff.start()
-        for t in (t_clip, t_resnet, t_v13, t_xception, t_eff):
-            t.join(timeout=240.0)  # max 4 min for full parallel batch (CLIP + 4 others)
-        self.clip_detector = clip_result[0]
-        if self.clip_detector is None:
-            logger.warning("⚠️  CLIP did not load in time; creating in main thread...")
-            try:
+        # --- 1. CLIP (required) ---
+        _s = _t.time()
+        try:
+            from .enhanced_detector import _detector_instance as enhanced_singleton
+            if enhanced_singleton is not None:
+                self.clip_detector = enhanced_singleton
+                logger.info(f"✅ CLIP reused (singleton) [{_t.time()-_s:.1f}s]")
+            else:
                 from .enhanced_detector import get_enhanced_detector
-                self.clip_detector = get_enhanced_detector(device=self.device, clip_model_name=clip_model_name, clip_pretrained=clip_pretrained)
+                self.clip_detector = get_enhanced_detector(
+                    device=self.device,
+                    clip_model_name=clip_model_name,
+                    clip_pretrained=clip_pretrained
+                )
+                logger.info(f"✅ CLIP loaded [{_t.time()-_s:.1f}s]")
+        except Exception as e:
+            raise RuntimeError(f"CLIP required for detection: {e}") from e
+
+        # --- 2. ResNet50 (local weights, fast) ---
+        _s = _t.time()
+        try:
+            model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
+            for path in [resnet_model_path, 'ai_model/resnet_resnet50_final.pth',
+                         'ai_model/resnet_resnet50_best.pth',
+                         'resnet_resnet50_final.pth', 'resnet_resnet50_best.pth']:
+                if path and os.path.exists(path):
+                    base, ext = os.path.splitext(path)
+                    st_path = base + '.safetensors'
+                    if ext.lower() == '.pth' and os.path.exists(st_path):
+                        try:
+                            from safetensors.torch import load_file
+                            state = load_file(st_path, device=self.device)
+                        except Exception:
+                            state = torch.load(path, map_location=self.device, weights_only=True)
+                    else:
+                        try:
+                            state = torch.load(path, map_location=self.device, weights_only=True)
+                        except (TypeError, Exception):
+                            state = torch.load(path, map_location=self.device)
+                    if isinstance(state, dict) and 'state_dict' in state:
+                        state = state['state_dict']
+                    model.load_state_dict(state, strict=False)
+                    model.to(self.device)
+                    model.eval()
+                    self.resnet_model = model
+                    logger.info(f"✅ ResNet50 loaded from {path} [{_t.time()-_s:.1f}s]")
+                    break
+            if self.resnet_model is None:
+                logger.warning(f"⚠️  ResNet50 weights not found [{_t.time()-_s:.1f}s]")
+        except Exception as e:
+            logger.warning(f"⚠️  ResNet50: {e} [{_t.time()-_s:.1f}s]")
+
+        # --- 3. V13 (HuggingFace download, can be slow) ---
+        _s = _t.time()
+        if V13_AVAILABLE:
+            try:
+                self.v13_detector = get_deepfake_detector_v13(device=self.device)
+                logger.info(f"✅ V13 loaded [{_t.time()-_s:.1f}s]")
             except Exception as e:
-                raise RuntimeError(f"CLIP required for detection: {e}") from e
-        self.resnet_model = resnet_result[0]
-        self.v13_detector = v13_result[0]
-        self.xception_detector = xception_result[0]
-        self.efficientnet_detector = eff_result[0]
-        if t_v13.is_alive():
-            logger.warning("⚠️  V13 loading timed out (4 min). Ensemble will use CLIP + ResNet + XceptionNet.")
+                logger.warning(f"⚠️  V13: {e} [{_t.time()-_s:.1f}s]")
+
+        # --- 4. EfficientNet (pretrained, fast) ---
+        _s = _t.time()
+        if EFFICIENTNET_AVAILABLE:
+            try:
+                self.efficientnet_detector = get_efficientnet_detector(device=self.device)
+                logger.info(f"✅ EfficientNet loaded [{_t.time()-_s:.1f}s]")
+            except Exception as e:
+                logger.warning(f"⚠️  EfficientNet: {e} [{_t.time()-_s:.1f}s]")
+
+        # --- 5. XceptionNet (optional) ---
+        _s = _t.time()
+        if XCEPTION_AVAILABLE:
+            try:
+                self.xception_detector = get_xception_detector(device=self.device)
+                logger.info(f"✅ XceptionNet loaded [{_t.time()-_s:.1f}s]")
+            except Exception as e:
+                logger.warning(f"⚠️  XceptionNet: {e} [{_t.time()-_s:.1f}s]")
         if self.v13_detector and getattr(self.v13_detector, 'model_loaded', False):
             logger.info("✅ DeepFake Detector V13 loaded successfully!")
         if self.xception_detector:
