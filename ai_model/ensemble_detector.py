@@ -637,30 +637,62 @@ def init_ensemble_blocking() -> Optional[EnsembleDetector]:
 
 
 def start_background_ensemble_load() -> None:
-    """Start loading the ensemble in a background thread. Returns immediately.
-    Safe to call multiple times — subsequent calls are no-ops unless a retry is due."""
+    """Start loading the ensemble in the background. Returns immediately.
+    Safe to call multiple times — subsequent calls are no-ops unless a retry is due.
+
+    When running under eventlet (production with gunicorn+eventlet), uses
+    eventlet.tpool to run in a real OS thread so heavy PyTorch/model loading
+    does not deadlock the green thread hub. This is the same mechanism the
+    scan analysis path uses for detect_fake."""
     global _ensemble_loading_started, _ensemble_overall_status
     with _ensemble_loading_lock:
         if _ensemble_instance is not None:
             return
         if _ensemble_loading_started and _ensemble_overall_status == 'loading':
-            return  # already in progress
-        # Allow retry after cooldown on failure
+            # Detect stuck loads: if loading for >10 min, allow retry
+            if _ensemble_load_start_time and (_time.time() - _ensemble_load_start_time) > 600:
+                logger.warning("Ensemble load appears stuck (>10 min). Resetting for retry...")
+                _ensemble_loading_started = False
+                _ensemble_overall_status = 'idle'
+            else:
+                return  # already in progress
         if _ensemble_overall_status == 'failed':
             if _last_fail_time and (_time.time() - _last_fail_time) < _RETRY_COOLDOWN:
                 return  # too soon to retry
             logger.info(f"Retrying ensemble load (attempt {_ensemble_fail_count + 1}) after cooldown...")
-            _ensemble_overall_status = 'loading'
         _ensemble_loading_started = True
+        _ensemble_overall_status = 'loading'
 
-    def _run():
+    def _run_load():
         try:
             init_ensemble_blocking()
         except Exception:
             pass  # status already set inside init_ensemble_blocking
-    t = _threading.Thread(target=_run, daemon=True, name='ensemble-loader')
-    t.start()
-    logger.info("Ensemble load started in background thread.")
+
+    # Detect eventlet: if active, use tpool (real OS threads) to avoid deadlock.
+    # Green threads cannot do heavy CPU/IO (PyTorch model loading) without
+    # blocking the hub. tpool.execute runs in a real thread that eventlet manages.
+    _use_eventlet_tpool = False
+    try:
+        import eventlet
+        if hasattr(eventlet, 'sleep') and _threading.__name__ != 'threading':
+            _use_eventlet_tpool = True
+    except ImportError:
+        pass
+
+    if _use_eventlet_tpool:
+        import eventlet as _ev
+        def _tpool_wrapper():
+            try:
+                _ev.tpool.execute(init_ensemble_blocking)
+            except Exception as e:
+                logger.warning(f"Ensemble tpool load failed: {e}")
+        _ev.spawn_n(_tpool_wrapper)
+        logger.info("Ensemble load started via eventlet.tpool (real OS thread).")
+    else:
+        t = _threading.Thread(target=_run_load, daemon=True, name='ensemble-loader')
+        t.start()
+        logger.info("Ensemble load started in background thread.")
 
 
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
