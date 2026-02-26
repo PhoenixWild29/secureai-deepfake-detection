@@ -673,16 +673,17 @@ def start_background_ensemble_load() -> None:
     _use_eventlet = os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet'
 
     if _use_eventlet:
-        # Green threads deadlock on heavy PyTorch loads. Use eventlet.tpool
+        # Green threads deadlock on heavy PyTorch loads. Use eventlet tpool
         # (real OS thread pool) — same mechanism the scan analysis path uses.
         import eventlet as _ev
+        from eventlet import tpool as _tpool
         def _tpool_wrapper():
             try:
-                _ev.tpool.execute(init_ensemble_blocking)
+                _tpool.execute(init_ensemble_blocking)
             except Exception as e:
                 logger.warning(f"Ensemble tpool load failed: {e}")
         _ev.spawn_n(_tpool_wrapper)
-        logger.info("Ensemble load started via eventlet.tpool (real OS thread).")
+        logger.info("Ensemble load started via eventlet tpool (real OS thread).")
     else:
         t = _threading.Thread(target=_run_load, daemon=True, name='ensemble-loader')
         t.start()
