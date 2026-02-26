@@ -669,18 +669,12 @@ def start_background_ensemble_load() -> None:
         except Exception:
             pass  # status already set inside init_ensemble_blocking
 
-    # Detect eventlet: if active, use tpool (real OS threads) to avoid deadlock.
-    # Green threads cannot do heavy CPU/IO (PyTorch model loading) without
-    # blocking the hub. tpool.execute runs in a real thread that eventlet manages.
-    _use_eventlet_tpool = False
-    try:
-        import eventlet
-        if hasattr(eventlet, 'sleep') and _threading.__name__ != 'threading':
-            _use_eventlet_tpool = True
-    except ImportError:
-        pass
+    # Detect eventlet by checking the env var the docker-compose and api.py use.
+    _use_eventlet = os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet'
 
-    if _use_eventlet_tpool:
+    if _use_eventlet:
+        # Green threads deadlock on heavy PyTorch loads. Use eventlet.tpool
+        # (real OS thread pool) — same mechanism the scan analysis path uses.
         import eventlet as _ev
         def _tpool_wrapper():
             try:
