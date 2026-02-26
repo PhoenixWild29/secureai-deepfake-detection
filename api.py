@@ -1166,21 +1166,11 @@ def analyze_video():
         _heartbeat_thread = threading.Thread(target=_progress_heartbeat, daemon=True)
         _heartbeat_thread.start()
         try:
-            ensemble_ok = _ensure_ensemble_loaded()
+            _ensure_ensemble_loaded()
         finally:
             _stop_heartbeat.set()
-        if not ensemble_ok:
-            try:
-                from ai_model.ensemble_detector import get_ensemble_status
-                status = get_ensemble_status()
-            except Exception:
-                status = {'status': 'loading', 'progress_pct': 0, 'ready': False}
-            return jsonify({
-                'error': 'Models are loading. The scan will start automatically when ready.',
-                'ensemble_unavailable': True,
-                'retry_after_seconds': 10,
-                'ensemble_status': status,
-            }), 503
+        # No 503 — if ensemble isn't preloaded, it loads inline inside tpool.execute
+        # (first scan takes 2-4 min; subsequent scans are instant)
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
@@ -1572,21 +1562,10 @@ def analyze_video_from_url():
         _heartbeat_thread = threading.Thread(target=_progress_heartbeat, daemon=True)
         _heartbeat_thread.start()
         try:
-            ensemble_ok = _ensure_ensemble_loaded()
+            _ensure_ensemble_loaded()
         finally:
             _stop_heartbeat.set()
-        if not ensemble_ok:
-            try:
-                from ai_model.ensemble_detector import get_ensemble_status
-                status = get_ensemble_status()
-            except Exception:
-                status = {'status': 'loading', 'progress_pct': 0, 'ready': False}
-            return jsonify({
-                'error': 'Models are loading. The scan will start automatically when ready.',
-                'ensemble_unavailable': True,
-                'retry_after_seconds': 10,
-                'ensemble_status': status,
-            }), 503
+        # No 503 — ensemble loads inline inside tpool if needed
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore

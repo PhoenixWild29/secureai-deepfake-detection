@@ -696,13 +696,19 @@ def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleD
 
 
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
-    """Convenience function for ensemble detection. Returns error dict if not ready."""
+    """Convenience function for ensemble detection.
+    If the ensemble isn't loaded yet, loads it inline (works because the caller
+    — api.py — already runs this inside eventlet.tpool.execute)."""
     detector = get_ensemble_detector()
     if detector is None:
-        start_background_ensemble_load()  # ensure loading is in progress
+        # Load models right here. This is safe because api.py wraps the entire
+        # analysis in tpool.execute() which runs in a real OS thread.
+        logger.info("Ensemble not loaded yet — loading inline (first scan, takes 2-4 min)...")
+        detector = init_ensemble_blocking()
+    if detector is None:
         status = get_ensemble_status()
         return {
-            'error': 'Ensemble detector is still loading. It will be ready shortly.',
+            'error': 'Ensemble detector failed to load. Check server logs.',
             'is_deepfake': False,
             'confidence': 0.0,
             'ensemble_fake_probability': 0.5,
