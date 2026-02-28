@@ -1,0 +1,1515 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#service-level-agreement-sla" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Service Level Agreement (SLA)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Service Level Agreement (SLA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#service-level-commitments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Service Level Commitments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-service-availability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. SERVICE AVAILABILITY
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. SERVICE AVAILABILITY">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-uptime-commitments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Uptime Commitments
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1 Uptime Commitments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#professional-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Professional Tier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enterprise-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enterprise Tier
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-service-credit-claims" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Service Credit Claims
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-performance-commitments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. PERFORMANCE COMMITMENTS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. PERFORMANCE COMMITMENTS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-analysis-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Analysis Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1 Analysis Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#processing-time-sla" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Processing Time SLA
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-detection-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Detection Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-support-commitments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. SUPPORT COMMITMENTS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. SUPPORT COMMITMENTS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-support-response-times" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Support Response Times
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Support Response Times">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#starter-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starter Tier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#professional-tier_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Professional Tier
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enterprise-tier_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enterprise Tier
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-priority-definitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Priority Definitions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-maintenance-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. MAINTENANCE &amp; UPDATES
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. MAINTENANCE &amp; UPDATES">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-scheduled-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Scheduled Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-emergency-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Emergency Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-software-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Software Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-protection-backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. DATA PROTECTION &amp; BACKUP
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. DATA PROTECTION &amp; BACKUP">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-data-backup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Data Backup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-data-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Data Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-security-commitments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. SECURITY COMMITMENTS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. SECURITY COMMITMENTS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-security-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Security Standards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-incident-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Incident Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-compliance-commitments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. COMPLIANCE COMMITMENTS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. COMPLIANCE COMMITMENTS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-regulatory-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Regulatory Compliance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-audit-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Audit Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-service-level-exclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. SERVICE LEVEL EXCLUSIONS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. SERVICE LEVEL EXCLUSIONS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-sla-does-not-apply-to" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 SLA Does Not Apply To:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-sla-reporting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. SLA REPORTING
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. SLA REPORTING">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-performance-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Performance Reports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-transparency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Transparency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-sla-modifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. SLA MODIFICATIONS
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. SLA MODIFICATIONS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-changes-to-sla" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Changes to SLA
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-custom-sla" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Custom SLA
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-acceptance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. ACCEPTANCE
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="service-level-agreement-sla">Service Level Agreement (SLA)</h2>
+<h3 id="service-level-commitments">📋 Service Level Commitments</h3>
+<p>This Service Level Agreement ("SLA") defines the service levels that SecureAI, Inc. ("SecureAI") will provide to Customer under the Master Software License Agreement.</p>
+<hr />
+<h2 id="1-service-availability">1. SERVICE AVAILABILITY</h2>
+<h3 id="11-uptime-commitments"><strong>1.1 Uptime Commitments</strong></h3>
+<h4 id="professional-tier"><strong>Professional Tier</strong></h4>
+<pre><code class="language-yaml">Monthly Uptime: 99.5% guaranteed
+Measurement Period: Calendar month
+Excludes: Scheduled maintenance (max 4 hours/month with 7 days notice)
+
+Service Credit Formula:
+  99.0% - 99.5% uptime: 10% monthly service credit
+  98.0% - 99.0% uptime: 25% monthly service credit
+  Below 98.0% uptime: 50% monthly service credit
+
+Maximum Credit: 50% of monthly fees
+</code></pre>
+<h4 id="enterprise-tier"><strong>Enterprise Tier</strong></h4>
+<pre><code class="language-yaml">Monthly Uptime: 99.9% guaranteed
+Measurement Period: Calendar month
+Excludes: Scheduled maintenance (max 2 hours/month with 14 days notice)
+
+Service Credit Formula:
+  99.5% - 99.9% uptime: 10% monthly service credit
+  99.0% - 99.5% uptime: 25% monthly service credit
+  98.0% - 99.0% uptime: 50% monthly service credit
+  Below 98.0% uptime: 100% monthly service credit
+
+Maximum Credit: 100% of monthly fees
+Additional: Priority restoration and root cause analysis
+</code></pre>
+<h3 id="12-service-credit-claims"><strong>1.2 Service Credit Claims</strong></h3>
+<p>To receive service credits, Customer must:
+1. Submit claim within 30 days of incident
+2. Provide incident details and impact documentation
+3. Have current account in good standing
+4. Credits apply to next month's invoice
+5. Credits are Customer's sole remedy for availability issues</p>
+<hr />
+<h2 id="2-performance-commitments">2. PERFORMANCE COMMITMENTS</h2>
+<h3 id="21-analysis-performance"><strong>2.1 Analysis Performance</strong></h3>
+<h4 id="processing-time-sla"><strong>Processing Time SLA</strong></h4>
+<table>
+<thead>
+<tr>
+<th>Analysis Type</th>
+<th>Target</th>
+<th>Maximum</th>
+<th>SLA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quick</td>
+<td>&lt;1 minute</td>
+<td>2 minutes</td>
+<td>95% within target</td>
+</tr>
+<tr>
+<td>Comprehensive</td>
+<td>2-5 minutes</td>
+<td>10 minutes</td>
+<td>95% within target</td>
+</tr>
+<tr>
+<td>Security-focused</td>
+<td>3-7 minutes</td>
+<td>15 minutes</td>
+<td>95% within target</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Measurement:</strong>
+- Calculated monthly
+- Based on successful analyses
+- Excludes customer network latency</p>
+<p><strong>Service Credits:</strong></p>
+<pre><code class="language-yaml">Performance Below SLA:
+  90-95% within target: No credit (warning issued)
+  85-90% within target: 5% service credit
+  Below 85% within target: 10% service credit
+
+Maximum Credit: 10% monthly fees (combined with availability credits)
+</code></pre>
+<h3 id="22-detection-accuracy"><strong>2.2 Detection Accuracy</strong></h3>
+<pre><code class="language-yaml">Accuracy Target: 95% detection accuracy
+Measurement: Monthly validation against test dataset
+Reporting: Quarterly accuracy reports provided
+
+Accuracy Commitment:
+  - 95%+ accuracy: Meeting SLA
+  - 92-95% accuracy: Review and optimization
+  - Below 92%: Immediate remediation
+
+Note: Accuracy measured on controlled test dataset.
+Actual results may vary based on video quality and manipulation techniques.
+</code></pre>
+<hr />
+<h2 id="3-support-commitments">3. SUPPORT COMMITMENTS</h2>
+<h3 id="31-support-response-times"><strong>3.1 Support Response Times</strong></h3>
+<h4 id="starter-tier"><strong>Starter Tier</strong></h4>
+<pre><code class="language-yaml">Support Hours: Monday-Friday, 9 AM - 5 PM EST
+Channels: Email, knowledge base
+Holiday Coverage: No
+
+Response Times:
+  Critical (P1): 8 business hours
+  High (P2): 24 business hours
+  Medium (P3): 48 business hours
+  Low (P4): 72 business hours
+</code></pre>
+<h4 id="professional-tier_1"><strong>Professional Tier</strong></h4>
+<pre><code class="language-yaml">Support Hours: Monday-Friday, 8 AM - 8 PM EST
+Channels: Email, phone, chat
+Holiday Coverage: Limited
+
+Response Times:
+  Critical (P1): 4 business hours
+  High (P2): 8 business hours
+  Medium (P3): 24 business hours
+  Low (P4): 48 business hours
+
+Additional: Monthly check-in calls
+</code></pre>
+<h4 id="enterprise-tier_1"><strong>Enterprise Tier</strong></h4>
+<pre><code class="language-yaml">Support Hours: 24/7/365
+Channels: Email, phone, chat, emergency hotline
+Holiday Coverage: Full
+
+Response Times:
+  Critical (P1): 1 hour
+  High (P2): 4 hours
+  Medium (P3): 8 hours
+  Low (P4): 24 hours
+
+Additional:
+  - Dedicated account manager
+  - Dedicated solutions architect
+  - Quarterly business reviews
+  - On-site support (upon request)
+</code></pre>
+<h3 id="32-priority-definitions"><strong>3.2 Priority Definitions</strong></h3>
+<p><strong>Critical (P1):</strong>
+- System completely unavailable
+- Data loss or corruption
+- Security breach
+- Affects all or most users</p>
+<p><strong>High (P2):</strong>
+- Major functionality unavailable
+- Significant performance degradation
+- Affects multiple users
+- Security vulnerability</p>
+<p><strong>Medium (P3):</strong>
+- Minor functionality impaired
+- Affects limited number of users
+- Workaround available
+- Non-critical bug</p>
+<p><strong>Low (P4):</strong>
+- Cosmetic issues
+- Feature requests
+- General questions
+- Documentation requests</p>
+<hr />
+<h2 id="4-maintenance-updates">4. MAINTENANCE &amp; UPDATES</h2>
+<h3 id="41-scheduled-maintenance"><strong>4.1 Scheduled Maintenance</strong></h3>
+<pre><code class="language-yaml">Professional Tier:
+  Maximum: 4 hours per month
+  Notice: 7 days advance notice
+  Schedule: Outside business hours when possible
+  Communication: Email notification and status page
+
+Enterprise Tier:
+  Maximum: 2 hours per month
+  Notice: 14 days advance notice
+  Schedule: Coordinated with Customer
+  Communication: Email, phone, status page, account manager
+</code></pre>
+<h3 id="42-emergency-maintenance"><strong>4.2 Emergency Maintenance</strong></h3>
+<pre><code class="language-yaml">Unplanned Maintenance:
+  - Notice: As soon as possible
+  - Duration: Minimize impact
+  - Communication: Real-time updates
+  - Post-incident: Root cause analysis (Enterprise)
+
+Does not count toward scheduled maintenance limits
+</code></pre>
+<h3 id="43-software-updates"><strong>4.3 Software Updates</strong></h3>
+<pre><code class="language-yaml">Update Types:
+  Minor Updates: Monthly
+    - Bug fixes
+    - Performance improvements
+    - Security patches
+    - Applied automatically
+
+  Major Updates: Quarterly
+    - New features
+    - Significant enhancements
+    - Applied with 14 days notice
+    - Optional rollback period
+
+  Security Updates: As needed
+    - Critical security patches
+    - Applied immediately
+    - Customer notification within 24 hours
+</code></pre>
+<hr />
+<h2 id="5-data-protection-backup">5. DATA PROTECTION &amp; BACKUP</h2>
+<h3 id="51-data-backup"><strong>5.1 Data Backup</strong></h3>
+<pre><code class="language-yaml">Backup Frequency:
+  Customer Data: Daily incremental, weekly full
+  Configuration: Daily
+  Audit Logs: Real-time replication
+
+Backup Retention:
+  Daily backups: 7 days
+  Weekly backups: 30 days
+  Monthly backups: 1 year
+
+Backup Locations:
+  Primary: AWS us-west-2
+  Secondary: AWS us-east-1
+  Optional: EU region (for GDPR)
+
+Backup Encryption: AES-256
+</code></pre>
+<h3 id="52-data-recovery"><strong>5.2 Data Recovery</strong></h3>
+<pre><code class="language-yaml">Recovery Time Objective (RTO):
+  Professional Tier: 4 hours
+  Enterprise Tier: 2 hours
+
+Recovery Point Objective (RPO):
+  Professional Tier: 24 hours
+  Enterprise Tier: 4 hours
+
+Disaster Recovery:
+  Professional: Manual failover
+  Enterprise: Automatic failover
+
+  Testing: Annual DR drill
+  Documentation: DR procedures provided
+</code></pre>
+<hr />
+<h2 id="6-security-commitments">6. SECURITY COMMITMENTS</h2>
+<h3 id="61-security-standards"><strong>6.1 Security Standards</strong></h3>
+<pre><code class="language-yaml">Certifications Maintained:
+  ✅ SOC 2 Type II (annual audit)
+  ✅ ISO 27001 (certified)
+  ✅ PCI DSS (if applicable)
+  ✅ HIPAA (optional, for healthcare)
+
+Security Testing:
+  - Penetration testing: Quarterly
+  - Vulnerability scanning: Weekly
+  - Security audits: Annual
+  - Compliance reviews: Quarterly
+</code></pre>
+<h3 id="62-incident-response"><strong>6.2 Incident Response</strong></h3>
+<pre><code class="language-yaml">Security Incident Response:
+  Detection: 24/7 monitoring
+  Notification: Within 24 hours of detection
+  Investigation: Immediate
+  Resolution: Based on severity
+
+  Reporting:
+    - Incident summary: Within 72 hours
+    - Root cause analysis: Within 7 days
+    - Remediation plan: Within 14 days
+
+Customer Notification:
+  - Email: Primary contact
+  - Phone: For critical incidents
+  - Portal: Incident status updates
+</code></pre>
+<hr />
+<h2 id="7-compliance-commitments">7. COMPLIANCE COMMITMENTS</h2>
+<h3 id="71-regulatory-compliance"><strong>7.1 Regulatory Compliance</strong></h3>
+<pre><code class="language-yaml">Maintained Compliance:
+  ✅ GDPR (General Data Protection Regulation)
+  ✅ CCPA/CPRA (California privacy laws)
+  ✅ AI Act (European Union AI regulation)
+  ✅ SOX (Sarbanes-Oxley) - for applicable customers
+  ✅ HIPAA (Health Insurance Portability) - optional
+
+Evidence Provided:
+  - Compliance attestations
+  - Audit reports (summary)
+  - Certification documents
+  - Policy documentation
+</code></pre>
+<h3 id="72-audit-support"><strong>7.2 Audit Support</strong></h3>
+<pre><code class="language-yaml">Customer Audits:
+  - Notice required: 30 days
+  - Frequency: Once per year
+  - Documentation provided: Yes
+  - On-site audits: Enterprise tier only
+  - Remote audits: All tiers
+
+SecureAI Audits:
+  - Right to audit: Upon reasonable notice
+  - Security audits: Quarterly
+  - Compliance audits: Annual
+  - Results shared: Summary provided
+</code></pre>
+<hr />
+<h2 id="8-service-level-exclusions">8. SERVICE LEVEL EXCLUSIONS</h2>
+<h3 id="81-sla-does-not-apply-to"><strong>8.1 SLA Does Not Apply To:</strong></h3>
+<p>❌ Issues caused by factors outside SecureAI's control:
+- Customer's network or internet connectivity
+- Third-party services or integrations
+- Customer's equipment or software
+- Force majeure events</p>
+<p>❌ Issues caused by Customer:
+- Unauthorized modifications
+- Misuse or abuse of the Software
+- Failure to follow documentation
+- Exceeding usage limits</p>
+<p>❌ Scheduled maintenance windows (with proper notice)</p>
+<p>❌ Beta features or experimental functionality</p>
+<hr />
+<h2 id="9-sla-reporting">9. SLA REPORTING</h2>
+<h3 id="91-performance-reports"><strong>9.1 Performance Reports</strong></h3>
+<pre><code class="language-yaml">Monthly Reports (All Tiers):
+  - System uptime percentage
+  - Average response times
+  - Performance metrics
+  - Incident summary
+
+Quarterly Reports (Professional+):
+  - Detailed performance analysis
+  - Trend analysis
+  - Capacity planning
+  - Recommendations
+
+Annual Reports (Enterprise):
+  - Comprehensive review
+  - Year-over-year comparison
+  - Strategic recommendations
+  - Executive presentation
+</code></pre>
+<h3 id="92-transparency"><strong>9.2 Transparency</strong></h3>
+<pre><code class="language-yaml">Status Page: https://status.secureai.com
+  - Real-time system status
+  - Scheduled maintenance calendar
+  - Incident history
+  - Subscribe to notifications
+
+Performance Dashboard:
+  - Customer portal access
+  - Real-time metrics
+  - Historical data
+  - Custom reports
+</code></pre>
+<hr />
+<h2 id="10-sla-modifications">10. SLA MODIFICATIONS</h2>
+<h3 id="101-changes-to-sla"><strong>10.1 Changes to SLA</strong></h3>
+<p>SecureAI may modify this SLA upon 60 days written notice. Changes apply at next renewal date. If Customer objects to changes, Customer may terminate without penalty within 30 days of notice.</p>
+<h3 id="102-custom-sla"><strong>10.2 Custom SLA</strong></h3>
+<p>Enterprise customers may negotiate custom SLA terms including:
+- Higher uptime guarantees
+- Faster response times
+- Custom performance metrics
+- Additional service credits
+- Dedicated resources</p>
+<p>Contact: enterprise-sales@secureai.com</p>
+<hr />
+<h2 id="11-acceptance">11. ACCEPTANCE</h2>
+<p>By using the SecureAI Services, Customer agrees to the terms of this SLA.</p>
+<p><strong>Effective Date:</strong> January 27, 2025<br />
+<strong>Version:</strong> 1.0<br />
+<strong>Last Updated:</strong> January 27, 2025</p>
+<hr />
+<p><strong>Questions about SLA commitments?</strong><br />
+Contact: support@secureai.com or your account manager</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

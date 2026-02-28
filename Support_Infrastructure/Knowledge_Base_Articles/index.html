@@ -1,0 +1,1773 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-base-article-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Base Article Library
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Knowledge Base Article Library">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-self-service-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Comprehensive Self-Service Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Getting Started Articles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Getting Started Articles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#article-001-creating-your-secureai-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 001: Creating Your SecureAI Account
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 001: Creating Your SecureAI Account">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#article-002-understanding-confidence-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 002: Understanding Confidence Scores
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 002: Understanding Confidence Scores">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-are-confidence-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Confidence Scores?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#score-interpretation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Score Interpretation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#factors-affecting-confidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Factors Affecting Confidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Troubleshooting Articles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Troubleshooting Articles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#article-101-troubleshooting-upload-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 101: Troubleshooting Upload Failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 101: Troubleshooting Upload Failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-upload-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Upload Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prevention-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prevention Tips
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#article-102-api-authentication-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 102: API Authentication Errors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 102: API Authentication Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-api-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common API Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔌 Integration Articles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔌 Integration Articles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#article-201-setting-up-splunk-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 201: Setting Up Splunk Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 201: Setting Up Splunk Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-by-step-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-Step Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#article-202-configuring-saml-single-sign-on" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 202: Configuring SAML Single Sign-On
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 202: Configuring SAML Single Sign-On">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#part-1-identity-provider-setup-okta-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part 1: Identity Provider Setup (Okta Example)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#communication-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💬 Communication Templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💬 Communication Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#article-301-ticket-response-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article 301: Ticket Response Templates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Article 301: Ticket Response Templates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initial-response-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initial Response Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#progress-update-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Progress Update Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolution-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resolution Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#top-50-knowledge-base-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Top 50 Knowledge Base Articles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Top 50 Knowledge Base Articles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#most-viewed-articles-by-category" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Most Viewed Articles (By Category)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Most Viewed Articles (By Category)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-started-10-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Started (10 articles)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-analysis-10-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Video Analysis (10 articles)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-integration-10-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Integration (10 articles)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integrations-8-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integrations (8 articles)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#administration-8-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Administration (8 articles)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-4-articles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting (4 articles)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-base-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Knowledge Base Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Knowledge Base Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#article-performance-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Article Performance Tracking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-improvement-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Improvement Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="knowledge-base-article-library">Knowledge Base Article Library</h2>
+<h3 id="comprehensive-self-service-support">📚 Comprehensive Self-Service Support</h3>
+<p>Pre-written knowledge base articles for common customer questions and issues.</p>
+<hr />
+<h2 id="getting-started-articles">🚀 Getting Started Articles</h2>
+<h3 id="article-001-creating-your-secureai-account"><strong>Article 001: Creating Your SecureAI Account</strong></h3>
+<p><strong>Category:</strong> Getting Started<br />
+<strong>Difficulty:</strong> Beginner<br />
+<strong>Reading Time:</strong> 2 minutes</p>
+<h4 id="overview"><strong>Overview</strong></h4>
+<p>Learn how to create and activate your SecureAI account.</p>
+<h4 id="steps"><strong>Steps</strong></h4>
+<ol>
+<li>Go to https://secureai.yourcompany.com/signup</li>
+<li>Enter your email address</li>
+<li>Choose a strong password (12+ characters, mixed case, numbers, symbols)</li>
+<li>Verify your email (check inbox for verification link)</li>
+<li>Complete your profile information</li>
+<li>Set up two-factor authentication (recommended)</li>
+</ol>
+<h4 id="troubleshooting"><strong>Troubleshooting</strong></h4>
+<ul>
+<li><strong>Email not received?</strong> Check spam folder, add noreply@secureai.com to contacts</li>
+<li><strong>Password rejected?</strong> Ensure it meets requirements above</li>
+<li><strong>Verification link expired?</strong> Request a new verification email</li>
+</ul>
+<p><strong>Related:</strong> First Login Guide, Profile Setup, Two-Factor Authentication</p>
+<hr />
+<h3 id="article-002-understanding-confidence-scores"><strong>Article 002: Understanding Confidence Scores</strong></h3>
+<p><strong>Category:</strong> Core Features &gt; Video Analysis<br />
+<strong>Difficulty:</strong> Beginner<br />
+<strong>Reading Time:</strong> 5 minutes</p>
+<h4 id="what-are-confidence-scores"><strong>What Are Confidence Scores?</strong></h4>
+<p>Confidence scores indicate how certain the AI system is that a video is a deepfake, expressed as a percentage from 0% to 100%.</p>
+<h4 id="score-interpretation"><strong>Score Interpretation</strong></h4>
+<table>
+<thead>
+<tr>
+<th>Score Range</th>
+<th>Risk Level</th>
+<th>Meaning</th>
+<th>Recommended Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>90-100%</strong></td>
+<td>🔴 Critical</td>
+<td>AI is very confident this is a deepfake</td>
+<td>Immediate investigation, create security incident</td>
+</tr>
+<tr>
+<td><strong>80-89%</strong></td>
+<td>🟠 High</td>
+<td>Strong indicators of manipulation</td>
+<td>Manual expert review, document findings</td>
+</tr>
+<tr>
+<td><strong>60-79%</strong></td>
+<td>🟡 Medium</td>
+<td>Moderate suspicion, some red flags</td>
+<td>Additional analysis, monitor closely</td>
+</tr>
+<tr>
+<td><strong>40-59%</strong></td>
+<td>🟢 Low</td>
+<td>Uncertain, borderline case</td>
+<td>Request second opinion, use security-focused analysis</td>
+</tr>
+<tr>
+<td><strong>0-39%</strong></td>
+<td>⚪ Very Low</td>
+<td>Likely authentic video</td>
+<td>Standard documentation, no special action</td>
+</tr>
+</tbody>
+</table>
+<h4 id="factors-affecting-confidence"><strong>Factors Affecting Confidence</strong></h4>
+<p><strong>Increases Confidence:</strong>
+- Multiple detection techniques agree
+- Clear manipulation indicators
+- High-quality source video
+- Complete metadata available</p>
+<p><strong>Decreases Confidence:</strong>
+- Poor video quality
+- Heavy compression
+- Short video duration
+- Missing metadata</p>
+<h4 id="best-practices"><strong>Best Practices</strong></h4>
+<p>✅ <strong>DO:</strong>
+- Use confidence scores as one factor in decision-making
+- Consider the context and source
+- Review detailed analysis for high-stakes decisions
+- Combine with human expertise for critical cases</p>
+<p>❌ <strong>DON'T:</strong>
+- Rely solely on confidence scores
+- Ignore low scores if context is suspicious
+- Make irreversible decisions without review
+- Skip detailed analysis for important videos</p>
+<p><strong>Related:</strong> Detection Techniques Explained, Forensic Analysis, Creating Incidents</p>
+<hr />
+<h2 id="troubleshooting-articles">🔧 Troubleshooting Articles</h2>
+<h3 id="article-101-troubleshooting-upload-failures"><strong>Article 101: Troubleshooting Upload Failures</strong></h3>
+<p><strong>Category:</strong> Troubleshooting<br />
+<strong>Difficulty:</strong> Beginner<br />
+<strong>Reading Time:</strong> 4 minutes</p>
+<h4 id="common-upload-issues"><strong>Common Upload Issues</strong></h4>
+<p><strong>Error: "File too large"</strong></p>
+<pre><code>Problem: Video exceeds 500MB limit
+Solutions:
+1. Compress video using these settings:
+   - Codec: H.264
+   - Bitrate: 5 Mbps
+   - Resolution: 1080p max
+   - Tool: HandBrake, FFmpeg
+
+2. Split video into smaller segments
+
+3. Upgrade to Enterprise tier (unlimited size)
+
+Command to compress with FFmpeg:
+ffmpeg -i input.mp4 -vcodec h264 -b:v 5M output.mp4
+</code></pre>
+<p><strong>Error: "Unsupported format"</strong></p>
+<pre><code>Problem: Video format not supported
+Supported: MP4, AVI, MOV, MKV, WEBM
+Unsupported: FLV, WMV, 3GP
+
+Solution: Convert to MP4 using:
+ffmpeg -i input.flv -c:v h264 -c:a aac output.mp4
+</code></pre>
+<p><strong>Error: "Upload timeout"</strong></p>
+<pre><code>Problem: Network connection interrupted
+Solutions:
+1. Check internet connection speed (need 10+ Mbps)
+2. Try uploading during off-peak hours
+3. Use API upload for better reliability
+4. Contact support for large file assistance
+</code></pre>
+<p><strong>Error: "Invalid video file"</strong></p>
+<pre><code>Problem: File is corrupted or not a valid video
+Solutions:
+1. Verify file plays in video player
+2. Re-export from source
+3. Try different encoding
+4. Contact support if file is valid
+</code></pre>
+<h4 id="prevention-tips"><strong>Prevention Tips</strong></h4>
+<ul>
+<li>Keep videos under 400MB for best results</li>
+<li>Use MP4 format with H.264 codec</li>
+<li>Ensure stable internet connection</li>
+<li>Test with small file first</li>
+</ul>
+<p><strong>Related:</strong> Supported File Formats, Video Compression Guide, API Upload</p>
+<hr />
+<h3 id="article-102-api-authentication-errors"><strong>Article 102: API Authentication Errors</strong></h3>
+<p><strong>Category:</strong> Troubleshooting &gt; API<br />
+<strong>Difficulty:</strong> Intermediate<br />
+<strong>Reading Time:</strong> 6 minutes</p>
+<h4 id="common-api-errors"><strong>Common API Errors</strong></h4>
+<p><strong>Error 401: Unauthorized</strong></p>
+<pre><code>Cause: Invalid or expired API token
+Solutions:
+
+1. Verify token is not expired
+   - Tokens expire after 24 hours (default)
+   - Generate new token in dashboard
+
+2. Check header format:
+   Correct: Authorization: Bearer YOUR_TOKEN_HERE
+   Wrong: Authorization: YOUR_TOKEN_HERE
+   Wrong: Bearer YOUR_TOKEN_HERE
+
+3. Ensure token has required permissions
+   - Check token permissions in dashboard
+   - Regenerate with correct permissions
+
+4. Verify you're using the correct API endpoint
+   - Production: https://api.secureai.com/v1
+   - Staging: https://staging-api.secureai.com/v1
+
+Example (Python):
+headers = {
+    &quot;Authorization&quot;: f&quot;Bearer {api_token}&quot;,
+    &quot;Content-Type&quot;: &quot;application/json&quot;
+}
+response = requests.post(url, headers=headers)
+</code></pre>
+<p><strong>Error 429: Rate Limited</strong></p>
+<pre><code>Cause: Too many requests in short time
+Solutions:
+
+1. Check your rate limits:
+   - Starter: 10 requests/minute
+   - Professional: 50 requests/minute
+   - Enterprise: 100 requests/minute
+
+2. Implement exponential backoff:
+
+import time
+
+def api_request_with_retry(url, headers, data, max_retries=3):
+    for attempt in range(max_retries):
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code != 429:
+            return response
+
+        wait_time = 2 ** attempt  # 1s, 2s, 4s
+        time.sleep(wait_time)
+
+    return response
+
+3. Use batch endpoints for multiple videos
+4. Upgrade tier for higher limits
+</code></pre>
+<p><strong>Error 500: Internal Server Error</strong></p>
+<pre><code>Cause: Server-side issue
+Solutions:
+
+1. Check system status: https://status.secureai.com
+2. Retry request after brief delay
+3. If persistent:
+   - Save request details
+   - Note timestamp and error
+   - Contact support with request ID
+
+4. Temporary workaround: Use web interface
+</code></pre>
+<p><strong>Related:</strong> API Documentation, Rate Limiting, Error Codes Reference</p>
+<hr />
+<h2 id="integration-articles">🔌 Integration Articles</h2>
+<h3 id="article-201-setting-up-splunk-integration"><strong>Article 201: Setting Up Splunk Integration</strong></h3>
+<p><strong>Category:</strong> Integrations &gt; SIEM<br />
+<strong>Difficulty:</strong> Advanced<br />
+<strong>Reading Time:</strong> 10 minutes</p>
+<h4 id="prerequisites"><strong>Prerequisites</strong></h4>
+<ul>
+<li>Splunk instance (8.0 or later)</li>
+<li>Admin access to both SecureAI and Splunk</li>
+<li>Service account credentials for API access</li>
+</ul>
+<h4 id="step-by-step-setup"><strong>Step-by-Step Setup</strong></h4>
+<p><strong>Part 1: Splunk Configuration</strong></p>
+<pre><code>1. Create SecureAI Index
+   - Navigate to Settings → Indexes
+   - Click &quot;New Index&quot;
+   - Name: secureai
+   - Max size: 100GB (adjust as needed)
+   - Save
+
+2. Create Service Account
+   - Navigate to Settings → Users
+   - Create user: secureai_integration
+   - Role: can_index, can_search
+   - Generate password
+   - Save credentials
+
+3. Enable HTTP Event Collector (HEC)
+   - Settings → Data Inputs → HTTP Event Collector
+   - Click &quot;New Token&quot;
+   - Name: SecureAI Events
+   - Source type: secureai:deepfake
+   - Allowed indexes: secureai
+   - Save token value
+</code></pre>
+<p><strong>Part 2: SecureAI Configuration</strong></p>
+<pre><code>1. Navigate to Settings → Integrations → SIEM
+2. Click &quot;Add Integration&quot;
+3. Select &quot;Splunk&quot;
+4. Enter connection details:
+
+   Splunk URL: https://splunk.company.com:8089
+   Username: secureai_integration
+   Password: [service account password]
+   HEC Token: [token from Part 1]
+   Index: secureai
+
+5. Configure event types to forward:
+   ☑ High-confidence deepfake detections (&gt;90%)
+   ☑ Medium-confidence detections (70-89%)
+   ☐ All analyses (generates high volume)
+   ☑ System alerts
+   ☑ Authentication events
+
+6. Click &quot;Test Connection&quot;
+7. If successful, click &quot;Save Integration&quot;
+</code></pre>
+<p><strong>Part 3: Verification</strong></p>
+<pre><code>1. In Splunk, run search:
+   index=secureai | head 10
+
+2. You should see events from SecureAI
+3. Verify event structure and data
+4. Create alerts if needed
+</code></pre>
+<h4 id="troubleshooting_1"><strong>Troubleshooting</strong></h4>
+<ul>
+<li><strong>Connection fails:</strong> Verify Splunk URL and credentials</li>
+<li><strong>No events appearing:</strong> Check HEC token and index permissions</li>
+<li><strong>Events delayed:</strong> Normal for first sync, wait 5-10 minutes</li>
+</ul>
+<p><strong>Related:</strong> QRadar Integration, ArcSight Integration, Event Forwarding</p>
+<hr />
+<h3 id="article-202-configuring-saml-single-sign-on"><strong>Article 202: Configuring SAML Single Sign-On</strong></h3>
+<p><strong>Category:</strong> Integrations &gt; Identity<br />
+<strong>Difficulty:</strong> Advanced<br />
+<strong>Reading Time:</strong> 12 minutes</p>
+<h4 id="prerequisites_1"><strong>Prerequisites</strong></h4>
+<ul>
+<li>Identity Provider (IdP) with SAML 2.0 support (Okta, Azure AD, etc.)</li>
+<li>Admin access to IdP and SecureAI</li>
+<li>X.509 certificate from IdP</li>
+</ul>
+<h4 id="part-1-identity-provider-setup-okta-example"><strong>Part 1: Identity Provider Setup (Okta Example)</strong></h4>
+<pre><code>1. Log in to Okta Admin Console
+2. Navigate to Applications → Applications
+3. Click &quot;Create App Integration&quot;
+4. Select &quot;SAML 2.0&quot;
+5. Configure General Settings:
+
+   App name: SecureAI DeepFake Detection
+   App logo: [Upload SecureAI logo]
+
+6. Configure SAML Settings:
+
+   Single sign on URL:
+   https://secureai.yourcompany.com/auth/saml/callback
+
+   Audience URI (SP Entity ID):
+   https://secureai.yourcompany.com
+
+   Name ID format: EmailAddress
+   Application username: Email
+
+7. Attribute Statements:
+
+   email → user.email
+   firstName → user.firstName
+   lastName → user.lastName
+   groups → user.groups
+
+8. Save configuration
+9. Download IdP metadata or note:
+   - SSO URL
+   - Entity ID
+   - X.509 Certificate
+</code></pre>
+<p><strong>Part 2: SecureAI Configuration</strong></p>
+<pre><code>1. Log in to SecureAI as admin
+2. Navigate to Settings → Authentication → SSO
+3. Select &quot;SAML 2.0&quot;
+4. Configure SAML Settings:
+
+   IdP Entity ID: [from Okta]
+   SSO URL: [from Okta]
+   X.509 Certificate: [paste certificate]
+
+   Attribute Mapping:
+   Email: email
+   First Name: firstName
+   Last Name: lastName
+   Groups: groups
+
+5. Group to Role Mapping:
+
+   &quot;Security Team&quot; → security_professional
+   &quot;Compliance Team&quot; → compliance_officer
+   &quot;Content Moderators&quot; → content_moderator
+   &quot;IT Admins&quot; → admin
+
+6. Click &quot;Test SAML Configuration&quot;
+7. Complete test login flow
+8. If successful, click &quot;Enable SAML&quot;
+</code></pre>
+<p><strong>Part 3: Verification</strong></p>
+<pre><code>1. Log out of SecureAI
+2. Go to https://secureai.yourcompany.com
+3. Click &quot;Sign in with SSO&quot;
+4. Enter your corporate email
+5. Redirect to IdP login
+6. Complete IdP authentication
+7. Redirect back to SecureAI
+8. Verify you're logged in
+9. Check your role assignment
+</code></pre>
+<h4 id="common-issues"><strong>Common Issues</strong></h4>
+<p><strong>"SAML Response Invalid"</strong>
+- Check certificate is correctly pasted
+- Verify SSO URL is correct
+- Ensure clock sync between systems</p>
+<p><strong>"User not found"</strong>
+- Check attribute mapping
+- Verify email attribute is sent
+- Check user auto-provisioning settings</p>
+<p><strong>"Insufficient Permissions"</strong>
+- Verify group mappings
+- Check user groups in IdP
+- Confirm role assignments</p>
+<p><strong>Related:</strong> OAuth2 Setup, Active Directory Integration, User Management</p>
+<hr />
+<h2 id="communication-templates">💬 Communication Templates</h2>
+<h3 id="article-301-ticket-response-templates"><strong>Article 301: Ticket Response Templates</strong></h3>
+<p><strong>Category:</strong> For Support Agents<br />
+<strong>Internal Use Only</strong></p>
+<h4 id="initial-response-template"><strong>Initial Response Template</strong></h4>
+<pre><code>Hi [Customer Name],
+
+Thank you for contacting SecureAI Support. I'm [Agent Name], and I'll be 
+assisting you today.
+
+I understand you're experiencing [issue summary]. I'm here to help resolve 
+this quickly.
+
+To better assist you, could you please provide:
+- [Specific information needed 1]
+- [Specific information needed 2]
+- [Specific information needed 3]
+
+In the meantime, I'm checking [what you're investigating].
+
+I'll update you within [timeframe based on SLA].
+
+Best regards,
+[Agent Name]
+SecureAI Support Team
+
+Ticket ID: #[TICKET_ID]
+Priority: [P1/P2/P3/P4]
+</code></pre>
+<h4 id="progress-update-template"><strong>Progress Update Template</strong></h4>
+<pre><code>Hi [Customer Name],
+
+Quick update on ticket #[TICKET_ID]:
+
+Progress:
+✓ [Completed action 1]
+✓ [Completed action 2]
+→ [Current investigation]
+
+Findings so far:
+[What we've discovered]
+
+Next steps:
+- [Planned action 1]
+- [Planned action 2]
+
+Expected resolution: [Timeframe]
+
+Please let me know if you have any questions.
+
+Best regards,
+[Agent Name]
+</code></pre>
+<h4 id="resolution-template"><strong>Resolution Template</strong></h4>
+<pre><code>Hi [Customer Name],
+
+Great news! I've resolved your issue with [brief description].
+
+What was wrong:
+[Clear explanation of the problem]
+
+What we did:
+[Steps taken to resolve]
+
+What you need to do:
+[Any customer actions required, or &quot;Nothing - it's all set!&quot;]
+
+Please verify:
+[Specific test for customer to confirm resolution]
+
+Your ticket #[TICKET_ID] is now marked as resolved. If you're satisfied with 
+the resolution, the ticket will automatically close in 48 hours.
+
+If you have any other questions or if the issue returns, please let me know 
+and I'll reopen the ticket immediately.
+
+Best regards,
+[Agent Name]
+SecureAI Support Team
+
+We'd love your feedback: [Survey link]
+</code></pre>
+<hr />
+<h2 id="top-50-knowledge-base-articles">🎯 Top 50 Knowledge Base Articles</h2>
+<h3 id="most-viewed-articles-by-category"><strong>Most Viewed Articles (By Category)</strong></h3>
+<h4 id="getting-started-10-articles"><strong>Getting Started (10 articles)</strong></h4>
+<ol>
+<li>Creating Your SecureAI Account</li>
+<li>First Login and Profile Setup</li>
+<li>Navigating the Dashboard</li>
+<li>Uploading Your First Video</li>
+<li>Understanding Analysis Results</li>
+<li>Configuring Notifications</li>
+<li>Managing Your Team</li>
+<li>Setting Up Two-Factor Authentication</li>
+<li>Resetting Your Password</li>
+<li>Quick Start Video Tutorial</li>
+</ol>
+<h4 id="video-analysis-10-articles"><strong>Video Analysis (10 articles)</strong></h4>
+<ol>
+<li>How to Upload and Analyze Videos</li>
+<li>Understanding Confidence Scores</li>
+<li>Batch Processing Multiple Videos</li>
+<li>Using Different Analysis Types</li>
+<li>Interpreting Forensic Details</li>
+<li>Frame-by-Frame Analysis Guide</li>
+<li>Audio Deepfake Detection</li>
+<li>Metadata Analysis Explained</li>
+<li>Generating Analysis Reports</li>
+<li>Downloading Results</li>
+</ol>
+<h4 id="api-integration-10-articles"><strong>API Integration (10 articles)</strong></h4>
+<ol>
+<li>API Quick Start Guide</li>
+<li>Generating API Tokens</li>
+<li>Authentication and Authorization</li>
+<li>Analyzing Videos via API</li>
+<li>Batch API Usage</li>
+<li>Webhook Configuration</li>
+<li>API Error Codes Reference</li>
+<li>Rate Limiting and Best Practices</li>
+<li>API Code Examples (Python, JavaScript, curl)</li>
+<li>API Troubleshooting</li>
+</ol>
+<h4 id="integrations-8-articles"><strong>Integrations (8 articles)</strong></h4>
+<ol>
+<li>SIEM Integration Overview</li>
+<li>Setting Up Splunk Integration</li>
+<li>Setting Up QRadar Integration</li>
+<li>SOAR Platform Integration Guide</li>
+<li>Configuring SAML Single Sign-On</li>
+<li>Active Directory Integration</li>
+<li>Microsoft Teams Integration</li>
+<li>ServiceNow Integration</li>
+</ol>
+<h4 id="administration-8-articles"><strong>Administration (8 articles)</strong></h4>
+<ol>
+<li>User Account Management</li>
+<li>Role-Based Access Control</li>
+<li>System Configuration Guide</li>
+<li>Monitoring and Performance</li>
+<li>Backup and Recovery</li>
+<li>Security Best Practices</li>
+<li>Compliance Reporting</li>
+<li>System Health Checks</li>
+</ol>
+<h4 id="troubleshooting-4-articles"><strong>Troubleshooting (4 articles)</strong></h4>
+<ol>
+<li>Troubleshooting Upload Failures</li>
+<li>Resolving API Authentication Errors</li>
+<li>Performance Issues and Solutions</li>
+<li>Common Integration Problems</li>
+</ol>
+<hr />
+<h2 id="knowledge-base-metrics">📊 Knowledge Base Metrics</h2>
+<h3 id="article-performance-tracking"><strong>Article Performance Tracking</strong></h3>
+<pre><code class="language-yaml">Article Metrics:
+  - Views: Total article views
+  - Unique views: Unique visitors
+  - Helpfulness: Thumbs up/down votes
+  - Deflection rate: % who didn't create ticket after viewing
+  - Search ranking: Position in search results
+  - Last updated: Date of last revision
+
+Target Metrics:
+  - Deflection rate: &gt;40%
+  - Helpfulness: &gt;85% positive
+  - Freshness: Articles updated within 90 days
+  - Coverage: &gt;90% of common issues
+</code></pre>
+<h3 id="content-improvement-process"><strong>Content Improvement Process</strong></h3>
+<pre><code>1. Monitor article performance weekly
+2. Identify low-performing articles (&lt;70% helpfulness)
+3. Review ticket trends for content gaps
+4. Update or create articles monthly
+5. Quarterly comprehensive content review
+6. Annual content strategy planning
+</code></pre>
+<hr />
+<p><em>This knowledge base provides comprehensive self-service support, reducing ticket volume and improving customer satisfaction.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1892 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference-guide-cheat-sheet" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Reference Guide &amp; Cheat Sheet
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Reference Guide &amp; Cheat Sheet">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fast-access-to-essential-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚡ Fast Access to Essential Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Quick Start
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Quick Start">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#login-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Login &amp; Access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upload Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#confidence-score-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Confidence Score Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Common Tasks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Common Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analyze-single-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyze Single Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generate-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generate Report
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-audit-trail" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Audit Trail
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔌 API Quick Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔌 API Quick Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyze-video" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyze Video
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Get Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batch-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-quick-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Troubleshooting Quick Fixes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚨 Troubleshooting Quick Fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#login-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Login Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upload-fails" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upload Fails
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slow-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slow Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-format-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 File Format Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 File Format Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-video-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported Video Formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommended-video-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended Video Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚙️ Settings Quick Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Settings Quick Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#notification-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notification Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analysis-defaults" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analysis Defaults
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-roles-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 User Roles &amp; Permissions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 User Roles &amp; Permissions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#role-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Role Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-contacts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Support Contacts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Support Contacts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#support-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Tiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-times" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response Times
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#keyboard-shortcuts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔑 Keyboard Shortcuts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Documentation Links
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Documentation Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Guides
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#technical-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Docs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚡ Performance Tips
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚡ Performance Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#faster-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Faster Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#better-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Better Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resource Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-reminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🛡️ Security Reminders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🛡️ Security Reminders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#account-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Account Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-protection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Protection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-codes-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔍 Error Codes Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mobile-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📱 Mobile Access
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📱 Mobile Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mobile-web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mobile Web
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mobile-app-if-available" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mobile App (if available)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Training Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Training Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#video-tutorials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Video Tutorials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#interactive-tutorials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interactive Tutorials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#webinars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Webinars
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-checklists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Quick Checklists
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ Quick Checklists">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#daily-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Daily Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weekly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Weekly Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monthly Tasks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="quick-reference-guide-cheat-sheet">Quick Reference Guide &amp; Cheat Sheet</h2>
+<h3 id="fast-access-to-essential-information">⚡ Fast Access to Essential Information</h3>
+<hr />
+<h2 id="quick-start">🚀 Quick Start</h2>
+<h3 id="login-access"><strong>Login &amp; Access</strong></h3>
+<pre><code>URL: https://secureai.yourcompany.com
+Username: your.email@company.com
+Password: [your password]
+2FA: [authenticator app code]
+</code></pre>
+<h3 id="upload-video"><strong>Upload Video</strong></h3>
+<pre><code>1. Click &quot;Analyze Video&quot;
+2. Drag &amp; drop or browse
+3. Select analysis type
+4. Click &quot;Start Analysis&quot;
+</code></pre>
+<h3 id="view-results"><strong>View Results</strong></h3>
+<pre><code>Dashboard → Recent Analyses → Click analysis
+</code></pre>
+<hr />
+<h2 id="confidence-score-reference">📊 Confidence Score Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Risk</th>
+<th>Meaning</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>90-100%</td>
+<td>🔴 <strong>CRITICAL</strong></td>
+<td>Definite deepfake</td>
+<td>Immediate investigation</td>
+</tr>
+<tr>
+<td>80-89%</td>
+<td>🟠 <strong>HIGH</strong></td>
+<td>Probable deepfake</td>
+<td>Manual review</td>
+</tr>
+<tr>
+<td>60-79%</td>
+<td>🟡 <strong>MEDIUM</strong></td>
+<td>Suspicious</td>
+<td>Additional analysis</td>
+</tr>
+<tr>
+<td>40-59%</td>
+<td>🟢 <strong>LOW</strong></td>
+<td>Uncertain</td>
+<td>Monitor</td>
+</tr>
+<tr>
+<td>0-39%</td>
+<td>⚪ <strong>VERY LOW</strong></td>
+<td>Likely authentic</td>
+<td>No action</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="common-tasks">🔧 Common Tasks</h2>
+<h3 id="analyze-single-video"><strong>Analyze Single Video</strong></h3>
+<pre><code>Dashboard → Analyze Video → Upload File → Start Analysis
+Time: 2-5 minutes
+</code></pre>
+<h3 id="batch-processing"><strong>Batch Processing</strong></h3>
+<pre><code>Batch Processing → Upload Multiple → Configure Options → Start Batch
+Time: Varies (5+ videos)
+</code></pre>
+<h3 id="generate-report"><strong>Generate Report</strong></h3>
+<pre><code>Analysis Results → Download → Select Format (PDF/JSON/CSV) → Generate
+</code></pre>
+<h3 id="create-incident"><strong>Create Incident</strong></h3>
+<pre><code>Analysis Results → Create Incident → Fill Details → Assign → Submit
+</code></pre>
+<h3 id="view-audit-trail"><strong>View Audit Trail</strong></h3>
+<pre><code>Reports → Audit Trail → Select Date Range → View/Export
+</code></pre>
+<hr />
+<h2 id="api-quick-reference">🔌 API Quick Reference</h2>
+<h3 id="authentication"><strong>Authentication</strong></h3>
+<pre><code class="language-bash"># Get API token
+curl -X POST https://api.secureai.com/v1/auth/login \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;username&quot;:&quot;user@company.com&quot;,&quot;password&quot;:&quot;password&quot;}'
+</code></pre>
+<h3 id="analyze-video"><strong>Analyze Video</strong></h3>
+<pre><code class="language-bash">curl -X POST https://api.secureai.com/v1/analyze/video \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -F &quot;video=@video.mp4&quot; \
+  -F &quot;analysis_type=comprehensive&quot;
+</code></pre>
+<h3 id="get-results"><strong>Get Results</strong></h3>
+<pre><code class="language-bash">curl https://api.secureai.com/v1/analyze/video/{analysis_id} \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot;
+</code></pre>
+<h3 id="batch-analysis"><strong>Batch Analysis</strong></h3>
+<pre><code class="language-bash">curl -X POST https://api.secureai.com/v1/analyze/batch \
+  -H &quot;Authorization: Bearer YOUR_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;videos&quot;:[{&quot;url&quot;:&quot;https://example.com/video1.mp4&quot;}]}'
+</code></pre>
+<hr />
+<h2 id="troubleshooting-quick-fixes">🚨 Troubleshooting Quick Fixes</h2>
+<h3 id="login-issues"><strong>Login Issues</strong></h3>
+<pre><code>Issue: Can't log in
+Fix: Reset password → Click &quot;Forgot Password&quot;
+</code></pre>
+<h3 id="upload-fails"><strong>Upload Fails</strong></h3>
+<pre><code>Issue: Upload fails
+Check:
+1. File size &lt;500MB? → Compress video
+2. Correct format? → Convert to MP4
+3. Network stable? → Retry upload
+</code></pre>
+<h3 id="slow-analysis"><strong>Slow Analysis</strong></h3>
+<pre><code>Issue: Analysis taking too long
+Check:
+1. System status → Status page
+2. Video size → Large files take longer
+3. Analysis type → Use &quot;Quick&quot; for faster results
+</code></pre>
+<h3 id="api-errors"><strong>API Errors</strong></h3>
+<pre><code>401 Unauthorized → Check API token validity
+429 Rate Limited → Slow down requests
+500 Server Error → Check status page, retry
+</code></pre>
+<hr />
+<h2 id="file-format-reference">📋 File Format Reference</h2>
+<h3 id="supported-video-formats"><strong>Supported Video Formats</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Extension</th>
+<th>Max Size</th>
+<th>Recommended</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MP4</td>
+<td>.mp4</td>
+<td>500MB</td>
+<td>✅ Best</td>
+</tr>
+<tr>
+<td>AVI</td>
+<td>.avi</td>
+<td>500MB</td>
+<td>✅ Good</td>
+</tr>
+<tr>
+<td>MOV</td>
+<td>.mov</td>
+<td>500MB</td>
+<td>✅ Good</td>
+</tr>
+<tr>
+<td>MKV</td>
+<td>.mkv</td>
+<td>500MB</td>
+<td>⚠️ OK</td>
+</tr>
+<tr>
+<td>WEBM</td>
+<td>.webm</td>
+<td>500MB</td>
+<td>⚠️ OK</td>
+</tr>
+</tbody>
+</table>
+<h3 id="recommended-video-settings"><strong>Recommended Video Settings</strong></h3>
+<pre><code>Codec: H.264
+Resolution: 1080p or higher
+Frame Rate: 30fps
+Audio: AAC, 128kbps
+Bitrate: 5-10 Mbps
+</code></pre>
+<hr />
+<h2 id="settings-quick-reference">⚙️ Settings Quick Reference</h2>
+<h3 id="notification-settings"><strong>Notification Settings</strong></h3>
+<pre><code>Path: Settings → Notifications
+
+Options:
+☑ Email on high-risk detection
+☑ In-app notifications
+☐ SMS alerts (premium)
+☑ Webhook integration
+☑ Daily summary report
+</code></pre>
+<h3 id="analysis-defaults"><strong>Analysis Defaults</strong></h3>
+<pre><code>Path: Settings → Analysis Defaults
+
+Recommended:
+• Analysis Type: Comprehensive
+• Confidence Threshold: 85%
+• Blockchain Logging: Enabled
+• Auto-generate Reports: Enabled
+</code></pre>
+<h3 id="integration-settings"><strong>Integration Settings</strong></h3>
+<pre><code>Path: Settings → Integrations
+
+Available:
+• SIEM: Splunk, QRadar, ArcSight
+• SOAR: Phantom, Demisto, Sentinel
+• Identity: AD, Okta, Ping
+• APIs: ServiceNow, Teams, Slack
+</code></pre>
+<hr />
+<h2 id="user-roles-permissions">🎯 User Roles &amp; Permissions</h2>
+<h3 id="role-capabilities"><strong>Role Capabilities</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>User</th>
+<th>Content Moderator</th>
+<th>Security Pro</th>
+<th>Compliance Officer</th>
+<th>Admin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analyze Videos</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>View Results</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Batch Processing</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create Incidents</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Generate Reports</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>View Audit Trail</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Manage Users</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>System Config</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="support-contacts">📞 Support Contacts</h2>
+<h3 id="support-tiers"><strong>Support Tiers</strong></h3>
+<pre><code>Tier 1 (General): support@secureai.com
+Tier 2 (Technical): technical@secureai.com
+Tier 3 (Engineering): engineering@secureai.com
+Emergency: +1-800-SECURE-AI
+</code></pre>
+<h3 id="response-times"><strong>Response Times</strong></h3>
+<pre><code>Email: 2-4 hours (business hours)
+Chat: 30 minutes (business hours)
+Phone: 15 minutes (business hours)
+Emergency: Immediate (24/7)
+</code></pre>
+<hr />
+<h2 id="keyboard-shortcuts">🔑 Keyboard Shortcuts</h2>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Shortcut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Upload Video</td>
+<td><code>Ctrl + U</code></td>
+</tr>
+<tr>
+<td>Search</td>
+<td><code>Ctrl + K</code></td>
+</tr>
+<tr>
+<td>View Dashboard</td>
+<td><code>Ctrl + H</code></td>
+</tr>
+<tr>
+<td>New Analysis</td>
+<td><code>Ctrl + N</code></td>
+</tr>
+<tr>
+<td>Settings</td>
+<td><code>Ctrl + ,</code></td>
+</tr>
+<tr>
+<td>Help</td>
+<td><code>F1</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="documentation-links">📚 Documentation Links</h2>
+<h3 id="user-guides"><strong>User Guides</strong></h3>
+<ul>
+<li>Security Professionals: <code>User_Guide_Security_Professionals.md</code></li>
+<li>Compliance Officers: <code>User_Guide_Compliance_Officers.md</code></li>
+<li>Administrators: <code>Administrator_Guide.md</code></li>
+</ul>
+<h3 id="technical-docs"><strong>Technical Docs</strong></h3>
+<ul>
+<li>API Documentation: <code>API_Documentation.md</code></li>
+<li>Technical Docs: <code>Technical_Documentation.md</code></li>
+<li>Troubleshooting: <code>Troubleshooting_Guide.md</code></li>
+</ul>
+<h3 id="training"><strong>Training</strong></h3>
+<ul>
+<li>Customer Onboarding: <code>Customer_Onboarding_Guide.md</code></li>
+<li>Support Training: <code>Support_Team_Training.md</code></li>
+</ul>
+<hr />
+<h2 id="performance-tips">⚡ Performance Tips</h2>
+<h3 id="faster-analysis"><strong>Faster Analysis</strong></h3>
+<ul>
+<li>Use "Quick" mode for initial screening</li>
+<li>Batch process during off-peak hours</li>
+<li>Use API for automated workflows</li>
+</ul>
+<h3 id="better-results"><strong>Better Results</strong></h3>
+<ul>
+<li>Upload highest quality video available</li>
+<li>Ensure good lighting in source video</li>
+<li>Use "Comprehensive" for important cases</li>
+</ul>
+<h3 id="resource-management"><strong>Resource Management</strong></h3>
+<ul>
+<li>Limit concurrent batch analyses to 10</li>
+<li>Archive old results regularly</li>
+<li>Use S3 storage for large files</li>
+</ul>
+<hr />
+<h2 id="security-reminders">🛡️ Security Reminders</h2>
+<h3 id="account-security"><strong>Account Security</strong></h3>
+<ul>
+<li>✅ Use strong, unique passwords</li>
+<li>✅ Enable two-factor authentication</li>
+<li>✅ Never share API tokens</li>
+<li>✅ Log out when not in use</li>
+<li>✅ Review account activity regularly</li>
+</ul>
+<h3 id="data-protection"><strong>Data Protection</strong></h3>
+<ul>
+<li>✅ Only upload authorized videos</li>
+<li>✅ Follow data retention policies</li>
+<li>✅ Use secure connections (HTTPS)</li>
+<li>✅ Delete sensitive results when done</li>
+<li>✅ Comply with privacy regulations</li>
+</ul>
+<hr />
+<h2 id="error-codes-quick-reference">🔍 Error Codes Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>400</td>
+<td>Bad Request</td>
+<td>Check request parameters</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Unauthorized</td>
+<td>Verify API token</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Forbidden</td>
+<td>Check permissions</td>
+</tr>
+<tr>
+<td>404</td>
+<td>Not Found</td>
+<td>Verify resource exists</td>
+</tr>
+<tr>
+<td>413</td>
+<td>File Too Large</td>
+<td>Compress video or split</td>
+</tr>
+<tr>
+<td>415</td>
+<td>Unsupported Format</td>
+<td>Convert to MP4</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Rate Limited</td>
+<td>Slow down requests</td>
+</tr>
+<tr>
+<td>500</td>
+<td>Server Error</td>
+<td>Check status, retry later</td>
+</tr>
+<tr>
+<td>503</td>
+<td>Service Unavailable</td>
+<td>Check status page</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mobile-access">📱 Mobile Access</h2>
+<h3 id="mobile-web"><strong>Mobile Web</strong></h3>
+<pre><code>URL: https://m.secureai.yourcompany.com
+Same credentials as desktop
+Optimized for mobile browsers
+</code></pre>
+<h3 id="mobile-app-if-available"><strong>Mobile App</strong> (if available)</h3>
+<pre><code>iOS: Download from App Store
+Android: Download from Google Play
+Login with same credentials
+Enable biometric authentication
+</code></pre>
+<hr />
+<h2 id="training-resources">🎓 Training Resources</h2>
+<h3 id="video-tutorials"><strong>Video Tutorials</strong></h3>
+<ul>
+<li>Getting Started (5 min)</li>
+<li>First Video Analysis (10 min)</li>
+<li>Batch Processing (8 min)</li>
+<li>API Integration (15 min)</li>
+<li>Reporting (12 min)</li>
+</ul>
+<h3 id="interactive-tutorials"><strong>Interactive Tutorials</strong></h3>
+<ul>
+<li>Dashboard Tour (interactive)</li>
+<li>Analysis Workflow (hands-on)</li>
+<li>Report Generation (practice)</li>
+<li>Integration Setup (guided)</li>
+</ul>
+<h3 id="webinars"><strong>Webinars</strong></h3>
+<ul>
+<li>Monthly Product Updates</li>
+<li>Best Practices Series</li>
+<li>Advanced Features Deep Dive</li>
+<li>Q&amp;A Sessions</li>
+</ul>
+<hr />
+<h2 id="quick-checklists">✅ Quick Checklists</h2>
+<h3 id="daily-operations"><strong>Daily Operations</strong></h3>
+<ul>
+<li>[ ] Check dashboard for high-risk alerts</li>
+<li>[ ] Review pending analyses</li>
+<li>[ ] Process priority videos</li>
+<li>[ ] Respond to notifications</li>
+<li>[ ] Update incident status</li>
+</ul>
+<h3 id="weekly-tasks"><strong>Weekly Tasks</strong></h3>
+<ul>
+<li>[ ] Review weekly summary report</li>
+<li>[ ] Archive old analyses</li>
+<li>[ ] Update team on findings</li>
+<li>[ ] Check system performance</li>
+<li>[ ] Review compliance status</li>
+</ul>
+<h3 id="monthly-tasks"><strong>Monthly Tasks</strong></h3>
+<ul>
+<li>[ ] Generate monthly reports</li>
+<li>[ ] Review user access</li>
+<li>[ ] Update security settings</li>
+<li>[ ] Conduct training refresher</li>
+<li>[ ] Review and update procedures</li>
+</ul>
+<hr />
+<p><strong>📌 Print this guide and keep it handy for quick reference!</strong></p>
+<p><em>Last updated: January 27, 2025</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

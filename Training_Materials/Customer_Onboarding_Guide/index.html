@@ -1,0 +1,2551 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.3">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#customer-onboarding-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customer Onboarding Guide
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Customer Onboarding Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#welcome-to-secureai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Welcome to SecureAI!
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Getting Started
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-youll-learn" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You'll Learn
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#onboarding-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Onboarding Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#day-1-system-access-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📅 Day 1: System Access &amp; Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📅 Day 1: System Access &amp; Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-first-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1: First Login
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1: First Login">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-access-the-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Access the System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-update-your-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Update Your Profile
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-11-first-login" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 1.1: First Login
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-dashboard-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2: Dashboard Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.2: Dashboard Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#main-dashboard-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Main Dashboard Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-12-dashboard-navigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 1.2: Dashboard Navigation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-system-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3: System Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3: System Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-settings-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Settings Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-13-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 1.3: Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#day-1-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Day 1 Checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#day-2-basic-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📅 Day 2: Basic Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📅 Day 2: Basic Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#21-video-upload-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1: Video Upload &amp; Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1: Video Upload &amp; Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-video-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Video Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-21-first-video-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 2.1: First Video Analysis
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-understanding-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2: Understanding Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2: Understanding Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#analysis-results-screen" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analysis Results Screen
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-confidence-scores" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding Confidence Scores
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#detection-techniques-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detection Techniques Explained
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-22-interpreting-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 2.2: Interpreting Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-taking-action-on-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3: Taking Action on Results
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3: Taking Action on Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#action-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Action Workflows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generating-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generating Reports
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-23-action-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 2.3: Action Workflows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#day-2-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Day 2 Checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#day-3-advanced-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📅 Day 3: Advanced Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📅 Day 3: Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#31-batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1: Batch Processing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1: Batch Processing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#batch-upload-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batch Upload Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-batch-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Monitoring Batch Progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-31-batch-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 3.1: Batch Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-api-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2: API Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2: API Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#api-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-videos-via-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing Videos via API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieving-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retrieving Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-32-api-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 3.2: API Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-custom-dashboards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3: Custom Dashboards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3: Custom Dashboards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-custom-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a Custom Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-33-dashboard-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 3.3: Dashboard Creation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#day-3-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Day 3 Checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#day-4-integration-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📅 Day 4: Integration Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📅 Day 4: Integration Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#41-siem-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1: SIEM Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1: SIEM Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#splunk-integration-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Splunk Integration Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-41-siem-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 4.1: SIEM Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-soar-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2: SOAR Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2: SOAR Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phantom-playbook-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phantom Playbook Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-42-soar-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 4.2: SOAR Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#day-4-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Day 4 Checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#day-5-best-practices-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📅 Day 5: Best Practices &amp; Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📅 Day 5: Best Practices &amp; Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#51-security-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1: Security Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1: Security Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-control-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access Control Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-protection-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Protection Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-51-security-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 5.1: Security Audit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2: Performance Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2: Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-optimization-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Optimization Tips
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-52-performance-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 5.2: Performance Tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-troubleshooting-common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3: Troubleshooting Common Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3: Troubleshooting Common Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues-solutions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues &amp; Solutions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exercise-53-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Exercise 5.3: Troubleshooting
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#day-5-checkpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Day 5 Checkpoint
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certification-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Certification Assessment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Certification Assessment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#final-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Final Assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📜 Certification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📜 Certification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#secureai-certified-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecureAI Certified User
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Additional Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Additional Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continuing-education" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Continuing Education
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="customer-onboarding-guide">Customer Onboarding Guide</h2>
+<h3 id="welcome-to-secureai">🎓 Welcome to SecureAI!</h3>
+<p>This comprehensive onboarding guide will help you get started with the SecureAI DeepFake Detection System quickly and effectively.</p>
+<hr />
+<h2 id="table-of-contents">📋 Table of Contents</h2>
+<ol>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#day-1-system-access--setup">Day 1: System Access &amp; Setup</a></li>
+<li><a href="#day-2-basic-operations">Day 2: Basic Operations</a></li>
+<li><a href="#day-3-advanced-features">Day 3: Advanced Features</a></li>
+<li><a href="#day-4-integration-setup">Day 4: Integration Setup</a></li>
+<li><a href="#day-5-best-practices--optimization">Day 5: Best Practices &amp; Optimization</a></li>
+</ol>
+<hr />
+<h2 id="getting-started">🚀 Getting Started</h2>
+<h3 id="what-youll-learn"><strong>What You'll Learn</strong></h3>
+<p>By the end of this onboarding program, you will be able to:
+- ✅ Access and navigate the SecureAI system
+- ✅ Upload and analyze videos for deepfake detection
+- ✅ Interpret analysis results and confidence scores
+- ✅ Configure alerts and notifications
+- ✅ Integrate with your existing security tools
+- ✅ Generate compliance reports
+- ✅ Manage users and permissions
+- ✅ Troubleshoot common issues</p>
+<h3 id="prerequisites"><strong>Prerequisites</strong></h3>
+<p>Before you begin:
+- [ ] SecureAI account credentials received
+- [ ] Access to your organization's system (email, VPN if required)
+- [ ] Basic understanding of your organization's security workflows
+- [ ] Sample videos for testing (if available)</p>
+<h3 id="onboarding-timeline"><strong>Onboarding Timeline</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Focus Area</th>
+<th>Duration</th>
+<th>Activities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Day 1</strong></td>
+<td>System Access &amp; Setup</td>
+<td>2-3 hours</td>
+<td>Login, navigation, basic configuration</td>
+</tr>
+<tr>
+<td><strong>Day 2</strong></td>
+<td>Basic Operations</td>
+<td>3-4 hours</td>
+<td>Video upload, analysis, results interpretation</td>
+</tr>
+<tr>
+<td><strong>Day 3</strong></td>
+<td>Advanced Features</td>
+<td>3-4 hours</td>
+<td>Batch processing, API usage, reporting</td>
+</tr>
+<tr>
+<td><strong>Day 4</strong></td>
+<td>Integration Setup</td>
+<td>2-3 hours</td>
+<td>SIEM, SOAR, identity provider integration</td>
+</tr>
+<tr>
+<td><strong>Day 5</strong></td>
+<td>Best Practices</td>
+<td>2-3 hours</td>
+<td>Optimization, troubleshooting, certification</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total Time:</strong> 12-17 hours over 5 days</p>
+<hr />
+<h2 id="day-1-system-access-setup">📅 Day 1: System Access &amp; Setup</h2>
+<h3 id="learning-objectives"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Access the SecureAI system</li>
+<li>Navigate the main dashboard</li>
+<li>Configure your user profile</li>
+<li>Understand basic system architecture</li>
+</ul>
+<h3 id="11-first-login"><strong>1.1: First Login</strong></h3>
+<h4 id="step-1-access-the-system"><strong>Step 1: Access the System</strong></h4>
+<pre><code>1. Open your web browser
+2. Navigate to: https://secureai.yourcompany.com
+3. Enter your credentials:
+   - Username: [provided by admin]
+   - Password: [provided by admin]
+4. Complete two-factor authentication (2FA)
+5. Accept terms of service
+</code></pre>
+<h4 id="step-2-update-your-profile"><strong>Step 2: Update Your Profile</strong></h4>
+<pre><code>1. Click on your profile icon (top right)
+2. Select &quot;Profile Settings&quot;
+3. Update your information:
+   - Full name
+   - Email address
+   - Phone number (for alerts)
+   - Notification preferences
+4. Change your password (if temporary)
+5. Set up 2FA preferences
+6. Click &quot;Save Changes&quot;
+</code></pre>
+<h4 id="exercise-11-first-login"><strong>✏️ Exercise 1.1: First Login</strong></h4>
+<ul>
+<li>[ ] Successfully log in to the system</li>
+<li>[ ] Complete profile setup</li>
+<li>[ ] Enable two-factor authentication</li>
+<li>[ ] Verify email address</li>
+</ul>
+<h3 id="12-dashboard-overview"><strong>1.2: Dashboard Overview</strong></h3>
+<h4 id="main-dashboard-components"><strong>Main Dashboard Components</strong></h4>
+<pre><code>┌─────────────────────────────────────────────────┐
+│  SecureAI DeepFake Detection                    │
+│  [Profile] [Notifications] [Help] [Logout]      │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│  Quick Stats                                    │
+│  ┌───────┐ ┌───────┐ ┌───────┐ ┌───────┐     │
+│  │ Total │ │Deepfake│ │ Real  │ │Pending│     │
+│  │ 1,234 │ │  156   │ │ 1,078 │ │   5   │     │
+│  └───────┘ └───────┘ └───────┘ └───────┘     │
+│                                                 │
+│  Recent Analyses                                │
+│  ┌─────────────────────────────────────────┐  │
+│  │ Video 1 | High Risk | 95% Confidence   │  │
+│  │ Video 2 | Low Risk  | 12% Confidence   │  │
+│  │ Video 3 | Medium    | 67% Confidence   │  │
+│  └─────────────────────────────────────────┘  │
+│                                                 │
+│  [Upload Video] [View Reports] [Settings]      │
+└─────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>Key Dashboard Elements:</strong></p>
+<ol>
+<li><strong>Quick Stats Panel</strong></li>
+<li>Total analyses performed</li>
+<li>Deepfakes detected</li>
+<li>Real videos confirmed</li>
+<li>
+<p>Pending analyses</p>
+</li>
+<li>
+<p><strong>Recent Analyses</strong></p>
+</li>
+<li>Latest video analysis results</li>
+<li>Risk levels and confidence scores</li>
+<li>
+<p>Quick action buttons</p>
+</li>
+<li>
+<p><strong>Navigation Menu</strong></p>
+</li>
+<li>Dashboard</li>
+<li>Analyze Video</li>
+<li>Batch Processing</li>
+<li>Reports</li>
+<li>Settings</li>
+<li>Help &amp; Support</li>
+</ol>
+<h4 id="exercise-12-dashboard-navigation"><strong>✏️ Exercise 1.2: Dashboard Navigation</strong></h4>
+<ul>
+<li>[ ] Locate the main navigation menu</li>
+<li>[ ] View quick stats</li>
+<li>[ ] Browse recent analyses</li>
+<li>[ ] Access help documentation</li>
+</ul>
+<h3 id="13-system-configuration"><strong>1.3: System Configuration</strong></h3>
+<h4 id="basic-settings-setup"><strong>Basic Settings Setup</strong></h4>
+<p><strong>Step 1: Configure Notification Preferences</strong></p>
+<pre><code>1. Navigate to: Settings → Notifications
+2. Choose notification channels:
+   ☑ Email notifications
+   ☑ In-app notifications
+   ☐ SMS notifications (optional)
+   ☑ Webhook notifications
+3. Set notification triggers:
+   ☑ High-risk deepfake detected (confidence &gt;90%)
+   ☑ Analysis complete
+   ☐ Daily summary report
+   ☑ System alerts
+4. Enter notification endpoints:
+   - Email: your.email@company.com
+   - Webhook: https://your-webhook-url.com
+5. Click &quot;Save Preferences&quot;
+</code></pre>
+<p><strong>Step 2: Configure Analysis Defaults</strong></p>
+<pre><code>1. Navigate to: Settings → Analysis Defaults
+2. Set default analysis type:
+   ◉ Comprehensive (recommended)
+   ○ Quick
+   ○ Security-focused
+3. Set confidence threshold: 85% (recommended)
+4. Enable blockchain logging: ☑ Yes
+5. Auto-generate reports: ☑ Yes
+6. Click &quot;Save Defaults&quot;
+</code></pre>
+<h4 id="exercise-13-configuration"><strong>✏️ Exercise 1.3: Configuration</strong></h4>
+<ul>
+<li>[ ] Configure notification preferences</li>
+<li>[ ] Set analysis defaults</li>
+<li>[ ] Test notification delivery</li>
+<li>[ ] Verify settings saved</li>
+</ul>
+<h3 id="day-1-checkpoint"><strong>Day 1 Checkpoint</strong></h3>
+<p><strong>✅ Completion Checklist:</strong>
+- [ ] Successfully accessed the system
+- [ ] Profile completed and updated
+- [ ] 2FA enabled
+- [ ] Dashboard navigation understood
+- [ ] Notification preferences configured
+- [ ] Analysis defaults set</p>
+<p><strong>📝 Day 1 Assessment:</strong>
+- What are the three main dashboard components?
+- Where do you configure notification preferences?
+- What is the recommended confidence threshold?</p>
+<p><strong>Ready for Day 2?</strong> Continue to Basic Operations →</p>
+<hr />
+<h2 id="day-2-basic-operations">📅 Day 2: Basic Operations</h2>
+<h3 id="learning-objectives_1"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Upload and analyze videos</li>
+<li>Interpret analysis results</li>
+<li>Understand confidence scores and risk levels</li>
+<li>Take action on detected deepfakes</li>
+</ul>
+<h3 id="21-video-upload-analysis"><strong>2.1: Video Upload &amp; Analysis</strong></h3>
+<h4 id="single-video-analysis"><strong>Single Video Analysis</strong></h4>
+<p><strong>Step 1: Upload a Video</strong></p>
+<pre><code>1. Click &quot;Analyze Video&quot; button on dashboard
+2. Choose upload method:
+   ◉ Upload from computer
+   ○ Paste video URL
+   ○ Use API
+3. Click &quot;Choose File&quot; or drag &amp; drop video
+4. Select video file (max 500MB)
+   - Supported formats: MP4, AVI, MOV, MKV, WEBM
+5. Review video preview
+6. Click &quot;Upload&quot;
+</code></pre>
+<p><strong>Step 2: Configure Analysis Options</strong></p>
+<pre><code>Analysis Options:
+1. Analysis Type:
+   ◉ Comprehensive (2-5 minutes)
+   ○ Quick (&lt;1 minute)
+   ○ Security-focused (3-7 minutes)
+
+2. Additional Options:
+   ☑ Detailed forensic analysis
+   ☑ Frame-by-frame examination
+   ☑ Audio deepfake detection
+   ☑ Metadata analysis
+   ☑ Generate blockchain proof
+
+3. Priority:
+   ○ Normal
+   ◉ High
+   ○ Critical (for urgent cases)
+
+4. Click &quot;Start Analysis&quot;
+</code></pre>
+<p><strong>Step 3: Monitor Analysis Progress</strong></p>
+<pre><code>Analysis Progress Screen:
+┌─────────────────────────────────────┐
+│ Analyzing: video_sample.mp4         │
+│                                     │
+│ [████████████░░░░░░░] 65%          │
+│                                     │
+│ Current Stage:                      │
+│ ✓ Video preprocessing               │
+│ ✓ Face detection                    │
+│ ✓ Facial landmark analysis          │
+│ → Temporal consistency check        │
+│   Audio analysis                    │
+│   Metadata examination              │
+│                                     │
+│ Estimated time: 2 minutes           │
+└─────────────────────────────────────┘
+</code></pre>
+<h4 id="exercise-21-first-video-analysis"><strong>✏️ Exercise 2.1: First Video Analysis</strong></h4>
+<ul>
+<li>[ ] Upload a test video</li>
+<li>[ ] Configure analysis options</li>
+<li>[ ] Monitor analysis progress</li>
+<li>[ ] Wait for completion</li>
+</ul>
+<h3 id="22-understanding-results"><strong>2.2: Understanding Results</strong></h3>
+<h4 id="analysis-results-screen"><strong>Analysis Results Screen</strong></h4>
+<pre><code>┌──────────────────────────────────────────────────┐
+│ Analysis Complete: video_sample.mp4              │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│ RESULT: ⚠️ DEEPFAKE DETECTED                    │
+│                                                  │
+│ Overall Confidence: 95.7%                        │
+│ Risk Level: HIGH                                 │
+│                                                  │
+│ ┌────────────────────────────────────────────┐ │
+│ │ Detection Breakdown                        │ │
+│ ├────────────────────────────────────────────┤ │
+│ │ Facial Analysis:        97.2% (Deepfake)  │ │
+│ │ Temporal Consistency:   89.5% (Anomalies) │ │
+│ │ Audio Analysis:         94.3% (Synthetic) │ │
+│ │ Metadata Examination:   92.1% (Modified)  │ │
+│ └────────────────────────────────────────────┘ │
+│                                                  │
+│ Key Indicators:                                  │
+│ • Face swap technique detected                   │
+│ • Inconsistent facial landmarks (23 anomalies)   │
+│ • Voice cloning detected                         │
+│ • Video metadata shows editing signs             │
+│                                                  │
+│ [View Detailed Report] [Download] [Share]       │
+│ [Create Incident] [Quarantine Video]            │
+└──────────────────────────────────────────────────┘
+</code></pre>
+<h4 id="understanding-confidence-scores"><strong>Understanding Confidence Scores</strong></h4>
+<table>
+<thead>
+<tr>
+<th>Confidence Range</th>
+<th>Risk Level</th>
+<th>Interpretation</th>
+<th>Recommended Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>90-100%</td>
+<td><strong>CRITICAL</strong></td>
+<td>Very high certainty of deepfake</td>
+<td>Immediate investigation required</td>
+</tr>
+<tr>
+<td>80-89%</td>
+<td><strong>HIGH</strong></td>
+<td>High probability of deepfake</td>
+<td>Manual review recommended</td>
+</tr>
+<tr>
+<td>60-79%</td>
+<td><strong>MEDIUM</strong></td>
+<td>Moderate suspicion</td>
+<td>Additional analysis suggested</td>
+</tr>
+<tr>
+<td>40-59%</td>
+<td><strong>LOW</strong></td>
+<td>Uncertain, borderline case</td>
+<td>Monitor, may need expert review</td>
+</tr>
+<tr>
+<td>0-39%</td>
+<td><strong>VERY LOW</strong></td>
+<td>Likely authentic</td>
+<td>No immediate action needed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="detection-techniques-explained"><strong>Detection Techniques Explained</strong></h4>
+<ol>
+<li><strong>Facial Landmark Analysis</strong></li>
+<li>Examines consistency of facial features</li>
+<li>Detects unnatural movements or distortions</li>
+<li>
+<p>Identifies blending artifacts</p>
+</li>
+<li>
+<p><strong>Temporal Consistency</strong></p>
+</li>
+<li>Analyzes frame-to-frame changes</li>
+<li>Detects inconsistencies in lighting or shadows</li>
+<li>
+<p>Identifies temporal artifacts</p>
+</li>
+<li>
+<p><strong>Audio Analysis</strong></p>
+</li>
+<li>Voice cloning detection</li>
+<li>Acoustic feature analysis</li>
+<li>
+<p>Audio-visual synchronization check</p>
+</li>
+<li>
+<p><strong>Metadata Examination</strong></p>
+</li>
+<li>File creation and modification dates</li>
+<li>Editing software signatures</li>
+<li>Compression artifacts</li>
+</ol>
+<h4 id="exercise-22-interpreting-results"><strong>✏️ Exercise 2.2: Interpreting Results</strong></h4>
+<ul>
+<li>[ ] Review analysis results</li>
+<li>[ ] Understand confidence scores</li>
+<li>[ ] Identify detection techniques used</li>
+<li>[ ] Determine appropriate action</li>
+</ul>
+<h3 id="23-taking-action-on-results"><strong>2.3: Taking Action on Results</strong></h3>
+<h4 id="action-workflows"><strong>Action Workflows</strong></h4>
+<p><strong>For High-Risk Deepfakes (90%+ confidence):</strong></p>
+<pre><code>Immediate Actions:
+1. Click &quot;Create Incident&quot;
+2. Fill in incident details:
+   - Incident title
+   - Severity level
+   - Affected parties
+   - Description
+3. Assign to security team
+4. Click &quot;Quarantine Video&quot;
+5. Generate incident report
+6. Notify stakeholders
+</code></pre>
+<p><strong>For Medium-Risk Cases (60-89% confidence):</strong></p>
+<pre><code>Review Actions:
+1. Click &quot;View Detailed Report&quot;
+2. Examine frame-by-frame analysis
+3. Review forensic details
+4. Request human expert review if needed
+5. Document findings
+6. Set up monitoring
+</code></pre>
+<p><strong>For Low-Risk Cases (&lt;60% confidence):</strong></p>
+<pre><code>Documentation Actions:
+1. Download analysis report
+2. Archive for future reference
+3. Tag for monitoring
+4. Update case notes
+</code></pre>
+<h4 id="generating-reports"><strong>Generating Reports</strong></h4>
+<pre><code>Report Generation:
+1. Click &quot;Download&quot; button
+2. Choose report format:
+   ◉ PDF (detailed report)
+   ○ JSON (raw data)
+   ○ CSV (tabular data)
+3. Select report sections:
+   ☑ Executive summary
+   ☑ Technical analysis
+   ☑ Forensic details
+   ☑ Recommendations
+   ☑ Blockchain proof
+4. Click &quot;Generate Report&quot;
+5. Download when ready
+</code></pre>
+<h4 id="exercise-23-action-workflows"><strong>✏️ Exercise 2.3: Action Workflows</strong></h4>
+<ul>
+<li>[ ] Create a test incident</li>
+<li>[ ] Generate a PDF report</li>
+<li>[ ] Quarantine a test video</li>
+<li>[ ] Notify a test stakeholder</li>
+</ul>
+<h3 id="day-2-checkpoint"><strong>Day 2 Checkpoint</strong></h3>
+<p><strong>✅ Completion Checklist:</strong>
+- [ ] Successfully uploaded and analyzed a video
+- [ ] Understood analysis results
+- [ ] Interpreted confidence scores correctly
+- [ ] Executed appropriate action workflows
+- [ ] Generated analysis reports</p>
+<p><strong>📝 Day 2 Assessment:</strong>
+- What confidence score indicates a high-risk deepfake?
+- Name three detection techniques used by the system
+- What is the first action for a 95% confidence deepfake?</p>
+<p><strong>Ready for Day 3?</strong> Continue to Advanced Features →</p>
+<hr />
+<h2 id="day-3-advanced-features">📅 Day 3: Advanced Features</h2>
+<h3 id="learning-objectives_2"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Process multiple videos in batch</li>
+<li>Use the API for programmatic access</li>
+<li>Create custom dashboards and reports</li>
+<li>Set up automated workflows</li>
+</ul>
+<h3 id="31-batch-processing"><strong>3.1: Batch Processing</strong></h3>
+<h4 id="batch-upload-interface"><strong>Batch Upload Interface</strong></h4>
+<pre><code>Batch Processing Screen:
+┌──────────────────────────────────────────────┐
+│ Batch Video Analysis                         │
+├──────────────────────────────────────────────┤
+│                                              │
+│ Upload Method:                               │
+│ ◉ Multiple file upload                       │
+│ ○ URL list import                            │
+│ ○ Cloud storage sync (S3, Azure)            │
+│                                              │
+│ [Browse Files] or drag &amp; drop multiple files │
+│                                              │
+│ Queued Videos (12):                          │
+│ ┌──────────────────────────────────────┐   │
+│ │ ✓ video_001.mp4         Status: Ready│   │
+│ │ ✓ video_002.mp4         Status: Ready│   │
+│ │ ✓ video_003.mp4         Status: Ready│   │
+│ │ ... (9 more files)                    │   │
+│ └──────────────────────────────────────┘   │
+│                                              │
+│ Batch Options:                               │
+│ Analysis Type: [Comprehensive ▼]             │
+│ Priority: [Normal ▼]                         │
+│ Max Concurrent: [5 ▼]                        │
+│ ☑ Generate batch report                     │
+│ ☑ Email on completion                       │
+│                                              │
+│ [Start Batch Processing]                     │
+└──────────────────────────────────────────────┘
+</code></pre>
+<h4 id="monitoring-batch-progress"><strong>Monitoring Batch Progress</strong></h4>
+<pre><code>Batch Progress Dashboard:
+┌──────────────────────────────────────────────┐
+│ Batch ID: BATCH-20250127-001                 │
+│ Status: Processing (8/12 complete)           │
+│                                              │
+│ Overall Progress: [████████░░░░] 67%        │
+│                                              │
+│ Statistics:                                  │
+│ • Completed: 8                               │
+│ • Processing: 2                              │
+│ • Queued: 2                                  │
+│ • Failed: 0                                  │
+│                                              │
+│ Results Summary:                             │
+│ • Deepfakes Detected: 3 (37.5%)             │
+│ • Real Videos: 5 (62.5%)                    │
+│ • Average Confidence: 87.3%                  │
+│                                              │
+│ Estimated Completion: 5 minutes              │
+│                                              │
+│ [View Details] [Pause] [Cancel]              │
+└──────────────────────────────────────────────┘
+</code></pre>
+<h4 id="exercise-31-batch-processing"><strong>✏️ Exercise 3.1: Batch Processing</strong></h4>
+<ul>
+<li>[ ] Upload 5+ test videos in batch</li>
+<li>[ ] Configure batch options</li>
+<li>[ ] Monitor batch progress</li>
+<li>[ ] Review batch results</li>
+</ul>
+<h3 id="32-api-usage"><strong>3.2: API Usage</strong></h3>
+<h4 id="api-authentication"><strong>API Authentication</strong></h4>
+<pre><code class="language-python"># Python Example: Get API Token
+import requests
+
+# Authenticate
+auth_response = requests.post(
+    'https://api.secureai.com/v1/auth/login',
+    json={
+        'username': 'your_username',
+        'password': 'your_password'
+    }
+)
+
+api_token = auth_response.json()['access_token']
+print(f&quot;API Token: {api_token}&quot;)
+</code></pre>
+<h4 id="analyzing-videos-via-api"><strong>Analyzing Videos via API</strong></h4>
+<pre><code class="language-python"># Python Example: Analyze Video
+import requests
+
+# Set up headers
+headers = {
+    'Authorization': f'Bearer {api_token}',
+    'Content-Type': 'multipart/form-data'
+}
+
+# Upload and analyze video
+with open('video.mp4', 'rb') as video_file:
+    files = {'video': video_file}
+    data = {
+        'analysis_type': 'comprehensive',
+        'generate_report': True
+    }
+
+    response = requests.post(
+        'https://api.secureai.com/v1/analyze/video',
+        headers=headers,
+        files=files,
+        data=data
+    )
+
+result = response.json()
+print(f&quot;Analysis ID: {result['analysis_id']}&quot;)
+print(f&quot;Deepfake Detected: {result['is_deepfake']}&quot;)
+print(f&quot;Confidence: {result['confidence']}%&quot;)
+</code></pre>
+<h4 id="retrieving-results"><strong>Retrieving Results</strong></h4>
+<pre><code class="language-python"># Python Example: Get Analysis Results
+analysis_id = &quot;analysis_123456789&quot;
+
+response = requests.get(
+    f'https://api.secureai.com/v1/analyze/video/{analysis_id}',
+    headers=headers
+)
+
+results = response.json()
+print(f&quot;Status: {results['status']}&quot;)
+print(f&quot;Confidence: {results['confidence']}%&quot;)
+print(f&quot;Risk Level: {results['risk_level']}&quot;)
+</code></pre>
+<h4 id="exercise-32-api-integration"><strong>✏️ Exercise 3.2: API Integration</strong></h4>
+<ul>
+<li>[ ] Generate API token</li>
+<li>[ ] Analyze video via API</li>
+<li>[ ] Retrieve analysis results</li>
+<li>[ ] Parse JSON response</li>
+</ul>
+<h3 id="33-custom-dashboards"><strong>3.3: Custom Dashboards</strong></h3>
+<h4 id="creating-a-custom-dashboard"><strong>Creating a Custom Dashboard</strong></h4>
+<pre><code>Custom Dashboard Builder:
+1. Navigate to: Dashboards → Create New
+2. Enter dashboard name: &quot;Security Team Dashboard&quot;
+3. Add widgets:
+
+   Widget Options:
+   ☑ Detection Statistics (chart)
+   ☑ Recent High-Risk Detections (list)
+   ☑ Daily Summary (metrics)
+   ☑ Compliance Status (gauge)
+   ☑ System Performance (graph)
+
+4. Configure layout:
+   [Drag widgets to arrange]
+
+5. Set refresh interval: 30 seconds
+6. Set permissions: Security Team
+7. Click &quot;Save Dashboard&quot;
+</code></pre>
+<h4 id="exercise-33-dashboard-creation"><strong>✏️ Exercise 3.3: Dashboard Creation</strong></h4>
+<ul>
+<li>[ ] Create a custom dashboard</li>
+<li>[ ] Add 3+ widgets</li>
+<li>[ ] Configure layout</li>
+<li>[ ] Share with team</li>
+</ul>
+<h3 id="day-3-checkpoint"><strong>Day 3 Checkpoint</strong></h3>
+<p><strong>✅ Completion Checklist:</strong>
+- [ ] Successfully processed videos in batch
+- [ ] Used API for programmatic access
+- [ ] Created custom dashboard
+- [ ] Set up automated workflows</p>
+<p><strong>📝 Day 3 Assessment:</strong>
+- How many videos can be processed concurrently in batch mode?
+- What authentication method does the API use?
+- Name three widgets available for custom dashboards</p>
+<p><strong>Ready for Day 4?</strong> Continue to Integration Setup →</p>
+<hr />
+<h2 id="day-4-integration-setup">📅 Day 4: Integration Setup</h2>
+<h3 id="learning-objectives_3"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Integrate with SIEM platforms</li>
+<li>Configure SOAR playbooks</li>
+<li>Set up identity provider integration</li>
+<li>Connect enterprise communication tools</li>
+</ul>
+<h3 id="41-siem-integration"><strong>4.1: SIEM Integration</strong></h3>
+<h4 id="splunk-integration-setup"><strong>Splunk Integration Setup</strong></h4>
+<pre><code>Splunk Integration:
+1. Navigate to: Settings → Integrations → SIEM
+2. Select: Splunk
+3. Enter connection details:
+   - Splunk URL: https://splunk.company.com:8089
+   - Username: secureai_integration
+   - Password: [secure_password]
+   - Index: secureai
+4. Configure event forwarding:
+   ☑ Deepfake detections (high confidence)
+   ☑ System alerts
+   ☑ Audit events
+   ☐ All analyses (optional)
+5. Test connection
+6. Click &quot;Save Integration&quot;
+</code></pre>
+<h4 id="exercise-41-siem-setup"><strong>✏️ Exercise 4.1: SIEM Setup</strong></h4>
+<ul>
+<li>[ ] Configure SIEM integration</li>
+<li>[ ] Test connection</li>
+<li>[ ] Forward test event</li>
+<li>[ ] Verify event in SIEM</li>
+</ul>
+<h3 id="42-soar-integration"><strong>4.2: SOAR Integration</strong></h3>
+<h4 id="phantom-playbook-configuration"><strong>Phantom Playbook Configuration</strong></h4>
+<pre><code>SOAR Integration:
+1. Navigate to: Settings → Integrations → SOAR
+2. Select: Phantom (Splunk SOAR)
+3. Enter connection details:
+   - Phantom URL: https://phantom.company.com
+   - API Token: [api_token]
+4. Configure playbooks:
+   ☑ Deepfake Incident Response
+   ☑ Quarantine Suspicious Content
+   ☑ Stakeholder Notification
+5. Set trigger conditions:
+   - Confidence &gt; 90%: Auto-execute playbook
+   - Confidence 80-89%: Manual approval
+6. Test playbook execution
+7. Click &quot;Save Integration&quot;
+</code></pre>
+<h4 id="exercise-42-soar-setup"><strong>✏️ Exercise 4.2: SOAR Setup</strong></h4>
+<ul>
+<li>[ ] Configure SOAR integration</li>
+<li>[ ] Test playbook trigger</li>
+<li>[ ] Execute test playbook</li>
+<li>[ ] Verify automation</li>
+</ul>
+<h3 id="day-4-checkpoint"><strong>Day 4 Checkpoint</strong></h3>
+<p><strong>✅ Completion Checklist:</strong>
+- [ ] SIEM integration configured
+- [ ] SOAR playbooks set up
+- [ ] Identity provider connected
+- [ ] Communication tools integrated</p>
+<p><strong>📝 Day 4 Assessment:</strong>
+- What SIEM platforms does SecureAI support?
+- What triggers automatic playbook execution?
+- Name two identity providers supported</p>
+<p><strong>Ready for Day 5?</strong> Continue to Best Practices →</p>
+<hr />
+<h2 id="day-5-best-practices-optimization">📅 Day 5: Best Practices &amp; Optimization</h2>
+<h3 id="learning-objectives_4"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Implement security best practices</li>
+<li>Optimize system performance</li>
+<li>Troubleshoot common issues</li>
+<li>Complete certification assessment</li>
+</ul>
+<h3 id="51-security-best-practices"><strong>5.1: Security Best Practices</strong></h3>
+<h4 id="access-control-best-practices"><strong>Access Control Best Practices</strong></h4>
+<ul>
+<li>✅ Enable MFA for all users</li>
+<li>✅ Use role-based access control (RBAC)</li>
+<li>✅ Regularly review user permissions</li>
+<li>✅ Implement least privilege principle</li>
+<li>✅ Monitor user activity logs</li>
+</ul>
+<h4 id="data-protection-best-practices"><strong>Data Protection Best Practices</strong></h4>
+<ul>
+<li>✅ Enable encryption for sensitive data</li>
+<li>✅ Implement data retention policies</li>
+<li>✅ Use secure video storage (S3 with encryption)</li>
+<li>✅ Regular backups of analysis results</li>
+<li>✅ Comply with data protection regulations</li>
+</ul>
+<h4 id="exercise-51-security-audit"><strong>✏️ Exercise 5.1: Security Audit</strong></h4>
+<ul>
+<li>[ ] Review current access controls</li>
+<li>[ ] Enable additional security features</li>
+<li>[ ] Document security policies</li>
+<li>[ ] Complete security checklist</li>
+</ul>
+<h3 id="52-performance-optimization"><strong>5.2: Performance Optimization</strong></h3>
+<h4 id="system-optimization-tips"><strong>System Optimization Tips</strong></h4>
+<ol>
+<li><strong>Analysis Performance</strong></li>
+<li>Use "Quick" mode for initial screening</li>
+<li>Reserve "Comprehensive" for suspicious videos</li>
+<li>
+<p>Batch process during off-peak hours</p>
+</li>
+<li>
+<p><strong>Resource Management</strong></p>
+</li>
+<li>Monitor system resource usage</li>
+<li>Set appropriate concurrent limits</li>
+<li>
+<p>Configure auto-scaling if available</p>
+</li>
+<li>
+<p><strong>Integration Optimization</strong></p>
+</li>
+<li>Use webhook notifications instead of polling</li>
+<li>Implement rate limiting for API calls</li>
+<li>Cache frequently accessed data</li>
+</ol>
+<h4 id="exercise-52-performance-tuning"><strong>✏️ Exercise 5.2: Performance Tuning</strong></h4>
+<ul>
+<li>[ ] Review system performance metrics</li>
+<li>[ ] Implement optimization recommendations</li>
+<li>[ ] Test improved performance</li>
+<li>[ ] Document changes</li>
+</ul>
+<h3 id="53-troubleshooting-common-issues"><strong>5.3: Troubleshooting Common Issues</strong></h3>
+<h4 id="common-issues-solutions"><strong>Common Issues &amp; Solutions</strong></h4>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Possible Cause</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Upload fails</td>
+<td>File too large</td>
+<td>Compress video or split into parts</td>
+</tr>
+<tr>
+<td>Analysis slow</td>
+<td>High system load</td>
+<td>Check concurrent processing limit</td>
+</tr>
+<tr>
+<td>Results inaccurate</td>
+<td>Poor video quality</td>
+<td>Re-upload higher quality version</td>
+</tr>
+<tr>
+<td>API timeout</td>
+<td>Network issues</td>
+<td>Check network connectivity</td>
+</tr>
+<tr>
+<td>Integration fails</td>
+<td>Wrong credentials</td>
+<td>Verify integration settings</td>
+</tr>
+</tbody>
+</table>
+<h4 id="exercise-53-troubleshooting"><strong>✏️ Exercise 5.3: Troubleshooting</strong></h4>
+<ul>
+<li>[ ] Review troubleshooting guide</li>
+<li>[ ] Practice common fixes</li>
+<li>[ ] Document solutions</li>
+<li>[ ] Create support ticket (if needed)</li>
+</ul>
+<h3 id="day-5-checkpoint"><strong>Day 5 Checkpoint</strong></h3>
+<p><strong>✅ Completion Checklist:</strong>
+- [ ] Security best practices implemented
+- [ ] System optimized for performance
+- [ ] Common issues understood
+- [ ] Troubleshooting skills developed</p>
+<hr />
+<h2 id="certification-assessment">🎓 Certification Assessment</h2>
+<h3 id="final-assessment"><strong>Final Assessment</strong></h3>
+<p><strong>Complete the certification assessment to verify your knowledge:</strong></p>
+<p><strong>Section 1: System Basics (20%)</strong>
+1. What are the three analysis types available?
+2. What is the recommended confidence threshold?
+3. Where do you configure notification preferences?</p>
+<p><strong>Section 2: Operations (30%)</strong>
+4. How do you upload a video for analysis?
+5. What confidence score indicates a high-risk deepfake?
+6. What actions should you take for a 95% confidence detection?</p>
+<p><strong>Section 3: Advanced Features (25%)</strong>
+7. What is the maximum number of videos in batch processing?
+8. What authentication method does the API use?
+9. How do you create a custom dashboard?</p>
+<p><strong>Section 4: Integrations (15%)</strong>
+10. Name three SIEM platforms supported
+11. What triggers automatic SOAR playbook execution?
+12. How do you test an integration?</p>
+<p><strong>Section 5: Best Practices (10%)</strong>
+13. List three security best practices
+14. What are two performance optimization tips?
+15. How do you troubleshoot upload failures?</p>
+<p><strong>Passing Score:</strong> 80% (12/15 correct)</p>
+<hr />
+<h2 id="certification">📜 Certification</h2>
+<h3 id="secureai-certified-user"><strong>SecureAI Certified User</strong></h3>
+<p>Upon completing the onboarding program and passing the assessment, you will receive:</p>
+<ul>
+<li>✅ <strong>SecureAI Certified User</strong> certificate</li>
+<li>✅ Digital badge for email signature</li>
+<li>✅ Access to advanced training materials</li>
+<li>✅ Priority support access</li>
+<li>✅ Invitation to user community</li>
+</ul>
+<hr />
+<h2 id="additional-resources">📚 Additional Resources</h2>
+<h3 id="documentation"><strong>Documentation</strong></h3>
+<ul>
+<li>User Guide for Security Professionals</li>
+<li>User Guide for Compliance Officers</li>
+<li>API Documentation</li>
+<li>Troubleshooting Guide</li>
+</ul>
+<h3 id="support"><strong>Support</strong></h3>
+<ul>
+<li>Help Center: https://help.secureai.com</li>
+<li>Support Email: support@secureai.com</li>
+<li>Community Forum: https://community.secureai.com</li>
+<li>Emergency Hotline: +1-800-SECURE-AI</li>
+</ul>
+<h3 id="continuing-education"><strong>Continuing Education</strong></h3>
+<ul>
+<li>Monthly webinars</li>
+<li>Quarterly product updates</li>
+<li>Annual advanced training</li>
+<li>Certification renewal (annual)</li>
+</ul>
+<hr />
+<p><strong>🎉 Congratulations!</strong></p>
+<p>You have completed the SecureAI Customer Onboarding Program!</p>
+<p><strong>Next Steps:</strong>
+1. Complete certification assessment
+2. Receive your certificate
+3. Join the user community
+4. Start protecting against deepfakes!</p>
+<hr />
+<p><em>For questions or additional support during onboarding, contact your dedicated onboarding specialist or email onboarding@secureai.com</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
