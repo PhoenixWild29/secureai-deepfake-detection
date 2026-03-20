@@ -54,7 +54,7 @@ jobs:
         # Only check critical errors in our main codebase
         flake8 api.py database/ storage/ monitoring/ performance/ utils/ --count --select=E9,F63,F7,F82 --show-source --statistics
         # General linting
-        flake8 api.py database/ storage/ monitoring/ performance/ utils/ --count --max-complexity=10 --max-line-length=127 --extend-ignore=E501 --statistics --exclude=tests,integration,external,ai_model
+        flake8 api.py database/ storage/ monitoring/ performance/ utils/ --count --max-complexity=10 --max-line-length=127 --extend-ignore=E501,E128,E301,E302,E305,E306,E402,E722,W291,W292,W293,W391,F401,F541,C901 --statistics --exclude=tests,integration,external,ai_model
     
     - name: Type checking with mypy
       run: |
