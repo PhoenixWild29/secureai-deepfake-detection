@@ -690,7 +690,6 @@ def _resolve_identity_db(fingerprint: str, alias: str, components: dict):
 
 def _resolve_identity_memory(fingerprint: str, alias: str, components: dict):
     """Resolve identity using in-memory storage (fallback)"""
-    global _identity_store
     
     if fingerprint in _identity_store:
         # Existing device
