@@ -275,7 +275,7 @@ def download_direct_video(url: str, output_dir: str = None) -> tuple[str, str]:
         if os.path.exists(filepath):
             os.remove(filepath)
         raise Exception(f"Failed to download video: {str(e)}")
-    except Exception as e:
+    except Exception:
         if os.path.exists(filepath):
             os.remove(filepath)
         raise
