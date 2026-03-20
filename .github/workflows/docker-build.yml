@@ -90,9 +90,14 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     
+    - name: Set lowercase image ref
+      run: |
+        IMAGE_REF=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}" | tr '[:upper:]' '[:lower:]')
+        echo "IMAGE_REF=$IMAGE_REF" >> $GITHUB_ENV
+
     - name: Pull Docker image
       run: |
-        docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+        docker pull ${{ env.IMAGE_REF }}
     
     - name: Test Docker image
       run: |
@@ -104,7 +109,7 @@ jobs:
           -p 8000:8000 \
           -e DEBUG=false \
           -e USE_LOCAL_STORAGE=true \
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          ${{ env.IMAGE_REF }}
         
         # Wait for container to start
         sleep 10
@@ -119,7 +124,7 @@ jobs:
     - name: Scan image for vulnerabilities
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}'
+        image-ref: '${{ env.IMAGE_REF }}'
         format: 'table'
         exit-code: '0'
         severity: 'CRITICAL,HIGH'
