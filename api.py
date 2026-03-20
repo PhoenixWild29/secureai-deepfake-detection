@@ -132,7 +132,7 @@ def _run_analysis_core(filepath, model_type_param='enhanced'):
     """
     import time
     from utils.forensic_metrics import calculate_forensic_metrics
-    from ai_model.morpheus_security import analyze_video_security
+    from ai_model.morpheus_security import analyze_video_security  # noqa: F811
     start = time.time()
     result = detect_fake(filepath, model_type_param)
     try:
@@ -690,7 +690,6 @@ def _resolve_identity_db(fingerprint: str, alias: str, components: dict):
 
 def _resolve_identity_memory(fingerprint: str, alias: str, components: dict):
     """Resolve identity using in-memory storage (fallback)"""
-    global _identity_store
     
     if fingerprint in _identity_store:
         # Existing device
@@ -1096,8 +1095,6 @@ def analyze_video():
         }, room=unique_id)
         
         # Start analysis with progress updates
-        start_time = time.time()
-        
         # Progress step 1: File uploaded
         progress_manager.update_progress(unique_id, 20, 'SEQUENCING_LOCAL_BUFFER...', '[INFERENCE] Mapping media to tensor space', step=1)
         socketio.emit('progress', {
@@ -1290,7 +1287,7 @@ def analyze_video():
                 network = os.getenv('SOLANA_NETWORK', 'devnet')
                 # Wrap in eventlet threadpool to avoid blocking Socket.IO event loop
                 if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
-                    import eventlet  # type: ignore
+                    import eventlet  # type: ignore  # noqa: F811
                     from eventlet import tpool  # type: ignore
                     blockchain_tx = tpool.execute(submit_to_solana, video_hash, authenticity_score, network)
                 else:
@@ -2169,8 +2166,6 @@ def get_user_stats():
     if not user:
         return jsonify({'error': 'Not authenticated'}), 401
 
-    user_id = session['user_id']
-
     # Get user's analyses from history
     user_analyses = []
     for filename in os.listdir(app.config['RESULTS_FOLDER']):
@@ -2197,8 +2192,6 @@ def get_advanced_analytics():
     user = get_current_user()
     if not user:
         return jsonify({'error': 'Not authenticated'}), 401
-
-    user_id = session['user_id']
 
     try:
         # Get all user analyses

@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Union
 from datetime import datetime, timezone
 import redis
 import redis.asyncio as aioredis
-from redis.exceptions import RedisError, ConnectionError, TimeoutError
+from redis.exceptions import RedisError, ConnectionError, TimeoutError  # noqa: F401
 
 logger = logging.getLogger(__name__)
 
