@@ -1,0 +1,678 @@
+/**
+ * DetailedAnalysisView Component Styles
+ * Comprehensive analysis view with interactive panels and layered visualizations
+ */
+
+/* ============================================================================
+   Main Container
+   ============================================================================ */
+
+.detailedAnalysisView {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Header Controls
+   ============================================================================ */
+
+.headerControls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Panel Toggle Controls */
+.panelToggle {
+  display: flex;
+  justify-content: center;
+}
+
+.panelButtons {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 0.25rem;
+}
+
+.panelButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.panelButton:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.panelButton.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.panelIcon {
+  font-size: 1.25rem;
+}
+
+.panelLabel {
+  white-space: nowrap;
+}
+
+/* Layer Mode Controls */
+.layerModeControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.layerModeControls label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.layerModeButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.layerModeButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.layerModeButton:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.layerModeButton.active {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  color: #1d4ed8;
+}
+
+.modeIcon {
+  font-size: 1rem;
+}
+
+.modeLabel {
+  white-space: nowrap;
+}
+
+/* Frame Navigation Controls */
+.frameNavigationControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+}
+
+.playbackControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.playButton {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.playButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.playButton.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.speedControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.speedControl label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.speedSelect {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.frameCounter {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.viewerControls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.viewerButton {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.viewerButton:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   Main Content Area
+   ============================================================================ */
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panelContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.overlayPanel {
+  position: relative;
+}
+
+/* Detection Results Container */
+.detectionResultsContainer {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.overlayMode {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.sideBySideMode {
+  flex: 1;
+}
+
+/* ============================================================================
+   Heatmap Components
+   ============================================================================ */
+
+.noHeatmapData {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  text-align: center;
+  padding: 2rem;
+}
+
+.noHeatmapIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.noHeatmapData h3 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.noHeatmapData p {
+  margin: 0;
+  color: #64748b;
+}
+
+.heatmapLoadingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.heatmapContainer {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Confidence Dashboard
+   ============================================================================ */
+
+.confidenceDashboardContainer {
+  flex: 1;
+  display: flex;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  margin: 1rem;
+  overflow: hidden;
+}
+
+/* ============================================================================
+   Selected Regions Panel
+   ============================================================================ */
+
+.selectedRegionsPanel {
+  background: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.selectedRegionsPanel h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.selectedRegionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selectedRegionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.regionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.regionId {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.regionCoordinate {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Monaco', 'Menlo', monospace;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+}
+
+.regionStats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.confidence {
+  font-weight: 600;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+.removeRegionButton {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.removeRegionButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.1);
+}
+
+/* ============================================================================
+   Debug Information
+   ============================================================================ */
+
+.debugInfo {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 0.75rem;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================================
+   Loading and Error States
+   ============================================================================ */
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loadingState p {
+  margin: 0;
+  font-size: 1rem;
+  color: #64748b;
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.errorState h3 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.errorState p {
+  margin: 0;
+  color: #64748b;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .headerControls {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+  
+  .frameNavigationControls {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .playbackControls,
+  .viewerControls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .panelButtons {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .panelButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+  
+  .layerModeControls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .layerModeButtons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .layerModeButton {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+  
+  .frameCounter {
+    text-align: center;
+  }
+  
+  .selectedRegionsPanel {
+    padding: 0.75rem;
+  }
+  
+  .selectedRegionItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .regionStats {
+    align-self: flex-end;
+  }
+  
+  .debugInfo {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.6875rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerControls {
+    padding: 0.5rem;
+  }
+  
+  .panelButton {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  .frameNavigationControls {
+    padding: 0.75rem;
+  }
+  
+  .playButton {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .viewerButton {
+    width: 28px;
+    height: 28px;
+    font-size: 0.875rem;
+  }
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   Accessibility & Focus States
+   ============================================================================ */
+
+.panelButton:focus-visible,
+.layerModeButton:focus-visible,
+.playButton:focus-visible,
+.viewerButton:focus-visible,
+.removeRegionButton:focus-visible,
+.speedSelect:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.panelButton:focus:not(:focus-visible),
+.layerModeButton:focus:not(:focus-visible),
+ PlayButton:focus:not(:focus-visible),
+.viewerButton:focus:not(:focus-visible),
+.removeRegionButton:focus:not(:focus-visible),
+.speedSelect:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================================================
+   Reduced Motion Support
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .panelButton,
+  .layerModeButton,
+  .playButton,
+  .viewerButton,
+  .removeRegionButton {
+    transition: none;
+    animation: none;
+  }
+  
+  .loadingSpinner {
+    animation: none;
+    border-top-color: #3b82f6;
+    border-color: #e5e7eb;
+  }
+}
+
+/* ============================================================================
+   High Contrast Mode
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+  .detailedAnalysisView {
+    background: white;
+  }
+  
+  .headerControls {
+    background: white;
+    border-bottom: 2px solid #000;
+  }
+  
+  .panelButton.active,
+  .layerModeButton.active {
+    background: #000;
+    color: white;
+    border-color: #000;
+  }
+  
+  .selectedRegionItem,
+  .frameCounter {
+    border: 1px solid #000;
+  }
+  
+  .selectedRegionsPanel {
+    background: white;
+    border-top: 2px solid #000;
+  }
+}

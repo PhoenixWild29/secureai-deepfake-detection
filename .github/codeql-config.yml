@@ -1,0 +1,7 @@
+name: "SecureAI CodeQL Config"
+
+paths-ignore:
+  - archive/**
+  - docs/**
+  - test_videos/**
+  - scripts/ops/**

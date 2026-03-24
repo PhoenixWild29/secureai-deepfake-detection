@@ -1,0 +1,1533 @@
+/**
+ * Error Recovery Interface Styles
+ * CSS module for error recovery interface and manual retry capabilities
+ */
+
+/* Main Error Recovery Interface */
+.errorRecoveryInterface {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.errorRecoveryInterfaceHeader {
+  @apply flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50 rounded-t-lg;
+}
+
+.errorRecoveryInterfaceTitle {
+  @apply flex items-center space-x-3;
+}
+
+.errorRecoveryInterfaceIcon {
+  @apply w-6 h-6 text-red-500;
+}
+
+.errorRecoveryInterfaceTitleText {
+  @apply text-xl font-semibold text-gray-900;
+}
+
+.errorRecoveryInterfaceActions {
+  @apply flex items-center space-x-2;
+}
+
+.errorRecoveryInterfaceDismissButton {
+  @apply flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors;
+}
+
+.errorRecoveryInterfaceDismissIcon {
+  @apply w-4 h-4;
+}
+
+/* Error State */
+.errorRecoveryInterfaceError {
+  @apply flex items-center justify-between p-4 mx-6 mt-4 bg-red-50 border border-red-200 rounded-md;
+}
+
+.errorRecoveryInterfaceErrorIcon {
+  @apply w-5 h-5 text-red-500 flex-shrink-0;
+}
+
+.errorRecoveryInterfaceErrorMessage {
+  @apply flex-1 ml-3 text-sm text-red-700;
+}
+
+.errorRecoveryInterfaceErrorDismiss {
+  @apply ml-3 p-1 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded;
+}
+
+.errorRecoveryInterfaceErrorDismissIcon {
+  @apply w-4 h-4;
+}
+
+/* Loading State */
+.errorRecoveryInterfaceLoading {
+  @apply flex items-center justify-center p-8;
+}
+
+.errorRecoveryInterfaceLoadingSpinner {
+  @apply w-6 h-6 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin;
+}
+
+.errorRecoveryInterfaceLoadingText {
+  @apply ml-3 text-sm text-gray-600;
+}
+
+/* Tabs */
+.errorRecoveryInterfaceTabs {
+  @apply flex border-b border-gray-200 bg-white;
+}
+
+.errorRecoveryInterfaceTab {
+  @apply flex items-center space-x-2 px-6 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors;
+}
+
+.errorRecoveryInterfaceTabActive {
+  @apply text-red-600 border-red-500;
+}
+
+.errorRecoveryInterfaceTabIcon {
+  @apply w-4 h-4;
+}
+
+.errorRecoveryInterfaceTabLabel {
+  @apply whitespace-nowrap;
+}
+
+/* Content */
+.errorRecoveryInterfaceContent {
+  @apply p-6;
+}
+
+.errorRecoveryInterfaceTabContent {
+  @apply space-y-6;
+}
+
+/* Footer */
+.errorRecoveryInterfaceFooter {
+  @apply flex items-center justify-between p-4 bg-gray-50 border-t border-gray-200 rounded-b-lg text-sm text-gray-600;
+}
+
+.errorRecoveryInterfaceFooterInfo {
+  @apply flex items-center space-x-2;
+}
+
+.errorRecoveryInterfaceFooterLabel {
+  @apply font-medium;
+}
+
+.errorRecoveryInterfaceFooterValue {
+  @apply font-mono text-gray-900;
+}
+
+/* Error Details Styles */
+.errorDetails {
+  @apply space-y-6;
+}
+
+.errorHeader {
+  @apply flex items-start space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200;
+}
+
+.errorIconContainer {
+  @apply flex-shrink-0;
+}
+
+.errorInfo {
+  @apply flex-1 min-w-0;
+}
+
+.errorTitle {
+  @apply flex items-center space-x-3 mb-2;
+}
+
+.errorName {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.severityBadge {
+  @apply px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.severityCritical {
+  @apply bg-red-100 text-red-800;
+}
+
+.severityHigh {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.severityMedium {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.severityLow {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.severityIconCritical {
+  @apply w-6 h-6 text-red-500;
+}
+
+.severityIconHigh {
+  @apply w-6 h-6 text-orange-500;
+}
+
+.severityIconMedium {
+  @apply w-6 h-6 text-yellow-500;
+}
+
+.severityIconLow {
+  @apply w-6 h-6 text-blue-500;
+}
+
+.errorMessage {
+  @apply text-gray-700 mb-3;
+}
+
+.errorMetadata {
+  @apply space-y-2;
+}
+
+.errorMetaItem {
+  @apply flex items-center space-x-2 text-sm text-gray-600;
+}
+
+.metaIcon {
+  @apply w-4 h-4 flex-shrink-0;
+}
+
+.metaLabel {
+  @apply font-medium;
+}
+
+.metaValue {
+  @apply font-mono;
+}
+
+.metaSubtext {
+  @apply text-gray-500;
+}
+
+.errorDescription {
+  @apply p-4 bg-blue-50 border border-blue-200 rounded-lg;
+}
+
+.errorDescription p {
+  @apply text-blue-800;
+}
+
+.errorTypeInfo {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.errorTypeTitle {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.errorTypeDescription {
+  @apply text-gray-700 mb-4;
+}
+
+.commonCauses {
+  @apply space-y-2;
+}
+
+.commonCausesTitle {
+  @apply font-medium text-gray-900;
+}
+
+.commonCausesList {
+  @apply list-disc list-inside space-y-1;
+}
+
+.commonCausesItem {
+  @apply text-gray-700;
+}
+
+.errorDetailsSection {
+  @apply space-y-4;
+}
+
+.expandButton {
+  @apply flex items-center justify-between w-full p-3 text-left bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors;
+}
+
+.expandButtonText {
+  @apply font-medium text-gray-700;
+}
+
+.expandIcon {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.errorDetailsContent {
+  @apply space-y-4;
+}
+
+.errorContext {
+  @apply p-4 bg-white border border-gray-200 rounded-lg;
+}
+
+.contextTitle {
+  @apply font-semibold text-gray-900 mb-3;
+}
+
+.contextItem {
+  @apply flex items-center space-x-2 py-1;
+}
+
+.contextLabel {
+  @apply font-medium text-gray-600 min-w-0 flex-shrink-0;
+}
+
+.contextValue {
+  @apply font-mono text-gray-900;
+}
+
+.contextGroup {
+  @apply mt-4 pt-4 border-t border-gray-200;
+}
+
+.contextGroupTitle {
+  @apply font-medium text-gray-900 mb-2;
+}
+
+.errorMetadata {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.metadataTitle {
+  @apply font-semibold text-gray-900 mb-2;
+}
+
+.metadataContent {
+  @apply overflow-x-auto;
+}
+
+.metadataPre {
+  @apply text-sm text-gray-700 bg-white p-3 rounded border;
+}
+
+.stackTraceSection {
+  @apply space-y-2;
+}
+
+.stackTraceHeader {
+  @apply flex items-center justify-between;
+}
+
+.stackTraceTitle {
+  @apply font-semibold text-gray-900;
+}
+
+.stackTraceToggle {
+  @apply text-sm text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded;
+}
+
+.stackTraceContent {
+  @apply overflow-x-auto;
+}
+
+.stackTracePre {
+  @apply text-xs text-gray-700 bg-gray-900 text-green-400 p-3 rounded border font-mono;
+}
+
+.recoveryStatus {
+  @apply flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.recoveryStatusItem {
+  @apply flex items-center space-x-2;
+}
+
+.recoveryStatusLabel {
+  @apply font-medium text-gray-600;
+}
+
+.recoveryStatusValue {
+  @apply font-mono text-gray-900;
+}
+
+.recoverableYes {
+  @apply text-green-600;
+}
+
+.recoverableNo {
+  @apply text-red-600;
+}
+
+/* Retry Options Styles */
+.retryOptions {
+  @apply space-y-6;
+}
+
+.retryOptionsHeader {
+  @apply space-y-2;
+}
+
+.retryOptionsTitle {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.retryOptionsDescription {
+  @apply text-gray-600;
+}
+
+.noPermissionMessage {
+  @apply flex items-center space-x-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg;
+}
+
+.noPermissionIcon {
+  @apply w-5 h-5 text-yellow-500 flex-shrink-0;
+}
+
+.noPermissionMessage p {
+  @apply text-yellow-800;
+}
+
+.activeRetryMessage {
+  @apply flex items-center space-x-3 p-4 bg-blue-50 border border-blue-200 rounded-lg;
+}
+
+.activeRetryIcon {
+  @apply w-5 h-5 text-blue-500 flex-shrink-0;
+}
+
+.activeRetryTitle {
+  @apply font-medium text-blue-900;
+}
+
+.activeRetryDescription {
+  @apply text-blue-800;
+}
+
+.retryScopeSection {
+  @apply space-y-4;
+}
+
+.retryScopeTitle {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.retryScopeGrid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.retryScopeCard {
+  @apply p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-red-300 hover:bg-red-50 transition-colors;
+}
+
+.retryScopeCardSelected {
+  @apply border-red-500 bg-red-50;
+}
+
+.retryScopeCardHeader {
+  @apply flex items-center space-x-3 mb-3;
+}
+
+.scopeIcon {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.retryScopeCardTitle {
+  @apply font-medium text-gray-900;
+}
+
+.retryScopeCardDescription {
+  @apply text-sm text-gray-600 mb-3;
+}
+
+.retryScopeCardMeta {
+  @apply space-y-1;
+}
+
+.retryScopeCardMetaItem {
+  @apply flex items-center space-x-2 text-xs text-gray-500;
+}
+
+.retryScopeCardMetaIcon {
+  @apply w-3 h-3;
+}
+
+.retryScopeCardMetaText {
+  @apply font-mono;
+}
+
+.retryOptionsConfig {
+  @apply space-y-4;
+}
+
+.retryOptionsConfigTitle {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.retryOptionsConfigGrid {
+  @apply space-y-3;
+}
+
+.retryOptionsConfigItem {
+  @apply flex items-start space-x-3;
+}
+
+.retryOptionsConfigCheckbox {
+  @apply mt-1 w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500;
+}
+
+.retryOptionsConfigLabel {
+  @apply font-medium text-gray-900;
+}
+
+.retryOptionsConfigDescription {
+  @apply text-sm text-gray-600 mt-1;
+}
+
+.retryOptionsConfigInput {
+  @apply w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:ring-red-500 focus:border-red-500;
+}
+
+.retryActions {
+  @apply space-y-4;
+}
+
+.retryButton {
+  @apply flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+}
+
+.retryButtonPrimary {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed;
+}
+
+.retryButtonSpinner {
+  @apply w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin;
+}
+
+.retryButtonIcon {
+  @apply w-4 h-4;
+}
+
+.unrecoverableMessage {
+  @apply flex items-center space-x-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg;
+}
+
+.unrecoverableIcon {
+  @apply w-4 h-4 text-yellow-500;
+}
+
+.unrecoverableMessage span {
+  @apply text-sm text-yellow-800;
+}
+
+.retryHistorySummary {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.retryHistorySummaryTitle {
+  @apply font-semibold text-gray-900 mb-3;
+}
+
+.retryHistorySummaryStats {
+  @apply grid grid-cols-3 gap-4;
+}
+
+.retryHistorySummaryStat {
+  @apply text-center;
+}
+
+.retryHistorySummaryStatValue {
+  @apply block text-2xl font-bold text-gray-900;
+}
+
+.retryHistorySummaryStatLabel {
+  @apply text-sm text-gray-600;
+}
+
+/* Error Log Viewer Styles */
+.errorLogViewer {
+  @apply space-y-6;
+}
+
+.errorLogViewerHeader {
+  @apply flex items-center justify-between;
+}
+
+.errorLogViewerTitle {
+  @apply flex items-center space-x-3;
+}
+
+.errorLogViewerIcon {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.errorLogViewerTitleText {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.errorLogViewerCount {
+  @apply px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full;
+}
+
+.errorLogViewerActions {
+  @apply flex items-center space-x-2;
+}
+
+.errorLogViewerActionButton {
+  @apply px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+.errorLogViewerFilters {
+  @apply flex items-center space-x-4;
+}
+
+.errorLogViewerSearch {
+  @apply relative flex-1 max-w-md;
+}
+
+.errorLogViewerSearchIcon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400;
+}
+
+.errorLogViewerSearchInput {
+  @apply w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500;
+}
+
+.errorLogViewerLevelFilter {
+  @apply flex items-center space-x-2;
+}
+
+.errorLogViewerFilterIcon {
+  @apply w-4 h-4 text-gray-400;
+}
+
+.errorLogViewerLevelSelect {
+  @apply px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500;
+}
+
+.errorLogViewerSort {
+  @apply flex items-center space-x-1;
+}
+
+.errorLogViewerSortButton {
+  @apply px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+.errorLogViewerSortButtonActive {
+  @apply bg-red-50 text-red-700 border-red-300;
+}
+
+.errorLogViewerList {
+  @apply space-y-2;
+}
+
+.errorLogViewerEmpty {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.errorLogViewerEmptyIcon {
+  @apply w-12 h-12 text-gray-400 mb-4;
+}
+
+.errorLogViewerEmptyText {
+  @apply text-gray-600;
+}
+
+.errorLogEntry {
+  @apply border border-gray-200 rounded-lg overflow-hidden;
+}
+
+.errorLogEntryHeader {
+  @apply p-4 hover:bg-gray-50 transition-colors;
+}
+
+.errorLogEntryHeaderExpandable {
+  @apply cursor-pointer;
+}
+
+.errorLogEntryMain {
+  @apply flex items-start space-x-4;
+}
+
+.errorLogEntryLevel {
+  @apply flex items-center space-x-2 flex-shrink-0;
+}
+
+.logLevelIconCritical {
+  @apply w-5 h-5 text-red-500;
+}
+
+.logLevelIconError {
+  @apply w-5 h-5 text-red-500;
+}
+
+.logLevelIconWarning {
+  @apply w-5 h-5 text-yellow-500;
+}
+
+.logLevelIconInfo {
+  @apply w-5 h-5 text-blue-500;
+}
+
+.logLevelIconDebug {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.logLevelCritical {
+  @apply text-red-600;
+}
+
+.logLevelError {
+  @apply text-red-600;
+}
+
+.logLevelWarning {
+  @apply text-yellow-600;
+}
+
+.logLevelInfo {
+  @apply text-blue-600;
+}
+
+.logLevelDebug {
+  @apply text-gray-600;
+}
+
+.errorLogEntryLevelText {
+  @apply text-xs font-medium;
+}
+
+.errorLogEntryContent {
+  @apply flex-1 min-w-0;
+}
+
+.errorLogEntryMessage {
+  @apply text-gray-900 mb-2;
+}
+
+.errorLogEntryMeta {
+  @apply flex flex-wrap items-center gap-4 text-sm text-gray-600;
+}
+
+.errorLogEntryMetaItem {
+  @apply flex items-center space-x-1;
+}
+
+.errorLogEntryMetaIcon {
+  @apply w-3 h-3 flex-shrink-0;
+}
+
+.errorLogEntryMetaText {
+  @apply font-mono;
+}
+
+.errorLogEntryMetaLabel {
+  @apply font-medium;
+}
+
+.errorLogEntryExpand {
+  @apply flex-shrink-0;
+}
+
+.errorLogEntryExpandIcon {
+  @apply w-4 h-4 text-gray-400;
+}
+
+.errorLogEntryDetails {
+  @apply px-4 pb-4 border-t border-gray-200 bg-gray-50;
+}
+
+.errorLogEntryData {
+  @apply space-y-2;
+}
+
+.errorLogEntryDataTitle {
+  @apply font-medium text-gray-900;
+}
+
+.errorLogEntryDataContent {
+  @apply overflow-x-auto;
+}
+
+.errorLogEntryDataPre {
+  @apply text-xs text-gray-700 bg-white p-3 rounded border font-mono;
+}
+
+.errorLogEntryStackTrace {
+  @apply space-y-2;
+}
+
+.errorLogEntryStackTraceTitle {
+  @apply font-medium text-gray-900;
+}
+
+.errorLogEntryStackTraceContent {
+  @apply overflow-x-auto;
+}
+
+.errorLogEntryStackTracePre {
+  @apply text-xs text-gray-700 bg-gray-900 text-green-400 p-3 rounded border font-mono;
+}
+
+.errorLogViewerStats {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.errorLogViewerStatsTitle {
+  @apply font-semibold text-gray-900 mb-3;
+}
+
+.errorLogViewerStatsGrid {
+  @apply grid grid-cols-5 gap-4;
+}
+
+.errorLogViewerStat {
+  @apply text-center;
+}
+
+.errorLogViewerStatValue {
+  @apply block text-lg font-bold;
+}
+
+.errorLogViewerStatLabel {
+  @apply text-xs text-gray-600;
+}
+
+/* Troubleshooting Guide Styles */
+.troubleshootingGuide {
+  @apply space-y-6;
+}
+
+.troubleshootingGuideHeader {
+  @apply space-y-4;
+}
+
+.troubleshootingGuideTitle {
+  @apply flex items-center space-x-3;
+}
+
+.troubleshootingGuideIcon {
+  @apply w-5 h-5 text-yellow-500;
+}
+
+.troubleshootingGuideTitleText {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.troubleshootingGuideProgress {
+  @apply space-y-2;
+}
+
+.troubleshootingGuideProgressBar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.troubleshootingGuideProgressFill {
+  @apply bg-yellow-500 h-2 rounded-full transition-all duration-300;
+}
+
+.troubleshootingGuideProgressText {
+  @apply text-sm text-gray-600;
+}
+
+.troubleshootingGuideContext {
+  @apply p-4 bg-blue-50 border border-blue-200 rounded-lg;
+}
+
+.troubleshootingGuideContextTitle {
+  @apply font-semibold text-blue-900 mb-2;
+}
+
+.troubleshootingGuideContextDescription {
+  @apply text-blue-800;
+}
+
+.troubleshootingGuideSteps {
+  @apply space-y-4;
+}
+
+.troubleshootingStep {
+  @apply border border-gray-200 rounded-lg overflow-hidden;
+}
+
+.troubleshootingStepCompleted {
+  @apply bg-green-50 border-green-200;
+}
+
+.troubleshootingStepHeader {
+  @apply p-4 hover:bg-gray-50 transition-colors cursor-pointer;
+}
+
+.troubleshootingStepMain {
+  @apply flex items-start space-x-4;
+}
+
+.troubleshootingStepNumber {
+  @apply flex-shrink-0 w-8 h-8 flex items-center justify-center;
+}
+
+.troubleshootingStepNumberText {
+  @apply w-6 h-6 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium;
+}
+
+.troubleshootingStepNumberIconCompleted {
+  @apply w-6 h-6 text-green-500;
+}
+
+.troubleshootingStepContent {
+  @apply flex-1 min-w-0;
+}
+
+.troubleshootingStepTitle {
+  @apply flex items-center justify-between mb-2;
+}
+
+.troubleshootingStepTitleText {
+  @apply font-medium text-gray-900;
+}
+
+.troubleshootingStepPriority {
+  @apply flex items-center space-x-1 px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.troubleshootingPriorityUrgent {
+  @apply bg-red-100 text-red-800;
+}
+
+.troubleshootingPriorityHigh {
+  @apply bg-orange-100 text-orange-800;
+}
+
+.troubleshootingPriorityMedium {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.troubleshootingPriorityLow {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.troubleshootingPriorityIconUrgent {
+  @apply w-3 h-3;
+}
+
+.troubleshootingPriorityIconHigh {
+  @apply w-3 h-3;
+}
+
+.troubleshootingPriorityIconMedium {
+  @apply w-3 h-3;
+}
+
+.troubleshootingPriorityIconLow {
+  @apply w-3 h-3;
+}
+
+.troubleshootingStepPriorityText {
+  @apply font-medium;
+}
+
+.troubleshootingStepDescription {
+  @apply text-gray-700 mb-3;
+}
+
+.troubleshootingStepMeta {
+  @apply flex flex-wrap items-center gap-4 text-sm text-gray-600;
+}
+
+.troubleshootingStepMetaItem {
+  @apply flex items-center space-x-1;
+}
+
+.troubleshootingStepIcon {
+  @apply w-4 h-4 text-gray-500;
+}
+
+.troubleshootingStepMetaText {
+  @apply font-medium;
+}
+
+.troubleshootingStepMetaIcon {
+  @apply w-3 h-3;
+}
+
+.troubleshootingStepExpand {
+  @apply flex-shrink-0;
+}
+
+.troubleshootingStepExpandIcon {
+  @apply w-4 h-4 text-gray-400 transition-transform;
+}
+
+.troubleshootingStepExpandIconExpanded {
+  @apply transform rotate-90;
+}
+
+.troubleshootingStepDetails {
+  @apply px-4 pb-4 border-t border-gray-200 bg-gray-50;
+}
+
+.troubleshootingStepPrerequisites {
+  @apply space-y-2;
+}
+
+.troubleshootingStepPrerequisitesTitle {
+  @apply font-medium text-gray-900;
+}
+
+.troubleshootingStepPrerequisitesList {
+  @apply list-disc list-inside space-y-1;
+}
+
+.troubleshootingStepPrerequisitesItem {
+  @apply text-gray-700;
+}
+
+.troubleshootingStepOutcome {
+  @apply space-y-2;
+}
+
+.troubleshootingStepOutcomeTitle {
+  @apply font-medium text-gray-900;
+}
+
+.troubleshootingStepOutcomeText {
+  @apply text-gray-700;
+}
+
+.troubleshootingStepResources {
+  @apply space-y-2;
+}
+
+.troubleshootingStepResourcesTitle {
+  @apply font-medium text-gray-900;
+}
+
+.troubleshootingStepResourcesList {
+  @apply space-y-2;
+}
+
+.troubleshootingStepResourceLink {
+  @apply flex items-center space-x-2 p-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors;
+}
+
+.troubleshootingStepResourceIcon {
+  @apply w-4 h-4;
+}
+
+.troubleshootingStepResourceExternalIcon {
+  @apply w-3 h-3;
+}
+
+.troubleshootingStepActions {
+  @apply pt-4 border-t border-gray-200;
+}
+
+.troubleshootingStepCompleteButton {
+  @apply flex items-center space-x-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-200 rounded hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors;
+}
+
+.troubleshootingStepCompleteButtonIcon {
+  @apply w-4 h-4;
+}
+
+.troubleshootingGuideSummary {
+  @apply p-4 bg-green-50 border border-green-200 rounded-lg;
+}
+
+.troubleshootingGuideSummaryHeader {
+  @apply flex items-center space-x-3 mb-2;
+}
+
+.troubleshootingGuideSummaryIcon {
+  @apply w-5 h-5 text-green-500;
+}
+
+.troubleshootingGuideSummaryTitle {
+  @apply font-semibold text-green-900;
+}
+
+.troubleshootingGuideSummaryText {
+  @apply text-green-800;
+}
+
+/* Retry History Styles */
+.retryHistory {
+  @apply space-y-6;
+}
+
+.retryHistoryHeader {
+  @apply flex items-center justify-between;
+}
+
+.retryHistoryTitle {
+  @apply flex items-center space-x-3;
+}
+
+.retryHistoryIcon {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.retryHistoryTitleText {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.retryHistoryCount {
+  @apply px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full;
+}
+
+.retryHistorySort {
+  @apply flex items-center space-x-1;
+}
+
+.retryHistorySortButton {
+  @apply px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500;
+}
+
+.retryHistorySortButtonActive {
+  @apply bg-red-50 text-red-700 border-red-300;
+}
+
+.retryHistoryStats {
+  @apply p-4 bg-gray-50 border border-gray-200 rounded-lg;
+}
+
+.retryHistoryStatsGrid {
+  @apply grid grid-cols-5 gap-4;
+}
+
+.retryHistoryStat {
+  @apply text-center;
+}
+
+.retryHistoryStatValue {
+  @apply block text-lg font-bold text-gray-900;
+}
+
+.retryHistoryStatValueSuccess {
+  @apply text-green-600;
+}
+
+.retryHistoryStatValueFailed {
+  @apply text-red-600;
+}
+
+.retryHistoryStatLabel {
+  @apply text-xs text-gray-600;
+}
+
+.retryHistoryList {
+  @apply space-y-3;
+}
+
+.retryHistoryEmpty {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.retryHistoryEmptyIcon {
+  @apply w-12 h-12 text-gray-400 mb-4;
+}
+
+.retryHistoryEmptyText {
+  @apply text-gray-600;
+}
+
+.retryAttempt {
+  @apply border border-gray-200 rounded-lg overflow-hidden;
+}
+
+.retryAttemptHeader {
+  @apply p-4 hover:bg-gray-50 transition-colors;
+}
+
+.retryAttemptHeaderExpandable {
+  @apply cursor-pointer;
+}
+
+.retryAttemptMain {
+  @apply flex items-start space-x-4;
+}
+
+.retryAttemptStatus {
+  @apply flex items-center space-x-2 flex-shrink-0;
+}
+
+.retryStatusIconCompleted {
+  @apply w-5 h-5 text-green-500;
+}
+
+.retryStatusIconFailed {
+  @apply w-5 h-5 text-red-500;
+}
+
+.retryStatusIconInProgress {
+  @apply w-5 h-5 text-blue-500 animate-spin;
+}
+
+.retryStatusIconPending {
+  @apply w-5 h-5 text-yellow-500;
+}
+
+.retryStatusIconCancelled {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.retryStatusIconUnknown {
+  @apply w-5 h-5 text-gray-500;
+}
+
+.retryStatusCompleted {
+  @apply text-green-600;
+}
+
+.retryStatusFailed {
+  @apply text-red-600;
+}
+
+.retryStatusInProgress {
+  @apply text-blue-600;
+}
+
+.retryStatusPending {
+  @apply text-yellow-600;
+}
+
+.retryStatusCancelled {
+  @apply text-gray-600;
+}
+
+.retryStatusUnknown {
+  @apply text-gray-600;
+}
+
+.retryAttemptStatusText {
+  @apply text-xs font-medium;
+}
+
+.retryAttemptContent {
+  @apply flex-1 min-w-0;
+}
+
+.retryAttemptTitle {
+  @apply flex items-center justify-between mb-2;
+}
+
+.retryAttemptScope {
+  @apply flex items-center space-x-2;
+}
+
+.retryScopeIcon {
+  @apply w-4 h-4 text-gray-500;
+}
+
+.retryAttemptScopeText {
+  @apply font-medium text-gray-900;
+}
+
+.retryAttemptNumber {
+  @apply text-sm text-gray-600;
+}
+
+.retryAttemptMeta {
+  @apply flex flex-wrap items-center gap-4 text-sm text-gray-600;
+}
+
+.retryAttemptMetaItem {
+  @apply flex items-center space-x-1;
+}
+
+.retryAttemptMetaIcon {
+  @apply w-3 h-3 flex-shrink-0;
+}
+
+.retryAttemptMetaText {
+  @apply font-mono;
+}
+
+.retryAttemptMetaLabel {
+  @apply font-medium;
+}
+
+.retryAttemptMetaSubtext {
+  @apply text-gray-500;
+}
+
+.retryAttemptExpand {
+  @apply flex-shrink-0;
+}
+
+.retryAttemptExpandIcon {
+  @apply w-4 h-4 text-gray-400;
+}
+
+.retryAttemptDetails {
+  @apply px-4 pb-4 border-t border-gray-200 bg-gray-50;
+}
+
+.retryAttemptResult {
+  @apply space-y-3;
+}
+
+.retryAttemptResultTitle {
+  @apply font-medium text-gray-900;
+}
+
+.retryAttemptResultContent {
+  @apply space-y-2;
+}
+
+.retryAttemptResultStatus {
+  @apply flex items-center space-x-2;
+}
+
+.retryAttemptResultStatusLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptResultStatusValue {
+  @apply font-mono;
+}
+
+.retryAttemptResultSuccess {
+  @apply text-green-600;
+}
+
+.retryAttemptResultFailed {
+  @apply text-red-600;
+}
+
+.retryAttemptResultMessage {
+  @apply space-y-1;
+}
+
+.retryAttemptResultMessageLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptResultMessageValue {
+  @apply text-gray-900;
+}
+
+.retryAttemptResultProgress {
+  @apply space-y-1;
+}
+
+.retryAttemptResultProgressLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptResultProgressValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptResultStage {
+  @apply space-y-1;
+}
+
+.retryAttemptResultStageLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptResultStageValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptResultData {
+  @apply space-y-1;
+}
+
+.retryAttemptResultDataLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptResultDataPre {
+  @apply text-xs text-gray-700 bg-white p-3 rounded border font-mono overflow-x-auto;
+}
+
+.retryAttemptError {
+  @apply space-y-3;
+}
+
+.retryAttemptErrorTitle {
+  @apply font-medium text-gray-900;
+}
+
+.retryAttemptErrorContent {
+  @apply space-y-2;
+}
+
+.retryAttemptErrorType {
+  @apply space-y-1;
+}
+
+.retryAttemptErrorTypeLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptErrorTypeValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptErrorMessage {
+  @apply space-y-1;
+}
+
+.retryAttemptErrorMessageLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptErrorMessageValue {
+  @apply text-gray-900;
+}
+
+.retryAttemptErrorCode {
+  @apply space-y-1;
+}
+
+.retryAttemptErrorCodeLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptErrorCodeValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptConfiguration {
+  @apply space-y-3;
+}
+
+.retryAttemptConfigurationTitle {
+  @apply font-medium text-gray-900;
+}
+
+.retryAttemptConfigurationContent {
+  @apply space-y-2;
+}
+
+.retryAttemptConfigurationScope {
+  @apply space-y-1;
+}
+
+.retryAttemptConfigurationScopeLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptConfigurationScopeValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptConfigurationStage {
+  @apply space-y-1;
+}
+
+.retryAttemptConfigurationStageLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptConfigurationStageValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptConfigurationFrame {
+  @apply space-y-1;
+}
+
+.retryAttemptConfigurationFrameLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptConfigurationFrameValue {
+  @apply font-mono text-gray-900;
+}
+
+.retryAttemptConfigurationOptions {
+  @apply space-y-1;
+}
+
+.retryAttemptConfigurationOptionsLabel {
+  @apply font-medium text-gray-600;
+}
+
+.retryAttemptConfigurationOptionsPre {
+  @apply text-xs text-gray-700 bg-white p-3 rounded border font-mono overflow-x-auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .errorRecoveryInterfaceHeader {
+    @apply flex-col space-y-4;
+  }
+
+  .errorRecoveryInterfaceTabs {
+    @apply flex-wrap;
+  }
+
+  .errorRecoveryInterfaceTab {
+    @apply flex-1 min-w-0;
+  }
+
+  .retryScopeGrid {
+    @apply grid-cols-1;
+  }
+
+  .errorLogViewerFilters {
+    @apply flex-col space-y-2 space-x-0;
+  }
+
+  .errorLogViewerSearch {
+    @apply max-w-none;
+  }
+
+  .retryHistoryStatsGrid,
+  .errorLogViewerStatsGrid {
+    @apply grid-cols-2;
+  }
+
+  .retryHistorySummaryStats {
+    @apply grid-cols-1;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .errorRecoveryInterface {
+    @apply bg-gray-900 border-gray-700;
+  }
+
+  .errorRecoveryInterfaceHeader {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .errorRecoveryInterfaceTitleText {
+    @apply text-gray-100;
+  }
+
+  .errorRecoveryInterfaceDismissButton {
+    @apply text-gray-300 bg-gray-800 border-gray-600 hover:bg-gray-700;
+  }
+
+  .errorRecoveryInterfaceError {
+    @apply bg-red-900 border-red-700;
+  }
+
+  .errorRecoveryInterfaceErrorMessage {
+    @apply text-red-200;
+  }
+
+  .errorRecoveryInterfaceLoadingText {
+    @apply text-gray-400;
+  }
+
+  .errorRecoveryInterfaceTab {
+    @apply text-gray-400 hover:text-gray-200;
+  }
+
+  .errorRecoveryInterfaceTabActive {
+    @apply text-red-400;
+  }
+
+  .errorRecoveryInterfaceFooter {
+    @apply bg-gray-800 border-gray-700 text-gray-400;
+  }
+
+  .errorRecoveryInterfaceFooterValue {
+    @apply text-gray-200;
+  }
+}

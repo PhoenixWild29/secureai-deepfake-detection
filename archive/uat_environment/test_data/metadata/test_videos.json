@@ -1,0 +1,166 @@
+[
+  {
+    "id": "exec_001",
+    "filename": "ceo_announcement_sample.mp4",
+    "persona": "security_professionals",
+    "scenario": "executive_impersonation",
+    "technique": "face_swap",
+    "expected_result": "deepfake",
+    "confidence_threshold": 0.95,
+    "metadata": {
+      "duration_seconds": 120,
+      "resolution": "1920x1080",
+      "file_size_mb": 45.2,
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "exec_002",
+    "filename": "cto_security_breach_sample.mp4",
+    "persona": "security_professionals",
+    "scenario": "executive_impersonation",
+    "technique": "voice_cloning",
+    "expected_result": "deepfake",
+    "confidence_threshold": 0.90,
+    "metadata": {
+      "duration_seconds": 90,
+      "resolution": "1920x1080",
+      "file_size_mb": 38.7,
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "zero_001",
+    "filename": "novel_technique_sample.mp4",
+    "persona": "security_professionals",
+    "scenario": "zero_day_attack",
+    "technique": "unknown",
+    "expected_result": "suspicious",
+    "confidence_threshold": 0.70,
+    "metadata": {
+      "duration_seconds": 60,
+      "resolution": "1280x720",
+      "file_size_mb": 22.1,
+      "novelty_score": 0.85,
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "camp_001",
+    "filename": "campaign_face_swap_sample.mp4",
+    "persona": "security_professionals",
+    "scenario": "multi_vector_campaign",
+    "technique": "face_swap",
+    "expected_result": "deepfake",
+    "confidence_threshold": 0.92,
+    "campaign_id": "campaign_alpha_001",
+    "metadata": {
+      "duration_seconds": 75,
+      "resolution": "1920x1080",
+      "file_size_mb": 28.4,
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "gdpr_001",
+    "filename": "eu_citizen_interview_sample.mp4",
+    "persona": "compliance_officers",
+    "scenario": "gdpr_compliance",
+    "technique": "authentic",
+    "expected_result": "authentic",
+    "confidence_threshold": 0.90,
+    "metadata": {
+      "duration_seconds": 180,
+      "resolution": "1280x720",
+      "file_size_mb": 32.1,
+      "data_subject": "EU_citizen",
+      "lawful_basis": "consent",
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "sox_001",
+    "filename": "financial_earnings_call_sample.mp4",
+    "persona": "compliance_officers",
+    "scenario": "sox_compliance",
+    "technique": "authentic",
+    "expected_result": "authentic",
+    "confidence_threshold": 0.95,
+    "metadata": {
+      "duration_seconds": 240,
+      "resolution": "1920x1080",
+      "file_size_mb": 67.8,
+      "financial_content": true,
+      "executive_communication": true,
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "hipaa_001",
+    "filename": "patient_consultation_sample.mp4",
+    "persona": "compliance_officers",
+    "scenario": "hipaa_compliance",
+    "technique": "authentic",
+    "expected_result": "authentic",
+    "confidence_threshold": 0.95,
+    "metadata": {
+      "duration_seconds": 300,
+      "resolution": "1920x1080",
+      "file_size_mb": 89.2,
+      "phi_content": true,
+      "healthcare_context": true,
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "mis_001",
+    "filename": "political_misinformation_sample.mp4",
+    "persona": "content_moderators",
+    "scenario": "misinformation_detection",
+    "technique": "face_swap",
+    "expected_result": "deepfake",
+    "confidence_threshold": 0.85,
+    "metadata": {
+      "duration_seconds": 60,
+      "resolution": "1920x1080",
+      "file_size_mb": 18.7,
+      "content_type": "political",
+      "misinformation_category": "election_interference",
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "harm_001",
+    "filename": "harassment_content_sample.mp4",
+    "persona": "content_moderators",
+    "scenario": "harmful_content",
+    "technique": "voice_cloning",
+    "expected_result": "deepfake",
+    "confidence_threshold": 0.95,
+    "metadata": {
+      "duration_seconds": 45,
+      "resolution": "1280x720",
+      "file_size_mb": 12.3,
+      "content_type": "harassment",
+      "harm_category": "cyberbullying",
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  },
+  {
+    "id": "bulk_001",
+    "filename": "batch_content_sample.mp4",
+    "persona": "content_moderators",
+    "scenario": "bulk_operations",
+    "technique": "mixed",
+    "expected_result": "mixed",
+    "confidence_threshold": 0.80,
+    "batch_id": "bulk_test_001",
+    "metadata": {
+      "duration_seconds": 30,
+      "resolution": "1280x720",
+      "file_size_mb": 8.9,
+      "processing_priority": "medium",
+      "created_at": "2025-01-27T10:00:00.000Z"
+    }
+  }
+]

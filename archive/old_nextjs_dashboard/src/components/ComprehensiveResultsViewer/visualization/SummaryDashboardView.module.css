@@ -1,0 +1,691 @@
+/**
+ * SummaryDashboardView Component Styles
+ * Comprehensive overview dashboard with metrics cards and visualizations
+ */
+
+/* ============================================================================
+   Main Container
+   ============================================================================ */
+
+.summaryDashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  overflow-y: auto;
+}
+
+/* ============================================================================
+   Header Section
+   ============================================================================ */
+
+.dashboardHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.dashboardHeader h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboardHeader p {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Filter Controls
+   ============================================================================ */
+
+.filterControls {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.filterGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+.thresholdSlider {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.thresholdSlider::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.thresholdValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #3b82f6;
+  text-align: center;
+  padding: 0.25rem 0.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 6px;
+}
+
+.timeRangeSelect,
+.metricSelect {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.timeRangeSelect:focus,
+.metricSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================================
+   Summary Cards
+   ============================================================================ */
+
+.summarycards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metriccard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease-in-out;
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.metriccard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
+  transition: height 0.3s ease-in-out;
+}
+
+.metriccard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.metriccard:hover::before {
+  height: 6px;
+}
+
+/* Risk level colors */
+.metriccard.critical {
+  border-left: 4px solid #ef4444;
+}
+
+.metriccard.critical::before {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.metriccard.high {
+  border-left: 4px solid #f59e0b;
+}
+
+.metriccard.high::before {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.metriccard.medium {
+  border-left: 4px solid #3b82f6;
+}
+
+.metriccard.medium::before {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.metriccard.low {
+  border-left: 4px solid #10b981;
+}
+
+.metriccard.low::before {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.metriccard.info {
+  border-left: 4px solid #8b5cf6;
+}
+
+.metriccard.info::before {
+  background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.verified {
+  border-left: 4px solid #10b981;
+}
+
+.verified::before {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.pending::before {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.failed {
+  border-left: 4px solid #ef4444;
+}
+
+.failed::before {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cardIcon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.cardValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* ============================================================================
+   Dashboard Content Layout
+   ============================================================================ */
+
+.dashboardContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  flex: 1;
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ============================================================================
+   Interactive Components
+   ============================================================================ */
+
+.distributionChart {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.blockchainDetails {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.suspiciousRegionSummary {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.analysisMetadata {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.distributionChart h3,
+.blockchainDetails h3,
+.suspiciousRegionSummary h3,
+.analysisMetadata h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* ============================================================================
+   Blockchain Status
+   ============================================================================ */
+
+.blockchainStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.statusProgress {
+  flex: 1;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-right: 1rem;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+  border-radius: 12px;
+  transition: width 0.5s ease-in-out;
+}
+
+.statusText {
+  font-weight: 600;
+  color: #374151;
+}
+
+.blockchainInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+}
+
+.infoItem label {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.infoItem code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+.infoItem span {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Suspicious Regions
+   ============================================================================ */
+
+.regionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.regionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.regionCoordinate {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.regionFrequency {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.regionConfidence {
+  font-weight: 600;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+.noRegions {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ============================================================================
+   Analysis Metadata
+   ============================================================================ */
+
+.metadataGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.metadataItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.metadataItem label {
+  font-weight: 500;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.metadataItem code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.75rem;
+  color: #374151;
+}
+
+.metadataItem span {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   Loading and Error States
+   ============================================================================ */
+
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.errorState h3 {
+  margin: 0 0 0.5rem 0;
+  color: #374151;
+}
+
+.errorState p {
+  margin: 0;
+  color: #64748b;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .dashboardContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .summaryDashboard {
+    padding: 1rem;
+  }
+  
+  .dashboardHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .filterControls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .summarycards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .metriccard {
+    padding: 1rem;
+  }
+  
+  .cardValue {
+    font-size: 2rem;
+  }
+  
+  .regionItem {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .analysisMetadata,
+  .blockchainDetails,
+  .suspiciousRegionSummary,
+  .distributionChart {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboardHeader {
+    margin-bottom: 1rem;
+  }
+  
+  .dashboardHeader h2 {
+    font-size: 1.25rem;
+  }
+  
+  .dashboardHeader p {
+    font-size: 1rem;
+  }
+  
+  .filterControls {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+  
+  .cardHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .cardIcon {
+    font-size: 1.5rem;
+  }
+  
+  .cardValue {
+    font-size: 1.75rem;
+  }
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   Accessibility & High Contrast
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .metriccard,
+  .progressBar {
+    animation: none;
+    transition: none;
+  }
+  
+  .loadingSpinner {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .summaryDashboard {
+    background: white;
+  }
+  
+  .metriccard {
+    border: 2px solid #000;
+  }
+  
+  .filterControls,
+  .analysisMetadata,
+  .blockchainDetails,
+  .suspiciousRegionSummary,
+  .distributionChart {
+    border: 1px solid #000;
+  }
+}
