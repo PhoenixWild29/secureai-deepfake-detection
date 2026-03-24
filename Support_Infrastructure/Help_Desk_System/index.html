@@ -1,0 +1,2560 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#help-desk-system-support-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Help Desk System &amp; Support Infrastructure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Help Desk System &amp; Support Infrastructure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comprehensive-support-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎧 Comprehensive Support Operations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-infrastructure-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Support Infrastructure Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Support Infrastructure Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#support-system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support System Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Components
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Support Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ticketing-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Ticketing System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-knowledge-base" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Knowledge Base
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-live-chat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Live Chat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-phone-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Phone Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-customer-portal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Customer Portal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-channels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Support Channels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Support Channels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#channel-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#email-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Email Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#support-email-addresses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Email Addresses
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#email-response-sla" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Response SLA
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#email-template-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Email Template Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#live-chat-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Live Chat Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Live Chat Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chat-widget-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat Widget Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#chat-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chat Hours
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phone-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phone Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phone Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#support-phone-numbers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Phone Numbers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ivr-script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IVR Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ticket-management-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎫 Ticket Management System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎫 Ticket Management System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ticket-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ticket Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ticket-priority-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ticket Priority Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-ticket-routing-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automatic Ticket Routing Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ticket-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ticket Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-metrics-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Support Metrics &amp; KPIs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Support Metrics &amp; KPIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-performance-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Performance Indicators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Performance Indicators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#response-resolution-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Response &amp; Resolution Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quality-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quality Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#efficiency-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Efficiency Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#knowledge-base-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Knowledge Base Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Knowledge Base Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-base-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Base Categories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-knowledge-base-article" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample Knowledge Base Article
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#escalation-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚨 Escalation Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚨 Escalation Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#escalation-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Escalation Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#escalation-decision-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Escalation Decision Tree
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#escalation-notification-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Escalation Notification Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🤖 Support Automation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🤖 Support Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chatbot-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chatbot Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Chatbot Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chatbot-capabilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chatbot Capabilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-chatbot-conversation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample Chatbot Conversation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automated-ticket-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Ticket Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-analytics-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📈 Support Analytics Dashboard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 Support Analytics Dashboard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-time-support-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-Time Support Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-tools-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 Support Tools &amp; Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 Support Tools &amp; Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#essential-support-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Essential Support Tools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Essential Support Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ticketing-system-zendeskfreshdesk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Ticketing System (Zendesk/Freshdesk)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-knowledge-base-confluencehelp-scout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Knowledge Base (Confluence/Help Scout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-live-chat-intercomdrift" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Live Chat (Intercom/Drift)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-phone-system-ringcentral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Phone System (RingCentral)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-customer-portal_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Customer Portal
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-team-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Support Team Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Support Team Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#team-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Team Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staffing-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Staffing Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emergency-support-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Emergency Support Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Emergency Support Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#critical-incident-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Critical Incident Response
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Critical Incident Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#incident-classification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Incident Classification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="help-desk-system-support-infrastructure">Help Desk System &amp; Support Infrastructure</h2>
+<h3 id="comprehensive-support-operations">🎧 Comprehensive Support Operations</h3>
+<p>This guide covers the complete help desk system, support processes, and infrastructure for providing world-class customer support.</p>
+<hr />
+<h2 id="support-infrastructure-overview">🎯 Support Infrastructure Overview</h2>
+<h3 id="support-system-architecture"><strong>Support System Architecture</strong></h3>
+<pre><code class="language-mermaid">graph TB
+    A[Customer Contact] --&gt; B{Support Channel}
+    B --&gt;|Email| C[Ticket System]
+    B --&gt;|Chat| D[Live Chat Platform]
+    B --&gt;|Phone| E[Call Center]
+    B --&gt;|Self-Service| F[Knowledge Base]
+
+    C --&gt; G[Ticket Routing]
+    D --&gt; G
+    E --&gt; G
+
+    G --&gt; H{Priority Classification}
+    H --&gt;|P1-Critical| I[Tier 3 - Engineering]
+    H --&gt;|P2-High| J[Tier 2 - Technical]
+    H --&gt;|P3-Medium| K[Tier 1 - General]
+    H --&gt;|P4-Low| K
+
+    I --&gt; L[Resolution]
+    J --&gt; L
+    K --&gt; L
+
+    L --&gt; M[Customer Notification]
+    M --&gt; N[Quality Assurance]
+    N --&gt; O[Knowledge Base Update]
+</code></pre>
+<h3 id="support-components"><strong>Support Components</strong></h3>
+<h4 id="1-ticketing-system"><strong>1. Ticketing System</strong></h4>
+<ul>
+<li><strong>Platform</strong>: Zendesk / Freshdesk / ServiceNow</li>
+<li><strong>Purpose</strong>: Centralized ticket management</li>
+<li><strong>Features</strong>: Auto-routing, SLA tracking, escalation automation</li>
+<li><strong>Integration</strong>: Email, chat, phone, API</li>
+</ul>
+<h4 id="2-knowledge-base"><strong>2. Knowledge Base</strong></h4>
+<ul>
+<li><strong>Platform</strong>: Confluence / Help Scout / Custom</li>
+<li><strong>Purpose</strong>: Self-service support</li>
+<li><strong>Content</strong>: Articles, FAQs, tutorials, troubleshooting</li>
+<li><strong>Search</strong>: Full-text search with AI assistance</li>
+</ul>
+<h4 id="3-live-chat"><strong>3. Live Chat</strong></h4>
+<ul>
+<li><strong>Platform</strong>: Intercom / Drift / LiveChat</li>
+<li><strong>Purpose</strong>: Real-time customer support</li>
+<li><strong>Hours</strong>: Business hours (Starter/Pro), 24/7 (Enterprise)</li>
+<li><strong>Features</strong>: Chatbot + human handoff</li>
+</ul>
+<h4 id="4-phone-support"><strong>4. Phone Support</strong></h4>
+<ul>
+<li><strong>Platform</strong>: RingCentral / 8x8 / Five9</li>
+<li><strong>Purpose</strong>: Voice support for complex issues</li>
+<li><strong>Hours</strong>: Business hours (Pro), 24/7 (Enterprise)</li>
+<li><strong>Features</strong>: IVR, call routing, recording</li>
+</ul>
+<h4 id="5-customer-portal"><strong>5. Customer Portal</strong></h4>
+<ul>
+<li><strong>Platform</strong>: Custom web application</li>
+<li><strong>Purpose</strong>: Self-service and account management</li>
+<li><strong>Features</strong>: Ticket tracking, knowledge base, account settings</li>
+</ul>
+<hr />
+<h2 id="support-channels">📞 Support Channels</h2>
+<h3 id="channel-overview"><strong>Channel Overview</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Availability</th>
+<th>Response Time</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Email</strong></td>
+<td>24/7 submission</td>
+<td>2-8 hours</td>
+<td>Non-urgent issues</td>
+</tr>
+<tr>
+<td><strong>Live Chat</strong></td>
+<td>Business hours</td>
+<td>5-30 minutes</td>
+<td>Quick questions</td>
+</tr>
+<tr>
+<td><strong>Phone</strong></td>
+<td>Business hours+</td>
+<td>Immediate</td>
+<td>Urgent issues</td>
+</tr>
+<tr>
+<td><strong>Portal</strong></td>
+<td>24/7</td>
+<td>Self-service</td>
+<td>Account management</td>
+</tr>
+<tr>
+<td><strong>Community Forum</strong></td>
+<td>24/7</td>
+<td>Community-driven</td>
+<td>Peer support</td>
+</tr>
+<tr>
+<td><strong>Emergency Hotline</strong></td>
+<td>24/7</td>
+<td>Immediate</td>
+<td>Critical issues</td>
+</tr>
+</tbody>
+</table>
+<h3 id="email-support"><strong>Email Support</strong></h3>
+<h4 id="support-email-addresses"><strong>Support Email Addresses</strong></h4>
+<pre><code>General Support: support@secureai.com
+Technical Support: technical@secureai.com
+Billing Support: billing@secureai.com
+Security Issues: security@secureai.com
+Enterprise Support: enterprise-support@secureai.com
+</code></pre>
+<h4 id="email-response-sla"><strong>Email Response SLA</strong></h4>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Priority</th>
+<th>Response Time</th>
+<th>Resolution Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Starter</strong></td>
+<td>P1</td>
+<td>8 hours</td>
+<td>48 hours</td>
+</tr>
+<tr>
+<td><strong>Starter</strong></td>
+<td>P2-P4</td>
+<td>24 hours</td>
+<td>72 hours</td>
+</tr>
+<tr>
+<td><strong>Professional</strong></td>
+<td>P1</td>
+<td>4 hours</td>
+<td>24 hours</td>
+</tr>
+<tr>
+<td><strong>Professional</strong></td>
+<td>P2-P4</td>
+<td>8 hours</td>
+<td>48 hours</td>
+</tr>
+<tr>
+<td><strong>Enterprise</strong></td>
+<td>P1</td>
+<td>1 hour</td>
+<td>4 hours</td>
+</tr>
+<tr>
+<td><strong>Enterprise</strong></td>
+<td>P2-P4</td>
+<td>4 hours</td>
+<td>24 hours</td>
+</tr>
+</tbody>
+</table>
+<h4 id="email-template-structure"><strong>Email Template Structure</strong></h4>
+<pre><code>From: SecureAI Support &lt;support@secureai.com&gt;
+To: customer@company.com
+Subject: [Ticket #12345] Your SecureAI Support Request
+Priority: [P1/P2/P3/P4]
+
+Dear [Customer Name],
+
+Thank you for contacting SecureAI Support.
+
+Ticket Details:
+- Ticket ID: #12345
+- Priority: P2 (High)
+- Status: In Progress
+- Assigned To: [Agent Name]
+
+Issue Summary:
+[Brief description of the issue]
+
+Current Status:
+[What we're doing to resolve]
+
+Next Steps:
+[What customer needs to do, if anything]
+
+Expected Resolution: [Timeframe]
+
+You can track this ticket at: https://support.secureai.com/tickets/12345
+
+Best regards,
+[Agent Name]
+SecureAI Support Team
+</code></pre>
+<h3 id="live-chat-support"><strong>Live Chat Support</strong></h3>
+<h4 id="chat-widget-configuration"><strong>Chat Widget Configuration</strong></h4>
+<pre><code class="language-javascript">// Live chat integration
+&lt;script&gt;
+window.intercomSettings = {
+  app_id: &quot;secureai_app_id&quot;,
+  name: &quot;Customer Name&quot;,
+  email: &quot;customer@company.com&quot;,
+  user_id: &quot;customer_123&quot;,
+  company: {
+    id: &quot;company_456&quot;,
+    name: &quot;Customer Company&quot;,
+    plan: &quot;professional&quot;
+  },
+  // Custom data
+  subscription_tier: &quot;professional&quot;,
+  analyses_this_month: 1234,
+  last_analysis_date: &quot;2025-01-27&quot;
+};
+&lt;/script&gt;
+</code></pre>
+<h4 id="chat-hours"><strong>Chat Hours</strong></h4>
+<pre><code class="language-yaml">Starter Tier:
+  - Monday-Friday: 9 AM - 5 PM EST
+  - Weekends: Chatbot only
+  - Holidays: Closed
+
+Professional Tier:
+  - Monday-Friday: 8 AM - 8 PM EST
+  - Weekends: 10 AM - 4 PM EST
+  - Holidays: Limited hours
+
+Enterprise Tier:
+  - 24/7/365 coverage
+  - Dedicated chat queue
+  - Priority response
+</code></pre>
+<h3 id="phone-support"><strong>Phone Support</strong></h3>
+<h4 id="support-phone-numbers"><strong>Support Phone Numbers</strong></h4>
+<pre><code>Main Support Line: +1-800-SECURE-AI (732-8734)
+  - Press 1: General support
+  - Press 2: Technical support
+  - Press 3: Billing
+  - Press 4: Enterprise support
+  - Press 9: Emergency hotline
+
+International Numbers:
+  - UK: +44-20-XXXX-XXXX
+  - EU: +49-30-XXXX-XXXX
+  - APAC: +65-XXXX-XXXX
+</code></pre>
+<h4 id="ivr-script"><strong>IVR Script</strong></h4>
+<pre><code>&quot;Thank you for calling SecureAI Support.
+
+For quality and training purposes, this call may be recorded.
+
+If this is a critical system outage affecting multiple users, press 9 now.
+
+Otherwise, please select from the following options:
+
+Press 1 for general support and account questions
+Press 2 for technical support and API issues
+Press 3 for billing and subscription questions
+Press 4 for enterprise customer support
+Press 5 to speak with a sales representative
+Press 0 to repeat these options
+
+Or stay on the line to speak with the next available agent.&quot;
+</code></pre>
+<hr />
+<h2 id="ticket-management-system">🎫 Ticket Management System</h2>
+<h3 id="ticket-lifecycle"><strong>Ticket Lifecycle</strong></h3>
+<pre><code>┌─────────────┐
+│   Created   │ ← Customer submits request
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│   Assigned  │ ← Auto-routed to appropriate tier
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│ In Progress │ ← Agent working on resolution
+└──────┬──────┘
+       │
+       ├──────────┐
+       ▼          ▼
+┌─────────────┐ ┌──────────────┐
+│  Escalated  │ │   Pending    │ ← Waiting for customer
+└──────┬──────┘ └──────┬───────┘
+       │               │
+       ▼               ▼
+┌─────────────┐ ┌──────────────┐
+│  Resolved   │ │   Resolved   │
+└──────┬──────┘ └──────┬───────┘
+       │               │
+       └───────┬───────┘
+               ▼
+        ┌─────────────┐
+        │   Closed    │ ← Customer confirms or auto-close
+        └─────────────┘
+</code></pre>
+<h3 id="ticket-priority-matrix"><strong>Ticket Priority Matrix</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Definition</th>
+<th>Response Time</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P1 - Critical</strong></td>
+<td>System down, all users affected</td>
+<td>1-8 hours</td>
+<td>Complete outage, data breach, security incident</td>
+</tr>
+<tr>
+<td><strong>P2 - High</strong></td>
+<td>Major functionality broken</td>
+<td>4-24 hours</td>
+<td>API failures, batch processing down, login issues</td>
+</tr>
+<tr>
+<td><strong>P3 - Medium</strong></td>
+<td>Minor functionality impaired</td>
+<td>8-48 hours</td>
+<td>Individual feature bug, slow performance</td>
+</tr>
+<tr>
+<td><strong>P4 - Low</strong></td>
+<td>Minimal impact</td>
+<td>24-72 hours</td>
+<td>Cosmetic issues, feature requests, questions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automatic-ticket-routing-rules"><strong>Automatic Ticket Routing Rules</strong></h3>
+<pre><code class="language-yaml">Routing Rules:
+
+1. Subject Line Keywords:
+   &quot;login&quot;, &quot;password&quot;, &quot;access&quot; → Account Support Queue
+   &quot;api&quot;, &quot;integration&quot;, &quot;error code&quot; → Technical Support Queue
+   &quot;bill&quot;, &quot;invoice&quot;, &quot;payment&quot; → Billing Queue
+   &quot;security&quot;, &quot;breach&quot;, &quot;incident&quot; → Security Queue (High Priority)
+
+2. Customer Tier:
+   Enterprise → Enterprise Queue (Priority)
+   Professional → Professional Queue
+   Starter → General Queue
+
+3. Previous Ticket History:
+   Repeat issue → Escalate to Tier 2
+   VIP customer → Priority routing
+
+4. Time of Day:
+   Business hours → Live agent
+   After hours → Ticket queue (Enterprise gets on-call)
+
+5. Issue Type:
+   System outage → Immediate escalation to Tier 3
+   Security incident → Security team + Management notification
+   Compliance issue → Compliance team notification
+</code></pre>
+<h3 id="ticket-template"><strong>Ticket Template</strong></h3>
+<pre><code class="language-yaml">Ticket ID: TICK-20250127-001
+Created: 2025-01-27 10:30:00 UTC
+Updated: 2025-01-27 11:15:00 UTC
+Status: In Progress
+Priority: P2 (High)
+
+Customer Information:
+  Name: John Doe
+  Email: john.doe@company.com
+  Company: Example Corp
+  Tier: Professional
+  User ID: USER-12345
+
+Issue Details:
+  Category: Technical - API
+  Subcategory: Authentication
+  Subject: API authentication failing with 401 error
+
+  Description:
+  &quot;We're getting 401 Unauthorized errors when calling the /analyze/video 
+  endpoint. The API token was generated yesterday and should be valid.&quot;
+
+  Steps to Reproduce:
+  1. Generate API token via dashboard
+  2. Make POST request to /api/v1/analyze/video
+  3. Include Authorization: Bearer [token] header
+  4. Receive 401 error response
+
+  Environment:
+  - API client: Python requests library
+  - Version: Latest
+  - Token generated: 2025-01-26
+
+  Attachments:
+  - screenshot_error.png
+  - api_request_log.txt
+
+Assignment:
+  Assigned To: Jane Smith (Tier 2 Technical Support)
+  Team: Technical Support
+  Queue: API Issues
+
+Activity Log:
+  2025-01-27 10:30:00 - Ticket created by customer
+  2025-01-27 10:32:00 - Auto-assigned to Technical Support queue
+  2025-01-27 10:45:00 - Jane Smith claimed ticket
+  2025-01-27 11:00:00 - Jane requested additional information
+  2025-01-27 11:15:00 - Customer provided logs
+
+Internal Notes:
+  &quot;Checking if token has correct permissions. Verified token is active.
+  Reviewing customer's code sample to identify issue.&quot;
+
+Resolution:
+  [To be filled when resolved]
+
+Customer Satisfaction:
+  [To be filled after resolution]
+</code></pre>
+<hr />
+<h2 id="support-metrics-kpis">📊 Support Metrics &amp; KPIs</h2>
+<h3 id="key-performance-indicators"><strong>Key Performance Indicators</strong></h3>
+<h4 id="response-resolution-metrics"><strong>Response &amp; Resolution Metrics</strong></h4>
+<pre><code class="language-yaml">First Response Time (FRT):
+  Target: &lt;2 hours (all tiers combined)
+  Measurement: Time from ticket creation to first agent response
+  SLA Adherence: &gt;95%
+
+Time to Resolution (TTR):
+  Target: &lt;24 hours (all priorities combined)
+  Measurement: Time from creation to resolution
+  SLA Adherence: &gt;90%
+
+First Contact Resolution (FCR):
+  Target: &gt;70%
+  Measurement: % of tickets resolved on first contact
+  No escalation or follow-up required
+</code></pre>
+<h4 id="quality-metrics"><strong>Quality Metrics</strong></h4>
+<pre><code class="language-yaml">Customer Satisfaction (CSAT):
+  Target: &gt;90%
+  Measurement: Post-ticket survey (1-5 scale)
+  Survey sent: After ticket closure
+  Response rate target: &gt;50%
+
+Net Promoter Score (NPS):
+  Target: &gt;50
+  Measurement: Quarterly survey
+  Question: &quot;Would you recommend SecureAI?&quot;
+  Scale: 0-10
+
+Ticket Reopen Rate:
+  Target: &lt;10%
+  Measurement: % of tickets reopened within 7 days
+  Indicates: Quality of initial resolution
+</code></pre>
+<h4 id="efficiency-metrics"><strong>Efficiency Metrics</strong></h4>
+<pre><code class="language-yaml">Tickets per Agent per Day:
+  Target: 15-20 tickets (Tier 1)
+  Target: 8-12 tickets (Tier 2)
+  Target: 3-5 tickets (Tier 3)
+
+Escalation Rate:
+  Target: &lt;20%
+  Measurement: % of tickets escalated to higher tier
+  Lower is better (indicates Tier 1 effectiveness)
+
+Knowledge Base Deflection:
+  Target: &gt;40%
+  Measurement: % of customers who find answers without tickets
+  Higher is better (reduces ticket volume)
+</code></pre>
+<hr />
+<h2 id="knowledge-base-structure">📚 Knowledge Base Structure</h2>
+<h3 id="knowledge-base-categories"><strong>Knowledge Base Categories</strong></h3>
+<pre><code>SecureAI Help Center
+├── Getting Started
+│   ├── Account Setup
+│   ├── First Login
+│   ├── Profile Configuration
+│   ├── Quick Start Guide
+│   └── Video Tutorials
+│
+├── Core Features
+│   ├── Video Analysis
+│   │   ├── Single Video Upload
+│   │   ├── Batch Processing
+│   │   ├── API Integration
+│   │   └── Results Interpretation
+│   ├── Reporting
+│   │   ├── Generating Reports
+│   │   ├── Custom Reports
+│   │   └── Scheduled Reports
+│   └── Dashboards
+│       ├── Default Dashboard
+│       ├── Custom Dashboards
+│       └── Dashboard Widgets
+│
+├── Integrations
+│   ├── SIEM Platforms
+│   │   ├── Splunk Integration
+│   │   ├── QRadar Integration
+│   │   └── ArcSight Integration
+│   ├── SOAR Platforms
+│   │   ├── Phantom Integration
+│   │   ├── Demisto Integration
+│   │   └── Sentinel Integration
+│   └── Identity Providers
+│       ├── Active Directory
+│       ├── Okta
+│       └── SAML/SSO Setup
+│
+├── API Documentation
+│   ├── Authentication
+│   ├── Video Analysis Endpoints
+│   ├── Batch Processing
+│   ├── Webhooks
+│   └── Error Codes
+│
+├── Administration
+│   ├── User Management
+│   ├── Permission Configuration
+│   ├── System Settings
+│   ├── Monitoring
+│   └── Backup &amp; Recovery
+│
+├── Troubleshooting
+│   ├── Login Issues
+│   ├── Upload Failures
+│   ├── API Errors
+│   ├── Performance Problems
+│   └── Integration Issues
+│
+├── Compliance &amp; Security
+│   ├── GDPR Compliance
+│   ├── CCPA Compliance
+│   ├── Data Protection
+│   ├── Security Best Practices
+│   └── Audit Trails
+│
+└── Billing &amp; Account
+    ├── Subscription Management
+    ├── Billing Information
+    ├── Usage and Quotas
+    └── Upgrading/Downgrading
+</code></pre>
+<h3 id="sample-knowledge-base-article"><strong>Sample Knowledge Base Article</strong></h3>
+<pre><code class="language-markdown"># How to Upload and Analyze Your First Video
+
+**Category:** Getting Started &gt; Video Analysis
+**Last Updated:** January 27, 2025
+**Estimated Reading Time:** 3 minutes
+**Difficulty:** Beginner
+
+## Overview
+This guide walks you through uploading and analyzing your first video for 
+deepfake detection using SecureAI.
+
+## Prerequisites
+- Active SecureAI account
+- Video file in supported format (MP4, AVI, MOV, MKV, WEBM)
+- File size under 500MB
+
+## Step-by-Step Instructions
+
+### Step 1: Access the Upload Interface
+1. Log in to your SecureAI dashboard
+2. Click the **&quot;Analyze Video&quot;** button in the main navigation
+3. The upload interface will appear
+
+### Step 2: Upload Your Video
+You have three options:
+
+**Option A: Drag and Drop**
+- Drag your video file from your computer
+- Drop it into the upload area
+
+**Option B: File Browser**
+- Click &quot;Browse Files&quot;
+- Select your video file
+- Click &quot;Open&quot;
+
+**Option C: URL Upload**
+- Click &quot;Upload from URL&quot;
+- Paste the video URL
+- Click &quot;Upload&quot;
+
+### Step 3: Configure Analysis Options
+Choose your analysis type:
+- **Quick** (&lt; 1 minute): Fast screening
+- **Comprehensive** (2-5 minutes): Detailed analysis (recommended)
+- **Security-focused** (3-7 minutes): Maximum scrutiny
+
+Optional settings:
+- ☑️ Detailed forensic analysis
+- ☑️ Audio deepfake detection
+- ☑️ Metadata examination
+- ☑️ Generate blockchain proof
+
+### Step 4: Start Analysis
+Click the **&quot;Start Analysis&quot;** button
+
+### Step 5: Monitor Progress
+Watch the progress bar and status updates:
+- Video preprocessing
+- Face detection
+- Facial landmark analysis
+- Temporal consistency check
+- Audio analysis
+- Metadata examination
+
+### Step 6: Review Results
+When complete, you'll see:
+- Overall verdict (Deepfake / Real)
+- Confidence score (0-100%)
+- Risk level (Low / Medium / High / Critical)
+- Detection breakdown by technique
+- Recommended actions
+
+## What the Results Mean
+
+| Confidence | Risk Level | Meaning |
+|------------|------------|---------|
+| 90-100% | Critical | Definite deepfake - investigate immediately |
+| 80-89% | High | Probable deepfake - manual review recommended |
+| 60-79% | Medium | Suspicious - additional analysis suggested |
+| 40-59% | Low | Uncertain - monitor |
+| 0-39% | Very Low | Likely authentic |
+
+## Next Steps
+- Download detailed report (PDF)
+- Create incident (if high risk)
+- Share results with team
+- Configure alerts for future analyses
+
+## Common Issues
+
+**Upload fails:**
+- Check file size (&lt;500MB)
+- Verify format (MP4, AVI, MOV, MKV, WEBM)
+- Check internet connection
+
+**Slow analysis:**
+- Large files take longer
+- Use &quot;Quick&quot; analysis for faster results
+- Check system status page
+
+## Related Articles
+- Understanding Confidence Scores
+- Generating Analysis Reports
+- Batch Processing Multiple Videos
+- API Integration Guide
+
+## Was this article helpful?
+[Yes 👍] [No 👎]
+
+## Still need help?
+[Contact Support] [Live Chat] [Community Forum]
+</code></pre>
+<hr />
+<h2 id="escalation-procedures">🚨 Escalation Procedures</h2>
+<h3 id="escalation-matrix"><strong>Escalation Matrix</strong></h3>
+<pre><code class="language-yaml">Tier 1 → Tier 2 Escalation:
+  Criteria:
+    - Technical issue beyond basic troubleshooting
+    - API or integration problems
+    - Configuration issues
+    - After 30 minutes of unsuccessful troubleshooting
+
+  Process:
+    1. Document all troubleshooting steps
+    2. Assign to Tier 2 queue
+    3. Notify Tier 2 team lead
+    4. Update customer with escalation notice
+
+  Response Time:
+    - P1: Immediate
+    - P2: 1 hour
+    - P3: 4 hours
+    - P4: 8 hours
+
+Tier 2 → Tier 3 Escalation:
+  Criteria:
+    - System bugs or defects
+    - Performance issues requiring code changes
+    - Complex integration problems
+    - After 4 hours of unsuccessful resolution
+
+  Process:
+    1. Create detailed technical summary
+    2. Assign to Engineering queue
+    3. Engineering team lead notified
+    4. Account manager notified (Enterprise)
+    5. Customer updated with timeline
+
+  Response Time:
+    - P1: Immediate
+    - P2: 2 hours
+    - P3: 8 hours
+    - P4: 24 hours
+
+Tier 3 → Management Escalation:
+  Criteria:
+    - Critical customer impact
+    - Enterprise customer P1 issue
+    - Potential data breach or security incident
+    - Legal or compliance issues
+    - Major system outage
+
+  Process:
+    1. Notify VP of Engineering
+    2. Notify VP of Customer Success
+    3. Activate incident response team
+    4. Executive communication to customer
+    5. Hourly status updates
+
+  Response Time: Immediate
+</code></pre>
+<h3 id="escalation-decision-tree"><strong>Escalation Decision Tree</strong></h3>
+<pre><code>Issue Reported
+    │
+    ▼
+Is it a system outage? ──Yes──&gt; Immediate Tier 3
+    │                            + Management notification
+    No
+    │
+    ▼
+Is it a security incident? ──Yes──&gt; Immediate Security Team
+    │                                + Tier 3 + Management
+    No
+    │
+    ▼
+Is customer Enterprise tier? ──Yes──&gt; Assign to Enterprise queue
+    │                                  + Notify account manager
+    No
+    │
+    ▼
+Can Tier 1 resolve? ──Yes──&gt; Tier 1 handles
+    │
+    No
+    │
+    ▼
+Requires technical expertise? ──Yes──&gt; Escalate to Tier 2
+    │
+    No
+    │
+    ▼
+Requires code changes? ──Yes──&gt; Escalate to Tier 3
+    │
+    No
+    │
+    ▼
+Standard Tier 1 handling
+</code></pre>
+<h3 id="escalation-notification-template"><strong>Escalation Notification Template</strong></h3>
+<pre><code>To: tier2-support@secureai.com
+CC: support-manager@secureai.com
+Subject: [ESCALATION] [P2] API Authentication Issues - Ticket #12345
+
+ESCALATION NOTICE
+
+Ticket ID: #12345
+Customer: Example Corp (Professional Tier)
+Priority: P2 (High)
+Escalated By: John Smith (Tier 1)
+Escalation Time: 2025-01-27 11:30:00 UTC
+
+ISSUE SUMMARY:
+Customer experiencing API authentication failures. All API requests returning 
+401 Unauthorized despite valid token.
+
+CUSTOMER IMPACT:
+- Unable to use API integration
+- Blocking their automated workflows
+- Affecting 10+ users
+- Critical for their operations
+
+TROUBLESHOOTING PERFORMED:
+✓ Verified token is active and not expired
+✓ Confirmed correct Authorization header format
+✓ Tested with curl - same error
+✓ Checked customer's API usage logs
+✓ Reviewed recent system changes - none found
+✗ Cannot reproduce in test environment
+
+REASON FOR ESCALATION:
+Issue requires investigation of authentication service logs and potential 
+backend debugging. Beyond Tier 1 capabilities.
+
+CUSTOMER EXPECTATION:
+Resolution within 4 hours (per SLA)
+Has been notified of escalation
+
+REQUESTED ACTION:
+- Review authentication service logs
+- Check for customer-specific issues
+- Test with customer's actual token
+- Identify root cause and implement fix
+
+ATTACHMENTS:
+- Customer's API request logs
+- Screenshot of error
+- Troubleshooting notes
+
+PRIORITY JUSTIFICATION:
+Professional tier customer, business-critical issue, SLA clock running.
+</code></pre>
+<hr />
+<h2 id="support-automation">🤖 Support Automation</h2>
+<h3 id="chatbot-configuration"><strong>Chatbot Configuration</strong></h3>
+<h4 id="chatbot-capabilities"><strong>Chatbot Capabilities</strong></h4>
+<pre><code class="language-yaml">Automated Responses:
+  - FAQs and common questions
+  - Account status and usage information
+  - Basic troubleshooting steps
+  - Knowledge base article suggestions
+  - Ticket creation and tracking
+  - Business hours and contact information
+
+Handoff to Human:
+  Triggers:
+    - Customer requests human agent
+    - Chatbot confidence &lt;70%
+    - Complex technical issues
+    - Billing or account changes
+    - Customer frustration detected
+
+  Process:
+    1. Collect issue details from customer
+    2. Pre-populate ticket with conversation history
+    3. Transfer to appropriate queue
+    4. Notify customer of estimated wait time
+</code></pre>
+<h4 id="sample-chatbot-conversation"><strong>Sample Chatbot Conversation</strong></h4>
+<pre><code>Chatbot: &quot;Hi! I'm the SecureAI assistant. How can I help you today?&quot;
+
+Customer: &quot;I can't upload my video&quot;
+
+Chatbot: &quot;I'm sorry you're having trouble uploading. Let me help you troubleshoot. 
+          Can you tell me what error message you're seeing?&quot;
+
+Customer: &quot;It says file too large&quot;
+
+Chatbot: &quot;I see. The maximum file size is 500MB. How large is your video file?&quot;
+
+Customer: &quot;650MB&quot;
+
+Chatbot: &quot;Your file is larger than our 500MB limit. Here are your options:
+
+1. Compress the video (I can provide instructions)
+2. Split the video into smaller parts
+3. Upgrade to Enterprise tier for unlimited file sizes
+
+Which option would you prefer?&quot;
+
+Customer: &quot;How do I compress it?&quot;
+
+Chatbot: &quot;Here's a quick guide to compress your video:
+          [Link to knowledge base article]
+
+          Would you like me to:
+          A) Create a support ticket for personalized assistance
+          B) Continue with self-service instructions&quot;
+
+Customer: &quot;Create a ticket&quot;
+
+Chatbot: &quot;I've created ticket #12345 for you. A support agent will respond 
+          within 4 hours.
+
+          Ticket details:
+          - Issue: Video upload - file too large
+          - Your file size: 650MB
+          - Priority: P3 (Medium)
+
+          You can track your ticket at: https://support.secureai.com/tickets/12345
+
+          Is there anything else I can help with?&quot;
+</code></pre>
+<h3 id="automated-ticket-classification"><strong>Automated Ticket Classification</strong></h3>
+<pre><code class="language-python"># Automated ticket classification using ML
+def classify_ticket(ticket_text):
+    &quot;&quot;&quot;Classify ticket category and priority&quot;&quot;&quot;
+
+    categories = {
+        &quot;account_access&quot;: [&quot;login&quot;, &quot;password&quot;, &quot;access&quot;, &quot;account&quot;, &quot;locked&quot;],
+        &quot;upload_issues&quot;: [&quot;upload&quot;, &quot;file&quot;, &quot;size&quot;, &quot;format&quot;, &quot;failed&quot;],
+        &quot;api_integration&quot;: [&quot;api&quot;, &quot;token&quot;, &quot;authentication&quot;, &quot;401&quot;, &quot;403&quot;],
+        &quot;performance&quot;: [&quot;slow&quot;, &quot;timeout&quot;, &quot;loading&quot;, &quot;performance&quot;],
+        &quot;billing&quot;: [&quot;bill&quot;, &quot;invoice&quot;, &quot;payment&quot;, &quot;charge&quot;, &quot;subscription&quot;],
+        &quot;security&quot;: [&quot;breach&quot;, &quot;security&quot;, &quot;hack&quot;, &quot;unauthorized&quot;, &quot;incident&quot;]
+    }
+
+    priority_keywords = {
+        &quot;critical&quot;: [&quot;down&quot;, &quot;outage&quot;, &quot;breach&quot;, &quot;all users&quot;, &quot;emergency&quot;],
+        &quot;high&quot;: [&quot;urgent&quot;, &quot;production&quot;, &quot;blocking&quot;, &quot;critical business&quot;],
+        &quot;medium&quot;: [&quot;issue&quot;, &quot;problem&quot;, &quot;error&quot;, &quot;bug&quot;],
+        &quot;low&quot;: [&quot;question&quot;, &quot;how to&quot;, &quot;feature request&quot;]
+    }
+
+    # Use NLP to classify
+    # This is a simplified example
+    ticket_lower = ticket_text.lower()
+
+    # Determine category
+    category = &quot;general&quot;
+    for cat, keywords in categories.items():
+        if any(keyword in ticket_lower for keyword in keywords):
+            category = cat
+            break
+
+    # Determine priority
+    priority = &quot;medium&quot;
+    for pri, keywords in priority_keywords.items():
+        if any(keyword in ticket_lower for keyword in keywords):
+            priority = pri
+            break
+
+    return {
+        &quot;category&quot;: category,
+        &quot;priority&quot;: priority,
+        &quot;confidence&quot;: 0.85
+    }
+</code></pre>
+<hr />
+<h2 id="support-analytics-dashboard">📈 Support Analytics Dashboard</h2>
+<h3 id="real-time-support-dashboard"><strong>Real-Time Support Dashboard</strong></h3>
+<pre><code class="language-yaml">Dashboard Widgets:
+
+1. Ticket Overview:
+   - Open tickets: 45
+   - In progress: 23
+   - Pending customer: 12
+   - Resolved today: 67
+   - Average resolution time: 18.5 hours
+
+2. SLA Compliance:
+   - Response SLA: 96.5% ✅
+   - Resolution SLA: 92.3% ✅
+   - Critical tickets on time: 100% ✅
+   - SLA breaches today: 2 ⚠️
+
+3. Team Performance:
+   - Agents online: 8/10
+   - Average tickets per agent: 16
+   - First contact resolution: 72% ✅
+   - Customer satisfaction: 4.6/5 ✅
+
+4. Channel Distribution:
+   - Email: 45%
+   - Live chat: 30%
+   - Phone: 15%
+   - Self-service: 10%
+
+5. Top Issues (Last 7 days):
+   - Upload failures: 23 tickets
+   - API authentication: 18 tickets
+   - Performance questions: 15 tickets
+   - Integration help: 12 tickets
+   - Billing questions: 8 tickets
+
+6. Customer Satisfaction:
+   - This week: 4.7/5
+   - This month: 4.6/5
+   - Trend: ↑ Improving
+</code></pre>
+<hr />
+<h2 id="support-tools-systems">🔧 Support Tools &amp; Systems</h2>
+<h3 id="essential-support-tools"><strong>Essential Support Tools</strong></h3>
+<h4 id="1-ticketing-system-zendeskfreshdesk"><strong>1. Ticketing System</strong> (Zendesk/Freshdesk)</h4>
+<pre><code class="language-yaml">Features:
+  - Multi-channel ticket creation
+  - Automated routing and assignment
+  - SLA tracking and alerts
+  - Custom fields and forms
+  - Macros and canned responses
+  - Reporting and analytics
+
+Configuration:
+  - Queues: Account, Technical, Billing, Security, Enterprise
+  - Views: My tickets, Team tickets, Unassigned, Escalated
+  - Automations: Auto-close, auto-escalate, SLA warnings
+  - Integrations: Email, chat, phone, API
+</code></pre>
+<h4 id="2-knowledge-base-confluencehelp-scout"><strong>2. Knowledge Base</strong> (Confluence/Help Scout)</h4>
+<pre><code class="language-yaml">Features:
+  - Article editor with rich formatting
+  - Version control
+  - Search functionality
+  - Usage analytics
+  - Multi-language support
+  - Customer feedback
+
+Content Types:
+  - How-to guides
+  - Troubleshooting articles
+  - Video tutorials
+  - FAQ sections
+  - Release notes
+  - API documentation
+</code></pre>
+<h4 id="3-live-chat-intercomdrift"><strong>3. Live Chat</strong> (Intercom/Drift)</h4>
+<pre><code class="language-yaml">Features:
+  - Real-time messaging
+  - Chatbot integration
+  - Visitor tracking
+  - Team inbox
+  - Canned responses
+  - Conversation routing
+
+Configuration:
+  - Business rules for routing
+  - Chatbot fallback to human
+  - Availability hours
+  - Offline messaging
+</code></pre>
+<h4 id="4-phone-system-ringcentral"><strong>4. Phone System</strong> (RingCentral)</h4>
+<pre><code class="language-yaml">Features:
+  - IVR (Interactive Voice Response)
+  - Call routing
+  - Call recording
+  - Queue management
+  - Analytics and reporting
+  - Voicemail to email
+
+Configuration:
+  - Support phone tree
+  - Queue priority
+  - After-hours handling
+  - Escalation paths
+</code></pre>
+<h4 id="5-customer-portal_1"><strong>5. Customer Portal</strong></h4>
+<pre><code class="language-yaml">Features:
+  - Ticket submission
+  - Ticket tracking
+  - Knowledge base access
+  - Account management
+  - Usage dashboard
+  - Billing information
+
+Access: https://support.secureai.com
+Login: Customer SecureAI credentials
+</code></pre>
+<hr />
+<h2 id="support-team-structure">📊 Support Team Structure</h2>
+<h3 id="team-organization"><strong>Team Organization</strong></h3>
+<pre><code>Support Organization Chart:
+
+VP of Customer Success
+├── Director of Support
+│   ├── Support Manager - Tier 1
+│   │   ├── Support Agent (6 agents)
+│   │   └── Chat Specialist (3 agents)
+│   ├── Support Manager - Tier 2
+│   │   ├── Technical Support Engineer (4 engineers)
+│   │   └── Integration Specialist (2 specialists)
+│   └── Support Manager - Tier 3
+│       ├── Senior Support Engineer (3 engineers)
+│       └── On-call Engineer (rotation)
+├── Knowledge Base Manager
+│   ├── Technical Writer (2 writers)
+│   └── Content Coordinator (1 person)
+└── Customer Success Manager
+    ├── Enterprise Account Manager (3 managers)
+    └── Onboarding Specialist (2 specialists)
+</code></pre>
+<h3 id="staffing-model"><strong>Staffing Model</strong></h3>
+<pre><code class="language-yaml">Tier 1 - General Support:
+  Headcount: 6-10 agents
+  Hours: Business hours + extended
+  Ratio: 1 agent per 100 active customers
+  Skills: Product knowledge, communication
+
+Tier 2 - Technical Support:
+  Headcount: 4-6 engineers
+  Hours: Business hours
+  Ratio: 1 engineer per 200 active customers
+  Skills: API expertise, integration knowledge
+
+Tier 3 - Engineering Support:
+  Headcount: 3-5 engineers
+  Hours: On-call rotation (24/7)
+  Ratio: 1 engineer per 500 active customers
+  Skills: Deep technical expertise, development
+
+Enterprise Support:
+  Headcount: 3-5 account managers
+  Hours: Business hours + flexibility
+  Ratio: 1 manager per 10-20 enterprise customers
+  Skills: Business acumen, technical knowledge
+</code></pre>
+<hr />
+<h2 id="emergency-support-procedures">📞 Emergency Support Procedures</h2>
+<h3 id="critical-incident-response"><strong>Critical Incident Response</strong></h3>
+<h4 id="incident-classification"><strong>Incident Classification</strong></h4>
+<p><strong>Level 1 - System Outage (P1)</strong></p>
+<pre><code class="language-yaml">Definition: Complete system unavailable to all customers
+Response: Immediate
+Notification:
+  - All support tiers
+  - Engineering team
+  - VP of Engineering
+  - VP of Customer Success
+  - CEO (if &gt;1 hour)
+
+Actions:
+  1. Activate incident response team
+  2. Update status page
+  3. Send customer notifications
+  4. Begin troubleshooting
+  5. Provide hourly updates
+  6. Post-incident review
+</code></pre>
+<p><strong>Level 2 - Security Incident (P1)</strong></p>
+<pre><code class="language-yaml">Definition: Data breach, unauthorized access, security vulnerability
+Response: Immediate
+Notification:
+  - Security team
+  - Engineering team
+  - Legal team
+  - Executive team
+  - Affected customers
+
+Actions:
+  1. Activate security incident response
+  2. Contain and assess impact
+  3. Notify affected customers
+  4. Regulatory notification (if required)
+  5. Forensic investigation
+  6. Remediation and prevention
+</code></pre>
+<p><strong>Level 3 - Enterprise Customer Critical (P1)</strong></p>
+<pre><code class="language-yaml">Definition: Enterprise customer with business-critical issue
+Response: 1 hour
+Notification:
+  - Tier 3 support
+  - Account manager
+  - Engineering team
+  - VP of Customer Success
+
+Actions:
+  1. Immediate response to customer
+  2. Assign senior engineer
+  3. Provide direct communication channel
+  4. Work until resolution
+  5. Executive follow-up
+</code></pre>
+<hr />
+<p><em>This comprehensive help desk system provides the foundation for delivering world-class customer support for the SecureAI DeepFake Detection System.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

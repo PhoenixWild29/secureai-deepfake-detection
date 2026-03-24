@@ -1,0 +1,2277 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#administrator-training-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Administrator Training Program
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Administrator Training Program">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-administration-excellence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚙️ System Administration Excellence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-program-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Training Program Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Training Program Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#administrator-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Administrator Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-1-system-architecture-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 1: System Architecture &amp; Installation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 1: System Architecture &amp; Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1: Architecture Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1: Architecture Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-installation-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2: Installation Procedure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.2: Installation Procedure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automated Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 1.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-2-user-access-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 2: User &amp; Access Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 2: User &amp; Access Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#21-user-account-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1: User Account Management
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1: User Account Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-user-accounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating User Accounts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user-roles-and-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Roles and Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bulk-user-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bulk User Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 2.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-authentication-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2: Authentication Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2: Authentication Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-factor-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Factor Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-sign-on-sso-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single Sign-On (SSO) Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 2.2
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-3-system-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 3: System Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 3: System Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#31-detection-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1: Detection Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1: Detection Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detection-sensitivity-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detection Sensitivity Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 3.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-storage-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2: Storage Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2: Storage Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aws-s3-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AWS S3 Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-in-secureai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configure in SecureAI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-4-monitoring-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 4: Monitoring &amp; Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 4: Monitoring &amp; Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#41-monitoring-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1: Monitoring Setup
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1: Monitoring Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prometheus-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prometheus Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grafana-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Grafana Setup
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-metrics-to-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Metrics to Monitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-41" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 4.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-5-security-administration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 5: Security Administration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 5: Security Administration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#51-access-control-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1: Access Control Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.1: Access Control Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#network-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#application-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 5.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-6-backup-disaster-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 6: Backup &amp; Disaster Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 6: Backup &amp; Disaster Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#learning-objectives_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning Objectives
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#61-backup-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1: Backup Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.1: Backup Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Automation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-61" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 6.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-7-troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Module 7: Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Module 7: Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-administrator-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Administrator Issues
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Administrator Issues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#issue-1-high-cpu-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 1: High CPU Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#issue-2-database-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Issue 2: Database Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hands-on-exercise-71" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✏️ Hands-On Exercise 7.1
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#administrator-certification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Administrator Certification
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Administrator Certification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#certification-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Certification Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge Assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#practical-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Assessment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certification-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Levels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#administrator-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Administrator Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Administrator Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scripts-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scripts &amp; Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="administrator-training-program">Administrator Training Program</h2>
+<h3 id="system-administration-excellence">⚙️ System Administration Excellence</h3>
+<p>Comprehensive training for administrators responsible for managing, configuring, and maintaining the SecureAI DeepFake Detection System.</p>
+<hr />
+<h2 id="training-program-overview">🎯 Training Program Overview</h2>
+<h3 id="administrator-responsibilities"><strong>Administrator Responsibilities</strong></h3>
+<ul>
+<li>System installation and deployment</li>
+<li>User account management and access control</li>
+<li>System configuration and optimization</li>
+<li>Monitoring and performance management</li>
+<li>Backup and disaster recovery</li>
+<li>Security management</li>
+<li>Compliance and audit support</li>
+<li>Troubleshooting and issue resolution</li>
+</ul>
+<h3 id="training-timeline"><strong>Training Timeline</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Topic</th>
+<th>Duration</th>
+<th>Format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Module 1</strong></td>
+<td>System Architecture &amp; Installation</td>
+<td>4 hours</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td><strong>Module 2</strong></td>
+<td>User &amp; Access Management</td>
+<td>3 hours</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td><strong>Module 3</strong></td>
+<td>System Configuration</td>
+<td>4 hours</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td><strong>Module 4</strong></td>
+<td>Monitoring &amp; Performance</td>
+<td>3 hours</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td><strong>Module 5</strong></td>
+<td>Security Administration</td>
+<td>4 hours</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td><strong>Module 6</strong></td>
+<td>Backup &amp; Recovery</td>
+<td>3 hours</td>
+<td>Hands-on</td>
+</tr>
+<tr>
+<td><strong>Module 7</strong></td>
+<td>Troubleshooting</td>
+<td>3 hours</td>
+<td>Practical</td>
+</tr>
+<tr>
+<td><strong>Module 8</strong></td>
+<td>Compliance Management</td>
+<td>2 hours</td>
+<td>Lecture</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total:</strong> 26 hours over 4-5 days</p>
+<hr />
+<h2 id="module-1-system-architecture-installation">📚 Module 1: System Architecture &amp; Installation</h2>
+<h3 id="learning-objectives"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Understand SecureAI system architecture</li>
+<li>Deploy SecureAI in production</li>
+<li>Configure infrastructure components</li>
+<li>Verify successful installation</li>
+</ul>
+<h3 id="11-architecture-overview"><strong>1.1: Architecture Overview</strong></h3>
+<h4 id="system-components"><strong>System Components</strong></h4>
+<pre><code>┌─────────────────────────────────────────┐
+│           Client Layer                  │
+│  [Web Dashboard] [Mobile] [API Client]  │
+└────────────┬────────────────────────────┘
+             │
+┌────────────▼────────────────────────────┐
+│         Load Balancer / CDN             │
+│      [Nginx] [CloudFlare]               │
+└────────────┬────────────────────────────┘
+             │
+┌────────────▼────────────────────────────┐
+│      Application Layer                  │
+│  [API Gateway] [Backend] [AI Service]   │
+└────────┬────────────┬───────────────────┘
+         │            │
+┌────────▼─────┐  ┌──▼──────────────────┐
+│  Data Layer  │  │  External Services  │
+│  [PostgreSQL]│  │  [SIEM] [SOAR]      │
+│  [Redis]     │  │  [Identity] [APIs]  │
+│  [S3]        │  │                     │
+│  [Blockchain]│  │                     │
+└──────────────┘  └─────────────────────┘
+</code></pre>
+<h4 id="infrastructure-requirements"><strong>Infrastructure Requirements</strong></h4>
+<pre><code class="language-yaml">Production Environment:
+  Compute:
+    - Application Servers: 2-5 instances (auto-scaling)
+    - AI/ML Servers: 2-3 GPU instances
+    - Worker Nodes: 3-5 instances
+
+  Database:
+    - PostgreSQL: RDS Multi-AZ
+    - Redis: ElastiCache cluster
+    - Storage: S3 with versioning
+
+  Network:
+    - VPC with private/public subnets
+    - Application Load Balancer
+    - CloudFront CDN
+    - Route 53 DNS
+
+  Security:
+    - IAM roles and policies
+    - Security groups
+    - SSL/TLS certificates
+    - WAF rules
+</code></pre>
+<h3 id="12-installation-procedure"><strong>1.2: Installation Procedure</strong></h3>
+<h4 id="automated-deployment"><strong>Automated Deployment</strong></h4>
+<pre><code class="language-bash"># Step 1: Prepare server
+ssh admin@your-server-ip
+sudo apt update &amp;&amp; sudo apt upgrade -y
+
+# Step 2: Clone repository
+git clone https://github.com/yourorg/secureai-deepfake-detection.git
+cd secureai-deepfake-detection
+
+# Step 3: Run automated deployment
+sudo chmod +x quick-deploy.sh
+sudo DOMAIN=secureai.yourcompany.com ./quick-deploy.sh
+
+# Step 4: Verify deployment
+./health-check.sh
+
+# Step 5: Run validation tests
+source .venv/bin/activate
+python performance_validator.py
+python security_auditor.py
+</code></pre>
+<h4 id="hands-on-exercise-11"><strong>✏️ Hands-On Exercise 1.1</strong></h4>
+<pre><code>Task: Deploy SecureAI in test environment
+1. Provision test server
+2. Run quick-deploy.sh script
+3. Verify all services running
+4. Access web interface
+5. Complete health checks
+
+Success Criteria:
+✓ All services running
+✓ Health checks passing
+✓ Web interface accessible
+✓ API responding correctly
+</code></pre>
+<hr />
+<h2 id="module-2-user-access-management">📚 Module 2: User &amp; Access Management</h2>
+<h3 id="learning-objectives_1"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Create and manage user accounts</li>
+<li>Configure role-based access control</li>
+<li>Implement authentication methods</li>
+<li>Manage API access</li>
+</ul>
+<h3 id="21-user-account-management"><strong>2.1: User Account Management</strong></h3>
+<h4 id="creating-user-accounts"><strong>Creating User Accounts</strong></h4>
+<p><strong>Via Web Interface:</strong></p>
+<pre><code>1. Navigate to: Admin → Users → Create New User
+2. Fill in user details:
+   - Email address (will be username)
+   - First name and last name
+   - Role (see role descriptions below)
+   - Department/Team
+   - Permissions
+3. Set account options:
+   ☑ Send welcome email
+   ☑ Require password change on first login
+   ☑ Enable two-factor authentication
+4. Click &quot;Create User&quot;
+</code></pre>
+<p><strong>Via API:</strong></p>
+<pre><code class="language-bash">curl -X POST https://api.secureai.com/admin/users \
+  -H &quot;Authorization: Bearer ADMIN_TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;email&quot;: &quot;john.doe@company.com&quot;,
+    &quot;first_name&quot;: &quot;John&quot;,
+    &quot;last_name&quot;: &quot;Doe&quot;,
+    &quot;role&quot;: &quot;security_professional&quot;,
+    &quot;permissions&quot;: [&quot;video:analyze&quot;, &quot;dashboard:access&quot;, &quot;reports:generate&quot;],
+    &quot;send_welcome_email&quot;: true,
+    &quot;require_mfa&quot;: true
+  }'
+</code></pre>
+<h4 id="user-roles-and-permissions"><strong>User Roles and Permissions</strong></h4>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Use Case</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Admin</strong></td>
+<td>System administrators</td>
+<td>Full system access</td>
+</tr>
+<tr>
+<td><strong>Security Professional</strong></td>
+<td>Security analysts</td>
+<td>Analyze, create incidents, forensics</td>
+</tr>
+<tr>
+<td><strong>Compliance Officer</strong></td>
+<td>Compliance team</td>
+<td>Reports, audit trails, data exports</td>
+</tr>
+<tr>
+<td><strong>Content Moderator</strong></td>
+<td>Content review team</td>
+<td>Analyze, review, moderate</td>
+</tr>
+<tr>
+<td><strong>User</strong></td>
+<td>General access</td>
+<td>Basic analysis only</td>
+</tr>
+</tbody>
+</table>
+<h4 id="bulk-user-management"><strong>Bulk User Management</strong></h4>
+<pre><code class="language-bash"># Import users from CSV
+python scripts/import-users.py --file users.csv --send-invitations
+
+# CSV Format:
+# email,first_name,last_name,role,department
+# john.doe@company.com,John,Doe,security_professional,Security
+# jane.smith@company.com,Jane,Smith,compliance_officer,Compliance
+</code></pre>
+<h4 id="hands-on-exercise-21"><strong>✏️ Hands-On Exercise 2.1</strong></h4>
+<pre><code>Task: Create users for each role type
+1. Create admin user
+2. Create security professional
+3. Create compliance officer
+4. Create content moderator
+5. Verify permissions for each
+
+Success Criteria:
+✓ 4+ users created
+✓ Correct roles assigned
+✓ Welcome emails sent
+✓ Users can log in successfully
+</code></pre>
+<h3 id="22-authentication-configuration"><strong>2.2: Authentication Configuration</strong></h3>
+<h4 id="multi-factor-authentication"><strong>Multi-Factor Authentication</strong></h4>
+<pre><code>Admin → Security Settings → Authentication
+
+Options:
+☑ Require MFA for all users
+☑ Supported methods:
+  • TOTP (Google Authenticator, Authy)
+  • SMS (requires configuration)
+  • Email (backup method)
+☑ Backup codes (10 per user)
+☑ Remember device for 30 days
+</code></pre>
+<h4 id="single-sign-on-sso-setup"><strong>Single Sign-On (SSO) Setup</strong></h4>
+<p><strong>SAML Configuration:</strong></p>
+<pre><code>Admin → Security Settings → SSO → SAML
+
+Configuration:
+1. Entity ID: https://secureai.yourcompany.com
+2. SSO URL: [Your IdP SSO URL]
+3. Certificate: [Upload IdP certificate]
+4. Attribute Mapping:
+   - Email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+   - First Name: givenName
+   - Last Name: surname
+   - Groups: memberOf
+
+5. Test SSO Connection
+6. Enable SSO
+</code></pre>
+<p><strong>OAuth2/OIDC Configuration:</strong></p>
+<pre><code>Admin → Security Settings → SSO → OAuth2
+
+Configuration:
+1. Provider: [Okta/Azure AD/Google]
+2. Client ID: [Your client ID]
+3. Client Secret: [Your client secret]
+4. Authorization URL: [Provider auth URL]
+5. Token URL: [Provider token URL]
+6. User Info URL: [Provider userinfo URL]
+7. Scopes: openid profile email groups
+
+8. Test OAuth2 Connection
+9. Enable OAuth2
+</code></pre>
+<h4 id="hands-on-exercise-22"><strong>✏️ Hands-On Exercise 2.2</strong></h4>
+<pre><code>Task: Configure SSO integration
+1. Choose identity provider (Okta/AD)
+2. Configure SSO settings
+3. Test SSO login flow
+4. Verify user attributes mapping
+5. Enable for production
+
+Success Criteria:
+✓ SSO configured correctly
+✓ Test login successful
+✓ User attributes mapped
+✓ Groups synchronized
+</code></pre>
+<hr />
+<h2 id="module-3-system-configuration">📚 Module 3: System Configuration</h2>
+<h3 id="learning-objectives_2"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Configure detection settings</li>
+<li>Set up storage and database</li>
+<li>Configure integrations</li>
+<li>Optimize system performance</li>
+</ul>
+<h3 id="31-detection-configuration"><strong>3.1: Detection Configuration</strong></h3>
+<h4 id="detection-sensitivity-settings"><strong>Detection Sensitivity Settings</strong></h4>
+<pre><code>Admin → System Config → Detection Settings
+
+Configuration:
+• Confidence Threshold: 85% (recommended)
+  Lower = More detections, higher false positives
+  Higher = Fewer detections, lower false positives
+
+• Analysis Types:
+  ◉ Comprehensive (default)
+  ○ Quick
+  ○ Security-focused
+
+• Detection Techniques:
+  ☑ Facial landmark analysis
+  ☑ Temporal consistency
+  ☑ Audio deepfake detection
+  ☑ Metadata examination
+
+• Advanced Options:
+  ☑ Enable GPU acceleration
+  ☑ Multi-model ensemble
+  ☑ Adversarial robustness
+
+• Performance Settings:
+  Max Concurrent Analyses: 100
+  Analysis Timeout: 300 seconds
+  Queue Size Limit: 1000
+</code></pre>
+<h4 id="hands-on-exercise-31"><strong>✏️ Hands-On Exercise 3.1</strong></h4>
+<pre><code>Task: Configure detection settings
+1. Adjust confidence threshold
+2. Enable all detection techniques
+3. Configure performance settings
+4. Test with sample video
+5. Verify settings applied
+
+Success Criteria:
+✓ Settings saved successfully
+✓ Test analysis uses new settings
+✓ Performance within targets
+</code></pre>
+<h3 id="32-storage-configuration"><strong>3.2: Storage Configuration</strong></h3>
+<h4 id="aws-s3-setup"><strong>AWS S3 Setup</strong></h4>
+<pre><code class="language-bash"># Create S3 buckets
+aws s3 mb s3://secureai-videos-production --region us-west-2
+aws s3 mb s3://secureai-results-production --region us-west-2
+aws s3 mb s3://secureai-backups-production --region us-west-2
+
+# Enable versioning
+aws s3api put-bucket-versioning \
+  --bucket secureai-backups-production \
+  --versioning-configuration Status=Enabled
+
+# Configure lifecycle policies
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket secureai-videos-production \
+  --lifecycle-configuration '{
+    &quot;Rules&quot;: [{
+      &quot;Id&quot;: &quot;ArchiveOldVideos&quot;,
+      &quot;Status&quot;: &quot;Enabled&quot;,
+      &quot;Transitions&quot;: [{
+        &quot;Days&quot;: 90,
+        &quot;StorageClass&quot;: &quot;GLACIER&quot;
+      }],
+      &quot;Expiration&quot;: {
+        &quot;Days&quot;: 365
+      }
+    }]
+  }'
+
+# Set bucket encryption
+aws s3api put-bucket-encryption \
+  --bucket secureai-videos-production \
+  --server-side-encryption-configuration '{
+    &quot;Rules&quot;: [{
+      &quot;ApplyServerSideEncryptionByDefault&quot;: {
+        &quot;SSEAlgorithm&quot;: &quot;AES256&quot;
+      }
+    }]
+  }'
+</code></pre>
+<h4 id="configure-in-secureai"><strong>Configure in SecureAI</strong></h4>
+<pre><code>Admin → System Config → Storage
+
+Storage Backend:
+◉ AWS S3
+○ Local filesystem
+○ Azure Blob Storage
+
+S3 Configuration:
+• Access Key ID: [Your AWS key]
+• Secret Access Key: [Your AWS secret]
+• Region: us-west-2
+• Video Bucket: secureai-videos-production
+• Results Bucket: secureai-results-production
+• Backup Bucket: secureai-backups-production
+
+Advanced Options:
+☑ Server-side encryption
+☑ Versioning enabled
+☑ Lifecycle policies enabled
+☐ Cross-region replication (optional)
+
+Click &quot;Test Connection&quot; then &quot;Save&quot;
+</code></pre>
+<hr />
+<h2 id="module-4-monitoring-performance">📚 Module 4: Monitoring &amp; Performance</h2>
+<h3 id="learning-objectives_3"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Set up system monitoring</li>
+<li>Configure alerts and notifications</li>
+<li>Optimize system performance</li>
+<li>Analyze system metrics</li>
+</ul>
+<h3 id="41-monitoring-setup"><strong>4.1: Monitoring Setup</strong></h3>
+<h4 id="prometheus-configuration"><strong>Prometheus Configuration</strong></h4>
+<pre><code class="language-bash"># Install Prometheus
+cd /opt
+wget https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz
+tar xvf prometheus-*.tar.gz
+cd prometheus-*
+
+# Create prometheus.yml
+cat &gt; prometheus.yml &lt;&lt; 'EOF'
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'secureai'
+    static_configs:
+      - targets: ['localhost:8000']
+    metrics_path: /metrics
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['localhost:9187']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['localhost:9121']
+EOF
+
+# Start Prometheus
+./prometheus --config.file=prometheus.yml &amp;
+</code></pre>
+<h4 id="grafana-setup"><strong>Grafana Setup</strong></h4>
+<pre><code class="language-bash"># Install Grafana
+sudo apt-get install -y software-properties-common
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+echo &quot;deb https://packages.grafana.com/oss/deb stable main&quot; | sudo tee /etc/apt/sources.list.d/grafana.list
+sudo apt-get update
+sudo apt-get install grafana -y
+
+# Start Grafana
+sudo systemctl start grafana-server
+sudo systemctl enable grafana-server
+
+# Access: http://your-server-ip:3000
+# Default login: admin/admin
+</code></pre>
+<h4 id="key-metrics-to-monitor"><strong>Key Metrics to Monitor</strong></h4>
+<pre><code class="language-yaml">Application Metrics:
+  - http_requests_total: Total HTTP requests
+  - http_request_duration_seconds: Request latency
+  - secureai_video_analyses_total: Total analyses
+  - secureai_analysis_duration_seconds: Analysis time
+  - secureai_analysis_queue_size: Queue backlog
+
+System Metrics:
+  - cpu_usage_percent: CPU utilization
+  - memory_usage_bytes: Memory consumption
+  - disk_usage_percent: Disk space usage
+  - network_io_bytes: Network traffic
+
+Database Metrics:
+  - pg_connections_active: Active connections
+  - pg_queries_per_second: Query throughput
+  - pg_slow_queries: Slow query count
+
+AI/ML Metrics:
+  - model_inference_time: Model inference latency
+  - gpu_utilization_percent: GPU usage
+  - detection_accuracy: Real-time accuracy
+</code></pre>
+<h4 id="hands-on-exercise-41"><strong>✏️ Hands-On Exercise 4.1</strong></h4>
+<pre><code>Task: Set up complete monitoring stack
+1. Install Prometheus and Grafana
+2. Configure metric collection
+3. Create basic dashboard
+4. Set up alert rules
+5. Test alert notifications
+
+Success Criteria:
+✓ Prometheus collecting metrics
+✓ Grafana showing data
+✓ Dashboard displaying key metrics
+✓ Alerts triggering correctly
+</code></pre>
+<hr />
+<h2 id="module-5-security-administration">📚 Module 5: Security Administration</h2>
+<h3 id="learning-objectives_4"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Implement security best practices</li>
+<li>Configure access controls</li>
+<li>Manage SSL/TLS certificates</li>
+<li>Conduct security audits</li>
+</ul>
+<h3 id="51-access-control-configuration"><strong>5.1: Access Control Configuration</strong></h3>
+<h4 id="network-security"><strong>Network Security</strong></h4>
+<pre><code class="language-bash"># Configure firewall (UFW)
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 'Nginx Full'
+sudo ufw --force enable
+
+# Verify rules
+sudo ufw status verbose
+
+# Configure fail2ban for brute force protection
+sudo apt install fail2ban -y
+
+# Create SecureAI jail
+sudo tee /etc/fail2ban/jail.d/secureai.conf &lt;&lt; 'EOF'
+[secureai]
+enabled = true
+port = http,https
+filter = secureai
+logpath = /var/log/nginx/secureai-access.log
+maxretry = 5
+bantime = 3600
+findtime = 600
+EOF
+
+# Restart fail2ban
+sudo systemctl restart fail2ban
+</code></pre>
+<h4 id="application-security"><strong>Application Security</strong></h4>
+<pre><code>Admin → Security Settings → Access Control
+
+Configuration:
+• Password Policy:
+  - Minimum length: 12 characters
+  - Require uppercase: Yes
+  - Require lowercase: Yes
+  - Require numbers: Yes
+  - Require special characters: Yes
+  - Password expiration: 90 days
+  - Password history: Remember last 5
+
+• Account Lockout:
+  - Failed login attempts: 5
+  - Lockout duration: 15 minutes
+  - Auto-unlock: Yes
+
+• Session Management:
+  - Session timeout: 30 minutes
+  - Max concurrent sessions: 3
+  - Require re-authentication: For sensitive actions
+
+• API Security:
+  - Rate limiting: 100 requests/minute
+  - Token expiration: 24 hours
+  - API key rotation: 90 days
+</code></pre>
+<h4 id="hands-on-exercise-51"><strong>✏️ Hands-On Exercise 5.1</strong></h4>
+<pre><code>Task: Implement security hardening
+1. Configure firewall rules
+2. Set up fail2ban
+3. Configure password policies
+4. Enable account lockout
+5. Test security controls
+
+Success Criteria:
+✓ Firewall blocking unauthorized access
+✓ Fail2ban active and monitoring
+✓ Password policy enforced
+✓ Lockout working after failed attempts
+</code></pre>
+<hr />
+<h2 id="module-6-backup-disaster-recovery">📚 Module 6: Backup &amp; Disaster Recovery</h2>
+<h3 id="learning-objectives_5"><strong>Learning Objectives</strong></h3>
+<ul>
+<li>Implement backup strategies</li>
+<li>Configure automated backups</li>
+<li>Test recovery procedures</li>
+<li>Document disaster recovery plan</li>
+</ul>
+<h3 id="61-backup-configuration"><strong>6.1: Backup Configuration</strong></h3>
+<h4 id="database-backup-automation"><strong>Database Backup Automation</strong></h4>
+<pre><code class="language-bash"># Create backup script
+sudo tee /opt/secureai/scripts/backup-database.sh &lt;&lt; 'EOF'
+#!/bin/bash
+BACKUP_DIR=&quot;/backups/database&quot;
+DATE=$(date +%Y%m%d_%H%M%S)
+DB_NAME=&quot;secureai_production&quot;
+
+mkdir -p $BACKUP_DIR
+
+# Full backup
+pg_dump -h localhost -U secureai_admin -d $DB_NAME \
+  --format=custom --compress=9 \
+  --file=&quot;$BACKUP_DIR/secureai_full_$DATE.backup&quot;
+
+# Upload to S3
+aws s3 cp &quot;$BACKUP_DIR/secureai_full_$DATE.backup&quot; \
+  s3://secureai-backups-production/database/
+
+# Cleanup old backups (keep 30 days)
+find $BACKUP_DIR -name &quot;*.backup&quot; -mtime +30 -delete
+
+echo &quot;Backup completed: secureai_full_$DATE.backup&quot;
+EOF
+
+chmod +x /opt/secureai/scripts/backup-database.sh
+
+# Set up cron job for daily backups
+sudo crontab -e
+# Add: 0 2 * * * /opt/secureai/scripts/backup-database.sh
+</code></pre>
+<h4 id="hands-on-exercise-61"><strong>✏️ Hands-On Exercise 6.1</strong></h4>
+<pre><code>Task: Implement and test backup system
+1. Create backup script
+2. Configure automated backups
+3. Run manual backup test
+4. Verify backup integrity
+5. Test restore procedure
+
+Success Criteria:
+✓ Backup script working
+✓ Automated backups scheduled
+✓ Backup uploaded to S3
+✓ Restore test successful
+</code></pre>
+<hr />
+<h2 id="module-7-troubleshooting">📚 Module 7: Troubleshooting</h2>
+<h3 id="common-administrator-issues"><strong>Common Administrator Issues</strong></h3>
+<h4 id="issue-1-high-cpu-usage"><strong>Issue 1: High CPU Usage</strong></h4>
+<pre><code>Diagnosis:
+1. Check running processes
+   ps aux --sort=-%cpu | head -10
+
+2. Check AI service load
+   nvidia-smi  # If using GPU
+
+3. Review concurrent analyses
+   curl https://api.secureai.com/admin/system/status
+
+Solution:
+1. Reduce concurrent analysis limit
+2. Scale up compute resources
+3. Optimize analysis queue
+4. Enable auto-scaling
+</code></pre>
+<h4 id="issue-2-database-performance"><strong>Issue 2: Database Performance</strong></h4>
+<pre><code>Diagnosis:
+1. Check active connections
+   SELECT count(*) FROM pg_stat_activity;
+
+2. Check slow queries
+   SELECT query, mean_time, calls 
+   FROM pg_stat_statements 
+   ORDER BY mean_time DESC LIMIT 10;
+
+3. Check database size
+   SELECT pg_size_pretty(pg_database_size('secureai_production'));
+
+Solution:
+1. Run VACUUM ANALYZE
+2. Reindex tables
+3. Increase connection pool
+4. Optimize slow queries
+5. Scale database instance
+</code></pre>
+<h4 id="hands-on-exercise-71"><strong>✏️ Hands-On Exercise 7.1</strong></h4>
+<pre><code>Task: Troubleshoot performance issue
+1. Simulate high load
+2. Identify bottleneck
+3. Implement solution
+4. Verify improvement
+5. Document resolution
+
+Success Criteria:
+✓ Bottleneck identified
+✓ Solution implemented
+✓ Performance improved
+✓ Issue documented
+</code></pre>
+<hr />
+<h2 id="administrator-certification">🎓 Administrator Certification</h2>
+<h3 id="certification-requirements"><strong>Certification Requirements</strong></h3>
+<h4 id="knowledge-assessment"><strong>Knowledge Assessment</strong></h4>
+<ul>
+<li>Complete all 8 training modules</li>
+<li>Pass written exam (85%+)</li>
+<li>Complete hands-on labs</li>
+<li>Document deployment procedures</li>
+</ul>
+<h4 id="practical-assessment"><strong>Practical Assessment</strong></h4>
+<pre><code>1. Deploy SecureAI in Test Environment (60 min)
+   - Provision infrastructure
+   - Deploy application
+   - Configure integrations
+   - Verify functionality
+
+2. User Management Scenario (30 min)
+   - Create user accounts
+   - Configure permissions
+   - Set up SSO
+   - Test access controls
+
+3. Troubleshooting Scenario (30 min)
+   - Diagnose simulated issue
+   - Implement solution
+   - Verify resolution
+   - Document process
+
+4. Disaster Recovery Drill (45 min)
+   - Simulate system failure
+   - Execute recovery procedures
+   - Restore from backup
+   - Verify data integrity
+
+Total Time: 3 hours
+Passing Score: 80%
+</code></pre>
+<h3 id="certification-levels"><strong>Certification Levels</strong></h3>
+<p><strong>Level 1: SecureAI Certified Administrator</strong>
+- Basic deployment and configuration
+- User management
+- Routine maintenance
+- Basic troubleshooting</p>
+<p><strong>Level 2: SecureAI Advanced Administrator</strong>
+- Advanced configurations
+- Performance optimization
+- Security hardening
+- Disaster recovery</p>
+<p><strong>Level 3: SecureAI Expert Administrator</strong>
+- Multi-region deployments
+- Custom integrations
+- Advanced troubleshooting
+- Architecture design</p>
+<hr />
+<h2 id="administrator-resources">📚 Administrator Resources</h2>
+<h3 id="documentation"><strong>Documentation</strong></h3>
+<ul>
+<li><code>Administrator_Guide.md</code> - Complete admin guide</li>
+<li><code>Technical_Documentation.md</code> - System architecture</li>
+<li><code>Production_Infrastructure.md</code> - Infrastructure setup</li>
+<li><code>Disaster_Recovery_Plan.md</code> - DR procedures</li>
+<li><code>Troubleshooting_Guide.md</code> - Issue resolution</li>
+</ul>
+<h3 id="scripts-tools"><strong>Scripts &amp; Tools</strong></h3>
+<ul>
+<li><code>quick-deploy.sh</code> - Automated deployment</li>
+<li><code>health-check.sh</code> - System health verification</li>
+<li><code>backup-database.sh</code> - Database backup</li>
+<li><code>performance_validator.py</code> - Performance testing</li>
+<li><code>security_auditor.py</code> - Security audit</li>
+</ul>
+<h3 id="support"><strong>Support</strong></h3>
+<ul>
+<li>Admin Forum: https://admin-forum.secureai.com</li>
+<li>Documentation: https://docs.secureai.com/admin</li>
+<li>Emergency Support: +1-800-SECURE-AI</li>
+<li>Email: admin-support@secureai.com</li>
+</ul>
+<hr />
+<p><strong>🎉 Administrator Training Complete!</strong></p>
+<p>You are now certified to administer the SecureAI DeepFake Detection System!</p>
+<hr />
+<p><em>For additional training or certification renewal, contact admin-training@secureai.com</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

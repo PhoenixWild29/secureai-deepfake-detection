@@ -1,0 +1,2054 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#complete-training-materials-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Training Materials Index
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Training Materials Index">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-resource-directory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Training Resource Directory
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-navigation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Quick Navigation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Quick Navigation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#i-am-a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        👤 I am a...
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="👤 I am a...">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-customer-end-user" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        New Customer / End User
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-team-member" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Team Member
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-administrator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Administrator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-professional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Professional
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compliance-officer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compliance Officer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-training-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Complete Training Materials
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Complete Training Materials">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customer-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customer Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-team-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Team Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#administrator-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Administrator Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certification-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Training Paths
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎓 Training Paths">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#path-1-end-user-journey-12-15-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path 1: End User Journey (12-15 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-2-support-team-journey-18-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path 2: Support Team Journey (18 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#path-3-administrator-journey-26-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Path 3: Administrator Journey (26 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-material-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Training Material Matrix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Training Material Matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#by-role" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By Role
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#by-topic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        By Topic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#video-tutorial-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Video Tutorial Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Video Tutorial Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tutorial-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutorial Series
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-learning-sequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Recommended Learning Sequences
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Recommended Learning Sequences">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-new-customers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For New Customers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-support-teams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Support Teams
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-administrators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Administrators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-delivery-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Training Delivery Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Training Delivery Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#self-paced-online-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Paced Online Learning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instructor-led-virtual-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instructor-Led Virtual Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-site-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-Site Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#video-tutorials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Video Tutorials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-material-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Training Material Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Training Material Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-training-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Training Library
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Training Library">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customer-training-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customer Training Materials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-team-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Team Materials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#administrator-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Administrator Materials
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certification-program_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Program
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-completion-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Training Completion Tracking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Training Completion Tracking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#customer-onboarding-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Customer Onboarding Progress
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#support-team-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Support Team Readiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Training Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Training Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-help-during-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Help During Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-quality-assurance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ Training Quality Assurance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ Training Quality Assurance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#post-training-survey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-Training Survey
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#training-success-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Success Metrics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-program-complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎉 Training Program Complete!
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎉 Training Program Complete!">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-training-materials" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Training Materials:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 Next Steps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 Next Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#for-training-coordinators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Training Coordinators:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-learners" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Learners:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#for-organizations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        For Organizations:
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="complete-training-materials-index">Complete Training Materials Index</h2>
+<h3 id="training-resource-directory">📚 Training Resource Directory</h3>
+<p>Welcome to the SecureAI training resource center. This index helps you find the right training materials for your role and experience level.</p>
+<hr />
+<h2 id="quick-navigation">🎯 Quick Navigation</h2>
+<h3 id="i-am-a"><strong>👤 I am a...</strong></h3>
+<h4 id="new-customer-end-user"><strong>New Customer / End User</strong></h4>
+<p>→ Start here: <a href="../Customer_Onboarding_Guide/"><code>Customer_Onboarding_Guide.md</code></a><br />
+→ Quick reference: <a href="../Quick_Reference_Guide/"><code>Quick_Reference_Guide.md</code></a><br />
+→ Certification: <a href="../Certification_Program/"><code>Certification_Program.md</code></a> - SCU</p>
+<h4 id="support-team-member"><strong>Support Team Member</strong></h4>
+<p>→ Start here: <a href="../Support_Team_Training/"><code>Support_Team_Training.md</code></a><br />
+→ Quick reference: <a href="../Quick_Reference_Guide/"><code>Quick_Reference_Guide.md</code></a><br />
+→ Certification: <a href="../Certification_Program/"><code>Certification_Program.md</code></a> - SSS</p>
+<h4 id="system-administrator"><strong>System Administrator</strong></h4>
+<p>→ Start here: <a href="../Administrator_Training/"><code>Administrator_Training.md</code></a><br />
+→ Reference: <a href="../Administrator_Guide.md"><code>../Administrator_Guide.md</code></a><br />
+→ Certification: <a href="../Certification_Program/"><code>Certification_Program.md</code></a> - SCA</p>
+<h4 id="security-professional"><strong>Security Professional</strong></h4>
+<p>→ Start here: <a href="../User_Guide_Security_Professionals.md"><code>../User_Guide_Security_Professionals.md</code></a><br />
+→ Training: <a href="../Customer_Onboarding_Guide/"><code>Customer_Onboarding_Guide.md</code></a><br />
+→ Certification: <a href="../Certification_Program/"><code>Certification_Program.md</code></a> - SAU</p>
+<h4 id="compliance-officer"><strong>Compliance Officer</strong></h4>
+<p>→ Start here: <a href="../User_Guide_Compliance_Officers.md"><code>../User_Guide_Compliance_Officers.md</code></a><br />
+→ Framework: <a href="../Regulatory_Compliance_Framework.md"><code>../Regulatory_Compliance_Framework.md</code></a><br />
+→ Reports: <a href="../Compliance_Reports.md"><code>../Compliance_Reports.md</code></a></p>
+<hr />
+<h2 id="complete-training-materials">📋 Complete Training Materials</h2>
+<h3 id="customer-training"><strong>Customer Training</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Audience</th>
+<th>Duration</th>
+<th>Format</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Customer_Onboarding_Guide.md</strong></td>
+<td>New customers</td>
+<td>12-17 hours</td>
+<td>Self-paced</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Quick_Reference_Guide.md</strong></td>
+<td>All users</td>
+<td>Reference</td>
+<td>Quick lookup</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Video_Tutorial_Scripts.md</strong></td>
+<td>Visual learners</td>
+<td>2.5 hours</td>
+<td>Video</td>
+<td>⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="support-team-training"><strong>Support Team Training</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Audience</th>
+<th>Duration</th>
+<th>Format</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Support_Team_Training.md</strong></td>
+<td>Support staff</td>
+<td>18 hours</td>
+<td>Mixed</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Quick_Reference_Guide.md</strong></td>
+<td>Support staff</td>
+<td>Reference</td>
+<td>Quick lookup</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Troubleshooting_Guide.md</strong></td>
+<td>Support staff</td>
+<td>Reference</td>
+<td>Solutions</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="administrator-training"><strong>Administrator Training</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Audience</th>
+<th>Duration</th>
+<th>Format</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Administrator_Training.md</strong></td>
+<td>Admins</td>
+<td>26 hours</td>
+<td>Hands-on</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Administrator_Guide.md</strong></td>
+<td>Admins</td>
+<td>Reference</td>
+<td>Operations</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Technical_Documentation.md</strong></td>
+<td>Admins</td>
+<td>Reference</td>
+<td>Architecture</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Production_Infrastructure.md</strong></td>
+<td>Admins</td>
+<td>Reference</td>
+<td>Deployment</td>
+<td>⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3 id="certification-program"><strong>Certification Program</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Audience</th>
+<th>Duration</th>
+<th>Format</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Certification_Program.md</strong></td>
+<td>All roles</td>
+<td>Varies</td>
+<td>Assessment</td>
+<td>⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="training-paths">🎓 Training Paths</h2>
+<h3 id="path-1-end-user-journey-12-15-hours"><strong>Path 1: End User Journey</strong> (12-15 hours)</h3>
+<pre><code>Week 1: Getting Started
+├─ Day 1: System Access &amp; Setup (2-3 hours)
+│  └─ Customer_Onboarding_Guide.md (Day 1)
+├─ Day 2: Basic Operations (3-4 hours)
+│  └─ Customer_Onboarding_Guide.md (Day 2)
+└─ Day 3: Advanced Features (3-4 hours)
+   └─ Customer_Onboarding_Guide.md (Day 3)
+
+Week 2: Specialization
+├─ Day 4: Integration Setup (2-3 hours)
+│  └─ Customer_Onboarding_Guide.md (Day 4)
+├─ Day 5: Best Practices (2-3 hours)
+│  └─ Customer_Onboarding_Guide.md (Day 5)
+└─ Certification: SecureAI Certified User (SCU)
+   └─ Certification_Program.md
+
+Ongoing: Reference &amp; Support
+└─ Quick_Reference_Guide.md (as needed)
+</code></pre>
+<h3 id="path-2-support-team-journey-18-hours"><strong>Path 2: Support Team Journey</strong> (18 hours)</h3>
+<pre><code>Week 1: Product Knowledge
+├─ Module 1: Product Fundamentals (4 hours)
+│  └─ Support_Team_Training.md (Product Knowledge)
+├─ Module 2: Technical Support (6 hours)
+│  └─ Support_Team_Training.md (Common Scenarios)
+└─ Module 3: Customer Service (4 hours)
+   └─ Support_Team_Training.md (Communication)
+
+Week 2: Advanced Skills
+├─ Module 4: Compliance &amp; Security (4 hours)
+│  └─ Support_Team_Training.md (Advanced Topics)
+└─ Certification: SecureAI Support Specialist (SSS)
+   └─ Certification_Program.md
+
+Ongoing: Reference &amp; Tools
+├─ Quick_Reference_Guide.md
+├─ Troubleshooting_Guide.md
+└─ Knowledge Base Updates
+</code></pre>
+<h3 id="path-3-administrator-journey-26-hours"><strong>Path 3: Administrator Journey</strong> (26 hours)</h3>
+<pre><code>Week 1: Foundation &amp; Deployment
+├─ Module 1: System Architecture (4 hours)
+│  └─ Administrator_Training.md
+├─ Module 2: Installation &amp; Deployment (4 hours)
+│  ├─ Administrator_Training.md
+│  └─ COMPLETE_DEPLOYMENT_GUIDE.md
+└─ Module 3: User Management (3 hours)
+   └─ Administrator_Training.md
+
+Week 2: Configuration &amp; Operations
+├─ Module 4: System Configuration (4 hours)
+│  └─ Administrator_Training.md
+├─ Module 5: Monitoring &amp; Maintenance (3 hours)
+│  └─ Administrator_Training.md
+├─ Module 6: Security Administration (4 hours)
+│  └─ Administrator_Training.md
+└─ Module 7: Backup &amp; Recovery (3 hours)
+   └─ Administrator_Training.md
+
+Week 3: Mastery
+├─ Module 8: Troubleshooting (2 hours)
+│  └─ Administrator_Training.md
+└─ Certification: SecureAI Certified Administrator (SCA)
+   └─ Certification_Program.md
+
+Ongoing: Reference &amp; Updates
+├─ Administrator_Guide.md
+├─ Technical_Documentation.md
+└─ Production_Infrastructure.md
+</code></pre>
+<hr />
+<h2 id="training-material-matrix">📊 Training Material Matrix</h2>
+<h3 id="by-role"><strong>By Role</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>End User</th>
+<th>Security Pro</th>
+<th>Compliance</th>
+<th>Content Mod</th>
+<th>Admin</th>
+<th>Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer_Onboarding_Guide.md</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Quick_Reference_Guide.md</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Support_Team_Training.md</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Administrator_Training.md</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐</td>
+</tr>
+<tr>
+<td>Video_Tutorial_Scripts.md</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Certification_Program.md</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<p>⭐⭐⭐ Essential | ⭐⭐ Recommended | ⭐ Optional</p>
+<h3 id="by-topic"><strong>By Topic</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Documents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Getting Started</strong></td>
+<td>Customer_Onboarding_Guide.md (Day 1)</td>
+</tr>
+<tr>
+<td><strong>Basic Operations</strong></td>
+<td>Customer_Onboarding_Guide.md (Day 2), Quick_Reference_Guide.md</td>
+</tr>
+<tr>
+<td><strong>Advanced Features</strong></td>
+<td>Customer_Onboarding_Guide.md (Day 3), Video_Tutorial_Scripts.md</td>
+</tr>
+<tr>
+<td><strong>Administration</strong></td>
+<td>Administrator_Training.md, Administrator_Guide.md</td>
+</tr>
+<tr>
+<td><strong>Support</strong></td>
+<td>Support_Team_Training.md, Troubleshooting_Guide.md</td>
+</tr>
+<tr>
+<td><strong>API Integration</strong></td>
+<td>API_Documentation.md, Video_Tutorial_Scripts.md (Tutorial 10)</td>
+</tr>
+<tr>
+<td><strong>SIEM/SOAR</strong></td>
+<td>Video_Tutorial_Scripts.md (Tutorials 11-12), Enterprise_Integration_Testing.md</td>
+</tr>
+<tr>
+<td><strong>Compliance</strong></td>
+<td>Regulatory_Compliance_Framework.md, Compliance_Reports.md</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Security_Audit_Framework.md, Security_Quick_Start.md</td>
+</tr>
+<tr>
+<td><strong>Certification</strong></td>
+<td>Certification_Program.md</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="video-tutorial-reference">🎬 Video Tutorial Reference</h2>
+<h3 id="tutorial-series"><strong>Tutorial Series</strong></h3>
+<p><strong>Series 1: Getting Started</strong> (30 min)
+- Tutorial 1: Welcome &amp; System Overview (5 min)
+- Tutorial 2: First Login &amp; Profile Setup (5 min)
+- Tutorial 3: Dashboard Navigation (10 min)
+- Tutorial 4: Your First Video Analysis (10 min)</p>
+<p><strong>Series 2: Core Features</strong> (45 min)
+- Tutorial 5: Understanding Results (10 min)
+- Tutorial 6: Batch Processing (10 min)
+- Tutorial 7: Reports &amp; Documentation (10 min)
+- Tutorial 8: Alerts &amp; Notifications (8 min)
+- Tutorial 9: Search &amp; Filtering (7 min)</p>
+<p><strong>Series 3: Advanced Operations</strong> (60 min)
+- Tutorial 10: API Integration Basics (15 min)
+- Tutorial 11: SIEM Integration Setup (12 min)
+- Tutorial 12: SOAR Automation (13 min)
+- Tutorial 13: Custom Dashboards (10 min)
+- Tutorial 14: Advanced Forensics (10 min)</p>
+<p><strong>Series 4: Administration</strong> (40 min)
+- Tutorial 15: User Management (10 min)
+- Tutorial 16: System Configuration (12 min)
+- Tutorial 17: Compliance &amp; Reporting (10 min)
+- Tutorial 18: Troubleshooting (8 min)</p>
+<p><strong>All scripts available in:</strong> <code>Video_Tutorial_Scripts.md</code></p>
+<hr />
+<h2 id="recommended-learning-sequences">📚 Recommended Learning Sequences</h2>
+<h3 id="for-new-customers"><strong>For New Customers</strong></h3>
+<p><strong>Week 1: Foundation</strong>
+1. Read: Customer_Onboarding_Guide.md (Day 1)
+2. Watch: Tutorial 1-4 (Getting Started series)
+3. Practice: Upload and analyze test videos
+4. Reference: Quick_Reference_Guide.md</p>
+<p><strong>Week 2: Proficiency</strong>
+1. Read: Customer_Onboarding_Guide.md (Day 2-3)
+2. Watch: Tutorial 5-9 (Core Features series)
+3. Practice: Batch processing, report generation
+4. Reference: User guides for your role</p>
+<p><strong>Week 3: Mastery</strong>
+1. Read: Customer_Onboarding_Guide.md (Day 4-5)
+2. Watch: Tutorial 10-14 (Advanced series)
+3. Practice: Integration setup, API usage
+4. Complete: Certification assessment</p>
+<h3 id="for-support-teams"><strong>For Support Teams</strong></h3>
+<p><strong>Week 1: Product Knowledge</strong>
+1. Read: Support_Team_Training.md (Modules 1-2)
+2. Watch: All video tutorials (2.5 hours)
+3. Practice: Shadow experienced support agent
+4. Complete: Product knowledge quiz</p>
+<p><strong>Week 2: Support Skills</strong>
+1. Read: Support_Team_Training.md (Modules 3-4)
+2. Practice: Handle simulated support scenarios
+3. Shadow: Handle live tickets with supervision
+4. Complete: Support skills assessment</p>
+<p><strong>Week 3: Certification</strong>
+1. Review: All training materials
+2. Practice: 10 supervised support tickets
+3. Complete: SSS certification exam
+4. Start: Independent support work</p>
+<h3 id="for-administrators"><strong>For Administrators</strong></h3>
+<p><strong>Week 1-2: Technical Foundation</strong>
+1. Read: Administrator_Training.md (Modules 1-4)
+2. Practice: Deploy test environment
+3. Complete: User management exercises
+4. Review: Technical_Documentation.md</p>
+<p><strong>Week 3: Operations &amp; Security</strong>
+1. Read: Administrator_Training.md (Modules 5-6)
+2. Practice: Configure monitoring
+3. Complete: Security hardening exercises
+4. Review: Security_Audit_Framework.md</p>
+<p><strong>Week 4: Mastery</strong>
+1. Read: Administrator_Training.md (Modules 7-8)
+2. Practice: Disaster recovery drill
+3. Complete: Troubleshooting scenarios
+4. Certify: SCA certification exam</p>
+<hr />
+<h2 id="training-delivery-methods">🎯 Training Delivery Methods</h2>
+<h3 id="self-paced-online-learning"><strong>Self-Paced Online Learning</strong></h3>
+<ul>
+<li>Access: https://training.secureai.com</li>
+<li>Format: Interactive modules with quizzes</li>
+<li>Duration: Complete at your own pace</li>
+<li>Support: Email support available</li>
+<li>Cost: Included with subscription</li>
+</ul>
+<h3 id="instructor-led-virtual-training"><strong>Instructor-Led Virtual Training</strong></h3>
+<ul>
+<li>Format: Live virtual classroom</li>
+<li>Schedule: Weekly cohorts</li>
+<li>Duration: 2-5 days depending on role</li>
+<li>Instructor: SecureAI certified trainers</li>
+<li>Cost: Contact sales for pricing</li>
+</ul>
+<h3 id="on-site-training"><strong>On-Site Training</strong></h3>
+<ul>
+<li>Format: In-person at your location</li>
+<li>Duration: Customized (2-5 days)</li>
+<li>Instructor: Senior SecureAI trainer</li>
+<li>Class size: Up to 20 participants</li>
+<li>Cost: Contact sales for pricing</li>
+</ul>
+<h3 id="video-tutorials"><strong>Video Tutorials</strong></h3>
+<ul>
+<li>Access: https://learn.secureai.com</li>
+<li>Format: HD video with captions</li>
+<li>Duration: 2.5 hours total (18 videos)</li>
+<li>Available: 24/7</li>
+<li>Cost: Included with subscription</li>
+</ul>
+<h3 id="documentation"><strong>Documentation</strong></h3>
+<ul>
+<li>Access: All documentation included</li>
+<li>Format: Markdown files</li>
+<li>Updates: Continuous</li>
+<li>Download: PDF versions available</li>
+<li>Cost: Included with subscription</li>
+</ul>
+<hr />
+<h2 id="training-material-summary">📊 Training Material Summary</h2>
+<h3 id="complete-training-library"><strong>Complete Training Library</strong></h3>
+<h4 id="customer-training-materials"><strong>Customer Training Materials</strong></h4>
+<ol>
+<li>✅ <strong>Customer_Onboarding_Guide.md</strong> (12-17 hours)</li>
+<li>5-day structured onboarding program</li>
+<li>Exercises and checkpoints</li>
+<li>Role-specific guidance</li>
+<li>
+<p>Certification preparation</p>
+</li>
+<li>
+<p>✅ <strong>Quick_Reference_Guide.md</strong> (Reference)</p>
+</li>
+<li>Quick task guides</li>
+<li>API reference</li>
+<li>Troubleshooting quick fixes</li>
+<li>
+<p>Cheat sheets and shortcuts</p>
+</li>
+<li>
+<p>✅ <strong>Video_Tutorial_Scripts.md</strong> (2.5 hours video content)</p>
+</li>
+<li>18 tutorial scripts</li>
+<li>Screen-by-screen walkthroughs</li>
+<li>Production guidelines</li>
+<li>Complete video series plan</li>
+</ol>
+<h4 id="support-team-materials"><strong>Support Team Materials</strong></h4>
+<ol>
+<li>✅ <strong>Support_Team_Training.md</strong> (18 hours)</li>
+<li>Product knowledge (4 hours)</li>
+<li>Technical support (6 hours)</li>
+<li>Customer service (4 hours)</li>
+<li>Compliance &amp; security (4 hours)</li>
+<li>Certification preparation</li>
+</ol>
+<h4 id="administrator-materials"><strong>Administrator Materials</strong></h4>
+<ol>
+<li>✅ <strong>Administrator_Training.md</strong> (26 hours)</li>
+<li>System architecture (4 hours)</li>
+<li>Installation &amp; deployment (4 hours)</li>
+<li>User management (3 hours)</li>
+<li>System configuration (4 hours)</li>
+<li>Monitoring &amp; maintenance (3 hours)</li>
+<li>Security administration (4 hours)</li>
+<li>Backup &amp; recovery (3 hours)</li>
+<li>Troubleshooting (2 hours)</li>
+</ol>
+<h4 id="certification-program_1"><strong>Certification Program</strong></h4>
+<ol>
+<li>✅ <strong>Certification_Program.md</strong></li>
+<li>6 certification tracks</li>
+<li>Detailed requirements</li>
+<li>Sample questions</li>
+<li>Renewal procedures</li>
+</ol>
+<hr />
+<h2 id="training-completion-tracking">🎯 Training Completion Tracking</h2>
+<h3 id="customer-onboarding-progress"><strong>Customer Onboarding Progress</strong></h3>
+<pre><code>Customer: [Company Name]
+Onboarding Start Date: [Date]
+Target Completion: [Date + 5 days]
+
+Progress:
+□ Day 1: System Access &amp; Setup
+  □ First login completed
+  □ Profile configured
+  □ Notifications set up
+
+□ Day 2: Basic Operations
+  □ First video analyzed
+  □ Results interpreted
+  □ Actions taken
+
+□ Day 3: Advanced Features
+  □ Batch processing completed
+  □ API access tested
+  □ Custom dashboard created
+
+□ Day 4: Integration Setup
+  □ SIEM configured
+  □ SOAR connected
+  □ Identity provider integrated
+
+□ Day 5: Best Practices
+  □ Security practices implemented
+  □ Performance optimized
+  □ Troubleshooting learned
+
+□ Certification
+  □ Assessment completed
+  □ Certificate issued
+</code></pre>
+<h3 id="support-team-readiness"><strong>Support Team Readiness</strong></h3>
+<pre><code>Support Agent: [Name]
+Training Start Date: [Date]
+Certification Target: [Date + 3 weeks]
+
+Module Completion:
+□ Module 1: Product Fundamentals (4 hours)
+□ Module 2: Technical Support (6 hours)
+□ Module 3: Customer Service (4 hours)
+□ Module 4: Compliance &amp; Security (4 hours)
+
+Practical Experience:
+□ Shadow experienced agent (8 hours)
+□ Handle supervised tickets (10 tickets)
+□ Pass practice scenarios (5/5)
+□ Achieve CSAT &gt;85% (10 tickets)
+
+Certification:
+□ Written exam passed (80%+)
+□ Practical assessment passed
+□ Certificate issued
+□ Independent support approved
+</code></pre>
+<hr />
+<h2 id="training-support">📞 Training Support</h2>
+<h3 id="getting-help-during-training"><strong>Getting Help During Training</strong></h3>
+<p><strong>Training Support Team:</strong>
+- Email: training@secureai.com
+- Hours: Monday-Friday, 9 AM - 5 PM EST
+- Response Time: 4 hours</p>
+<p><strong>Technical Issues:</strong>
+- Email: training-tech@secureai.com
+- Live Chat: Available during training hours
+- Response Time: 1 hour</p>
+<p><strong>Certification Support:</strong>
+- Email: certification@secureai.com
+- Hours: Monday-Friday, 9 AM - 5 PM EST
+- Response Time: 2 business days</p>
+<h3 id="training-resources"><strong>Training Resources</strong></h3>
+<p><strong>Online Portal:</strong>
+- URL: https://training.secureai.com
+- Login: Use your SecureAI credentials
+- Features: Videos, labs, quizzes, certification</p>
+<p><strong>Community Forum:</strong>
+- URL: https://community.secureai.com
+- Categories: Getting Started, Advanced Topics, Best Practices
+- Moderated by: SecureAI experts and power users</p>
+<p><strong>Knowledge Base:</strong>
+- URL: https://kb.secureai.com
+- Search: 500+ articles
+- Updated: Weekly
+- Languages: English, Spanish, French, German</p>
+<hr />
+<h2 id="training-quality-assurance">✅ Training Quality Assurance</h2>
+<h3 id="post-training-survey"><strong>Post-Training Survey</strong></h3>
+<p>After completing training, please provide feedback:</p>
+<p><strong>Training Effectiveness (1-5 scale):</strong>
+- Content relevance and clarity
+- Instructor knowledge and teaching ability
+- Hands-on exercises and labs
+- Documentation quality
+- Overall training experience</p>
+<p><strong>Learning Outcomes:</strong>
+- Did you achieve your learning objectives?
+- Are you confident using the system?
+- What topics need more coverage?
+- What topics were most valuable?
+- Suggestions for improvement</p>
+<h3 id="training-success-metrics"><strong>Training Success Metrics</strong></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Completion Rate</td>
+<td>&gt;90%</td>
+<td>% completing full program</td>
+</tr>
+<tr>
+<td>Certification Pass Rate</td>
+<td>&gt;85%</td>
+<td>% passing on first attempt</td>
+</tr>
+<tr>
+<td>Customer Satisfaction</td>
+<td>&gt;4.5/5</td>
+<td>Post-training survey</td>
+</tr>
+<tr>
+<td>Time to Proficiency</td>
+<td>&lt;2 weeks</td>
+<td>Time to independent usage</td>
+</tr>
+<tr>
+<td>Support Ticket Reduction</td>
+<td>50%</td>
+<td>Before vs after training</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="training-program-complete">🎉 Training Program Complete!</h2>
+<h3 id="available-training-materials"><strong>Available Training Materials:</strong></h3>
+<p>✅ <strong>6 Comprehensive Training Documents</strong>
+- Customer onboarding (5-day program)
+- Support team training (4 modules)
+- Administrator training (8 modules)
+- Video tutorial scripts (18 videos)
+- Quick reference guide
+- Certification program</p>
+<p>✅ <strong>Complete Coverage For:</strong>
+- End users and customers
+- Security professionals
+- Compliance officers
+- Content moderators
+- System administrators
+- Support team members</p>
+<p>✅ <strong>Multiple Learning Formats:</strong>
+- Self-paced written guides
+- Video tutorials
+- Hands-on exercises
+- Interactive assessments
+- Reference materials
+- Certification exams</p>
+<p>✅ <strong>Estimated Training Times:</strong>
+- End User: 12-17 hours
+- Support Team: 18 hours
+- Administrator: 26 hours
+- Video Content: 2.5 hours</p>
+<hr />
+<h2 id="next-steps">🚀 Next Steps</h2>
+<h3 id="for-training-coordinators"><strong>For Training Coordinators:</strong></h3>
+<ol>
+<li>Review all training materials</li>
+<li>Customize for your organization</li>
+<li>Schedule training sessions</li>
+<li>Assign materials to users</li>
+<li>Track completion and certification</li>
+</ol>
+<h3 id="for-learners"><strong>For Learners:</strong></h3>
+<ol>
+<li>Identify your role</li>
+<li>Follow recommended learning path</li>
+<li>Complete exercises and checkpoints</li>
+<li>Take certification exam</li>
+<li>Join the community</li>
+</ol>
+<h3 id="for-organizations"><strong>For Organizations:</strong></h3>
+<ol>
+<li>Deploy training portal</li>
+<li>Enroll users in appropriate tracks</li>
+<li>Monitor training completion</li>
+<li>Support certification goals</li>
+<li>Measure training effectiveness</li>
+</ol>
+<hr />
+<p><strong>🎓 Start Your Training Journey Today!</strong></p>
+<p>Access all training materials in the <code>Training_Materials/</code> directory or visit https://training.secureai.com</p>
+<hr />
+<p><em>For questions about training programs or to schedule instructor-led training, contact training@secureai.com</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

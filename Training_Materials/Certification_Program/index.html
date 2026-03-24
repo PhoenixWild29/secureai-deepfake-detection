@@ -1,0 +1,1473 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#certification-program" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Program
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Certification Program">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#professional-certification-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎓 Professional Certification &amp; Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certification-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Certification Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Certification Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-certifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Certifications
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Available Certifications">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-certifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User Certifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#professional-certifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Professional Certifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expert-certifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expert Certifications
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certification-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 Certification Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 Certification Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#secureai-certified-user-scu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecureAI Certified User (SCU)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SecureAI Certified User (SCU)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-modules-12-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Modules (12 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assessment-3-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assessment (3 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certification-benefits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Benefits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secureai-certified-administrator-sca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecureAI Certified Administrator (SCA)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SecureAI Certified Administrator (SCA)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-modules-26-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Modules (26 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assessment-4-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assessment (4 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#secureai-support-specialist-sss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecureAI Support Specialist (SSS)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SecureAI Support Specialist (SSS)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#training-modules-18-hours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training Modules (18 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#assessment-3-hours_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Assessment (3 hours)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#assessment-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 Assessment Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📝 Assessment Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sample-scu-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample SCU Questions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-sca-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample SCA Questions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-scenario-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample Scenario Questions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certification-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 Certification Tracking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 Certification Tracking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#certification-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#renewal-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renewal Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 Training Resources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 Training Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#self-paced-learning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Self-Paced Learning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instructor-led-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instructor-Led Training
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#community" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Community
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certification-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 Certification Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📞 Certification Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#contact-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contact Information
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#certification-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certification Schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="certification-program">Certification Program</h2>
+<h3 id="professional-certification-training">🎓 Professional Certification &amp; Training</h3>
+<p>Official certification program for SecureAI DeepFake Detection System users, support teams, and administrators.</p>
+<hr />
+<h2 id="certification-overview">🎯 Certification Overview</h2>
+<h3 id="available-certifications"><strong>Available Certifications</strong></h3>
+<h4 id="user-certifications"><strong>User Certifications</strong></h4>
+<ol>
+<li><strong>SecureAI Certified User (SCU)</strong></li>
+<li>Level: Beginner</li>
+<li>Duration: 12-15 hours</li>
+<li>Target: End users, security analysts</li>
+<li>
+<p>Validity: 1 year</p>
+</li>
+<li>
+<p><strong>SecureAI Advanced User (SAU)</strong></p>
+</li>
+<li>Level: Intermediate</li>
+<li>Duration: 20-25 hours</li>
+<li>Target: Security professionals, power users</li>
+<li>Validity: 2 years</li>
+</ol>
+<h4 id="professional-certifications"><strong>Professional Certifications</strong></h4>
+<ol>
+<li><strong>SecureAI Certified Administrator (SCA)</strong></li>
+<li>Level: Intermediate</li>
+<li>Duration: 26 hours</li>
+<li>Target: System administrators</li>
+<li>
+<p>Validity: 2 years</p>
+</li>
+<li>
+<p><strong>SecureAI Support Specialist (SSS)</strong></p>
+</li>
+<li>Level: Intermediate  </li>
+<li>Duration: 18 hours</li>
+<li>Target: Support team members</li>
+<li>Validity: 1 year</li>
+</ol>
+<h4 id="expert-certifications"><strong>Expert Certifications</strong></h4>
+<ol>
+<li><strong>SecureAI Expert Administrator (SEA)</strong></li>
+<li>Level: Advanced</li>
+<li>Duration: 40 hours</li>
+<li>Target: Senior administrators</li>
+<li>Validity: 3 years</li>
+<li>
+<p>Prerequisite: SCA certification</p>
+</li>
+<li>
+<p><strong>SecureAI Integration Specialist (SIS)</strong></p>
+</li>
+<li>Level: Advanced</li>
+<li>Duration: 30 hours</li>
+<li>Target: Integration engineers</li>
+<li>Validity: 2 years</li>
+</ol>
+<hr />
+<h2 id="certification-requirements">📚 Certification Requirements</h2>
+<h3 id="secureai-certified-user-scu"><strong>SecureAI Certified User (SCU)</strong></h3>
+<h4 id="training-modules-12-hours"><strong>Training Modules</strong> (12 hours)</h4>
+<pre><code>Module 1: Getting Started (3 hours)
+  - System overview
+  - Login and navigation
+  - Profile setup
+  - Basic features
+
+Module 2: Video Analysis (4 hours)
+  - Single video analysis
+  - Understanding results
+  - Confidence scores
+  - Taking action
+
+Module 3: Advanced Features (3 hours)
+  - Batch processing
+  - Report generation
+  - Alerts and notifications
+  - Search and filtering
+
+Module 4: Best Practices (2 hours)
+  - Security best practices
+  - Performance optimization
+  - Compliance awareness
+  - Troubleshooting basics
+</code></pre>
+<h4 id="assessment-3-hours"><strong>Assessment</strong> (3 hours)</h4>
+<pre><code>Written Exam (1.5 hours):
+  - 50 multiple choice questions
+  - Passing score: 80% (40/50)
+  - Topics: All training modules
+  - Open book: No
+  - Time limit: 90 minutes
+
+Practical Assessment (1.5 hours):
+  - Analyze 3 videos
+  - Generate reports
+  - Configure notifications
+  - Demonstrate workflow
+  - Passing: 4/5 tasks completed
+</code></pre>
+<h4 id="certification-benefits"><strong>Certification Benefits</strong></h4>
+<ul>
+<li>Official SCU certificate</li>
+<li>Digital badge for email signature</li>
+<li>Access to advanced training materials</li>
+<li>Priority support access</li>
+<li>User community membership</li>
+</ul>
+<hr />
+<h3 id="secureai-certified-administrator-sca"><strong>SecureAI Certified Administrator (SCA)</strong></h3>
+<h4 id="training-modules-26-hours"><strong>Training Modules</strong> (26 hours)</h4>
+<pre><code>Module 1: System Architecture (4 hours)
+  - Infrastructure components
+  - Deployment models
+  - Scaling considerations
+  - High availability design
+
+Module 2: Installation &amp; Deployment (4 hours)
+  - Prerequisites and planning
+  - Automated deployment
+  - Manual installation
+  - Post-deployment validation
+
+Module 3: User Management (3 hours)
+  - Account creation and management
+  - Role-based access control
+  - Authentication configuration
+  - SSO integration
+
+Module 4: System Configuration (4 hours)
+  - Detection settings
+  - Storage configuration
+  - Integration setup
+  - Performance tuning
+
+Module 5: Monitoring &amp; Maintenance (3 hours)
+  - Prometheus setup
+  - Grafana dashboards
+  - Log management
+  - Performance monitoring
+
+Module 6: Security Administration (4 hours)
+  - Security hardening
+  - Access controls
+  - SSL/TLS management
+  - Security audits
+
+Module 7: Backup &amp; Recovery (3 hours)
+  - Backup strategies
+  - Automated backups
+  - Recovery procedures
+  - Disaster recovery testing
+
+Module 8: Troubleshooting (2 hours)
+  - Common issues
+  - Diagnostic procedures
+  - Issue resolution
+  - Escalation guidelines
+</code></pre>
+<h4 id="assessment-4-hours"><strong>Assessment</strong> (4 hours)</h4>
+<pre><code>Written Exam (2 hours):
+  - 75 multiple choice questions
+  - 10 scenario-based questions
+  - Passing score: 85% (72/85)
+  - Topics: All modules
+  - Open book: No
+  - Time limit: 120 minutes
+
+Hands-On Lab (2 hours):
+  Task 1: Deploy SecureAI (60 min)
+    - Provision infrastructure
+    - Deploy application
+    - Configure integrations
+    - Verify functionality
+
+  Task 2: Troubleshooting (30 min)
+    - Diagnose simulated issues
+    - Implement solutions
+    - Verify resolution
+
+  Task 3: Disaster Recovery (30 min)
+    - Execute backup
+    - Simulate failure
+    - Perform recovery
+    - Validate data integrity
+
+  Passing: 80% of tasks completed successfully
+</code></pre>
+<hr />
+<h3 id="secureai-support-specialist-sss"><strong>SecureAI Support Specialist (SSS)</strong></h3>
+<h4 id="training-modules-18-hours"><strong>Training Modules</strong> (18 hours)</h4>
+<pre><code>Module 1: Product Knowledge (4 hours)
+  - Feature deep dive
+  - Technical architecture
+  - API documentation
+  - Integration capabilities
+
+Module 2: Customer Support Skills (4 hours)
+  - Communication best practices
+  - Issue diagnosis
+  - Solution implementation
+  - Customer satisfaction
+
+Module 3: Technical Support (6 hours)
+  - Account and access issues
+  - Upload and analysis problems
+  - API integration troubleshooting
+  - Performance issues
+  - Security concerns
+
+Module 4: Support Tools &amp; Systems (4 hours)
+  - Ticketing system usage
+  - Knowledge base management
+  - Remote assistance tools
+  - Escalation procedures
+  - Metrics and reporting
+</code></pre>
+<h4 id="assessment-3-hours_1"><strong>Assessment</strong> (3 hours)</h4>
+<pre><code>Written Exam (1.5 hours):
+  - 60 multiple choice questions
+  - Passing score: 80% (48/60)
+  - Topics: Product knowledge, support procedures
+  - Time limit: 90 minutes
+
+Practical Assessment (1.5 hours):
+  - Handle 5 simulated support scenarios
+  - Demonstrate proper diagnosis
+  - Provide correct solutions
+  - Show communication skills
+  - Document resolutions
+  - Passing: 4/5 scenarios handled correctly
+</code></pre>
+<hr />
+<h2 id="assessment-examples">📝 Assessment Examples</h2>
+<h3 id="sample-scu-questions"><strong>Sample SCU Questions</strong></h3>
+<p><strong>Question 1:</strong> What confidence score indicates a high-risk deepfake requiring immediate investigation?
+- A) 50-60%
+- B) 70-80%
+- C) 80-90%
+- D) 90-100% ✓</p>
+<p><strong>Question 2:</strong> Which analysis type provides the most detailed forensic information?
+- A) Quick
+- B) Comprehensive ✓
+- C) Security-focused
+- D) All provide the same detail</p>
+<p><strong>Question 3:</strong> What is the maximum file size for video uploads?
+- A) 100MB
+- B) 250MB
+- C) 500MB ✓
+- D) 1GB</p>
+<p><strong>Question 4:</strong> Which of the following is NOT a detection technique used by SecureAI?
+- A) Facial landmark analysis
+- B) Temporal consistency
+- C) Audio deepfake detection
+- D) Blockchain verification ✓</p>
+<p><strong>Question 5:</strong> What should you do if you detect a deepfake with 95% confidence?
+- A) Ignore it
+- B) Monitor it
+- C) Create incident and investigate ✓
+- D) Delete it immediately</p>
+<h3 id="sample-sca-questions"><strong>Sample SCA Questions</strong></h3>
+<p><strong>Question 1:</strong> Which database is recommended for production deployments?
+- A) SQLite
+- B) MySQL
+- C) PostgreSQL ✓
+- D) MongoDB</p>
+<p><strong>Question 2:</strong> What is the recommended backup frequency for production databases?
+- A) Weekly
+- B) Daily ✓
+- C) Monthly
+- D) On-demand only</p>
+<p><strong>Question 3:</strong> Which port should be open for HTTPS traffic?
+- A) 80
+- B) 8000
+- C) 443 ✓
+- D) 8080</p>
+<p><strong>Question 4:</strong> What is the recommended number of Gunicorn workers for a 4-core server?
+- A) 1-2
+- B) 3-5 ✓
+- C) 8-10
+- D) 16+</p>
+<p><strong>Question 5:</strong> Which of the following is essential for disaster recovery?
+- A) Daily database backups ✓
+- B) Load balancer
+- C) CDN
+- D) GPU instances</p>
+<h3 id="sample-scenario-questions"><strong>Sample Scenario Questions</strong></h3>
+<p><strong>Scenario 1:</strong></p>
+<pre><code>A customer reports that video uploads are failing with &quot;File too large&quot; errors. 
+The customer says the video is 450MB and in MP4 format.
+
+What is the correct response?
+
+A) Tell them the system doesn't support files that large
+B) Explain the 500MB limit and suggest compressing the video ✓
+C) Escalate to engineering immediately
+D) Tell them to split the video into parts
+
+Explanation: The 500MB limit is higher than the customer's file size (450MB), 
+so the issue is likely something else. However, compression might help. 
+The best response is B, but you should also investigate why a 450MB file 
+is failing when the limit is 500MB.
+</code></pre>
+<p><strong>Scenario 2:</strong></p>
+<pre><code>You notice the analysis queue has grown to 500 pending videos and processing 
+is slow. What should you do first?
+
+A) Restart all services
+B) Check system resource usage (CPU, memory, disk) ✓
+C) Increase the queue size limit
+D) Disable new video uploads
+
+Explanation: Before making changes, you need to diagnose the root cause. 
+Checking resource usage helps identify if the issue is CPU, memory, disk I/O, 
+or network-related.
+</code></pre>
+<hr />
+<h2 id="certification-tracking">📊 Certification Tracking</h2>
+<h3 id="certification-dashboard"><strong>Certification Dashboard</strong></h3>
+<pre><code>Administrator: John Doe
+Employee ID: EMP-12345
+
+Current Certifications:
+┌──────────────────────────────────────────────────┐
+│ SecureAI Certified Administrator (SCA)           │
+│ Issued: January 15, 2025                         │
+│ Expires: January 15, 2027                        │
+│ Status: ✅ Active                                │
+│ Score: 92% (Passed with Distinction)             │
+└──────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────┐
+│ SecureAI Certified User (SCU)                    │
+│ Issued: December 1, 2024                         │
+│ Expires: December 1, 2025                        │
+│ Status: ✅ Active                                │
+│ Score: 88% (Passed)                              │
+└──────────────────────────────────────────────────┘
+
+Continuing Education Credits: 12 hours
+Renewal Requirements: 8 hours before expiration
+</code></pre>
+<h3 id="renewal-requirements"><strong>Renewal Requirements</strong></h3>
+<pre><code class="language-yaml">SCU Renewal:
+  - Complete 4 hours of continuing education
+  - Pass renewal assessment (50 questions, 75% passing)
+  - OR retake full certification
+
+SCA Renewal:
+  - Complete 8 hours of continuing education
+  - Pass renewal assessment (60 questions, 80% passing)
+  - Complete 1 hands-on lab
+  - OR retake full certification
+
+SSS Renewal:
+  - Complete 6 hours of continuing education
+  - Maintain CSAT score &gt;85%
+  - Handle 100+ support tickets
+  - Pass renewal assessment
+</code></pre>
+<hr />
+<h2 id="training-resources">🎯 Training Resources</h2>
+<h3 id="self-paced-learning"><strong>Self-Paced Learning</strong></h3>
+<ul>
+<li>Online training portal: https://training.secureai.com</li>
+<li>Video tutorials (18 videos, 2.5 hours total)</li>
+<li>Interactive labs</li>
+<li>Practice assessments</li>
+<li>Study guides</li>
+</ul>
+<h3 id="instructor-led-training"><strong>Instructor-Led Training</strong></h3>
+<ul>
+<li>Virtual classroom sessions</li>
+<li>Live webinars</li>
+<li>Hands-on workshops</li>
+<li>Q&amp;A sessions</li>
+<li>Group exercises</li>
+</ul>
+<h3 id="documentation"><strong>Documentation</strong></h3>
+<ul>
+<li>Complete user guides</li>
+<li>Administrator documentation</li>
+<li>API reference</li>
+<li>Best practices guides</li>
+<li>Case studies</li>
+</ul>
+<h3 id="community"><strong>Community</strong></h3>
+<ul>
+<li>User forum</li>
+<li>Administrator community</li>
+<li>Monthly meetups</li>
+<li>Annual conference</li>
+<li>Slack workspace</li>
+</ul>
+<hr />
+<h2 id="certification-support">📞 Certification Support</h2>
+<h3 id="contact-information"><strong>Contact Information</strong></h3>
+<ul>
+<li><strong>Certification Team</strong>: certification@secureai.com</li>
+<li><strong>Training Support</strong>: training@secureai.com</li>
+<li><strong>Exam Questions</strong>: exam-support@secureai.com</li>
+<li><strong>General Inquiries</strong>: info@secureai.com</li>
+</ul>
+<h3 id="certification-schedule"><strong>Certification Schedule</strong></h3>
+<ul>
+<li>Exams offered: Monthly (first Monday)</li>
+<li>Registration deadline: 2 weeks before exam</li>
+<li>Results delivered: Within 5 business days</li>
+<li>Certificates issued: Within 10 business days</li>
+</ul>
+<hr />
+<p><strong>🎓 Start Your Certification Journey Today!</strong></p>
+<p>Visit https://certification.secureai.com to register for your certification exam.</p>
+<hr />
+<p><em>Last updated: January 27, 2025</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

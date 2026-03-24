@@ -1,0 +1,1959 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Complete documentation for SecureAI DeepFake Detection System">
+      
+      
+        <meta name="author" content="SecureAI Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>SecureAI DeepFake Detection System - SecureAI DeepFake Detection Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#secureai-deepfake-detection-system" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-header__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SecureAI DeepFake Detection Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SecureAI DeepFake Detection System
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SecureAI DeepFake Detection Documentation" class="md-nav__button md-logo" aria-label="SecureAI DeepFake Detection Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SecureAI DeepFake Detection Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../DEPLOYMENT_README.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../COMPLETE_DEPLOYMENT_GUIDE.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Security_Professionals.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security Professionals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../User_Guide_Compliance_Officers.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compliance Officers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../API_Documentation.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Administrator_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Administrator Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Troubleshooting_Guide.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#video-tutorial-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Video Tutorial Scripts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Video Tutorial Scripts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-video-training-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Complete Video Training Series
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#video-tutorial-series-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 Video Tutorial Series Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📋 Video Tutorial Series Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#series-1-getting-started-30-minutes-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series 1: Getting Started (30 minutes total)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#series-2-core-features-45-minutes-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series 2: Core Features (45 minutes total)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#series-3-advanced-operations-60-minutes-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series 3: Advanced Operations (60 minutes total)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#series-4-administration-40-minutes-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series 4: Administration (40 minutes total)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-1-welcome-system-overview-5-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Tutorial 1: Welcome &amp; System Overview (5 min)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Tutorial 1: Welcome &amp; System Overview (5 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-screen-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-Screen Text
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-2-first-login-profile-setup-5-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Tutorial 2: First Login &amp; Profile Setup (5 min)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Tutorial 2: First Login &amp; Profile Setup (5 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-4-your-first-video-analysis-10-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Tutorial 4: Your First Video Analysis (10 min)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Tutorial 4: Your First Video Analysis (10 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#on-screen-annotations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        On-Screen Annotations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-6-batch-video-processing-10-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Tutorial 6: Batch Video Processing (10 min)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Tutorial 6: Batch Video Processing (10 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-11-siem-integration-setup-12-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Tutorial 11: SIEM Integration Setup (12 min)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Tutorial 11: SIEM Integration Setup (12 min)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#script_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Script
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tutorial-scripts-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎬 Tutorial Scripts Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎬 Tutorial Scripts Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-tutorial-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Tutorial Series
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎥 Production Guidelines
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎥 Production Guidelines">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#video-production-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Video Production Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recording-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recording Settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="secureai-deepfake-detection-system">SecureAI DeepFake Detection System</h1>
+<h2 id="video-tutorial-scripts">Video Tutorial Scripts</h2>
+<h3 id="complete-video-training-series">🎬 Complete Video Training Series</h3>
+<p>This document contains scripts for creating video tutorials to train customers and support teams.</p>
+<hr />
+<h2 id="video-tutorial-series-overview">📋 Video Tutorial Series Overview</h2>
+<h3 id="series-1-getting-started-30-minutes-total"><strong>Series 1: Getting Started</strong> (30 minutes total)</h3>
+<ol>
+<li>Welcome &amp; System Overview (5 min)</li>
+<li>First Login &amp; Profile Setup (5 min)</li>
+<li>Dashboard Navigation (10 min)</li>
+<li>Your First Video Analysis (10 min)</li>
+</ol>
+<h3 id="series-2-core-features-45-minutes-total"><strong>Series 2: Core Features</strong> (45 minutes total)</h3>
+<ol>
+<li>Understanding Analysis Results (10 min)</li>
+<li>Batch Video Processing (10 min)</li>
+<li>Reports &amp; Documentation (10 min)</li>
+<li>Alerts &amp; Notifications (8 min)</li>
+<li>Search &amp; Filtering (7 min)</li>
+</ol>
+<h3 id="series-3-advanced-operations-60-minutes-total"><strong>Series 3: Advanced Operations</strong> (60 minutes total)</h3>
+<ol>
+<li>API Integration Basics (15 min)</li>
+<li>SIEM Integration Setup (12 min)</li>
+<li>SOAR Automation (13 min)</li>
+<li>Custom Dashboards (10 min)</li>
+<li>Advanced Forensics (10 min)</li>
+</ol>
+<h3 id="series-4-administration-40-minutes-total"><strong>Series 4: Administration</strong> (40 minutes total)</h3>
+<ol>
+<li>User Management (10 min)</li>
+<li>System Configuration (12 min)</li>
+<li>Compliance &amp; Reporting (10 min)</li>
+<li>Troubleshooting Common Issues (8 min)</li>
+</ol>
+<hr />
+<h2 id="tutorial-1-welcome-system-overview-5-min">🎬 Tutorial 1: Welcome &amp; System Overview (5 min)</h2>
+<h3 id="script"><strong>Script</strong></h3>
+<p><strong>[INTRO - 0:00-0:30]</strong></p>
+<pre><code>[Screen: SecureAI logo with background music]
+
+Narrator: &quot;Welcome to SecureAI DeepFake Detection System. I'm [Name], and in this tutorial series, I'll show you how to protect your organization from deepfake threats using our advanced AI-powered detection platform.&quot;
+
+[Transition to dashboard]
+</code></pre>
+<p><strong>[WHAT IS SECUREAI - 0:30-2:00]</strong></p>
+<pre><code>[Screen: System overview slide]
+
+Narrator: &quot;SecureAI is an enterprise-grade deepfake detection system that analyzes videos in real-time to identify AI-generated manipulations.&quot;
+
+[Screen: Show detection capabilities]
+
+&quot;Our system can detect:
+• Face swaps and facial manipulations
+• Voice cloning and audio deepfakes
+• Lip-sync manipulations
+• Expression transfers
+• And many other deepfake techniques
+
+With over 95% accuracy and processing speeds under 100 milliseconds per frame.&quot;
+
+[Screen: Key features graphic]
+</code></pre>
+<p><strong>[KEY CAPABILITIES - 2:00-3:30]</strong></p>
+<pre><code>[Screen: Feature showcase]
+
+Narrator: &quot;Let's look at what SecureAI can do for your organization:
+
+1. Real-Time Detection
+   [Show video being analyzed]
+   Upload a video and get results in minutes.
+
+2. Batch Processing
+   [Show batch interface]
+   Process hundreds of videos automatically.
+
+3. Enterprise Integration
+   [Show integration icons]
+   Seamlessly integrate with your existing security tools like Splunk, QRadar, and ServiceNow.
+
+4. Compliance Ready
+   [Show compliance badges]
+   Built-in compliance with GDPR, CCPA, and AI governance requirements.
+
+5. Blockchain Audit Trail
+   [Show blockchain visualization]
+   Immutable proof of all analyses for legal and compliance purposes.&quot;
+</code></pre>
+<p><strong>[WHO IS IT FOR - 3:30-4:30]</strong></p>
+<pre><code>[Screen: User personas]
+
+Narrator: &quot;SecureAI is designed for:
+
+Security Professionals
+[Show security dashboard]
+Detect deepfake threats and respond to incidents.
+
+Compliance Officers
+[Show compliance dashboard]
+Ensure regulatory compliance and generate audit reports.
+
+Content Moderators
+[Show moderation interface]
+Review and moderate user-generated content.
+
+IT Administrators
+[Show admin panel]
+Manage the system and user access.&quot;
+</code></pre>
+<p><strong>[NEXT STEPS - 4:30-5:00]</strong></p>
+<pre><code>[Screen: Tutorial series overview]
+
+Narrator: &quot;In the next video, I'll walk you through your first login and setting up your profile. Let's get started!&quot;
+
+[End screen with Next Video button]
+</code></pre>
+<h3 id="on-screen-text"><strong>On-Screen Text</strong></h3>
+<ul>
+<li>0:00: "SecureAI DeepFake Detection"</li>
+<li>0:30: "95%+ Detection Accuracy"</li>
+<li>2:00: "5 Key Capabilities"</li>
+<li>3:30: "Who Is It For?"</li>
+<li>4:30: "Next: First Login"</li>
+</ul>
+<hr />
+<h2 id="tutorial-2-first-login-profile-setup-5-min">🎬 Tutorial 2: First Login &amp; Profile Setup (5 min)</h2>
+<h3 id="script_1"><strong>Script</strong></h3>
+<p><strong>[INTRO - 0:00-0:15]</strong></p>
+<pre><code>[Screen: Login page]
+
+Narrator: &quot;Welcome back! In this tutorial, I'll show you how to log in to SecureAI for the first time and set up your profile.&quot;
+</code></pre>
+<p><strong>[LOGGING IN - 0:15-1:30]</strong></p>
+<pre><code>[Screen: Browser with login page]
+
+Narrator: &quot;Let's start by logging in. Open your web browser and navigate to your SecureAI URL. This was provided in your welcome email.&quot;
+
+[Type URL in address bar]
+
+&quot;Enter your username - this is usually your email address.&quot;
+
+[Type username]
+
+&quot;And your temporary password, also from your welcome email.&quot;
+
+[Type password]
+
+&quot;Click 'Sign In'.&quot;
+
+[Click button]
+
+&quot;For security, you'll be prompted to set up two-factor authentication on your first login.&quot;
+
+[Show 2FA setup screen]
+
+&quot;Scan the QR code with your authenticator app - like Google Authenticator or Microsoft Authenticator.&quot;
+
+[Show phone scanning QR code]
+
+&quot;Enter the 6-digit code from your app.&quot;
+
+[Enter code]
+
+&quot;Great! You're now logged in securely.&quot;
+</code></pre>
+<p><strong>[PROFILE SETUP - 1:30-3:00]</strong></p>
+<pre><code>[Screen: Dashboard with profile menu highlighted]
+
+Narrator: &quot;Now let's set up your profile. Click on your profile icon in the top right corner.&quot;
+
+[Click profile icon]
+
+&quot;Select 'Profile Settings'.&quot;
+
+[Click Profile Settings]
+
+&quot;Here you can update your information:
+• Full name - for identification in the system
+• Email address - for notifications and reports
+• Phone number - for SMS alerts if needed
+• Time zone - for accurate timestamps
+• Notification preferences&quot;
+
+[Fill in fields]
+
+&quot;Make sure to choose a strong password. It should be:
+• At least 12 characters
+• Include uppercase and lowercase letters
+• Include numbers and special characters
+• Different from passwords on other sites&quot;
+
+[Show password requirements]
+
+&quot;Click 'Save Changes'.&quot;
+
+[Click Save]
+</code></pre>
+<p><strong>[NOTIFICATION PREFERENCES - 3:00-4:30]</strong></p>
+<pre><code>[Screen: Notification settings]
+
+Narrator: &quot;Let's configure your notification preferences so you stay informed about important detections.&quot;
+
+[Navigate to Notifications tab]
+
+&quot;I recommend enabling:
+• Email notifications for high-risk detections
+• In-app notifications for all analyses
+• Daily summary reports&quot;
+
+[Check boxes]
+
+&quot;You can also set up webhook notifications if you want to integrate with other systems.&quot;
+
+[Show webhook configuration]
+
+&quot;Enter your email address and any webhook URLs.&quot;
+
+[Fill in fields]
+
+&quot;Click 'Save Preferences'.&quot;
+
+[Click Save]
+</code></pre>
+<p><strong>[WRAP UP - 4:30-5:00]</strong></p>
+<pre><code>[Screen: Completed profile]
+
+Narrator: &quot;Perfect! Your profile is now set up and you're ready to start using SecureAI.
+
+In the next tutorial, we'll explore the dashboard and learn how to navigate the system.
+
+See you there!&quot;
+
+[End screen]
+</code></pre>
+<hr />
+<h2 id="tutorial-4-your-first-video-analysis-10-min">🎬 Tutorial 4: Your First Video Analysis (10 min)</h2>
+<h3 id="script_2"><strong>Script</strong></h3>
+<p><strong>[INTRO - 0:00-0:30]</strong></p>
+<pre><code>[Screen: Dashboard]
+
+Narrator: &quot;Welcome back! In this tutorial, you'll analyze your first video for deepfake detection. This is the core feature of SecureAI, and by the end of this video, you'll be able to upload, analyze, and interpret results with confidence.&quot;
+</code></pre>
+<p><strong>[UPLOADING VIDEO - 0:30-2:30]</strong></p>
+<pre><code>[Screen: Dashboard with &quot;Analyze Video&quot; button highlighted]
+
+Narrator: &quot;To get started, click the 'Analyze Video' button on your dashboard.&quot;
+
+[Click button]
+
+[Screen: Upload interface appears]
+
+&quot;You have three ways to upload a video:
+1. Drag and drop from your computer
+2. Click 'Browse Files' to select a file
+3. Paste a video URL if it's hosted online
+
+For this demo, I'll drag and drop a video file.&quot;
+
+[Drag sample video file to upload area]
+
+&quot;Perfect! The video is now uploaded. You can see a preview here.&quot;
+
+[Show video preview]
+
+&quot;Before we start the analysis, let's review the file details:
+• Filename: executive_speech.mp4
+• Size: 125 MB
+• Duration: 2 minutes 15 seconds
+• Format: MP4&quot;
+
+[Point to file details on screen]
+</code></pre>
+<p><strong>[CONFIGURING ANALYSIS - 2:30-4:30]</strong></p>
+<pre><code>[Screen: Analysis options panel]
+
+Narrator: &quot;Now let's configure the analysis options. You have three analysis types to choose from:
+
+1. Quick Analysis - Takes less than 1 minute
+   Best for: Initial screening of many videos
+
+2. Comprehensive Analysis - Takes 2-5 minutes
+   Best for: Thorough examination when you need detailed results
+
+3. Security-Focused - Takes 3-7 minutes
+   Best for: Critical security investigations
+
+For this example, I'll select 'Comprehensive' because we want detailed results.&quot;
+
+[Select Comprehensive]
+
+&quot;Now let's look at additional options:
+
+[Point to each checkbox as mentioned]
+
+• Detailed Forensic Analysis - Provides frame-by-frame examination
+• Audio Deepfake Detection - Analyzes voice for cloning
+• Metadata Analysis - Examines file creation and editing data
+• Generate Blockchain Proof - Creates immutable evidence record
+
+I recommend enabling all of these for your first analysis so you can see the full capabilities.&quot;
+
+[Check all boxes]
+
+&quot;You can also set priority:
+• Normal - Standard processing queue
+• High - Processed ahead of normal priority
+• Critical - Immediate processing for urgent cases
+
+We'll use 'Normal' for this demo.&quot;
+
+[Select Normal priority]
+
+&quot;Everything looks good. Click 'Start Analysis'.&quot;
+
+[Click Start Analysis button]
+</code></pre>
+<p><strong>[MONITORING PROGRESS - 4:30-6:00]</strong></p>
+<pre><code>[Screen: Analysis progress screen]
+
+Narrator: &quot;Great! The analysis is now running. You can monitor the progress in real-time.&quot;
+
+[Point to progress bar]
+
+&quot;The progress bar shows overall completion. Below that, you can see the individual stages:
+
+✓ Video Preprocessing - Complete
+✓ Face Detection - Complete  
+✓ Facial Landmark Analysis - Complete
+→ Temporal Consistency Check - In Progress
+  Audio Analysis - Pending
+  Metadata Examination - Pending
+
+Each green checkmark indicates a completed stage. The arrow shows what's currently processing.&quot;
+
+[Show estimated time]
+
+&quot;The estimated time remaining is shown here. For a comprehensive analysis, it typically takes 2-5 minutes depending on video length and quality.
+
+While we wait, let me show you what happens behind the scenes...&quot;
+
+[Show brief animation of detection process]
+
+&quot;The system is analyzing:
+• Over 150 facial landmarks per frame
+• Temporal consistency across frames
+• Audio features and voice patterns
+• Metadata and compression artifacts
+
+All of this happens automatically using our advanced AI models.&quot;
+</code></pre>
+<p><strong>[RESULTS - 6:00-9:00]</strong></p>
+<pre><code>[Screen: Analysis complete notification]
+
+Narrator: &quot;Analysis complete! Let's examine the results.&quot;
+
+[Click to view results]
+
+[Screen: Results dashboard]
+
+&quot;The first thing you see is the overall verdict:
+⚠️ DEEPFAKE DETECTED
+
+This means the system has identified this video as a deepfake. Now let's look at the confidence score.&quot;
+
+[Highlight confidence score]
+
+&quot;Confidence: 95.7%
+Risk Level: HIGH
+
+A confidence score of 95.7% means the system is highly certain this is a deepfake. Scores above 90% warrant immediate investigation.
+
+Now let's break down the detection results:&quot;
+
+[Scroll to detection breakdown]
+
+&quot;• Facial Analysis: 97.2% - Detected inconsistent facial landmarks
+• Temporal Consistency: 89.5% - Found frame-to-frame anomalies
+• Audio Analysis: 94.3% - Identified synthetic voice characteristics
+• Metadata: 92.1% - Detected signs of video editing
+
+Each technique provides independent evidence. When multiple techniques agree, confidence increases.&quot;
+
+[Show key indicators section]
+
+&quot;The system also identifies specific indicators:
+• Face swap technique detected
+• 23 facial landmark inconsistencies
+• Voice cloning detected
+• Video metadata shows editing software signatures
+
+This forensic detail helps you understand exactly what was manipulated.&quot;
+
+[Show recommended actions]
+
+&quot;Based on these results, the system recommends:
+1. Create security incident immediately
+2. Quarantine this video
+3. Notify stakeholders
+4. Preserve evidence for investigation
+
+Let's see how to take these actions.&quot;
+</code></pre>
+<p><strong>[TAKING ACTION - 9:00-9:45]</strong></p>
+<pre><code>[Screen: Action buttons]
+
+Narrator: &quot;You have several action buttons:
+
+'Create Incident' - Opens incident creation form
+'Quarantine Video' - Removes video from circulation
+'Download Report' - Generates detailed PDF report
+'Share Results' - Share with team members
+'View Blockchain Proof' - See immutable evidence record
+
+For a high-risk detection like this, I'll click 'Create Incident'.&quot;
+
+[Click Create Incident]
+
+[Show incident form]
+
+&quot;Fill in the incident details, assign to your security team, and click Submit. The incident is now tracked in your system and integrated with your SOAR platform if configured.&quot;
+</code></pre>
+<p><strong>[WRAP UP - 9:45-10:00]</strong></p>
+<pre><code>[Screen: Summary]
+
+Narrator: &quot;Congratulations! You've completed your first video analysis. You now know how to:
+✓ Upload a video
+✓ Configure analysis options
+✓ Monitor progress
+✓ Interpret results
+✓ Take appropriate action
+
+In the next tutorial, we'll explore batch processing for analyzing multiple videos at once.
+
+Thanks for watching!&quot;
+
+[End screen with Next Video button]
+</code></pre>
+<h3 id="on-screen-annotations"><strong>On-Screen Annotations</strong></h3>
+<ul>
+<li>2:30: "3 Analysis Types"</li>
+<li>4:30: "Real-Time Progress Tracking"</li>
+<li>6:00: "Understanding Confidence Scores"</li>
+<li>9:00: "Recommended Actions"</li>
+</ul>
+<hr />
+<h2 id="tutorial-6-batch-video-processing-10-min">🎬 Tutorial 6: Batch Video Processing (10 min)</h2>
+<h3 id="script_3"><strong>Script</strong></h3>
+<p><strong>[INTRO - 0:00-0:30]</strong></p>
+<pre><code>[Screen: Dashboard]
+
+Narrator: &quot;Welcome back! In this tutorial, you'll learn how to process multiple videos simultaneously using SecureAI's batch processing feature. This is essential for security teams analyzing large volumes of content.&quot;
+</code></pre>
+<p><strong>[ACCESSING BATCH MODE - 0:30-1:30]</strong></p>
+<pre><code>[Screen: Navigation to batch processing]
+
+Narrator: &quot;To access batch processing, click on 'Batch Processing' in the main navigation menu.&quot;
+
+[Click Batch Processing]
+
+[Screen: Batch processing interface]
+
+&quot;This is the batch processing dashboard. From here, you can upload and analyze dozens or even hundreds of videos at once.&quot;
+
+[Show interface overview]
+
+&quot;Let's look at the three upload methods:
+
+1. Multiple File Upload - Select multiple files from your computer
+2. URL List Import - Import a list of video URLs from a file
+3. Cloud Storage Sync - Automatically sync from S3 or Azure Storage
+
+For this demo, we'll use multiple file upload.&quot;
+</code></pre>
+<p><strong>[UPLOADING MULTIPLE VIDEOS - 1:30-3:30]</strong></p>
+<pre><code>[Screen: File selection dialog]
+
+Narrator: &quot;Click 'Browse Files' and you can select multiple videos at once.&quot;
+
+[Open file dialog, select multiple files using Ctrl+Click]
+
+&quot;I'm selecting 10 test videos. Notice how you can preview the file list before uploading.&quot;
+
+[Show selected files list]
+
+&quot;You can see:
+• Filename
+• File size
+• Estimated analysis time
+• Status (Ready/Uploading/Queued)
+
+If you need to remove any videos, click the X button next to the filename.&quot;
+
+[Demonstrate removing and re-adding a file]
+
+&quot;Now let's configure our batch options.&quot;
+
+[Scroll to batch options section]
+
+&quot;Analysis Type: I'll select 'Comprehensive' for thorough analysis
+Priority: 'Normal' is fine for this demo
+Max Concurrent Analyses: Set to 5 to balance speed and resources
+Generate Batch Report: Enabled - Creates a summary report when complete
+Email on Completion: Enabled - You'll get notified when the batch finishes&quot;
+
+[Configure each option]
+
+&quot;Click 'Start Batch Processing'.&quot;
+
+[Click button]
+</code></pre>
+<p><strong>[MONITORING BATCH - 3:30-6:00]</strong></p>
+<pre><code>[Screen: Batch progress dashboard]
+
+Narrator: &quot;Your batch is now processing! Let's explore the monitoring dashboard.&quot;
+
+[Point to progress bar]
+
+&quot;The overall progress bar shows how many videos have been analyzed. Currently, we're at 30% - that's 3 out of 10 videos.&quot;
+
+[Point to statistics panel]
+
+&quot;The statistics panel shows:
+• Completed: 3 videos finished
+• Processing: 2 videos currently analyzing
+• Queued: 5 videos waiting to start
+• Failed: 0 failures (good news!)
+
+You can also see real-time results:&quot;
+
+[Point to results summary]
+
+&quot;• Deepfakes Detected: 1 video (so far)
+• Real Videos Confirmed: 2 videos
+• Average Confidence: 78.5%&quot;
+
+[Show individual video status]
+
+&quot;Below, you can see each video's individual status and confidence score. Videos that complete successfully show a checkmark with their results.&quot;
+
+[Point to completed video]
+
+&quot;For example, 'video_001.mp4' completed with:
+• Result: Deepfake Detected
+• Confidence: 95%
+• Risk Level: High
+
+You can click on any completed video to see detailed results.&quot;
+
+[Click on completed video to show details]
+</code></pre>
+<p><strong>[BATCH RESULTS - 6:00-8:30]</strong></p>
+<pre><code>[Screen: Batch completion screen]
+
+Narrator: &quot;All videos have finished processing! Let's review the batch results.&quot;
+
+[Show batch summary]
+
+&quot;The batch summary shows:
+• Total Videos: 10
+• Deepfakes Detected: 4 (40%)
+• Real Videos: 6 (60%)
+• Average Confidence: 87.3%
+• Highest Risk: video_003.mp4 (97% confidence)
+• Processing Time: 8 minutes 32 seconds&quot;
+
+[Show batch report]
+
+&quot;The batch report provides a comprehensive overview you can download and share with your team. It includes:
+• Executive summary
+• Individual video results
+• Statistical analysis
+• Recommendations
+• Blockchain proof of all analyses
+
+Click 'Download Batch Report' to get the PDF.&quot;
+
+[Click download]
+
+[Show PDF preview]
+
+&quot;The report is professionally formatted and ready to share with stakeholders or include in compliance documentation.&quot;
+</code></pre>
+<p><strong>[ADVANCED FEATURES - 8:30-9:30]</strong></p>
+<pre><code>[Screen: Advanced batch options]
+
+Narrator: &quot;Let me show you some advanced batch features:
+
+Scheduling:
+You can schedule batch processing for off-peak hours to optimize system resources.&quot;
+
+[Show scheduling interface]
+
+&quot;URL List Import:
+For large batches, you can import a CSV file with video URLs and metadata.&quot;
+
+[Show CSV import example]
+
+&quot;Cloud Storage Sync:
+If your videos are stored in S3 or Azure, you can configure automatic sync and analysis.&quot;
+
+[Show cloud sync configuration]
+
+&quot;These features make it easy to process thousands of videos automatically.&quot;
+</code></pre>
+<p><strong>[WRAP UP - 9:30-10:00]</strong></p>
+<pre><code>[Screen: Summary]
+
+Narrator: &quot;Excellent work! You now know how to:
+✓ Upload multiple videos in batch
+✓ Configure batch options
+✓ Monitor processing progress
+✓ Review batch results
+✓ Download batch reports
+
+In the next tutorial, we'll dive into understanding analysis results and forensic details.
+
+See you there!&quot;
+
+[End screen]
+</code></pre>
+<hr />
+<h2 id="tutorial-11-siem-integration-setup-12-min">🎬 Tutorial 11: SIEM Integration Setup (12 min)</h2>
+<h3 id="script_4"><strong>Script</strong></h3>
+<p><strong>[INTRO - 0:00-0:30]</strong></p>
+<pre><code>[Screen: Integration dashboard]
+
+Narrator: &quot;Welcome back! In this tutorial, you'll learn how to integrate SecureAI with your SIEM platform. We'll use Splunk as an example, but the process is similar for QRadar, ArcSight, and other SIEM platforms.&quot;
+</code></pre>
+<p><strong>[WHY SIEM INTEGRATION - 0:30-1:30]</strong></p>
+<pre><code>[Screen: Integration benefits graphic]
+
+Narrator: &quot;Integrating SecureAI with your SIEM provides several benefits:
+
+1. Centralized Security Monitoring
+   [Show unified dashboard]
+   All security events in one place
+
+2. Automated Incident Response
+   [Show workflow]
+   Trigger playbooks automatically
+
+3. Historical Analysis
+   [Show trend graph]
+   Analyze deepfake trends over time
+
+4. Compliance Reporting
+   [Show compliance dashboard]
+   Simplified regulatory reporting
+
+Let's set this up.&quot;
+</code></pre>
+<p><strong>[SPLUNK CONFIGURATION - 1:30-5:00]</strong></p>
+<pre><code>[Screen: Settings → Integrations]
+
+Narrator: &quot;Navigate to Settings, then Integrations, and select SIEM.&quot;
+
+[Navigate through menus]
+
+[Screen: SIEM integration page]
+
+&quot;Click 'Add New Integration' and select 'Splunk'.&quot;
+
+[Click Add, select Splunk]
+
+[Screen: Splunk configuration form]
+
+&quot;Now enter your Splunk connection details:
+
+Splunk URL: Your Splunk instance URL including port
+  Example: https://splunk.company.com:8089
+
+Username: Service account for API access
+  Recommendation: Create dedicated 'secureai_integration' account
+
+Password: Service account password
+  Store securely, never share
+
+Index: Where events will be sent
+  Recommendation: Create dedicated 'secureai' index in Splunk&quot;
+
+[Fill in form fields]
+
+&quot;Next, configure what events to forward to Splunk:&quot;
+
+[Show event selection checkboxes]
+
+&quot;I recommend:
+☑ High-confidence deepfake detections (90%+)
+☑ Medium-confidence detections (70-89%)
+☐ All analyses (optional - generates high volume)
+☑ System alerts and errors
+☑ User authentication events
+☑ Audit trail events
+
+This ensures important security events reach your SIEM without overwhelming it with low-value data.&quot;
+
+[Configure checkboxes]
+
+&quot;Now click 'Test Connection' to verify everything is working.&quot;
+
+[Click Test Connection]
+
+[Show success message]
+
+&quot;Perfect! Connection successful. Click 'Save Integration'.&quot;
+
+[Click Save]
+</code></pre>
+<p><strong>[VERIFYING IN SPLUNK - 5:00-7:30]</strong></p>
+<pre><code>[Screen: Switch to Splunk interface]
+
+Narrator: &quot;Now let's verify the integration in Splunk. I'll switch over to our Splunk instance.&quot;
+
+[Show Splunk login screen, log in]
+
+[Screen: Splunk search interface]
+
+&quot;In Splunk, let's search for SecureAI events. Enter this search query:
+
+index=secureai | head 10
+
+[Type and execute search]
+
+[Show search results]
+
+&quot;Excellent! We can see events from SecureAI appearing in Splunk. Let's examine one event.&quot;
+
+[Click on event to expand]
+
+&quot;Each event contains rich data:
+• Timestamp - When the detection occurred
+• Event Type - deepfake_detected
+• Confidence Score - 95.7%
+• Risk Level - high
+• Video Hash - Unique identifier
+• User ID - Who performed the analysis
+• Detection Techniques - Which methods identified the deepfake
+• Blockchain Hash - Proof of analysis
+
+This structured data makes it easy to create Splunk dashboards and alerts.&quot;
+</code></pre>
+<p><strong>[CREATING SPLUNK ALERTS - 7:30-10:00]</strong></p>
+<pre><code>[Screen: Splunk alert creation]
+
+Narrator: &quot;Let's create an alert in Splunk for high-risk deepfake detections.&quot;
+
+[Navigate to Settings → Searches, reports, and alerts]
+
+&quot;Click 'New Alert'.&quot;
+
+[Click New Alert]
+
+&quot;Configure the alert:
+
+Title: High-Risk Deepfake Detected
+
+Search Query:
+index=secureai risk_level=high confidence_score&gt;90
+
+Run Schedule: Real-time (searches continuously)
+
+Trigger Conditions:
+• Number of Results: greater than 0
+• Trigger: For each result
+
+Actions:
+☑ Send email to: security-team@company.com
+☑ Create ServiceNow incident
+☑ Send to SOAR platform (if configured)&quot;
+
+[Fill in alert configuration]
+
+&quot;Click 'Save' to activate the alert.&quot;
+
+[Click Save]
+
+&quot;Now whenever SecureAI detects a high-risk deepfake, your security team will be notified immediately through multiple channels.&quot;
+
+[Show test alert firing]
+</code></pre>
+<p><strong>[CREATING SPLUNK DASHBOARD - 10:00-11:30]</strong></p>
+<pre><code>[Screen: Splunk dashboard creation]
+
+Narrator: &quot;Finally, let's create a Splunk dashboard for SecureAI metrics.&quot;
+
+[Navigate to Dashboards → Create New Dashboard]
+
+&quot;I'll add a few panels:
+
+Panel 1: Deepfake Detections Over Time
+Query: index=secureai is_deepfake=true | timechart count
+
+[Show time series graph]
+
+Panel 2: Risk Level Distribution  
+Query: index=secureai | stats count by risk_level
+
+[Show pie chart]
+
+Panel 3: Top Detection Techniques
+Query: index=secureai | stats count by detection_technique | sort -count
+
+[Show bar chart]&quot;
+
+[Arrange panels]
+
+&quot;Save the dashboard as 'SecureAI Detection Overview'.&quot;
+
+[Click Save]
+
+&quot;Now you have a real-time view of all deepfake detections and trends directly in Splunk!&quot;
+</code></pre>
+<p><strong>[WRAP UP - 11:30-12:00]</strong></p>
+<pre><code>[Screen: Completed integration]
+
+Narrator: &quot;Perfect! You've successfully integrated SecureAI with Splunk. You now have:
+✓ Automatic event forwarding
+✓ Real-time alerts for high-risk detections
+✓ Custom dashboard for monitoring
+✓ Centralized security operations
+
+This same process works for other SIEM platforms with minor differences in configuration.
+
+In the next tutorial, we'll set up SOAR automation to automatically respond to deepfake threats.
+
+See you there!&quot;
+
+[End screen]
+</code></pre>
+<hr />
+<h2 id="tutorial-scripts-summary">🎬 Tutorial Scripts Summary</h2>
+<h3 id="complete-tutorial-series"><strong>Complete Tutorial Series</strong></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Title</th>
+<th>Duration</th>
+<th>Difficulty</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Welcome &amp; System Overview</td>
+<td>5 min</td>
+<td>⭐ Easy</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>2</td>
+<td>First Login &amp; Profile Setup</td>
+<td>5 min</td>
+<td>⭐ Easy</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Dashboard Navigation</td>
+<td>10 min</td>
+<td>⭐ Easy</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Your First Video Analysis</td>
+<td>10 min</td>
+<td>⭐ Easy</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Understanding Results</td>
+<td>10 min</td>
+<td>⭐⭐ Medium</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Batch Processing</td>
+<td>10 min</td>
+<td>⭐⭐ Medium</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Reports &amp; Documentation</td>
+<td>10 min</td>
+<td>⭐⭐ Medium</td>
+<td>Should Have</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Alerts &amp; Notifications</td>
+<td>8 min</td>
+<td>⭐ Easy</td>
+<td>Should Have</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Search &amp; Filtering</td>
+<td>7 min</td>
+<td>⭐ Easy</td>
+<td>Nice to Have</td>
+</tr>
+<tr>
+<td>10</td>
+<td>API Integration Basics</td>
+<td>15 min</td>
+<td>⭐⭐⭐ Hard</td>
+<td>Should Have</td>
+</tr>
+<tr>
+<td>11</td>
+<td>SIEM Integration Setup</td>
+<td>12 min</td>
+<td>⭐⭐⭐ Hard</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>12</td>
+<td>SOAR Automation</td>
+<td>13 min</td>
+<td>⭐⭐⭐ Hard</td>
+<td>Should Have</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Custom Dashboards</td>
+<td>10 min</td>
+<td>⭐⭐ Medium</td>
+<td>Nice to Have</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Advanced Forensics</td>
+<td>10 min</td>
+<td>⭐⭐⭐ Hard</td>
+<td>Should Have</td>
+</tr>
+<tr>
+<td>15</td>
+<td>User Management</td>
+<td>10 min</td>
+<td>⭐⭐ Medium</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>16</td>
+<td>System Configuration</td>
+<td>12 min</td>
+<td>⭐⭐⭐ Hard</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Compliance &amp; Reporting</td>
+<td>10 min</td>
+<td>⭐⭐ Medium</td>
+<td>Must Have</td>
+</tr>
+<tr>
+<td>18</td>
+<td>Troubleshooting</td>
+<td>8 min</td>
+<td>⭐⭐ Medium</td>
+<td>Must Have</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total Duration:</strong> ~2.5 hours of video content</p>
+<hr />
+<h2 id="production-guidelines">🎥 Production Guidelines</h2>
+<h3 id="video-production-checklist"><strong>Video Production Checklist</strong></h3>
+<p><strong>Pre-Production:</strong>
+- [ ] Script reviewed and approved
+- [ ] Screen recording software tested
+- [ ] Test environment prepared
+- [ ] Sample data ready
+- [ ] Audio equipment checked</p>
+<p><strong>Production:</strong>
+- [ ] Record in 1080p minimum
+- [ ] Use clear, professional narration
+- [ ] Include on-screen annotations
+- [ ] Add chapter markers
+- [ ] Record B-roll for transitions</p>
+<p><strong>Post-Production:</strong>
+- [ ] Edit for clarity and pacing
+- [ ] Add intro/outro branding
+- [ ] Include captions/subtitles
+- [ ] Add background music (subtle)
+- [ ] Export in multiple formats (MP4, WEBM)</p>
+<h3 id="recording-settings"><strong>Recording Settings</strong></h3>
+<pre><code>Video:
+- Resolution: 1920x1080 (1080p)
+- Frame Rate: 30fps
+- Codec: H.264
+- Bitrate: 5-8 Mbps
+
+Audio:
+- Format: AAC
+- Sample Rate: 48kHz
+- Bitrate: 192kbps
+- Channels: Stereo
+
+Export:
+- Format: MP4
+- Compatibility: Web-optimized
+- Size: &lt;100MB per video
+</code></pre>
+<hr />
+<p><em>These tutorial scripts provide a complete framework for creating professional video training content for the SecureAI DeepFake Detection System.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
