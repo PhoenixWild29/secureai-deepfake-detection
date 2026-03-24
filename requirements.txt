@@ -44,7 +44,7 @@ langchain-core>=1.2.5  # Fixed: Template injection (CVE-2025-65106)
 langchain-text-splitters>=1.1.0  # Fixed: XXE injection (CVE-2025-6985, PVE-2025-78354)
 langfuse>=3.11.2  # Fixed: Multiple vulnerabilities (PVE-2025-75620, PVE-2025-75619, PVE-2025-77285, PVE-2024-73564, PVE-2025-75618)
 langgraph-checkpoint>=3.0.1  # Fixed: Deserialization (CVE-2025-64439)
-litellm>=1.80.11  # Fixed: Information disclosure (PVE-2025-80130, PVE-2025-80100)
+litellm==1.80.11  # PINNED: PyPI/GitHub supply chain compromise (1.82.8 malicious release) — do NOT upgrade until supply chain is verified clean
 dspy>=3.0.4  # Fixed: Information disclosure (CVE-2025-12695)
 
 # Async Processing
