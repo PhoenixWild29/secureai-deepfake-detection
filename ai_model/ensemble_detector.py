@@ -82,123 +82,94 @@ class EnsembleDetector:
             self.device = device if device else ('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"🔧 Initializing EnsembleDetector on device: {self.device}")
         
-        # Load CLIP + ResNet + V13 + Xception + EfficientNet ALL IN PARALLEL so total time ~2-4 min (not 10+)
-        import threading
-        clip_result = [None]
-        def load_clip_thread():
-            try:
-                from .enhanced_detector import _detector_instance as enhanced_singleton
-                if enhanced_singleton is not None:
-                    clip_result[0] = enhanced_singleton
-                    logger.info("✅ Reusing existing CLIP detector (singleton)")
-                    return
-                from .enhanced_detector import get_enhanced_detector
-                clip_result[0] = get_enhanced_detector(
-                    device=self.device,
-                    clip_model_name=clip_model_name,
-                    clip_pretrained=clip_pretrained
-                )
-                logger.info("✅ CLIP detector loaded")
-            except (ImportError, AttributeError, Exception) as e:
-                logger.warning(f"⚠️  CLIP: {e}")
-        
-        # Load ResNet, V13, Xception, EfficientNet in parallel with CLIP
+        # Load models SEQUENTIALLY — no child threads.
+        # This runs inside eventlet.tpool.execute() so it's already in a real
+        # OS thread. Child threads deadlock under eventlet; sequential is reliable.
+        import time as _t
         self.resnet_model = None
         self.v13_detector = None
         self.xception_detector = None
         self.efficientnet_detector = None
-        logger.info("📦 Loading CLIP, ResNet50, V13, XceptionNet, EfficientNet in parallel (max 4 min)...")
-        
-        def _load_state_dict_resnet(path: str):
-            """Load state dict from .pth or .safetensors (safetensors is much faster)."""
-            base, ext = os.path.splitext(path)
-            # Prefer safetensors if available (faster load, no pickle)
-            if ext.lower() == '.pth':
-                safetensors_path = base + '.safetensors'
-                if os.path.exists(safetensors_path):
-                    try:
-                        from safetensors.torch import load_file
-                        return load_file(safetensors_path, device=self.device)
-                    except Exception:
-                        pass
-            # .pth: use weights_only=True when supported (PyTorch 2.0+, faster/safer)
-            try:
-                ckpt = torch.load(path, map_location=self.device, weights_only=True)
-            except (TypeError, Exception):
-                ckpt = torch.load(path, map_location=self.device)
-            return ckpt.get('state_dict', ckpt) if isinstance(ckpt, dict) else ckpt
+        logger.info("📦 Loading ensemble models sequentially (CLIP → ResNet → V13 → EfficientNet)...")
 
-        def load_resnet():
-            try:
-                model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
-                for path in [resnet_model_path, 'ai_model/resnet_resnet50_final.pth', 'ai_model/resnet_resnet50_best.pth',
-                             'resnet_resnet50_final.pth', 'resnet_resnet50_best.pth']:
-                    if path and os.path.exists(path):
-                        state = _load_state_dict_resnet(path)
-                        model.load_state_dict(state, strict=False)
-                        model.to(self.device)
-                        model.eval()
-                        logger.info(f"✅ ResNet50 loaded from: {path}")
-                        return model
-                logger.warning("⚠️  ResNet50 weights not found. Skipping ResNet.")
-            except Exception as e:
-                logger.warning(f"⚠️  ResNet50: {e}")
-            return None
-        
-        def load_v13_thread():
-            if not V13_AVAILABLE:
-                return None
-            try:
-                return get_deepfake_detector_v13(device=self.device)
-            except Exception as e:
-                logger.warning(f"⚠️  V13: {e}")
-                return None
-        
-        def load_xception_thread():
-            if not XCEPTION_AVAILABLE:
-                return None
-            try:
-                return get_xception_detector(device=self.device)
-            except Exception as e:
-                logger.warning(f"⚠️  XceptionNet: {e}")
-                return None
-        
-        def load_efficientnet_thread():
-            if not EFFICIENTNET_AVAILABLE:
-                return None
-            try:
-                return get_efficientnet_detector(device=self.device)
-            except Exception as e:
-                logger.warning(f"⚠️  EfficientNet: {e}")
-                return None
-        
-        resnet_result, v13_result, xception_result, eff_result = [None], [None], [None], [None]
-        t_clip = threading.Thread(target=load_clip_thread, daemon=True)
-        t_resnet = threading.Thread(target=lambda: resnet_result.__setitem__(0, load_resnet()), daemon=True)
-        t_v13 = threading.Thread(target=lambda: v13_result.__setitem__(0, load_v13_thread()), daemon=True)
-        t_xception = threading.Thread(target=lambda: xception_result.__setitem__(0, load_xception_thread()), daemon=True)
-        t_eff = threading.Thread(target=lambda: eff_result.__setitem__(0, load_efficientnet_thread()), daemon=True)
-        t_clip.start()
-        t_resnet.start()
-        t_v13.start()
-        t_xception.start()
-        t_eff.start()
-        for t in (t_clip, t_resnet, t_v13, t_xception, t_eff):
-            t.join(timeout=240.0)  # max 4 min for full parallel batch (CLIP + 4 others)
-        self.clip_detector = clip_result[0]
-        if self.clip_detector is None:
-            logger.warning("⚠️  CLIP did not load in time; creating in main thread...")
-            try:
+        # --- 1. CLIP (required) ---
+        _s = _t.time()
+        try:
+            from .enhanced_detector import _detector_instance as enhanced_singleton
+            if enhanced_singleton is not None:
+                self.clip_detector = enhanced_singleton
+                logger.info(f"✅ CLIP reused (singleton) [{_t.time()-_s:.1f}s]")
+            else:
                 from .enhanced_detector import get_enhanced_detector
-                self.clip_detector = get_enhanced_detector(device=self.device, clip_model_name=clip_model_name, clip_pretrained=clip_pretrained)
+                self.clip_detector = get_enhanced_detector(
+                    device=self.device,
+                    clip_model_name=clip_model_name,
+                    clip_pretrained=clip_pretrained
+                )
+                logger.info(f"✅ CLIP loaded [{_t.time()-_s:.1f}s]")
+        except Exception as e:
+            raise RuntimeError(f"CLIP required for detection: {e}") from e
+
+        # --- 2. ResNet50 (local weights, fast) ---
+        _s = _t.time()
+        try:
+            model = ResNetDeepfakeClassifier(model_name='resnet50', pretrained=False)
+            for path in [resnet_model_path, 'ai_model/resnet_resnet50_final.pth',
+                         'ai_model/resnet_resnet50_best.pth',
+                         'resnet_resnet50_final.pth', 'resnet_resnet50_best.pth']:
+                if path and os.path.exists(path):
+                    base, ext = os.path.splitext(path)
+                    st_path = base + '.safetensors'
+                    if ext.lower() == '.pth' and os.path.exists(st_path):
+                        try:
+                            from safetensors.torch import load_file
+                            state = load_file(st_path, device=self.device)
+                        except Exception:
+                            state = torch.load(path, map_location=self.device, weights_only=True)
+                    else:
+                        try:
+                            state = torch.load(path, map_location=self.device, weights_only=True)
+                        except (TypeError, Exception):
+                            state = torch.load(path, map_location=self.device)
+                    if isinstance(state, dict) and 'state_dict' in state:
+                        state = state['state_dict']
+                    model.load_state_dict(state, strict=False)
+                    model.to(self.device)
+                    model.eval()
+                    self.resnet_model = model
+                    logger.info(f"✅ ResNet50 loaded from {path} [{_t.time()-_s:.1f}s]")
+                    break
+            if self.resnet_model is None:
+                logger.warning(f"⚠️  ResNet50 weights not found [{_t.time()-_s:.1f}s]")
+        except Exception as e:
+            logger.warning(f"⚠️  ResNet50: {e} [{_t.time()-_s:.1f}s]")
+
+        # --- 3. V13 (HuggingFace download, can be slow) ---
+        _s = _t.time()
+        if V13_AVAILABLE:
+            try:
+                self.v13_detector = get_deepfake_detector_v13(device=self.device)
+                logger.info(f"✅ V13 loaded [{_t.time()-_s:.1f}s]")
             except Exception as e:
-                raise RuntimeError(f"CLIP required for detection: {e}") from e
-        self.resnet_model = resnet_result[0]
-        self.v13_detector = v13_result[0]
-        self.xception_detector = xception_result[0]
-        self.efficientnet_detector = eff_result[0]
-        if t_v13.is_alive():
-            logger.warning("⚠️  V13 loading timed out (4 min). Ensemble will use CLIP + ResNet + XceptionNet.")
+                logger.warning(f"⚠️  V13: {e} [{_t.time()-_s:.1f}s]")
+
+        # --- 4. EfficientNet (pretrained, fast) ---
+        _s = _t.time()
+        if EFFICIENTNET_AVAILABLE:
+            try:
+                self.efficientnet_detector = get_efficientnet_detector(device=self.device)
+                logger.info(f"✅ EfficientNet loaded [{_t.time()-_s:.1f}s]")
+            except Exception as e:
+                logger.warning(f"⚠️  EfficientNet: {e} [{_t.time()-_s:.1f}s]")
+
+        # --- 5. XceptionNet (optional) ---
+        _s = _t.time()
+        if XCEPTION_AVAILABLE:
+            try:
+                self.xception_detector = get_xception_detector(device=self.device)
+                logger.info(f"✅ XceptionNet loaded [{_t.time()-_s:.1f}s]")
+            except Exception as e:
+                logger.warning(f"⚠️  XceptionNet: {e} [{_t.time()-_s:.1f}s]")
         if self.v13_detector and getattr(self.v13_detector, 'model_loaded', False):
             logger.info("✅ DeepFake Detector V13 loaded successfully!")
         if self.xception_detector:
@@ -544,87 +515,172 @@ class EnsembleDetector:
         }
 
 
-# Global instance; loaded in background thread so the request thread never blocks
-import threading as _threading
-_ensemble_instance = None
-_ensemble_init_failed = False
+# ---------------------------------------------------------------------------
+# Global ensemble lifecycle: background preload, per-model status, resilient retry
+# ---------------------------------------------------------------------------
+import time as _time
+
+# Use REAL OS threads, not eventlet green threads.
+# When eventlet monkey-patches threading, green threads can't do heavy CPU/IO
+# (model downloads, PyTorch loads) without blocking the hub and deadlocking.
+try:
+    import eventlet.patcher as _ep
+    _threading = _ep.original('threading')  # real OS threading module
+except (ImportError, AttributeError):
+    import threading as _threading
+
+_ensemble_instance: Optional[EnsembleDetector] = None
 _ensemble_loading_started = False
 _ensemble_loading_lock = _threading.Lock()
+_ensemble_load_start_time: Optional[float] = None
+
+# Per-model status tracking so the frontend can show a real progress bar
+_MODEL_NAMES = ['clip', 'resnet', 'v13', 'xception', 'efficientnet']
+_model_status: Dict[str, str] = {m: 'pending' for m in _MODEL_NAMES}  # pending | loading | loaded | failed
+_ensemble_overall_status = 'idle'  # idle | loading | ready | failed
+_ensemble_fail_count = 0
+_RETRY_COOLDOWN = 30  # seconds before allowing retry after failure
+_last_fail_time: Optional[float] = None
+
+
+def get_ensemble_status() -> Dict[str, Any]:
+    """Return detailed loading status for the /api/ensemble-status endpoint.
+    Never blocks. Safe to call from any thread at any time."""
+    elapsed = round(_time.time() - _ensemble_load_start_time, 1) if _ensemble_load_start_time else 0
+    models = dict(_model_status)
+    loaded_count = sum(1 for s in models.values() if s == 'loaded')
+    total = len(models)
+    if _ensemble_overall_status == 'ready':
+        pct = 100
+    elif _ensemble_overall_status == 'loading':
+        pct = max(5, int(loaded_count / total * 90))  # 5-90% while loading
+    else:
+        pct = 0
+    return {
+        'status': _ensemble_overall_status,
+        'progress_pct': pct,
+        'models': models,
+        'models_loaded': loaded_count,
+        'models_total': total,
+        'elapsed_seconds': elapsed,
+        'ready': _ensemble_overall_status == 'ready',
+    }
+
 
 def init_ensemble_blocking() -> Optional[EnsembleDetector]:
-    """
-    Load the full ensemble in the current thread. Called only from the background
-    loader thread so the request thread never blocks for 10+ min.
-    """
-    global _ensemble_instance, _ensemble_init_failed
+    """Load the full ensemble in the current thread (called from background thread only)."""
+    global _ensemble_instance, _ensemble_overall_status, _ensemble_fail_count
+    global _last_fail_time, _ensemble_load_start_time
     if _ensemble_instance is not None:
         return _ensemble_instance
-    if _ensemble_init_failed:
-        return None
+    _ensemble_overall_status = 'loading'
+    _ensemble_load_start_time = _time.time()
+    for m in _MODEL_NAMES:
+        _model_status[m] = 'loading'
     try:
-        logger.info("Loading full ensemble (CLIP + ResNet + V13 + XceptionNet + EfficientNet + ...) — this may take 2–5 minutes.")
-        _ensemble_instance = EnsembleDetector()
-        logger.info("✅ EnsembleDetector loaded successfully. Every scan will use the full ensemble.")
-        return _ensemble_instance
+        logger.info("Loading full ensemble (CLIP + ResNet + V13 + XceptionNet + EfficientNet) — this may take 2–4 minutes.")
+        det = EnsembleDetector()
+        _ensemble_instance = det
+        _ensemble_overall_status = 'ready'
+        # Update per-model status from actual detector state
+        _model_status['clip'] = 'loaded' if det.clip_detector else 'failed'
+        _model_status['resnet'] = 'loaded' if det.resnet_model else 'failed'
+        _model_status['v13'] = 'loaded' if (det.v13_detector and getattr(det.v13_detector, 'model_loaded', False)) else 'failed'
+        _model_status['xception'] = 'loaded' if det.xception_detector else 'failed'
+        _model_status['efficientnet'] = 'loaded' if det.efficientnet_detector else 'failed'
+        elapsed = round(_time.time() - _ensemble_load_start_time, 1)
+        logger.info(f"✅ EnsembleDetector loaded in {elapsed}s. Models: {_model_status}")
+        return det
     except Exception as e:
         logger.exception(f"EnsembleDetector initialization failed: {e}")
-        _ensemble_init_failed = True
+        _ensemble_overall_status = 'failed'
+        _ensemble_fail_count += 1
+        _last_fail_time = _time.time()
+        for m in _MODEL_NAMES:
+            if _model_status[m] == 'loading':
+                _model_status[m] = 'failed'
         return None
 
+
 def start_background_ensemble_load() -> None:
-    """
-    Start loading the ensemble in a background thread if not already loaded or loading.
-    Returns immediately. The request thread must never block on model load — so the
-    first scan returns 503 and the user retries in 3 min when the background load has finished.
-    """
-    global _ensemble_instance, _ensemble_init_failed, _ensemble_loading_started
+    """Start loading the ensemble in the background. Returns immediately.
+    Safe to call multiple times — subsequent calls are no-ops unless a retry is due.
+
+    When running under eventlet (production with gunicorn+eventlet), uses
+    eventlet.tpool to run in a real OS thread so heavy PyTorch/model loading
+    does not deadlock the green thread hub. This is the same mechanism the
+    scan analysis path uses for detect_fake."""
+    global _ensemble_loading_started, _ensemble_overall_status
     with _ensemble_loading_lock:
         if _ensemble_instance is not None:
             return
-        if _ensemble_init_failed:
-            return
-        if _ensemble_loading_started:
-            return
+        if _ensemble_loading_started and _ensemble_overall_status == 'loading':
+            # Detect stuck loads: if loading for >10 min, allow retry
+            if _ensemble_load_start_time and (_time.time() - _ensemble_load_start_time) > 600:
+                logger.warning("Ensemble load appears stuck (>10 min). Resetting for retry...")
+                _ensemble_loading_started = False
+                _ensemble_overall_status = 'idle'
+            else:
+                return  # already in progress
+        if _ensemble_overall_status == 'failed':
+            if _last_fail_time and (_time.time() - _last_fail_time) < _RETRY_COOLDOWN:
+                return  # too soon to retry
+            logger.info(f"Retrying ensemble load (attempt {_ensemble_fail_count + 1}) after cooldown...")
         _ensemble_loading_started = True
-    def _run():
+        _ensemble_overall_status = 'loading'
+
+    def _run_load():
         try:
             init_ensemble_blocking()
-        finally:
-            pass  # _ensemble_instance or _ensemble_init_failed is set
-    t = _threading.Thread(target=_run, daemon=True)
-    t.start()
-    logger.info("Ensemble load started in background. Next scan (in ~3 min) will use it.")
+        except Exception:
+            pass  # status already set inside init_ensemble_blocking
+
+    # Detect eventlet by checking the env var the docker-compose and api.py use.
+    _use_eventlet = os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet'
+
+    if _use_eventlet:
+        # Green threads deadlock on heavy PyTorch loads. Use eventlet tpool
+        # (real OS thread pool) — same mechanism the scan analysis path uses.
+        import eventlet as _ev
+        from eventlet import tpool as _tpool
+        def _tpool_wrapper():
+            try:
+                _tpool.execute(init_ensemble_blocking)
+            except Exception as e:
+                logger.warning(f"Ensemble tpool load failed: {e}")
+        _ev.spawn_n(_tpool_wrapper)
+        logger.info("Ensemble load started via eventlet tpool (real OS thread).")
+    else:
+        t = _threading.Thread(target=_run_load, daemon=True, name='ensemble-loader')
+        t.start()
+        logger.info("Ensemble load started in background thread.")
+
 
 def get_ensemble_detector(timeout: Optional[float] = None) -> Optional[EnsembleDetector]:
-    """
-    Return the global ensemble detector if already loaded. Never blocks — if not loaded,
-    returns None so the API can return 503 and ask the user to retry in 3 min.
-    """
-    global _ensemble_instance
+    """Return the global ensemble detector if already loaded. Never blocks."""
     return _ensemble_instance
 
+
 def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any]:
-    """
-    Convenience function for ensemble detection with timeout protection
-    
-    Args:
-        video_path: Path to video file
-        num_frames: Number of frames to sample
-        
-    Returns:
-        Detection results or error dict if ensemble unavailable
-    """
-    detector = get_ensemble_detector()  # uses ENSEMBLE_INIT_TIMEOUT (default 300s)
+    """Convenience function for ensemble detection.
+    If the ensemble isn't loaded yet, loads it inline (works because the caller
+    — api.py — already runs this inside eventlet.tpool.execute)."""
+    detector = get_ensemble_detector()
     if detector is None:
-        # Ensemble unavailable - return error result
+        # Load models right here. This is safe because api.py wraps the entire
+        # analysis in tpool.execute() which runs in a real OS thread.
+        logger.info("Ensemble not loaded yet — loading inline (first scan, takes 2-4 min)...")
+        detector = init_ensemble_blocking()
+    if detector is None:
+        status = get_ensemble_status()
         return {
-            'error': 'Ensemble detector unavailable (initialization failed or timed out)',
+            'error': 'Ensemble detector failed to load. Check server logs.',
             'is_deepfake': False,
             'confidence': 0.0,
             'ensemble_fake_probability': 0.5,
-            'method': 'ensemble_unavailable'
+            'method': 'ensemble_unavailable',
+            'ensemble_status': status,
         }
-    
     try:
         return detector.detect(video_path, num_frames)
     except Exception as e:
@@ -636,4 +692,10 @@ def detect_fake_ensemble(video_path: str, num_frames: int = 16) -> Dict[str, Any
             'ensemble_fake_probability': 0.5,
             'method': 'ensemble_error'
         }
+
+
+# NOTE: Do NOT auto-start at module import. With gunicorn preload_app=True,
+# the import runs in the master process; threads die when workers are forked.
+# Instead, api.py triggers start_background_ensemble_load() on the first
+# HTTP request (any endpoint), when the worker and eventlet hub are alive.
 

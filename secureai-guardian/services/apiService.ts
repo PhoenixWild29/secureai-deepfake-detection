@@ -280,7 +280,10 @@ export async function analyzeVideo(
           } else if (response.status === 413) {
             errorMessage = 'File too large. Maximum size is 500MB.';
           } else if (response.status === 503 && errorData.ensemble_unavailable) {
-            errorMessage = errorData.error || 'Models are loading (2–4 min). Please click Scan again in 3 minutes.';
+            // Models still loading — throw a special marker so we can auto-retry
+            const retryErr = new Error('__ENSEMBLE_LOADING__');
+            (retryErr as any).ensembleStatus = errorData.ensemble_status;
+            throw retryErr;
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 500) {
@@ -288,6 +291,8 @@ export async function analyzeVideo(
         }
         }
       } catch (parseError) {
+        // Re-throw ensemble loading marker
+        if (parseError instanceof Error && parseError.message === '__ENSEMBLE_LOADING__') throw parseError;
         if (response.status === 504) {
           errorMessage = 'Request timed out. The server took too long to respond. Try a shorter video or try again.';
         } else if (response.status === 502 || response.status === 503) {
@@ -313,6 +318,8 @@ export async function analyzeVideo(
     }
   } catch (error) {
     clearTimeout(timeoutId);
+    // If ensemble is loading, re-throw marker so Scanner can handle it gracefully
+    if (error instanceof Error && error.message === '__ENSEMBLE_LOADING__') throw error;
     console.error('Video analysis error:', error);
     // Connection dropped or aborted after long run: backend may have finished
     const msg = error instanceof Error ? error.message : '';
@@ -367,7 +374,9 @@ export async function analyzeVideoFromUrl(
         }
         
         if (response.status === 503 && errorData.ensemble_unavailable) {
-          errorMessage = errorData.error || 'Models are loading (2–4 min). Please click Scan again in 3 minutes.';
+          const retryErr = new Error('__ENSEMBLE_LOADING__');
+          (retryErr as any).ensembleStatus = errorData.ensemble_status;
+          throw retryErr;
         } else if (response.status === 503) {
           errorMessage = errorData.error || 'Service temporarily unavailable. Please retry.';
         } else if (response.status === 400) {
@@ -386,6 +395,7 @@ export async function analyzeVideoFromUrl(
           errorMessage = 'Backend unavailable or overloaded. Please try again in a minute.';
         }
       } catch (parseError) {
+        if (parseError instanceof Error && parseError.message === '__ENSEMBLE_LOADING__') throw parseError;
         if (response.status === 504) {
           errorMessage = 'Request timed out. The server took too long to respond. Try a shorter video or try again.';
         } else if (response.status === 502 || response.status === 503) {
@@ -414,6 +424,7 @@ export async function analyzeVideoFromUrl(
     }
   } catch (error) {
     clearTimeout(timeoutId);
+    if (error instanceof Error && error.message === '__ENSEMBLE_LOADING__') throw error;
     console.error('Video URL analysis error:', error);
     const msg = error instanceof Error ? error.message : '';
     if (msg === 'Failed to fetch' || (msg.includes('fetch') && msg.toLowerCase().includes('failed'))) {
@@ -428,6 +439,63 @@ export async function analyzeVideoFromUrl(
     }
     throw error;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Ensemble status polling — lets the frontend show real loading progress
+// and auto-retry scans once models are ready (zero user friction).
+// ---------------------------------------------------------------------------
+export interface EnsembleStatus {
+  status: 'idle' | 'loading' | 'ready' | 'failed' | 'unknown';
+  progress_pct: number;
+  models: Record<string, string>;
+  models_loaded: number;
+  models_total: number;
+  elapsed_seconds: number;
+  ready: boolean;
+}
+
+export async function getEnsembleStatus(): Promise<EnsembleStatus> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/ensemble-status`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!response.ok) return { status: 'unknown', progress_pct: 0, models: {}, models_loaded: 0, models_total: 5, elapsed_seconds: 0, ready: false };
+    return await response.json();
+  } catch {
+    return { status: 'unknown', progress_pct: 0, models: {}, models_loaded: 0, models_total: 5, elapsed_seconds: 0, ready: false };
+  }
+}
+
+/**
+ * Wait for the ensemble to become ready, calling onProgress with status updates.
+ * Resolves when ready, rejects after maxWaitMs.
+ */
+export function waitForEnsemble(
+  onProgress?: (status: EnsembleStatus) => void,
+  maxWaitMs = 600000,  // 10 minutes max
+  pollMs = 3000,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const deadline = Date.now() + maxWaitMs;
+    const poll = async () => {
+      const status = await getEnsembleStatus();
+      onProgress?.(status);
+      if (status.ready) {
+        resolve();
+        return;
+      }
+      if (status.status === 'failed') {
+        // After failure, backend retries after cooldown — keep polling
+      }
+      if (Date.now() > deadline) {
+        reject(new Error('Model loading timed out. Please refresh and try again.'));
+        return;
+      }
+      setTimeout(poll, pollMs);
+    };
+    poll();
+  });
 }
 
 /**

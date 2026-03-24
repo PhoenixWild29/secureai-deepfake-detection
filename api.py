@@ -94,7 +94,7 @@ logging.basicConfig(level=logging.INFO)
 def _ensure_ensemble_loaded():
     """
     Ensure ensemble load is started (in background) and return True only if already loaded.
-    Never blocks the request thread. First scan gets 503 "retry in 3 min"; next scan proceeds.
+    Never blocks the request thread.
     """
     try:
         from ai_model.ensemble_detector import get_ensemble_detector, start_background_ensemble_load
@@ -458,6 +458,26 @@ def index():
     #     return redirect(url_for('login'))
     return render_template('index.html')
 
+# ---------------------------------------------------------------------------
+# Trigger ensemble preload on the FIRST request to ANY endpoint (health, login,
+# dashboard, etc.). By the time the user navigates to Forensics, models are
+# likely loaded. Runs once, never blocks — just kicks off the background thread.
+# ---------------------------------------------------------------------------
+_ensemble_preload_triggered = False
+
+@app.before_request
+def _trigger_ensemble_preload():
+    global _ensemble_preload_triggered
+    if not _ensemble_preload_triggered:
+        _ensemble_preload_triggered = True
+        try:
+            from ai_model.ensemble_detector import start_background_ensemble_load
+            start_background_ensemble_load()
+            logger.info("Ensemble background preload triggered by first request.")
+        except Exception as e:
+            logger.warning("Ensemble preload trigger failed: %s", e)
+
+
 @app.route('/api/health')
 def health_check():
     """Health check endpoint"""
@@ -466,6 +486,18 @@ def health_check():
         'timestamp': datetime.now().isoformat(),
         'version': '2.0.0'
     })
+
+
+@app.route('/api/ensemble-status')
+def ensemble_status():
+    """Return ensemble model loading status (lightweight, no auth required).
+    Frontend polls this to show progress and auto-retry scans."""
+    try:
+        from ai_model.ensemble_detector import get_ensemble_status
+        return jsonify(get_ensemble_status())
+    except Exception as e:
+        logger.warning("ensemble-status error: %s", e)
+        return jsonify({'status': 'unknown', 'ready': False, 'progress_pct': 0, 'models': {}})
 
 
 # =============================================================================
@@ -1131,15 +1163,11 @@ def analyze_video():
         _heartbeat_thread = threading.Thread(target=_progress_heartbeat, daemon=True)
         _heartbeat_thread.start()
         try:
-            ensemble_ok = _ensure_ensemble_loaded()
+            _ensure_ensemble_loaded()
         finally:
             _stop_heartbeat.set()
-        if not ensemble_ok:
-            return jsonify({
-                'error': 'Models are loading (takes 2–4 min). Please click Scan again in 3 minutes.',
-                'ensemble_unavailable': True,
-                'retry_after_seconds': 180
-            }), 503
+        # No 503 — if ensemble isn't preloaded, it loads inline inside tpool.execute
+        # (first scan takes 2-4 min; subsequent scans are instant)
         model_type_param = request.form.get('model_type') or 'enhanced'
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
@@ -1531,15 +1559,10 @@ def analyze_video_from_url():
         _heartbeat_thread = threading.Thread(target=_progress_heartbeat, daemon=True)
         _heartbeat_thread.start()
         try:
-            ensemble_ok = _ensure_ensemble_loaded()
+            _ensure_ensemble_loaded()
         finally:
             _stop_heartbeat.set()
-        if not ensemble_ok:
-            return jsonify({
-                'error': 'Models are loading (takes 2–4 min). Please click Scan again in 3 minutes.',
-                'ensemble_unavailable': True,
-                'retry_after_seconds': 180
-            }), 503
+        # No 503 — ensemble loads inline inside tpool if needed
         try:
             if os.getenv('SOCKETIO_ASYNC_MODE', '').lower() == 'eventlet':
                 import eventlet  # type: ignore
