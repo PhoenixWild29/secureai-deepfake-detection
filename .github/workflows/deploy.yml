@@ -43,7 +43,7 @@ jobs:
 - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt || echo &quot;Some requirements failed, continuing...&quot;; fi
+        if [ -f requirements.txt ]; then pip install -r requirements.txt || echo "Some requirements failed, continuing..."; fi
     
     - name: Run critical tests
       run: |
