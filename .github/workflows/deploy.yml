@@ -1,10 +1,9 @@
 name: Deploy to Production
 
 on:
-  push:
-    branches: [ master, main ]
-    tags:
-      - 'v*'
+  # Push trigger disabled — deployment pipeline is pre-production template.
+  # Re-enable after SECAI-001 (Project Scaffold + Architecture) establishes
+  # real server secrets, SSH access, and deployment commands.
   workflow_dispatch:
     inputs:
       environment:
