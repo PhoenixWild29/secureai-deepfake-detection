@@ -1,12 +1,9 @@
 name: Docker Build & Publish
 
 on:
-  push:
-    branches: [ main, master, develop ]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [ main, master ]
+  workflow_dispatch:  # Push/PR triggers removed during CI stabilization (PR #24)
+    # SECAI-001: Write a new Docker build workflow matching the real ML infrastructure.
+    # Do not re-enable the old push trigger — this template predates the actual Dockerfile.
 
 env:
   REGISTRY: ghcr.io
