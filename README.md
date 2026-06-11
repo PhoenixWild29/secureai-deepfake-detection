@@ -1,50 +1,54 @@
 # SecureAI DeepFake Detection Model
 
-This project implements a comprehensive deepfake detection system combining AI analysis with blockchain security. It uses advanced ensemble models incorporating SOTA techniques from leading research repositories for superior deepfake detection accuracy.
+This project implements a deepfake detection system that combines a trained model ensemble with blockchain-backed result storage. Detection is driven by an ensemble of models trained on Celeb-DF v2, fused with a learned logistic regression that weights each model by its measured value.
 
-## Guardian Web Hardening
+## 🚀 Features
 
-For the guardian.secureai.dev single-page app, include the following production assets:
-- `robots.txt` for crawler policy
-- `.well-known/security.txt` for vulnerability disclosure contact
-- `404.html` for a branded not-found page
-- `deploy/nginx.conf` for baseline security headers and static asset caching
-
-If you deploy with a different web server or CDN, mirror the same headers and 404 handling in that platform.
-
-## 🚀 Enhanced Features (2025 SOTA)
-
-- **Ensemble Detection**: Combines LAA-Net, CLIP-based detection, and diffusion model awareness
-- **Quality-Agnostic Detection**: Works across various video compressions and qualities
-- **Advanced Datasets**: Support for Celeb-DF++, FaceForensics++, DF40, and other benchmark datasets
+- **Trained Ensemble Detection**: ResNet50 (test AUC 0.906) + ConvNeXt-Base (test AUC ~0.915) + an FFT frequency-domain detector, fused by a learned logistic ensemble (test AUC ~0.936 on Celeb-DF v2). See [Performance Benchmarks](#-performance-benchmarks) for measured numbers.
+- **Face-Aware Preprocessing**: Frames are face-cropped (MTCNN with an OpenCV Haar-cascade fallback) before inference to match how the models were trained, with a safe fallback to the full frame when no face is found.
 - **Blockchain Storage**: Solana smart contract for tamper-proof result storage
 - **Real-time Analysis**: Web interface with drag-and-drop video analysis
 - **Batch Processing**: Process multiple videos with comprehensive analytics
 - **Production Infrastructure**: Redis caching, PostgreSQL database, AWS S3 cloud storage, Sentry error tracking
 
-## 🧠 Advanced Detection Techniques
+> **Honesty note**: CLIP zero-shot and LAA-Net were evaluated as candidate detectors but scored at or near chance (AUC ~0.49) on Celeb-DF v2, so the learned ensemble down-weights them to ≈0. They remain in the codebase as optional signals but do not meaningfully contribute to the production score.
 
-### Incorporated from Research Repositories:
+## 🧠 Detection Techniques
 
-1. **LAA-Net (Localized Artifact Attention)**
-   - Quality-agnostic attention mechanisms
-   - Focuses on subtle manipulation artifacts
-   - Repository: [LAA-Net](https://github.com/YZY-stack/LAA-Net)
+### Production detectors (trained and evaluated on Celeb-DF v2):
 
-2. **CLIP-Based Detection**
-   - Vision-language model for generalizable detection
-   - Zero-shot capabilities across manipulation techniques
-   - Repository: [CLIP](https://github.com/openai/CLIP)
+1. **ResNet50 (supervised)**
+   - Trained on Celeb-DF v2 face crops
+   - Measured test AUC 0.906 / accuracy 0.834
 
-3. **Diffusion Model Awareness**
-   - Detects artifacts from diffusion-based generation
-   - Critical for 2025 deepfake landscape
-   - Repositories: [DiFF](https://github.com/xaCheng1996/DiFF), [DiffFace](https://github.com/Rapisurazurite/DiffFace)
+2. **ConvNeXt-Base (supervised)**
+   - Trained on Celeb-DF v2 face crops
+   - Measured test AUC ~0.915
 
-4. **Ensemble Architecture**
-   - Multi-model fusion for improved accuracy
-   - Combines CNN, transformer, and specialized detectors
-   - Adaptive weighting based on video characteristics
+3. **FFT Frequency-Domain Detector**
+   - Logistic regression over radial frequency spectra
+   - Captures generation artifacts in the frequency domain
+
+4. **Learned Logistic Ensemble**
+   - Fuses the above detectors with coefficients learned on a held-out set
+   - Measured test AUC ~0.936 — the production scoring path
+   - Down-weights chance-level signals automatically (see note below)
+
+### Candidate detectors retained but down-weighted:
+
+- **CLIP zero-shot** ([repo](https://github.com/openai/CLIP)) and **LAA-Net**
+  ([repo](https://github.com/YZY-stack/LAA-Net)) are included as optional signals,
+  but on Celeb-DF v2 they scored at or near chance (AUC ~0.49). The learned ensemble
+  assigns them near-zero weight, so they do not drive production predictions.
+
+### Planned / not yet implemented:
+
+- **Diffusion Model Awareness** — detecting diffusion-generation artifacts is on the
+  roadmap but is **not** implemented in the current code path.
+- **NVIDIA Morpheus ML monitoring** — the security module exposes a Morpheus-style
+  interface, but no real Morpheus ML pipeline is wired in. Anomaly scoring currently
+  uses a deterministic statistical signal derived from the detector's own confidence
+  (no fabricated or random scores).
 
 ## 📊 Supported Datasets
 
@@ -67,14 +71,15 @@ python datasets/advanced_datasets.py celeb_df_pp
 
 ## 🏋️ Training Enhanced Models
 
-### Train Ensemble Model:
+### Train Models:
 ```bash
-# Train with all advanced techniques enabled
-python ai_model/train_enhanced.py --epochs 50 --batch_size 8 --use_laa --use_clip --use_dm_aware
-
-# Train with specific techniques
-python ai_model/train_enhanced.py --use_laa --use_clip --no_dm_aware
+# Train the supervised detectors on Celeb-DF v2
+python ai_model/train_enhanced.py --epochs 50 --batch_size 8
 ```
+
+> Note: "diffusion-model-aware" training flags referenced in older docs are **not**
+> implemented. The production ensemble is the trained ResNet50 + ConvNeXt + FFT models
+> fused by `ai_model/trained_models/ensemble_weights.json`.
 
 ### Benchmark Models:
 ```bash
@@ -168,16 +173,24 @@ SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
 python test_system.py
 ```
 
-### Enhanced Detection API
+### Detection API
 ```python
-from enhanced_detector import EnsembleDetector
+from ai_model.detect import detect_fake
 
-# Load enhanced model
-detector = EnsembleDetector(use_laa=True, use_clip=True, use_dm_aware=True)
+# Production path: 'enhanced'/'ensemble'/'full_ensemble' all route to the trained
+# ensemble (ResNet50 + ConvNeXt + FFT, fused by the learned logistic weights).
+result = detect_fake('path/to/video.mp4', model_type='enhanced')
+print(f"Is fake: {result['is_fake']} (confidence: {result['confidence']:.2f})")
+print(f"Fake probability: {result['fake_probability']:.2f}")
+```
 
-# Detect deepfake in video
-result = detector.detect_video('path/to/video.mp4')
-print(f"Result: {result['prediction']} (confidence: {result['confidence']:.2f})")
+You can also call the detector directly:
+```python
+from ai_model.enhanced_detector import EnhancedDetector
+
+detector = EnhancedDetector(use_face_crop=True)  # face-crops frames before inference
+result = detector.detect('path/to/video.mp4')
+print(result['ensemble_fake_probability'], result['method'])
 ```
 
 ### Web Interface
@@ -240,18 +253,30 @@ SecureAI-DeepFake-Detection/
 
 ## 📈 Performance Benchmarks
 
-### Model Comparison (on Celeb-DF test set):
-| Model | Accuracy | AUC | FPS |
-|-------|----------|-----|-----|
-| Enhanced Ensemble | 94.2% | 0.967 | 12.3 |
-| LAA-Net Only | 91.8% | 0.943 | 18.7 |
-| CLIP-Based | 89.5% | 0.921 | 15.2 |
-| CNN Baseline | 85.3% | 0.876 | 22.1 |
+All numbers below are **measured** on the Celeb-DF v2 test split and come from the
+saved evaluation artifacts in `ai_model/trained_models/*.json`. They are honest,
+reproducible results — not marketing figures.
 
-### Dataset Performance:
-- **Celeb-DF++**: 94.2% accuracy
-- **FaceForensics++**: 92.8% accuracy
-- **WildDeepfake**: 87.3% accuracy (challenging real-world)
+### Model comparison (Celeb-DF v2 test set):
+| Model | Test AUC | Test Accuracy | Notes |
+|-------|----------|---------------|-------|
+| **Learned ensemble (production)** | **~0.936** | ~0.84 | ResNet50 + ConvNeXt + FFT via learned logistic weights |
+| ConvNeXt-Base | ~0.915 | ~0.84 | Trained on Celeb-DF v2 |
+| ResNet50 | 0.906 | 0.834 | Trained on Celeb-DF v2 |
+| CLIP zero-shot | ~0.49 | ~0.51 | **Near chance** — down-weighted by the ensemble |
+| LAA-Net | ~0.49 | ~0.50 | **Near chance** — down-weighted by the ensemble |
+
+The learned ensemble's coefficients (`ai_model/trained_models/ensemble_weights.json`)
+make this explicit: `resnet50 ≈ 1.09` and `convnext ≈ 0.95` dominate, while
+`clip ≈ 0.001` and `laa ≈ 0.021` are effectively ignored.
+
+### Notes and caveats:
+- Numbers are for **Celeb-DF v2** only. Performance on other datasets
+  (FaceForensics++, WildDeepfake, etc.) has not been measured here and should not be
+  assumed.
+- ConvNeXt reached a higher *validation* AUC (~0.958) but did not beat ResNet50 on the
+  *test* set, suggesting some validation/test distribution shift — which is exactly
+  why the ensemble is learned on held-out scores rather than hand-tuned.
 
 ## 🔗 Blockchain Integration
 
