@@ -6,27 +6,126 @@ import os
 import subprocess
 import tempfile
 import re
+import socket
+import ipaddress
 from urllib.parse import urlparse
 import logging
 
 logger = logging.getLogger(__name__)
 
+
+def _is_blocked_ip(ip_str: str) -> bool:
+    """
+    SSRF GUARD: return True if an IP belongs to a private/internal/reserved range
+    that must never be reachable from a user-supplied URL.
+
+    Blocks (IPv4 and IPv6): loopback (127.0.0.0/8, ::1), private RFC1918
+    (10/8, 172.16/12, 192.168/16), link-local (169.254/16, fe80::/10),
+    unique-local IPv6 (fc00::/7), and other reserved/unspecified/multicast
+    ranges. Explicitly blocks the cloud metadata IP 169.254.169.254.
+    """
+    try:
+        ip = ipaddress.ip_address(ip_str)
+    except ValueError:
+        # Not parseable as an IP -> treat as unsafe.
+        return True
+
+    # Explicit cloud metadata endpoint (AWS/GCP/Azure/etc.).
+    if ip_str == '169.254.169.254':
+        return True
+
+    # ipaddress flags cover loopback, private, link-local, reserved,
+    # multicast, and unspecified for both IPv4 and IPv6.
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+    ):
+        return True
+
+    # fc00::/7 (IPv6 unique-local) — covered by is_private, but be explicit.
+    if isinstance(ip, ipaddress.IPv6Address) and ip in ipaddress.ip_network('fc00::/7'):
+        return True
+
+    return False
+
+
+def _hostname_resolves_to_blocked(hostname: str) -> bool:
+    """
+    SSRF GUARD: resolve a hostname and reject if ANY resolved address falls in a
+    blocked range. This prevents DNS-rebinding-style bypasses where a public
+    hostname maps to an internal/loopback IP.
+    """
+    try:
+        # getaddrinfo returns all A/AAAA records for the host.
+        infos = socket.getaddrinfo(hostname, None)
+    except socket.gaierror:
+        # Unresolvable host -> reject.
+        return True
+
+    for info in infos:
+        ip_str = info[4][0]
+        if _is_blocked_ip(ip_str):
+            return True
+    return False
+
+
 def is_valid_video_url(url: str) -> bool:
-    """Validate if URL is a valid video URL"""
+    """Validate if URL is a valid, SAFE video URL.
+
+    SECURITY (SSRF hardening): in addition to format/platform checks, this now:
+      * requires an http/https scheme (blocks file://, gopher://, etc.),
+      * rejects URLs whose host is a private/loopback/link-local/reserved IP,
+      * resolves hostnames and rejects them if they map to a blocked IP,
+      * explicitly blocks the cloud metadata IP 169.254.169.254.
+
+    Optional allowlist hook: set ALLOWED_DOWNLOAD_HOSTS (comma-separated host
+    suffixes) to restrict downloads to specific hosts. Default behavior is to
+    block private/internal targets but otherwise allow public hosts.
+    """
     if not url or not isinstance(url, str):
         return False
-    
+
     try:
         parsed = urlparse(url)
-        if not parsed.scheme or not parsed.netloc:
+
+        # SECURITY: only allow web schemes; reject file/ftp/gopher/etc.
+        if parsed.scheme not in ('http', 'https'):
             return False
-        
+        if not parsed.netloc or not parsed.hostname:
+            return False
+
+        hostname = parsed.hostname.lower()
+
+        # Optional allowlist: if configured, host must match one of the suffixes.
+        allowlist_raw = os.getenv('ALLOWED_DOWNLOAD_HOSTS', '').strip()
+        if allowlist_raw:
+            allowed = [h.strip().lower() for h in allowlist_raw.split(',') if h.strip()]
+            if not any(hostname == a or hostname.endswith('.' + a) for a in allowed):
+                logger.warning("URL host %s not in ALLOWED_DOWNLOAD_HOSTS", hostname)
+                return False
+
+        # SSRF GUARD: if the host is itself a literal IP, validate it directly.
+        try:
+            ipaddress.ip_address(hostname)
+            if _is_blocked_ip(hostname):
+                logger.warning("Blocked URL with private/internal IP host: %s", hostname)
+                return False
+        except ValueError:
+            # Hostname (not a literal IP): resolve and reject if it maps internal.
+            if _hostname_resolves_to_blocked(hostname):
+                logger.warning("Blocked URL whose host resolves to internal IP: %s", hostname)
+                return False
+
         # Check for direct video file extensions
         video_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.webm', '.flv', '.wmv']
         path_lower = parsed.path.lower()
         if any(path_lower.endswith(ext) for ext in video_extensions):
             return True
-        
+
         # Check for supported platforms
         supported_domains = [
             'youtube.com', 'youtu.be', 'm.youtube.com',
@@ -34,7 +133,7 @@ def is_valid_video_url(url: str) -> bool:
             'vimeo.com', 'dailymotion.com', 'tiktok.com',
             'instagram.com', 'facebook.com', 'fb.com'
         ]
-        
+
         domain = parsed.netloc.lower().replace('www.', '')
         return any(domain == sd or domain.endswith('.' + sd) for sd in supported_domains)
     except Exception as e:
@@ -222,12 +321,17 @@ def download_direct_video(url: str, output_dir: str = None) -> tuple[str, str]:
     """
     import requests
     import uuid
-    
+
+    # SECURITY (SSRF): validate the URL (scheme + private/internal IP block)
+    # BEFORE issuing any outbound request to the user-supplied target.
+    if not is_valid_video_url(url):
+        raise ValueError(f"Invalid or disallowed video URL: {url}")
+
     if output_dir is None:
         output_dir = tempfile.gettempdir()
-    
+
     os.makedirs(output_dir, exist_ok=True)
-    
+
     # Get file extension from URL
     parsed = urlparse(url)
     path = parsed.path.lower()
@@ -275,7 +379,7 @@ def download_direct_video(url: str, output_dir: str = None) -> tuple[str, str]:
         if os.path.exists(filepath):
             os.remove(filepath)
         raise Exception(f"Failed to download video: {str(e)}")
-    except Exception:
+    except Exception as e:
         if os.path.exists(filepath):
             os.remove(filepath)
         raise
