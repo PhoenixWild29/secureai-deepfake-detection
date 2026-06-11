@@ -264,13 +264,31 @@ class APIConfig:
     # Security
     require_authentication: bool = False
     enable_cors: bool = True
-    allowed_origins: List[str] = field(default_factory=lambda: ['*'])
-    
+    # SECURITY: default to a safe localhost dev origin list, NEVER '*'.
+    # A wildcard origin combined with credentialed requests is a serious CSRF/
+    # data-exfil risk. Production must set CORS_ORIGINS explicitly.
+    allowed_origins: List[str] = field(
+        default_factory=lambda: ['http://localhost:3000', 'http://localhost:8000']
+    )
+
     def __post_init__(self):
         """Initialize default values after dataclass creation"""
-        if self.allowed_origins is None:
-            self.allowed_origins = ['*']
-    
+        if not self.allowed_origins:
+            self.allowed_origins = ['http://localhost:3000', 'http://localhost:8000']
+
+    @staticmethod
+    def _parse_cors_origins() -> List[str]:
+        """
+        SECURITY: read allowed CORS origins from the CORS_ORIGINS env var
+        (comma-separated). Falls back to a safe localhost dev list rather than '*'.
+        An explicit '*' may be set by an operator but is strongly discouraged
+        alongside credentialed requests.
+        """
+        raw = os.getenv('CORS_ORIGINS', '').strip()
+        if not raw:
+            return ['http://localhost:3000', 'http://localhost:8000']
+        return [o.strip() for o in raw.split(',') if o.strip()]
+
     @classmethod
     def from_env(cls) -> 'APIConfig':
         """Create API config from environment variables"""
@@ -284,7 +302,8 @@ class APIConfig:
             enable_response_caching=os.getenv('API_ENABLE_CACHE', 'true').lower() == 'true',
             cache_ttl_seconds=int(os.getenv('API_CACHE_TTL', '3600')),
             require_authentication=os.getenv('API_REQUIRE_AUTH', 'false').lower() == 'true',
-            enable_cors=os.getenv('API_ENABLE_CORS', 'true').lower() == 'true'
+            enable_cors=os.getenv('API_ENABLE_CORS', 'true').lower() == 'true',
+            allowed_origins=cls._parse_cors_origins()
         )
 
 
