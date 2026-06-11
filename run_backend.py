@@ -33,7 +33,7 @@ def _filtered_stderr_reader(pipe, dest_fd):
 def main():
     dest_fd = sys.stderr.fileno()
     proc = subprocess.Popen(
-        ["gunicorn", "--config", "gunicorn_config.py", "api:app"],
+        ["gunicorn", "--config", "gunicorn_config.py", "-k", "uvicorn.workers.UvicornWorker", "app.main:app"],
         stdout=sys.stdout,
         stderr=subprocess.PIPE,
         env=os.environ,
