@@ -6,7 +6,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SECRET_KEY=${SECRET_KEY:-change-this-in-production}
+      # SECURITY: required secret — stack fails to start if SECRET_KEY is unset.
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set}
       - USE_LOCAL_STORAGE=${USE_LOCAL_STORAGE:-true}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
