@@ -24,7 +24,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
 
-from enhanced_detector import EnsembleDetector, LAABlock, CLIPBasedDetector
 from deepfake_classifier import DeepfakeClassifier
 
 class VideoDataset(Dataset):
@@ -71,7 +70,8 @@ class VideoDataset(Dataset):
         frames = self._extract_frames(video_path, self.frame_count)
 
         if self.transform:
-            frames = [self.transform(frame) for frame in frames]
+            # Transforms expect PIL Images; frames are numpy uint8 RGB arrays
+            frames = [self.transform(Image.fromarray(frame)) for frame in frames]
 
         # Stack frames into tensor
         frames_tensor = torch.stack(frames)
@@ -154,7 +154,10 @@ class EnhancedTrainer:
 
     def __init__(self, config: Dict):
         self.config = config
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        if os.getenv('FORCE_CPU', '0') == '1':
+            self.device = torch.device('cpu')
+        else:
+            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f"Using device: {self.device}")
 
         # Create output directory
@@ -167,14 +170,25 @@ class EnhancedTrainer:
 
     def setup_data(self):
         """Setup data loaders"""
-        transform = transforms.Compose([
+        _normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                          std=[0.229, 0.224, 0.225])
+        train_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(10),
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                               std=[0.229, 0.224, 0.225])
+            _normalize,
+        ])
+        val_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            _normalize,
         ])
 
         # Dataset directories (prioritize advanced datasets)
         dataset_dirs = [
+            "datasets/celeb_df_v2",
             "datasets/unified_deepfake",
             "datasets/celeb_df_pp",
             "datasets/face_forensics_pp",
@@ -196,14 +210,14 @@ class EnhancedTrainer:
         has_videos = any(list(Path(d).glob("**/*.mp4")) for d in existing_dirs)
         has_images = any(list(Path(d).glob("**/*.jpg")) for d in existing_dirs)
 
-        if has_videos and not has_images:
+        if has_videos:  # prefer VideoDataset when any mp4s exist
             # Use VideoDataset for video files
             self.train_dataset = VideoDataset(existing_dirs, 'train',
                                             frame_count=self.config['frame_count'],
-                                            transform=transform)
+                                            transform=train_transform)
             self.val_dataset = VideoDataset(existing_dirs, 'val',
                                           frame_count=self.config['frame_count'],
-                                          transform=transform)
+                                          transform=val_transform)
         elif has_images:
             # Use ImageDataset for frame images
             # Handle both structures: datasets/train and datasets/some_dataset/train
@@ -228,21 +242,22 @@ class EnhancedTrainer:
             print(f"Val directories: {val_dirs}")
 
             self.train_dataset = ImageDataset(train_dirs, 'dummy_split',
-                                            transform=transform,
+                                            transform=train_transform,
                                             frames_per_sample=self.config['frame_count'])
             self.val_dataset = ImageDataset(val_dirs, 'dummy_split',
-                                          transform=transform,
+                                          transform=val_transform,
                                           frames_per_sample=self.config['frame_count'])
         else:
             raise ValueError("No video files or image frames found in dataset directories")
 
         # Create data loaders
+        _pin = self.device.type == 'cuda'
         self.train_loader = DataLoader(
             self.train_dataset,
             batch_size=self.config['batch_size'],
             shuffle=True,
             num_workers=0,  # Set to 0 for Windows compatibility
-            pin_memory=False  # Disable for CPU training
+            pin_memory=_pin,
         )
 
         self.val_loader = DataLoader(
@@ -250,7 +265,7 @@ class EnhancedTrainer:
             batch_size=self.config['batch_size'],
             shuffle=False,
             num_workers=0,
-            pin_memory=False
+            pin_memory=_pin,
         )
 
         print(f"Train samples: {len(self.train_dataset)}")
@@ -279,8 +294,8 @@ class EnhancedTrainer:
         # Loss function
         self.criterion = nn.CrossEntropyLoss()
 
-        # Enable mixed precision if available
-        self.scaler = torch.cuda.amp.GradScaler() if torch.cuda.is_available() else None
+        # Enable mixed precision on CUDA devices
+        self.scaler = torch.amp.GradScaler('cuda') if self.device.type == 'cuda' else None
 
     def train_epoch(self) -> Tuple[float, float]:
         """Train for one epoch"""
@@ -291,6 +306,12 @@ class EnhancedTrainer:
 
         for batch_idx, (images, labels) in enumerate(self.train_loader):
             images, labels = images.to(self.device), labels.to(self.device)
+
+            # VideoDataset returns [B, T, C, H, W]; flatten frames into batch
+            if images.dim() == 5:
+                B, T, C, H, W = images.shape
+                images = images.view(B * T, C, H, W)
+                labels = labels.repeat_interleave(T)
 
             self.optimizer.zero_grad()
 
@@ -322,11 +343,13 @@ class EnhancedTrainer:
 
         return avg_loss, accuracy
 
-    def validate(self) -> Tuple[float, float, List[int], List[int]]:
-        """Validate the model"""
+    def validate(self) -> Tuple[float, float, List[int], List[int], float]:
+        """Validate the model. Returns (loss, accuracy, preds, labels, auc_roc)."""
+        from sklearn.metrics import roc_auc_score
+
         if len(self.val_dataset) == 0:
-            print("⚠️  No validation samples available, skipping validation")
-            return 0.0, 0.0, [], []
+            print("[!] No validation samples available, skipping validation")
+            return 0.0, 0.0, [], [], 0.0
 
         self.model.eval()
         total_loss = 0
@@ -334,26 +357,41 @@ class EnhancedTrainer:
         total = 0
         all_preds = []
         all_labels = []
+        all_probs = []  # fake-class probabilities for AUC
 
         with torch.no_grad():
             for images, labels in self.val_loader:
                 images, labels = images.to(self.device), labels.to(self.device)
 
+                # VideoDataset returns [B, T, C, H, W]; flatten frames into batch
+                if images.dim() == 5:
+                    B, T, C, H, W = images.shape
+                    images = images.view(B * T, C, H, W)
+                    labels = labels.repeat_interleave(T)
+
                 outputs = self.model(images)
                 loss = self.criterion(outputs, labels)
 
                 total_loss += loss.item()
+                probs = torch.softmax(outputs, dim=1)[:, 1]  # P(fake)
                 _, predicted = outputs.max(1)
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
 
                 all_preds.extend(predicted.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
+                all_probs.extend(probs.cpu().numpy())
 
         accuracy = 100. * correct / total
         avg_loss = total_loss / len(self.val_loader)
 
-        return avg_loss, accuracy, all_preds, all_labels
+        # AUC-ROC requires both classes present; fall back gracefully if not
+        try:
+            val_auc = roc_auc_score(all_labels, all_probs)
+        except ValueError:
+            val_auc = 0.0
+
+        return avg_loss, accuracy, all_preds, all_labels, val_auc
 
     def save_checkpoint(self, epoch: int, loss: float, accuracy: float):
         """Save model checkpoint"""
@@ -375,7 +413,7 @@ class EnhancedTrainer:
             self.best_accuracy = accuracy
             best_path = self.output_dir / 'best_model.pth'
             torch.save(checkpoint, best_path)
-            print(f"💾 Saved best model with accuracy: {accuracy:.2f}%")
+            print(f"[Saved] Best model with accuracy: {accuracy:.2f}%")
 
     def plot_training_history(self, history: Dict):
         """Plot training history"""
@@ -403,7 +441,7 @@ class EnhancedTrainer:
 
     def train(self):
         """Main training loop"""
-        print("🚀 Starting enhanced training...")
+        print("Starting enhanced training...")
         print(f"Output directory: {self.output_dir}")
 
         self.best_accuracy = 0
@@ -422,20 +460,21 @@ class EnhancedTrainer:
             train_time = time.time() - start_time
 
             # Validate
-            val_loss, val_acc, _, _ = self.validate()
+            val_loss, val_acc, _, _, val_auc = self.validate()
 
             # Update scheduler
             self.scheduler.step()
 
             # Log results
-            print(".2f")
-            print(".2f")
+            print(f"  Train | Loss: {train_loss:.4f}  Acc: {train_acc:.2f}%  Time: {train_time:.1f}s")
+            print(f"  Val   | Loss: {val_loss:.4f}  Acc: {val_acc:.2f}%  AUC: {val_auc:.4f}")
 
             # Save history
             history['train_loss'].append(train_loss)
             history['train_acc'].append(train_acc)
             history['val_loss'].append(val_loss)
             history['val_acc'].append(val_acc)
+            history.setdefault('val_auc', []).append(val_auc)
 
             # Save checkpoint
             self.save_checkpoint(epoch+1, val_loss, val_acc)
@@ -465,9 +504,79 @@ class EnhancedTrainer:
         with open(self.output_dir / 'training_summary.json', 'w') as f:
             json.dump(summary, f, indent=2)
 
-        print("\n✅ Training completed!")
+        print("\n[OK] Training completed!")
         print(f"Best validation accuracy: {self.best_accuracy:.2f}%")
         print(f"Models saved to: {self.output_dir}")
+
+        # Run test-set evaluation if a test split exists
+        self._run_test_evaluation(history)
+
+    def _run_test_evaluation(self, history: Dict):
+        """Evaluate on test split if available; save final_metrics.json."""
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
+        # Find test directories that match what was used for training
+        dataset_dirs = [
+            "datasets/celeb_df_v2", "datasets/unified_deepfake",
+            "datasets/celeb_df_pp", "datasets/face_forensics_pp",
+            "datasets/df40", "datasets/deeper_forensics",
+            "datasets/wild_deepfake", "datasets/forgery_net",
+        ]
+        val_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        test_dirs = []
+        for d in dataset_dirs:
+            p = Path(d)
+            if (p / 'test' / 'real').exists() or (p / 'test' / 'fake').exists():
+                test_dirs.append(str(p / 'test'))
+
+        if not test_dirs:
+            print("ℹ️  No test split found — skipping test evaluation")
+            return
+
+        print(f"\nRunning test evaluation on: {test_dirs}")
+        test_dataset = ImageDataset(test_dirs, 'dummy', transform=val_transform)
+        test_loader = DataLoader(test_dataset, batch_size=self.config['batch_size'],
+                                 shuffle=False, num_workers=0)
+
+        self.model.eval()
+        all_preds, all_labels, all_probs = [], [], []
+        with torch.no_grad():
+            for images, labels in test_loader:
+                images = images.to(self.device)
+                outputs = self.model(images)
+                probs = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
+                preds = outputs.argmax(dim=1).cpu().numpy()
+                all_preds.extend(preds)
+                all_labels.extend(labels.numpy())
+                all_probs.extend(probs)
+
+        try:
+            test_auc = roc_auc_score(all_labels, all_probs)
+        except ValueError:
+            test_auc = 0.0
+
+        metrics = {
+            'test_accuracy': accuracy_score(all_labels, all_preds),
+            'test_precision': precision_score(all_labels, all_preds, zero_division=0),
+            'test_recall': recall_score(all_labels, all_preds, zero_division=0),
+            'test_f1': f1_score(all_labels, all_preds, zero_division=0),
+            'test_auc_roc': test_auc,
+            'best_val_accuracy': self.best_accuracy,
+            'final_val_auc': history.get('val_auc', [0.0])[-1],
+            'test_samples': len(all_labels),
+        }
+        metrics_path = self.output_dir / 'final_metrics.json'
+        with open(metrics_path, 'w') as f:
+            json.dump(metrics, f, indent=2)
+
+        print(f"  Test Acc: {metrics['test_accuracy']:.4f}  "
+              f"F1: {metrics['test_f1']:.4f}  AUC: {metrics['test_auc_roc']:.4f}")
+        print(f"  Metrics saved to: {metrics_path}")
+
 
 def main():
     parser = argparse.ArgumentParser(description='Train Enhanced Deepfake Detector')
