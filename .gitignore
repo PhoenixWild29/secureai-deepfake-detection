@@ -37,6 +37,7 @@ env/
 *.swp
 *.swo
 *~
+.claude/
 
 # OS
 .DS_Store
@@ -87,3 +88,5 @@ certs/
 
 # Windows artifacts
 *.bat
+node_modules
+_review_backups/

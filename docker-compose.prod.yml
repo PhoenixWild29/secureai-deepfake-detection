@@ -10,7 +10,8 @@ services:
     environment:
       POSTGRES_DB: secureai_db
       POSTGRES_USER: secureai
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-this-in-production}
+      # SECURITY: required — no default DB password is shipped.
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -25,7 +26,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: secureai-redis
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    # SECURITY: require a Redis password (no empty-password fallback).
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
     volumes:
       - redis_data:/data
     restart: unless-stopped
@@ -45,8 +47,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://secureai:${DB_PASSWORD:-change-this}@postgres:5432/secureai_db
-      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://secureai:${DB_PASSWORD:?DB_PASSWORD must be set}@postgres:5432/secureai_db
+      # SECURITY: authenticate to Redis using the required REDIS_PASSWORD.
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379/0
     env_file:
       - .env
     volumes:

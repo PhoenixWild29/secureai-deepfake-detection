@@ -46,9 +46,20 @@ design/
 !README.md
 
 # Env and secrets (mounted at runtime, do not bake into image)
+# SECURITY: never copy secrets/credentials/keys into the build context.
 .env
 .env.*
 !.env.example
+secrets/
+wallet/
+certs/
+ssl/
+*.pem
+*.key
+
+# Review backups and archives (may contain copies of secrets / large blobs)
+_review_backups/
+*.zip
 
 # Tests and local scripts (not needed in production image)
 tests/
