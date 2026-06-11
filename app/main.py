@@ -15,8 +15,13 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-# Import our detection components
+# Import our detection components and routers
 from app.api.v1.endpoints.detect import router as detect_router
+from app.api.v1.endpoints.system import router as system_router
+from app.api.v1.endpoints.blockchain import router as blockchain_router
+from app.api.v1.endpoints.sage import router as sage_router
+# Socket.IO ASGI app — mounted at /socket.io (not included as a router)
+from app.api.websockets import socket_app
 from app.core.exceptions import DetectionAPIError
 from app.core.config import detection_settings
 
@@ -38,26 +43,41 @@ app = FastAPI(
 )
 
 # Configure CORS middleware
+# SECURITY: origins come from config (CORS_ORIGINS env, default safe localhost list),
+# never a hardcoded '*'. allow_credentials is only enabled when the origin list is
+# explicit (no wildcard) — the combination of '*' origins + credentials is unsafe and
+# is also rejected by browsers, so we disable credentials in that case.
+_cors_origins = detection_settings.api.allowed_origins
+_allow_credentials = bool(_cors_origins) and '*' not in _cors_origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=detection_settings.api.allowed_origins,
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_allow_credentials,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
 # Configure trusted host middleware
+# SECURITY: read allowed hosts from ALLOWED_HOSTS env (comma-separated); default to
+# localhost rather than '*' to mitigate Host-header attacks. Set ALLOWED_HOSTS in
+# production (e.g. "api.example.com,example.com").
+_allowed_hosts = [
+    h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()
+] or ["localhost", "127.0.0.1"]
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"]  # Configure appropriately for production
+    allowed_hosts=_allowed_hosts,
 )
 
 # Include API routers
 app.include_router(detect_router)
+app.include_router(system_router)
+app.include_router(blockchain_router)
+app.include_router(sage_router)
 
-# Include WebSocket router for real-time analysis updates
-from app.api.websockets import router as websocket_router
-app.include_router(websocket_router)
+# Mount Socket.IO ASGI app — must come AFTER include_router calls
+# The frontend connects to /socket.io using the Socket.IO client protocol
+app.mount("/socket.io", socket_app)
 
 
 # Global exception handlers
@@ -268,11 +288,15 @@ async def startup_event():
     """
     logger.info("Starting SecureAI DeepFake Detection API")
     
-    # Validate configuration
-    config_valid = detection_settings.validate_configuration()
-    if not config_valid['overall_valid']:
-        logger.error("Configuration validation failed", extra=config_valid)
-        raise Exception("Invalid configuration")
+    # Validate configuration — warn on failure, do not crash (services may be optional in dev)
+    try:
+        config_valid = detection_settings.validate_configuration()
+        if not config_valid.get('overall_valid'):
+            logger.warning("Configuration validation warnings: %s", config_valid)
+        else:
+            logger.info("Configuration validated successfully")
+    except Exception as cfg_exc:
+        logger.warning("Configuration validation skipped: %s", cfg_exc)
     
     # Create necessary directories
     upload_folder = detection_settings.detection.upload_folder

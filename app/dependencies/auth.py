@@ -9,7 +9,7 @@ import logging
 from typing import Optional, Dict, Any
 from datetime import datetime, timezone
 import jwt
-from fastapi import WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import WebSocket, WebSocketDisconnect, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.websockets import WebSocketState
 
@@ -45,7 +45,19 @@ class JWTWebSocketAuth:
             token_param: Query parameter name for token
             cookie_name: Cookie name for token
         """
-        self.secret_key = secret_key or os.getenv('JWT_SECRET_KEY', 'your-secret-key')
+        # SECURITY (fail-closed): never fall back to an insecure default secret.
+        # An explicit `secret_key` argument is honored (e.g. for tests). Otherwise the
+        # JWT_SECRET_KEY env var must be set to a real, non-default value or we refuse
+        # to initialize — this prevents signing/verifying tokens with a guessable key.
+        _INSECURE_DEFAULT = 'your-secret-key'
+        resolved_secret = secret_key if secret_key else os.getenv('JWT_SECRET_KEY', '')
+        if not resolved_secret or resolved_secret == _INSECURE_DEFAULT:
+            raise RuntimeError(
+                "JWT_SECRET_KEY is unset, empty, or set to the insecure default "
+                "'your-secret-key'. Set a strong JWT_SECRET_KEY environment variable "
+                "(or pass an explicit secret_key) before starting the service."
+            )
+        self.secret_key = resolved_secret
         self.algorithm = algorithm
         self.token_prefix = token_prefix
         self.token_param = token_param
@@ -333,6 +345,52 @@ def validate_token_structure(token: str) -> bool:
         return False
 
 
+# ---------------------------------------------------------------------------
+# HTTP (REST) authentication dependency
+# ---------------------------------------------------------------------------
+
+# Bearer-token security scheme for HTTP routes. auto_error=True makes FastAPI
+# return 403 automatically when the Authorization header is missing/malformed.
+http_bearer = HTTPBearer(auto_error=True)
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+) -> Dict[str, Any]:
+    """
+    FastAPI dependency that authenticates an HTTP request via a Bearer JWT.
+
+    Reuses the existing ``jwt_websocket_auth`` manager (same secret/algorithm)
+    to validate the token, so state-changing REST endpoints can be protected
+    with ``Depends(get_current_user)``. Returns the validated token payload
+    (containing at least the resolved user id) on success.
+
+    Raises:
+        HTTPException(401): if the token is missing, expired, or invalid.
+    """
+    token = credentials.credentials if credentials else None
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    try:
+        payload = jwt_websocket_auth.validate_token(token)
+    except WebSocketAuthError as exc:
+        # Translate auth-manager failures into a standard 401 for HTTP clients.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid or expired token: {exc}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return payload
+
+
+# Convenience alias for routes that only need to enforce authentication.
+require_auth = get_current_user
+
+
 # Export
 __all__ = [
     'WebSocketAuthError',
@@ -342,5 +400,8 @@ __all__ = [
     'require_websocket_auth',
     'WebSocketAuthDependency',
     'create_mock_token',
-    'validate_token_structure'
+    'validate_token_structure',
+    'get_current_user',
+    'require_auth',
+    'http_bearer'
 ]
