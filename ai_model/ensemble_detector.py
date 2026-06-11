@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
 """
-Ultimate Ensemble Detector: Best Deepfake Detection on the Planet
-Combines CLIP + ResNet50 + DeepFake Detector V13 + XceptionNet + EfficientNet + ViT + ConvNeXt
-Target: 98-99% Accuracy
+EnsembleDetector — DEPRECATED / NOT THE PRODUCTION PATH (see MODEL-HONESTY note below).
+
+Historically combined CLIP + ResNet50 (leakage-trained) + DeepFake Detector V13 +
+XceptionNet + EfficientNet. In practice several of these components are NOT trained
+for this task: the bundled Xception and EfficientNet use untrained / randomly
+initialised heads, and CLIP/LAA score at chance (AUC ~0.49) on Celeb-DF v2. As a
+result this ensemble does not provide reliable detection and previously over-claimed
+"98-99% accuracy".
+
+>>> DEPRECATED: The live API no longer routes detection here. <<<
+The production path is ai_model.detect.detect_fake(model_type in
+{'enhanced','ensemble','full_ensemble'}) -> ai_model.enhanced_detector.detect_fake_enhanced,
+which runs the TRAINED detectors (ResNet50 test AUC 0.906, ConvNeXt ~0.915, FFT) combined
+with the learned logistic ensemble in trained_models/ensemble_weights.json (test AUC ~0.936).
+
+This module is retained only for reference and backward compatibility. Do not add it
+back to the live inference path, and do not give meaningful weight to the untrained
+Xception/EfficientNet or chance-level CLIP/LAA components.
 """
 import os
 import sys
