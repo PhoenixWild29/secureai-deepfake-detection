@@ -5,18 +5,15 @@ Main detection module with multiple model options
 """
 import os
 
-# CRITICAL: Force CPU mode BEFORE any torch imports
-# Must be set before torch/tensorflow imports to prevent CUDA initialization
-os.environ['CUDA_VISIBLE_DEVICES'] = ''
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress all TensorFlow messages
+# GPU / CPU selection:
+# By default, auto-detect GPU. Set FORCE_CPU=1 to pin to CPU (e.g. for low-memory servers).
+if os.getenv('FORCE_CPU', '0') == '1':
+    os.environ.setdefault('CUDA_VISIBLE_DEVICES', '')
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow log noise
 
 import cv2
 import torch
-# Disable CUDA after torch import
-if os.getenv('CUDA_VISIBLE_DEVICES') == '':
-    # Monkey patch to force CPU mode
-    original_cuda_available = torch.cuda.is_available
-    torch.cuda.is_available = lambda: False
 
 import numpy as np
 import hashlib
@@ -53,13 +50,13 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
         from utils.video_paths import get_video_path_manager
         path_manager = get_video_path_manager()
         resolved_path = path_manager.resolve_video_path(video_path)
-        
+
         if resolved_path is None:
             raise FileNotFoundError(
                 f"Video file not found: {video_path}\n"
                 f"Searched in: {path_manager.get_uploads_directory()}, test_videos, and standard locations"
             )
-        
+
         video_path = str(resolved_path)
     except ImportError:
         # Fallback if VideoPathManager not available
@@ -80,16 +77,28 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
 
     try:
         if model_type in ('enhanced', 'ensemble', 'full_ensemble'):
-            # Full ensemble only — no fallback. Ensemble is loaded at worker startup (init_ensemble_blocking).
-            if not detect_fake_ensemble:
-                raise RuntimeError("Ensemble detector not available. Restart the backend.")
-            result = detect_fake_ensemble(video_path)
-            if result.get('method') == 'ensemble_unavailable' or result.get('error'):
-                raise ValueError(result.get('error', 'Ensemble detector unavailable. Restart the backend or retry.'))
-            if 'ensemble_fake_probability' in result:
-                result['is_fake'] = result.get('is_deepfake', result['ensemble_fake_probability'] > 0.5)
-                result.setdefault('confidence', result.get('overall_confidence', result['ensemble_fake_probability']))
-                result['authenticity_score'] = 1 - result['ensemble_fake_probability']
+            # PRODUCTION PATH (MODEL-HONESTY fix, task B1):
+            # Route to EnhancedDetector (via detect_fake_enhanced), which loads the
+            # TRAINED detectors -- resnet50_celeb_df_v2 (test AUC 0.906), convnext (0.915),
+            # fft -- and combines them with the learned logistic ensemble
+            # (trained_models/ensemble_weights.json, test AUC ~0.936).
+            #
+            # We deliberately do NOT use EnsembleDetector here: that path loads a
+            # leakage-trained ResNet plus UNTRAINED random-head Xception/EfficientNet and
+            # gives meaningful weight to chance-level CLIP/LAA (AUC ~0.49). EnsembleDetector
+            # is kept for reference/back-compat only -- see its module docstring.
+            result = detect_fake_enhanced(video_path)
+            if result.get('method') in ('ensemble_unavailable', 'ensemble_error') or result.get('error'):
+                raise ValueError(result.get('error', 'Detector unavailable. Restart the backend or retry.'))
+            # detect_fake_enhanced already returns is_fake / confidence / fake_probability /
+            # authenticity_score / detector_scores. Normalise the few legacy aliases the
+            # API/frontend may still read so the response schema is unchanged.
+            if 'ensemble_score' in result:
+                result.setdefault('ensemble_fake_probability', result['ensemble_score'])
+            if 'fake_probability' in result:
+                result['is_fake'] = result.get('is_fake', result['fake_probability'] > 0.5)
+                result.setdefault('confidence', result.get('confidence', result['fake_probability']))
+                result.setdefault('authenticity_score', 1 - result['fake_probability'])
 
         elif model_type == 'cnn':
             # Use our custom CNN classifier
@@ -139,10 +148,13 @@ def detect_fake(video_path: str, model_type: str = 'enhanced') -> Dict[str, Any]
 
 def get_available_models() -> Dict[str, str]:
     """Get available detection models and their descriptions"""
+    # NOTE (B1): 'enhanced'/'ensemble'/'full_ensemble' all map to EnhancedDetector,
+    # which runs the trained ResNet50 + ConvNeXt + FFT detectors combined with the
+    # learned logistic ensemble (test AUC ~0.936 on Celeb-DF v2).
     models = {
-        'enhanced': 'CLIP-based detector (optional LAA-Net when configured)',
-        'ensemble': 'Full ensemble (CLIP + ResNet50, optional LAA-Net) - Recommended',
-        'full_ensemble': 'Full ensemble (CLIP + ResNet50, optional LAA-Net) - Recommended',
+        'enhanced': 'Trained ensemble: ResNet50 + ConvNeXt + FFT via learned logistic weights (Recommended)',
+        'ensemble': 'Trained ensemble: ResNet50 + ConvNeXt + FFT via learned logistic weights (Recommended)',
+        'full_ensemble': 'Trained ensemble: ResNet50 + ConvNeXt + FFT via learned logistic weights (Recommended)',
         'cnn': 'Custom CNN classifier with YOLO face detection',
         'resnet': 'ResNet-based deepfake classifier'
     }
@@ -195,12 +207,12 @@ if __name__ == "__main__":
             print(f"\n{model_name.upper()} Results:")
             if result['success']:
                 r = result['result']
-                print(".2%")
-                print(".2f")
+                print(f"  Fake probability: {r.get('fake_probability', 0):.2%}")
+                print(f"  Confidence: {r.get('confidence', 0):.2f}")
                 print(f"  Method: {r.get('method', 'unknown')}")
             else:
                 print(f"  Error: {result['error']}")
-            print(".2f")
+            print(f"  Processing time: {result['processing_time']:.2f}s")
     else:
         print(f"Sample video not found at: {sample_video}")
         print("Available models:")

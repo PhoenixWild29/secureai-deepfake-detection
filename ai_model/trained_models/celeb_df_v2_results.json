@@ -1,0 +1,24 @@
+{
+  "test_auc_roc": 0.906470009914078,
+  "test_accuracy": 0.8341698841698841,
+  "test_f1": 0.8738804874467773,
+  "test_precision": 0.872471416007036,
+  "test_recall": 0.8752941176470588,
+  "confusion_matrix": [
+    [
+      1345,
+      435
+    ],
+    [
+      424,
+      2976
+    ]
+  ],
+  "best_val_auc": 0.9437270028801504,
+  "epochs": 15,
+  "batch_size": 64,
+  "lr": 0.0003,
+  "weight_decay": 0.0001,
+  "architecture": "ResNet50",
+  "dataset": "Celeb-DF v2"
+}

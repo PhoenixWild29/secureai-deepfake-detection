@@ -28,7 +28,8 @@ ENHANCED_MONITORING = True  # Always enable enhanced monitoring
 try:
     # Check if we're in an environment that supports Morpheus
     # NVIDIA Morpheus typically requires GPU/CUDA environment
-    CUDA_AVAILABLE = os.getenv('CUDA_VISIBLE_DEVICES') is not None or os.path.exists('/usr/local/cuda')
+    import torch as _torch
+    CUDA_AVAILABLE = _torch.cuda.is_available()
     
     # Try to import Morpheus Python API (if installed)
     # Note: Morpheus is typically installed via conda or Docker, not pip
@@ -291,16 +292,18 @@ class MorpheusSecurityMonitor:
 
     def _calculate_anomaly_score(self, features: Dict[str, Any], detection_result: Dict[str, Any]) -> float:
         """Calculate anomaly score using AI or statistical methods"""
+        # MODEL-HONESTY (B4): the real NVIDIA Morpheus ML pipeline is not wired up here.
+        # Previously this returned np.random.uniform(0.1, 0.9) — a fabricated "anomaly
+        # score" with no relationship to the input. That randomness has been removed.
+        # We now always derive a deterministic anomaly score from the actual detector
+        # output via _statistical_anomaly_score (a z-score on the detection confidence).
         if self.anomaly_detector['model_type'] == 'morpheus_ai' and MORPHEUS_AVAILABLE:
-            # Use actual Morpheus AI for anomaly detection
-            try:
-                # This would integrate with Morpheus pipeline
-                # For now, return a simulated score
-                return np.random.uniform(0.1, 0.9)
-            except Exception as e:
-                logger.error(f"Morpheus anomaly detection failed: {e}")
-                return self._statistical_anomaly_score(features)
-
+            # Morpheus is reported available but no real Morpheus inference is implemented.
+            # Fall back to the honest, deterministic statistical signal and warn once.
+            logger.warning(
+                "Morpheus ML anomaly pipeline is not implemented; using deterministic "
+                "statistical anomaly score derived from detection confidence instead."
+            )
         return self._statistical_anomaly_score(features)
 
     def _statistical_anomaly_score(self, features: Dict[str, Any]) -> float:

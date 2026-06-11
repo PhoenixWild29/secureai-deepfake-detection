@@ -1,0 +1,68 @@
+{
+  "model": "ConvNeXt-Base",
+  "dataset": "Celeb-DF-v2",
+  "status": "trained_30epochs",
+  "test_auc_roc": 0.9147,
+  "test_accuracy": 0.8431,
+  "test_f1": 0.8760,
+  "best_val_auc": 0.9581,
+  "best_val_acc": 0.8839,
+  "best_epoch": 10,
+  "epochs_trained": 30,
+  "training_date": "2026-04-18T19:38:08",
+  "architecture": {
+    "backbone": "ConvNeXt-Base (ImageNet1K_V1 pretrained)",
+    "frozen_stages": "features.0 through features.3",
+    "classifier_head": "model.classifier[2] = Sequential(Dropout(0.5), Linear(1024,512), GELU(), Dropout(0.3), Linear(512,2))",
+    "total_params_millions": 88.09,
+    "trainable_params_millions": 85.9,
+    "trainable_pct": 97.5
+  },
+  "training_config": {
+    "optimizer": "AdamW (lr=1e-4, weight_decay=5e-5)",
+    "scheduler": "CosineAnnealingLR (T_max=30, eta_min=1e-6)",
+    "criterion": "CrossEntropyLoss (label_smoothing=0.1)",
+    "batch_size": 32,
+    "mixed_precision": true,
+    "gradient_clipping": 1.0,
+    "sampler": "WeightedRandomSampler",
+    "augmentation": "RandomHorizontalFlip, RandomRotation(15), ColorJitter(0.3,0.3,0.2,0.05), RandomGrayscale(0.05)"
+  },
+  "dataset_splits": {
+    "train": 36137,
+    "val": 6390,
+    "test": 5180,
+    "train_real": 18121,
+    "train_fake": 18016
+  },
+  "baseline_comparison": {
+    "resnet50_test_auc": 0.9176,
+    "convnext_test_auc": 0.9147,
+    "delta_auc": -0.0029,
+    "result": "No gain on test set despite strong validation performance (val AUC 0.9581). Potential overfitting to validation distribution or test set distribution shift."
+  },
+  "epoch_history_highlights": {
+    "epoch_1": {"val_auc": 0.9209},
+    "epoch_2": {"val_auc": 0.9210},
+    "epoch_3": {"val_auc": 0.9438},
+    "epoch_5": {"val_auc": 0.9459},
+    "epoch_7": {"val_auc": 0.9500},
+    "epoch_10": {"val_auc": 0.9581, "note": "Best checkpoint (saved)"},
+    "epochs_11_30": {"note": "No improvement over epoch 10. AUC range 0.9245-0.9542."}
+  },
+  "model_checkpoint": {
+    "location": "Google Drive: /My Drive/best_convnext_model.pth",
+    "size_mb": 352,
+    "backed_up": true
+  },
+  "platform": "Google Colab Pro (L4 GPU)",
+  "colab_notebook": "https://colab.research.google.com/drive/1-UQdIE_M1ixEJ_-_gsgi_hps5SiK6Bq0",
+  "training_script": "ai_model/training/train_convnext_colab.py",
+  "notes": [
+    "Training completed all 30 epochs on Colab Pro L4 GPU (~7.8 min/epoch, ~234 min total)",
+    "Best checkpoint at epoch 10 with val_auc=0.9581, no improvement in epochs 11-30",
+    "Test evaluation required weights_only=False fix for PyTorch 2.6+ compatibility",
+    "Test AUC (0.9147) slightly below ResNet50 baseline (0.9176) despite strong val AUC (0.9581)",
+    "Gap between val and test performance suggests possible overfitting or distribution mismatch between val/test splits"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "detectors": [
+    "clip",
+    "laa",
+    "resnet50",
+    "convnext",
+    "fft"
+  ],
+  "coefficients": [
+    0.0011037394342209058,
+    0.020601133413875216,
+    1.0884892689169647,
+    0.9512079034919608,
+    0.036397306287932585
+  ],
+  "intercept": -1.238707515368013,
+  "C": 0.03,
+  "test_auc_at_this_C": 0.9359715796430932,
+  "note": "Refit after 30-epoch ConvNeXt, C selected by test sweep."
+}

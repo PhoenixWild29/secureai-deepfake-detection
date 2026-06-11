@@ -1,0 +1,22 @@
+{
+  "test_auc_roc": 0.6078,
+  "test_accuracy": 0.389,
+  "test_f1": 0.1857,
+  "best_val_auc": 0.6078,
+  "epochs_trained": 30,
+  "training_time_minutes": 49.5,
+  "augmentation": "Self-Blended Images (SBI)",
+  "model_architecture": "ResNet50 with custom FC head",
+  "optimizer": "AdamW (lr=3e-4, weight_decay=1e-4)",
+  "scheduler": "CosineAnnealingLR (T_max=30, eta_min=1e-6)",
+  "frozen_layers": ["conv1", "bn1", "layer1", "layer2"],
+  "dataset": "Celeb-DF v2 frames",
+  "train_frames": 18121,
+  "test_frames": 5180,
+  "sbi_probability": 0.5,
+  "note": "Trained only on REAL Celeb-DF frames with SBI-generated fakes as label=1. Test uses actual deepfakes. SBI approach underperformed compared to direct supervised training (AUC 0.6078 vs 0.8944).",
+  "kaggle_notebook": "https://www.kaggle.com/code/samuelshamber/notebook11327d547b",
+  "history": {
+    "val_auc": [0.6078, 0.578, 0.6007, 0.5729, 0.5914, 0.585, 0.5301, 0.6057, 0.5883, 0.5791, 0.5665, 0.5585, 0.581, 0.5702, 0.5728, 0.5673, 0.5799, 0.5796, 0.5916, 0.5848, 0.559, 0.5691, 0.5683, 0.5727, 0.567, 0.5636, 0.5667, 0.5574, 0.5619, 0.5606]
+  }
+}
