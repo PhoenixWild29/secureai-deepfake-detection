@@ -1,122 +1,149 @@
-from ultralytics import YOLO
+#!/usr/bin/env python3
+"""
+YOLOv8 Classification Training for DeepFake Detection
+======================================================
+
+NOTE: Previous version used YOLO in DETECTION mode (bounding boxes), which requires
+per-image .txt annotation files. Deepfake datasets only have class folders (real/fake),
+so detection mode always produced mAP50=0.0.
+
+FIX: Use YOLO CLASSIFICATION mode (task='classify'), which accepts:
+    datasets/<name>/train/real/  *.jpg
+    datasets/<name>/train/fake/  *.jpg
+No annotation files needed — the folder name IS the class label.
+
+Usage:
+    python ai_model/train_yolo.py
+    python ai_model/train_yolo.py --dataset datasets/celeb_df_v2 --epochs 50
+    FORCE_CPU=1 python ai_model/train_yolo.py
+"""
 import os
+import argparse
 import torch
-from pathlib import Path
 import json
+from pathlib import Path
 from datetime import datetime
 
-def train_yolo_model(data_yaml, epochs=100, imgsz=640, batch_size=16):
+if os.getenv('FORCE_CPU', '0') == '1':
+    os.environ.setdefault('CUDA_VISIBLE_DEVICES', '')
+
+from ultralytics import YOLO
+
+
+def find_dataset(base_hint: str = None) -> Path:
+    """Return the first dataset directory that has train/real and train/fake splits."""
+    candidates = []
+    if base_hint:
+        candidates.append(Path(base_hint))
+    candidates += [
+        Path('datasets/celeb_df_v2'),
+        Path('datasets/face_forensics_pp'),
+        Path('datasets/unified_deepfake'),
+        Path('datasets/celeb_df_pp'),
+        Path('datasets/train'),
+    ]
+    for c in candidates:
+        if (c / 'train' / 'real').exists() and (c / 'train' / 'fake').exists():
+            return c
+    return None
+
+
+def train_yolo_classify(dataset_dir: Path, epochs: int = 50, imgsz: int = 224,
+                        batch_size: int = 16) -> None:
     """
-    Train YOLO model for deepfake detection with optimized parameters
+    Train YOLOv8 in classification mode on a real/fake dataset.
+
+    Args:
+        dataset_dir: Path with sub-dirs train/real, train/fake, val/real, val/fake
+        epochs:      Number of training epochs
+        imgsz:       Input image size (224 matches ResNet/EfficientNet convention)
+        batch_size:  Training batch size
     """
-    print("🚀 Starting SecureAI YOLO Training")
+    device = 'cpu' if (os.getenv('CUDA_VISIBLE_DEVICES') == '' or
+                       not torch.cuda.is_available()) else 0
+
+    run_name = f'yolo_classify_{datetime.now().strftime("%Y%m%d_%H%M%S")}'
+
+    print("Starting YOLO Classification Training")
     print("=" * 50)
-    print(f"📊 Dataset: {data_yaml}")
-    print(f"🎯 Epochs: {epochs}")
-    print(f"📏 Image Size: {imgsz}x{imgsz}")
-    print(f"📦 Batch Size: {batch_size}")
-    print(f"🖥️  Device: {torch.device('cuda' if torch.cuda.is_available() else 'cpu')}")
+    print(f"  Dataset:    {dataset_dir}")
+    print(f"  Mode:       classify  (real/fake folder structure)")
+    print(f"  Epochs:     {epochs}")
+    print(f"  Image size: {imgsz}x{imgsz}")
+    print(f"  Batch:      {batch_size}")
+    print(f"  Device:     {device}")
     print()
 
-    # Load pretrained YOLOv8 model
-    model = YOLO('yolov8n.pt')  # Nano model for faster training
+    # YOLOv8n-cls: nano classification model
+    model = YOLO('yolov8n-cls.pt')
 
-    # Training configuration
-    training_args = {
-        'data': data_yaml,
-        'epochs': epochs,
-        'imgsz': imgsz,
-        'batch': batch_size,
-        'patience': 20,  # Early stopping patience
-        'save': True,
-        'save_period': 10,  # Save checkpoint every 10 epochs
-        'cache': True,  # Cache dataset for faster training
-        'device': 0 if torch.cuda.is_available() else 'cpu',
-        'workers': 2,  # Number of worker threads
-        'project': 'ai_model/training_runs',
-        'name': f'secureai_deepfake_{datetime.now().strftime("%Y%m%d_%H%M%S")}',
-        'exist_ok': True,
-        'pretrained': True,
-        'optimizer': 'Adam',  # Adam optimizer
-        'lr0': 0.001,  # Initial learning rate
-        'lrf': 0.01,  # Final learning rate fraction
-        'momentum': 0.937,
-        'weight_decay': 0.0005,
-        'warmup_epochs': 3.0,
-        'warmup_momentum': 0.8,
-        'warmup_bias_lr': 0.1,
-        'box': 7.5,  # Box loss gain
-        'cls': 0.5,  # Classification loss gain
-        'dfl': 1.5,  # Distribution focal loss gain
-        'cos_lr': True,  # Cosine learning rate scheduler
-        'close_mosaic': 10,  # Disable mosaic augmentation in last 10 epochs
-    }
+    results = model.train(
+        data=str(dataset_dir),        # points to dir with train/ and val/ sub-dirs
+        task='classify',
+        epochs=epochs,
+        imgsz=imgsz,
+        batch=batch_size,
+        patience=15,
+        save=True,
+        device=device,
+        workers=2,
+        project='ai_model/training_runs',
+        name=run_name,
+        exist_ok=True,
+        pretrained=True,
+        optimizer='Adam',
+        lr0=0.001,
+        lrf=0.01,
+        cos_lr=True,
+        close_mosaic=10,
+    )
 
-    # Start training
-    print("🏃 Training in progress...")
-    results = model.train(**training_args)
-
-    # Save the trained model
+    # Persist the trained model
     model_path = 'ai_model/trained_model.pt'
     model.save(model_path)
-    print(f"💾 Model saved to: {model_path}")
+    print(f"\nModel saved to: {model_path}")
 
     # Save training metadata
+    metrics = results.results_dict if hasattr(results, 'results_dict') else {}
     metadata = {
         'training_date': datetime.now().isoformat(),
-        'model_type': 'YOLOv8n',
-        'dataset': data_yaml,
+        'model_type': 'YOLOv8n-cls',
+        'task': 'classify',
+        'dataset': str(dataset_dir),
         'epochs': epochs,
         'imgsz': imgsz,
         'batch_size': batch_size,
         'final_metrics': {
-            'mAP50': float(results.results_dict.get('metrics/mAP50(B)', 0)),
-            'mAP50-95': float(results.results_dict.get('metrics/mAP50-95(B)', 0)),
-            'precision': float(results.results_dict.get('metrics/precision(B)', 0)),
-            'recall': float(results.results_dict.get('metrics/recall(B)', 0)),
-        } if hasattr(results, 'results_dict') else {}
+            'top1_accuracy': float(metrics.get('metrics/accuracy_top1', 0)),
+            'top5_accuracy': float(metrics.get('metrics/accuracy_top5', 0)),
+        },
     }
 
-    with open('ai_model/training_metadata.json', 'w') as f:
+    meta_path = 'ai_model/training_metadata.json'
+    with open(meta_path, 'w') as f:
         json.dump(metadata, f, indent=2)
 
-    print("✅ Training completed!")
-    print(f"📈 Final mAP50: {metadata['final_metrics'].get('mAP50', 'N/A'):.3f}")
-    print(f"🎯 Final mAP50-95: {metadata['final_metrics'].get('mAP50-95', 'N/A'):.3f}")
-
+    print(f"  Top-1 Accuracy: {metadata['final_metrics']['top1_accuracy']:.4f}")
+    print(f"  Metadata saved: {meta_path}")
+    print("\n[OK] YOLO classification training complete!")
     return model, results
 
-def validate_model(model_path, data_yaml):
-    """Validate the trained model"""
-    print("\n🔍 Validating trained model...")
-    model = YOLO(model_path)
-    results = model.val(data=data_yaml, split='val')
 
-    print("📊 Validation Results:")
-    print(f"   mAP50: {results.results_dict.get('metrics/mAP50(B)', 0):.3f}")
-    print(f"   mAP50-95: {results.results_dict.get('metrics/mAP50-95(B)', 0):.3f}")
-    print(f"   Precision: {results.results_dict.get('metrics/precision(B)', 0):.3f}")
-    print(f"   Recall: {results.results_dict.get('metrics/recall(B)', 0):.3f}")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Train YOLOv8 classifier for deepfake detection')
+    parser.add_argument('--dataset', type=str, default=None,
+                        help='Path to dataset root (must have train/real, train/fake sub-dirs)')
+    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--imgsz', type=int, default=224)
+    parser.add_argument('--batch', type=int, default=16)
+    args = parser.parse_args()
 
-    return results
+    dataset_dir = find_dataset(args.dataset)
+    if dataset_dir is None:
+        print('[ERROR] No suitable dataset found.')
+        print('   Run:  python scripts/setup/download_datasets.py --dataset celeb_df_v2')
+        raise SystemExit(1)
 
-if __name__ == "__main__":
-    # Check if dataset exists
-    if not os.path.exists('datasets/train') or not os.path.exists('datasets/val'):
-        print("❌ Training dataset not found!")
-        print("   Run 'python datasets/setup_training_data.py' first")
-        exit(1)
-
-    # Train the model
-    model, training_results = train_yolo_model(
-        data_yaml='datasets/data.yaml',
-        epochs=50,  # Reduced for demo, increase for production
-        imgsz=640,
-        batch_size=8  # Smaller batch size for limited data
-    )
-
-    # Validate the model
-    validate_model('ai_model/trained_model.pt', 'datasets/data.yaml')
-
-    print("\n🎉 AI training phase completed!")
-    print("🔄 Ready for next phase: Web Interface Development")
+    print(f'[OK] Using dataset: {dataset_dir}')
+    train_yolo_classify(dataset_dir, epochs=args.epochs,
+                        imgsz=args.imgsz, batch_size=args.batch)
