@@ -24,6 +24,9 @@ from app.api.v1.endpoints.sage import router as sage_router
 from app.api.websockets import socket_app
 from app.core.exceptions import DetectionAPIError
 from app.core.config import detection_settings
+from app.core.ratelimit import limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 # Configure logging
 logging.basicConfig(
@@ -41,6 +44,11 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json"
 )
+
+# SECURITY: per-client rate limiting (slowapi). The Limiter lives in
+# app.core.ratelimit; routes opt in with @limiter.limit(...) decorators.
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS middleware
 # SECURITY: origins come from config (CORS_ORIGINS env, default safe localhost list),

@@ -34,6 +34,7 @@ gunicorn>=23.0.0
 
 # FastAPI (Alternative/Additional API)
 fastapi>=0.104.0
+slowapi>=0.1.9  # SECURITY: per-client rate limiting on detect endpoints
 starlette>=0.50.0  # Fixed: DoS vulnerabilities (CVE-2025-54121, CVE-2024-47874, CVE-2025-62727)
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0

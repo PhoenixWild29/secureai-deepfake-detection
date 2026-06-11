@@ -23,8 +23,10 @@ from datetime import datetime
 from typing import Any, Optional
 from concurrent.futures import ThreadPoolExecutor
 
-from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
+
+from app.core.ratelimit import limiter, DETECT_LIMIT, DETECT_BATCH_LIMIT
 from werkzeug.utils import secure_filename
 
 from app.api.websockets import sio
@@ -49,11 +51,10 @@ MAX_UPLOAD_SIZE_BYTES = detection_settings.detection.max_file_size_bytes
 # Read uploads in bounded chunks so we never load an unbounded body into memory.
 _UPLOAD_CHUNK_SIZE = 1024 * 1024  # 1 MiB
 
-# TODO(rate-limiting): No FastAPI-compatible limiter (slowapi) is currently a
-# project dependency — only Flask-Limiter is present, which does not apply to
-# this ASGI app. To enforce per-client rate limits on these routes, add slowapi
-# and wire a Limiter into app.main, then decorate these handlers. Deferred here
-# to avoid introducing a new runtime dependency. See report.
+# Rate limiting (slowapi): each detect route is decorated with
+# @limiter.limit(...) — limits are env-configurable via RATE_LIMIT_DETECT /
+# RATE_LIMIT_DETECT_BATCH, with Redis-backed shared storage in production via
+# RATE_LIMIT_STORAGE_URI. See app/core/ratelimit.py.
 
 
 def _enforce_content_length(content_length: Optional[str]) -> None:
@@ -222,7 +223,9 @@ def _load_result(analysis_id: str) -> Optional[dict]:
         "Emits real-time Socket.IO progress events to the analysis room."
     ),
 )
+@limiter.limit(DETECT_LIMIT)
 async def analyze_video(
+    request: Request,  # required by slowapi rate limiter
     video: UploadFile = File(..., description="Video file (mp4, avi, mov, mkv, webm)"),
     model_type: str = Form(default='enhanced', description="Detection model: enhanced | ensemble | fast"),
     analysis_id: Optional[str] = Form(default=None, description="Pre-assigned analysis ID for Socket.IO room"),
@@ -327,7 +330,9 @@ async def analyze_video(
     summary="Analyze video from URL",
     description="Download and analyze a video from a URL (YouTube, Vimeo, direct links).",
 )
+@limiter.limit(DETECT_LIMIT)
 async def analyze_video_url(
+    request: Request,  # required by slowapi rate limiter
     body: dict,
     current_user: dict = Depends(get_current_user),  # SECURITY: require valid Bearer JWT
 ):
@@ -380,7 +385,12 @@ async def analyze_video_url(
     loop = asyncio.get_event_loop()
 
     try:
-        filepath = await loop.run_in_executor(_executor, download_video_from_url, video_url, UPLOAD_FOLDER)
+        # BUGFIX: download_video_from_url returns a (filepath, filename) tuple —
+        # previously the whole tuple was assigned to `filepath`, so the
+        # os.path.exists() check below always failed and /url never worked.
+        filepath, _downloaded_name = await loop.run_in_executor(
+            _executor, download_video_from_url, video_url, UPLOAD_FOLDER
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to download video: {exc}")
 
@@ -431,7 +441,9 @@ async def analyze_video_url(
     summary="Batch analyze videos",
     description="Submit multiple video files for sequential deepfake detection.",
 )
+@limiter.limit(DETECT_BATCH_LIMIT)
 async def batch_analyze(
+    request: Request,  # required by slowapi rate limiter
     videos: list[UploadFile] = File(..., description="Video files to analyze"),
     model_type: str = Form(default='enhanced'),
     content_length: Optional[str] = Header(default=None),
