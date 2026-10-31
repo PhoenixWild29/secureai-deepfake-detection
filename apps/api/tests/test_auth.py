@@ -132,3 +132,63 @@ def test_authorized_party_must_match_when_configured(tmp_path: Path) -> None:
         json={"filename": "clip.mp4"},
     )
     assert allowed.status_code == 200
+
+
+def test_empty_allow_list_skips_azp(tmp_path: Path) -> None:
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    public_jwk = RSAAlgorithm.to_jwk(private_key.public_key(), as_dict=True)
+    public_jwk["kid"] = "test-key"
+    settings = make_settings(tmp_path, auth_mode="clerk", clerk_issuer=ISSUER, clerk_authorized_parties=())
+    app = create_app(
+        settings=settings,
+        store=MemoryJobStore(),
+        queue=MemoryJobQueue(),
+        storage=FileSystemStorage(tmp_path),
+        fetch_jwks=lambda: {"keys": [public_jwk]},
+    )
+    client = TestClient(app)
+    response = client.post(
+        "/v1/uploads",
+        headers={"Authorization": f"Bearer {_token(private_key, azp='https://evil.example')}"},
+        json={"filename": "clip.mp4"},
+    )
+    assert response.status_code == 200
+
+
+def test_unknown_kid_refreshes_jwks(tmp_path: Path) -> None:
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    stale = RSAAlgorithm.to_jwk(private_key.public_key(), as_dict=True)
+    stale["kid"] = "old-key"
+    current = dict(stale)
+    current["kid"] = "test-key"
+    state = {"refreshed": False}
+
+    def fetch() -> dict[str, object]:
+        return {"keys": [stale]}
+
+    def refresh() -> dict[str, object]:
+        state["refreshed"] = True
+        return {"keys": [current]}
+
+    fetch.refresh = refresh  # type: ignore[attr-defined]
+    settings = make_settings(
+        tmp_path,
+        auth_mode="clerk",
+        clerk_issuer=ISSUER,
+        clerk_authorized_parties=("http://localhost:3000",),
+    )
+    app = create_app(
+        settings=settings,
+        store=MemoryJobStore(),
+        queue=MemoryJobQueue(),
+        storage=FileSystemStorage(tmp_path),
+        fetch_jwks=fetch,
+    )
+    client = TestClient(app)
+    response = client.post(
+        "/v1/uploads",
+        headers={"Authorization": f"Bearer {_token(private_key)}"},
+        json={"filename": "clip.mp4"},
+    )
+    assert state["refreshed"] is True
+    assert response.status_code == 200

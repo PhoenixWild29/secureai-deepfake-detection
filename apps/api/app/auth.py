@@ -39,17 +39,22 @@ def verify_clerk_token(
     except Exception as exc:
         raise AuthError("jwks unavailable") from exc
 
-    keys = jwks.get("keys")
-    if not isinstance(keys, list):
+    if _key_list(jwks) is None:
         raise AuthError("jwks unavailable")
     kid = header.get("kid")
-    match = None
-    for key in keys:
-        if isinstance(key, dict) and kid and key.get("kid") == kid:
-            match = key
-            break
-    if match is None and len(keys) == 1 and isinstance(keys[0], dict):
-        match = keys[0]
+    match = _matching_key(jwks, kid)
+    if match is None:
+        refresh = getattr(fetch_jwks, "refresh", None)
+        if callable(refresh):
+            try:
+                jwks = refresh()
+            except AuthError:
+                raise
+            except Exception as exc:
+                raise AuthError("jwks unavailable") from exc
+            if _key_list(jwks) is None:
+                raise AuthError("jwks unavailable")
+            match = _matching_key(jwks, kid)
     if match is None:
         raise AuthError("signing key not found")
 
@@ -65,6 +70,8 @@ def verify_clerk_token(
     except jwt.PyJWTError as exc:
         raise AuthError("invalid token") from exc
 
+    # An empty allow-list skips azp. That is for local Clerk only.
+    # Production sets CLERK_AUTHORIZED_PARTIES and this check rejects other azp values.
     parties = settings.clerk_authorized_parties
     if parties:
         azp = claims.get("azp")
@@ -110,6 +117,26 @@ def require_user(
         ) from exc
     logger.debug("auth subject=%s mode=%s", user.subject, user.mode)
     return user
+
+
+def _key_list(jwks: object) -> list[object] | None:
+    if isinstance(jwks, dict) and isinstance(jwks.get("keys"), list):
+        return jwks["keys"]
+    return None
+
+
+def _matching_key(jwks: object, kid: object) -> dict[str, object] | None:
+    if not isinstance(jwks, dict):
+        return None
+    keys = jwks.get("keys")
+    if not isinstance(keys, list):
+        return None
+    for key in keys:
+        if isinstance(key, dict) and kid and key.get("kid") == kid:
+            return key
+    if not kid and len(keys) == 1 and isinstance(keys[0], dict):
+        return keys[0]
+    return None
 
 
 def _bearer(authorization: str | None) -> str:

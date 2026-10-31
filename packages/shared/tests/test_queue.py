@@ -54,13 +54,18 @@ def test_redis_publish_and_consume() -> None:
 
         client = redis.Redis.from_url(url, decode_responses=True)
         client.ping()
-    except Exception:
-        pytest.skip("redis unavailable")
+    except Exception as exc:
+        if os.environ.get("REQUIRE_SERVICES") == "1":
+            pytest.fail(f"redis unavailable: {exc}")
+        pytest.skip(f"redis unavailable: {exc}")
     key = "secureai:jobs:unit"
     client.delete(key)
+    client.delete(f"{key}:inflight")
     queue = RedisJobQueue(url, key=key)
     queue.publish("job_abc")
     assert queue.consume(timeout=0) == "job_abc"
+    queue.ack("job_abc")
     assert queue.consume(timeout=0) is None
     assert queue.consume(timeout=1) is None
     client.delete(key)
+    client.delete(f"{key}:inflight")

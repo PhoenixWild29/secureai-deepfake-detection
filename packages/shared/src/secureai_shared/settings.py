@@ -31,6 +31,13 @@ class Settings:
     cors_origins: tuple[str, ...]
     dev_subject: str
     max_upload_bytes: int
+    detector_timeout_seconds: float = 60.0
+    stuck_job_seconds: float = 180.0
+    job_max_attempts: int = 3
+    rate_limit_jobs: int = 30
+    rate_limit_uploads: int = 60
+    rate_limit_window_seconds: int = 60
+    s3_auto_create_bucket: bool = False
 
 
 def assert_explicit_origins(origins: tuple[str, ...]) -> None:
@@ -100,6 +107,23 @@ def load_settings(
             "STORAGE_BACKEND=s3 requires S3_BUCKET, S3_ACCESS_KEY_ID, and S3_SECRET_ACCESS_KEY"
         )
 
+    detector_timeout = _positive_float(env, "DETECTOR_TIMEOUT_SECONDS", 60.0)
+    stuck_after = _positive_float(env, "STUCK_JOB_SECONDS", 180.0)
+    if stuck_after <= detector_timeout:
+        raise RuntimeError(
+            "STUCK_JOB_SECONDS must be greater than DETECTOR_TIMEOUT_SECONDS "
+            "so a live detection is not swept as abandoned"
+        )
+    max_attempts = _positive_int(env, "JOB_MAX_ATTEMPTS", 3)
+    rate_jobs = _nonnegative_int(env, "RATE_LIMIT_JOBS", 30)
+    rate_uploads = _nonnegative_int(env, "RATE_LIMIT_UPLOADS", 60)
+    rate_window = _positive_int(env, "RATE_LIMIT_WINDOW_SECONDS", 60)
+    auto_create = env.get("S3_AUTO_CREATE_BUCKET", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
     return Settings(
         auth_mode=auth_mode,
         clerk_issuer=issuer,
@@ -119,4 +143,44 @@ def load_settings(
         cors_origins=origins,
         dev_subject=env.get("DEV_AUTH_SUBJECT", "user_dev").strip() or "user_dev",
         max_upload_bytes=50_000_000,
+        detector_timeout_seconds=detector_timeout,
+        stuck_job_seconds=stuck_after,
+        job_max_attempts=max_attempts,
+        rate_limit_jobs=rate_jobs,
+        rate_limit_uploads=rate_uploads,
+        rate_limit_window_seconds=rate_window,
+        s3_auto_create_bucket=auto_create,
     )
+
+
+def _positive_float(env: Mapping[str, str], name: str, default: float) -> float:
+    raw = env.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} must be a number") from exc
+    if value <= 0:
+        raise RuntimeError(f"{name} must be greater than 0")
+    return value
+
+
+def _positive_int(env: Mapping[str, str], name: str, default: int) -> int:
+    value = int(_positive_float(env, name, float(default)))
+    if value < 1:
+        raise RuntimeError(f"{name} must be at least 1")
+    return value
+
+
+def _nonnegative_int(env: Mapping[str, str], name: str, default: int) -> int:
+    raw = env.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} must be an integer") from exc
+    if value < 0:
+        raise RuntimeError(f"{name} must be 0 or greater")
+    return value

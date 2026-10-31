@@ -22,6 +22,7 @@ from secureai_shared.settings import load_settings
 from secureai_shared.storage import build_storage, new_object_key
 from secureai_shared.store import PostgresJobStore
 from worker.consumer import process_job
+from worker.recovery import rescue_popped, sweep_stuck
 
 logger = logging.getLogger("secureai.worker")
 
@@ -72,6 +73,12 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     announced_idle = False
     while not stop["flag"]:
         try:
+            sweep_stuck(
+                store,
+                queue,
+                lease_seconds=settings.stuck_job_seconds,
+                max_attempts=settings.job_max_attempts,
+            )
             job_id = queue.consume(timeout=0 if args.once else args.poll_seconds)
         except Exception:
             logger.exception("queue read failed")
@@ -85,7 +92,23 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
                 announced_idle = True
             continue
         announced_idle = False
-        process_job(store, storage, job_id)
+        try:
+            finished = process_job(
+                store,
+                storage,
+                job_id,
+                timeout_seconds=settings.detector_timeout_seconds,
+                max_upload_bytes=settings.max_upload_bytes,
+            )
+        except Exception:
+            logger.exception("job aborted job_id=%s", job_id)
+            try:
+                rescue_popped(store, queue, job_id)
+            except Exception:
+                logger.exception("could not rescue job_id=%s", job_id)
+            return 2
+        if finished is not None:
+            queue.ack(job_id)
         if args.once:
             return 0
         if args.poll_seconds <= 0:

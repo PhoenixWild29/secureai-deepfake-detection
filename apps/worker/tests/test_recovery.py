@@ -1,0 +1,71 @@
+from secureai_shared.models import JobStatus
+from secureai_shared.queue import MemoryJobQueue
+from secureai_shared.storage import new_object_key
+from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore
+from worker.recovery import rescue_popped, sweep_stuck
+
+
+def _queued() -> tuple[MemoryJobStore, MemoryJobQueue, str]:
+    store = MemoryJobStore()
+    queue = MemoryJobQueue()
+    job = store.create(
+        user_id="user_dev",
+        filename="clip.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=new_object_key("user_dev", "clip.mp4"),
+    )
+    queue.publish(job.id)
+    return store, queue, job.id
+
+
+def test_sweep_requeues_a_processing_job_inside_the_attempt_budget() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.claim(job_id) is not None
+    queue._inflight[job_id] = (1_000.0, 1)  # noqa: SLF001
+    recovered = sweep_stuck(store, queue, lease_seconds=10, max_attempts=3, now=2_000)
+    assert recovered == [job_id]
+    job = store.get_any(job_id)
+    assert job is not None
+    assert job.status is JobStatus.queued
+    assert queue.consume() == job_id
+
+
+def test_sweep_fails_a_job_that_exhausted_attempts() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.claim(job_id) is not None
+    queue._inflight[job_id] = (0.0, 3)  # noqa: SLF001
+    recovered = sweep_stuck(store, queue, lease_seconds=10, max_attempts=3, now=1_000)
+    assert recovered == [job_id]
+    job = store.get_any(job_id)
+    assert job is not None
+    assert job.status is JobStatus.failed
+    assert job.detail == PUBLIC_FAILURE_DETAIL
+    assert job_id not in queue._inflight  # noqa: SLF001
+
+
+def test_rescue_republishes_when_claim_never_landed() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    rescue_popped(store, queue, job_id)
+    assert store.get_any(job_id) is not None
+    assert store.get_any(job_id).status is JobStatus.queued  # type: ignore[union-attr]
+    assert queue.consume() == job_id
+
+
+def test_rescue_requeues_when_fail_raises() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.claim(job_id) is not None
+
+    def explode(job_id: str, *, attempt: int | None = None):  # noqa: ARG001
+        raise RuntimeError("db down")
+
+    store.fail = explode  # type: ignore[method-assign]
+    rescue_popped(store, queue, job_id)
+    job = store.get_any(job_id)
+    assert job is not None
+    assert job.status is JobStatus.queued
+    assert queue.consume() == job_id

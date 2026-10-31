@@ -24,10 +24,12 @@ class JobRecord(BaseModel):
     content_type: str | None = None
     byte_size: int | None = None
     object_key: str
+    object_etag: str | None = None
     status: JobStatus = JobStatus.queued
     prediction: str | None = None
     confidence: float | None = None
     detail: str | None = None
+    attempt: int = 0
     created_at: datetime
     updated_at: datetime
 

@@ -44,8 +44,11 @@ def test_postgres_round_trip() -> None:
         store = PostgresJobStore(schema_url)
         from secureai_shared.db import Base
 
+        Base.metadata.drop_all(store.engine)
         Base.metadata.create_all(store.engine)
     except Exception as exc:
+        if os.environ.get("REQUIRE_SERVICES") == "1":
+            pytest.fail(f"postgres unavailable: {exc}")
         pytest.skip(f"postgres unavailable: {exc}")
 
     key = new_object_key("user_pg", "clip.mp4")

@@ -18,6 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.migrate import run_migrations
 from app.routes import router
+from secureai_shared.limits import RateLimiter, build_limiter
 from secureai_shared.queue import JobQueue, build_queue
 from secureai_shared.settings import Settings, assert_explicit_origins, load_settings
 from secureai_shared.storage import FileSystemStorage, S3Storage, build_storage
@@ -32,11 +33,17 @@ def create_app(
     queue: JobQueue | None = None,
     storage: FileSystemStorage | S3Storage | None = None,
     fetch_jwks: Callable[[], dict[str, object]] | None = None,
+    limiter: RateLimiter | None = None,
 ) -> FastAPI:
     """Build the API. Real Postgres, Redis, and storage are created only when omitted."""
 
     resolved = settings if settings is not None else load_settings(role="api")
     assert_explicit_origins(resolved.cors_origins)
+    if resolved.auth_mode == "clerk" and not resolved.clerk_authorized_parties:
+        logger.warning(
+            "CLERK_AUTHORIZED_PARTIES is empty, so azp is not checked. "
+            "Set it on a public API. An empty list is only for local Clerk."
+        )
 
     if store is None:
         run_migrations(resolved.database_url)
@@ -59,6 +66,7 @@ def create_app(
     app.state.store = store
     app.state.queue = queue
     app.state.storage = storage
+    app.state.limiter = limiter if limiter is not None else build_limiter(resolved)
     app.state.fetch_jwks = fetch_jwks or _jwks_fetcher(resolved)
     app.add_middleware(
         CORSMiddleware,
@@ -73,10 +81,10 @@ def create_app(
 def _jwks_fetcher(settings: Settings) -> Callable[[], dict[str, object]]:
     cache: dict[str, object] = {"expires": 0.0, "body": None}
 
-    def fetch() -> dict[str, object]:
+    def load(*, force: bool) -> dict[str, object]:
         now = time.time()
         body = cache["body"]
-        if isinstance(body, dict) and now < float(cache["expires"]):
+        if not force and isinstance(body, dict) and now < float(cache["expires"]):
             return body
         url = settings.clerk_jwks_url or f"{settings.clerk_issuer}/.well-known/jwks.json"
         with urllib.request.urlopen(url, timeout=5) as response:
@@ -88,4 +96,11 @@ def _jwks_fetcher(settings: Settings) -> Callable[[], dict[str, object]]:
         logger.info("refreshed clerk jwks")
         return payload
 
+    def fetch() -> dict[str, object]:
+        return load(force=False)
+
+    def refresh() -> dict[str, object]:
+        return load(force=True)
+
+    fetch.refresh = refresh  # type: ignore[attr-defined]
     return fetch
