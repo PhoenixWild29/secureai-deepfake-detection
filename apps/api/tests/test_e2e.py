@@ -35,7 +35,14 @@ def _services_available() -> bool:
     return True
 
 
-pytestmark = pytest.mark.skipif(not _services_available(), reason="redis or postgres unavailable")
+@pytest.fixture(autouse=True)
+def _require_live_services() -> None:
+    if _services_available():
+        return
+    reason = "redis or postgres unavailable"
+    if os.environ.get("REQUIRE_SERVICES") == "1":
+        pytest.fail(reason)
+    pytest.skip(reason)
 
 
 def _clip() -> bytes:
@@ -56,6 +63,7 @@ def test_worker_completes_a_queued_upload(tmp_path: Path, monkeypatch: pytest.Mo
 
     client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
     client.delete(QUEUE_KEY)
+    client.delete(f"{QUEUE_KEY}:inflight")
     monkeypatch.setenv("AUTH_MODE", "dev")
     monkeypatch.setenv("DEV_AUTH_SUBJECT", "user_e2e")
     monkeypatch.setenv("DATABASE_URL", DATABASE_URL)
@@ -118,3 +126,4 @@ def test_worker_completes_a_queued_upload(tmp_path: Path, monkeypatch: pytest.Mo
         assert 0.0 <= body["confidence"] <= 1.0
         assert body["detail"] is None
     client.delete(QUEUE_KEY)
+    client.delete(f"{QUEUE_KEY}:inflight")

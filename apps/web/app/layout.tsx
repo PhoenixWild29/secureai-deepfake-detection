@@ -3,16 +3,13 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AuthButtons } from "./auth-buttons";
+import { clerkEnabled } from "../lib/clerk-config";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SecureAI Guardian",
   description: "Upload a short video and read a CPU detection result.",
 };
-
-function clerkEnabled(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
-}
 
 function Shell({ children, showAuth }: { children: ReactNode; showAuth: boolean }) {
   return (
@@ -21,6 +18,7 @@ function Shell({ children, showAuth }: { children: ReactNode; showAuth: boolean 
         <strong>SecureAI</strong>
         <Link href="/">Home</Link>
         <Link href="/upload">Upload</Link>
+        <Link href="/jobs">History</Link>
         {showAuth ? <AuthButtons /> : null}
       </nav>
       {children}

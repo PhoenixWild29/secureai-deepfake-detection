@@ -1,10 +1,12 @@
 import logging
+import time
 from pathlib import Path
 
 import pytest
 
 from detector import detect_video
 from secureai_shared.models import JobStatus
+from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.storage import FileSystemStorage, new_object_key
 from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore
 from worker.__main__ import run
@@ -66,6 +68,73 @@ def test_process_job_on_unknown_id(tmp_path: Path) -> None:
     store = MemoryJobStore()
     storage = FileSystemStorage(tmp_path)
     assert process_job(store, storage, "job_0123456789ab") is None
+
+
+def test_process_job_times_out_with_a_fixed_detail(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    store, storage, job = _job(tmp_path)
+
+    def hang(path: str) -> dict[str, object]:
+        time.sleep(5)
+        return {"prediction": "real", "confidence": 1, "path": path}
+
+    with caplog.at_level(logging.ERROR, logger="secureai.worker"):
+        finished = process_job(store, storage, job.id, detect=hang, timeout_seconds=0.2)
+    assert finished is not None
+    assert finished.status is JobStatus.failed
+    assert finished.detail == PUBLIC_FAILURE_DETAIL
+    assert str(tmp_path) not in caplog.text
+    assert any("detector timed out" in record.message for record in caplog.records)
+
+
+def test_process_job_rejects_a_changed_object(tmp_path: Path) -> None:
+    store, storage, job = _job(tmp_path, b"clip-bytes")
+    rewritten = store.get_any(job.id)
+    assert rewritten is not None
+    store._rows[job.id] = rewritten.model_copy(update={"object_etag": "not-the-file"})  # noqa: SLF001
+
+    def explode(path: str) -> dict[str, object]:
+        raise AssertionError(path)
+
+    finished = process_job(store, storage, job.id, detect=explode)
+    assert finished is not None
+    assert finished.status is JobStatus.failed
+    assert finished.detail == PUBLIC_FAILURE_DETAIL
+
+
+def test_run_requeues_when_processing_raises(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AUTH_MODE", "dev")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://unused/unused")
+    monkeypatch.setenv("QUEUE_BACKEND", "memory")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("STORAGE_BACKEND", "filesystem")
+    monkeypatch.setenv("MEDIA_ROOT", str(tmp_path))
+    store = MemoryJobStore()
+    queue = MemoryJobQueue()
+    storage = FileSystemStorage(tmp_path)
+    key = new_object_key("user_dev", "clip.mp4")
+    storage.put(key, b"clip-bytes", "video/mp4")
+    job = store.create(
+        user_id="user_dev",
+        filename="clip.mp4",
+        content_type="video/mp4",
+        byte_size=len(b"clip-bytes"),
+        object_key=key,
+    )
+    queue.publish(job.id)
+    monkeypatch.setattr("worker.__main__.PostgresJobStore", lambda url: store)
+    monkeypatch.setattr("worker.__main__.build_queue", lambda settings: queue)
+    monkeypatch.setattr("worker.__main__.build_storage", lambda settings: storage)
+
+    def boom(*args: object, **kwargs: object) -> None:
+        del args, kwargs
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr("worker.__main__.process_job", boom)
+    assert run(["--once"]) == 2
+    assert queue.consume() == job.id
 
 
 def test_missing_database_exits(monkeypatch: pytest.MonkeyPatch) -> None:

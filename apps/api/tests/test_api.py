@@ -3,8 +3,12 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from conftest import _client, make_settings
+from secureai_shared.limits import MemoryRateLimiter
+from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.storage import new_object_key
 from secureai_shared.settings import Settings
+from secureai_shared.store import PUBLIC_FAILURE_DETAIL
 
 
 def test_import_does_not_connect() -> None:
@@ -141,6 +145,116 @@ def test_cors_allows_local_guardian(stack) -> None:
         },
     )
     assert response.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+
+def test_job_create_uses_stored_size(tmp_path: Path) -> None:
+    client, _store, queue, storage = _client(tmp_path, make_settings(tmp_path, max_upload_bytes=4))
+    key = new_object_key("user_dev", "clip.mp4")
+    storage.put(key, b"12345", "video/mp4")
+    with client:
+        response = client.post(
+            "/v1/jobs",
+            headers={"Authorization": "Bearer dev"},
+            json={"object_key": key, "filename": "clip.mp4", "byte_size": 1},
+        )
+    assert response.status_code == 413
+    assert queue.consume() is None
+
+
+def test_list_jobs_is_owner_scoped(stack) -> None:
+    client, store, _queue, storage = stack
+    headers = {"Authorization": "Bearer dev"}
+    uploaded = client.post(
+        "/v1/media",
+        headers=headers,
+        files={"file": ("clip.mp4", b"video-bytes", "video/mp4")},
+    )
+    media = uploaded.json()
+    created = client.post(
+        "/v1/jobs",
+        headers=headers,
+        json={"object_key": media["object_key"], "filename": "clip.mp4"},
+    )
+    assert created.status_code == 202
+    foreign_key = new_object_key("user_other", "clip.mp4")
+    storage.put(foreign_key, b"abc", "video/mp4")
+    store.create(
+        user_id="user_other",
+        filename="clip.mp4",
+        content_type="video/mp4",
+        byte_size=3,
+        object_key=foreign_key,
+    )
+    listed = client.get("/v1/jobs", headers=headers)
+    assert listed.status_code == 200
+    body = listed.json()
+    assert [row["id"] for row in body] == [created.json()["id"]]
+    assert body[0]["byte_size"] == len(b"video-bytes")
+    assert body[0]["object_etag"]
+
+
+def test_rate_limit_on_job_create(tmp_path: Path) -> None:
+    settings = make_settings(tmp_path)
+    store_queue_storage = _client(tmp_path, settings)
+    client, _store, _queue, storage = store_queue_storage
+    app_client = client
+    # Rebuild with a tiny limiter while keeping the same store, queue, and files.
+    from app.main import create_app as build
+
+    limited = build(
+        settings=settings,
+        store=client.app.state.store,  # type: ignore[attr-defined]
+        queue=client.app.state.queue,  # type: ignore[attr-defined]
+        storage=storage,
+        limiter=MemoryRateLimiter({"jobs": 1, "uploads": 10}, 60),
+    )
+    headers = {"Authorization": "Bearer dev"}
+    with TestClient(limited) as api:
+        first_key = new_object_key("user_dev", "clip.mp4")
+        second_key = new_object_key("user_dev", "other.mp4")
+        storage.put(first_key, b"one", "video/mp4")
+        storage.put(second_key, b"two", "video/mp4")
+        ok = api.post("/v1/jobs", headers=headers, json={"object_key": first_key, "filename": "clip.mp4"})
+        blocked = api.post(
+            "/v1/jobs",
+            headers=headers,
+            json={"object_key": second_key, "filename": "other.mp4"},
+        )
+    assert ok.status_code == 202
+    assert blocked.status_code == 429
+    assert blocked.json()["detail"] == "Too many requests"
+    app_client.close()
+
+
+def test_failed_enqueue_marks_the_row_failed(tmp_path: Path) -> None:
+    class DownQueue(MemoryJobQueue):
+        def publish(self, job_id: str) -> None:
+            del job_id
+            raise RuntimeError("redis down")
+
+    client, store, _queue, storage = _client(tmp_path, make_settings(tmp_path))
+    from app.main import create_app as build
+
+    api_app = build(
+        settings=make_settings(tmp_path),
+        store=store,
+        queue=DownQueue(),
+        storage=storage,
+    )
+    key = new_object_key("user_dev", "clip.mp4")
+    storage.put(key, b"video", "video/mp4")
+    with TestClient(api_app) as api:
+        response = api.post(
+            "/v1/jobs",
+            headers={"Authorization": "Bearer dev"},
+            json={"object_key": key, "filename": "clip.mp4", "byte_size": 1},
+        )
+    assert response.status_code == 503
+    rows = list(store._rows.values())  # noqa: SLF001
+    assert len(rows) == 1
+    assert rows[0].status.value == "failed"
+    assert rows[0].detail == PUBLIC_FAILURE_DETAIL
+    client.close()
 
 
 def test_wildcard_cors_refuses_to_boot(tmp_path: Path) -> None:

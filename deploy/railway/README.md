@@ -40,7 +40,7 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `AUTH_MODE` | api | `clerk` (the default). Required with `CLERK_ISSUER` |
 | `CLERK_ISSUER` | api | Clerk Frontend API origin, no trailing slash |
 | `CLERK_JWKS_URL` | api | Optional. Defaults to `{CLERK_ISSUER}/.well-known/jwks.json` |
-| `CLERK_AUTHORIZED_PARTIES` | api | Comma-separated allowed `azp` values, including the Vercel origin |
+| `CLERK_AUTHORIZED_PARTIES` | api | Comma-separated allowed `azp` values, including the Vercel origin. Required on a public API. Empty skips `azp` and is only for local Clerk |
 | `DATABASE_URL` | api, worker | Postgres URL using the `postgresql+psycopg://` driver |
 | `REDIS_URL` | api, worker | Shared Redis instance |
 | `QUEUE_BACKEND` | api, worker | `redis` (the default) |
@@ -49,6 +49,14 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | api, worker | Bucket credentials |
 | `S3_ENDPOINT` | api, worker | Railway or other S3-compatible endpoint. Empty for AWS |
 | `S3_REGION` | api, worker | Optional. Default `us-east-1` |
+| `S3_AUTO_CREATE_BUCKET` | api, worker | Leave unset or `false` in production. `true` is for MinIO/local only |
+| `DETECTOR_TIMEOUT_SECONDS` | worker | Optional. Default `60`. Hard stop around `detect_video` |
+| `STUCK_JOB_SECONDS` | worker | Optional. Default `180`. Must be greater than the detector timeout |
+| `JOB_MAX_ATTEMPTS` | worker | Optional. Default `3` |
+| `RATE_LIMIT_JOBS` | api | Optional. Default `30` per window. `0` disables |
+| `RATE_LIMIT_UPLOADS` | api | Optional. Default `60` per window. `0` disables |
+| `RATE_LIMIT_WINDOW_SECONDS` | api | Optional. Default `60` |
+| `MEDIA_ROOT` | api, worker | Only for `STORAGE_BACKEND=filesystem`. Use the same absolute path on both |
 | `CORS_ORIGINS` | api | Explicit Guardian origins, comma-separated. The API rejects `*` |
 | `DETECTOR_MODE` | worker | `cpu` (the default). `stub` does not read the file |
 

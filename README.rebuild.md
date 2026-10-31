@@ -1,4 +1,4 @@
-# SecureAI rebuild (Phase 1)
+# SecureAI rebuild (Phase 2)
 
 The legacy Flask API (`api.py`), React Guardian (`secureai-guardian/`), and the repository-root `Dockerfile` stay in place. The saleable product lives under `apps/` and `packages/`.
 
@@ -7,7 +7,7 @@ Source for review is `main`.
 ## Layout
 
 ```
-apps/web/             Next.js Guardian. Uploads a video and polls a job.
+apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, and shows a report.
 apps/api/             FastAPI. Clerk JWT (or a private dev bypass), Postgres, Redis.
 apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API.
 packages/detector/    DETECTOR_MODE=cpu samples frames. DETECTOR_MODE=stub hashes the path.
@@ -17,15 +17,21 @@ deploy/vercel/        Notes for the apps/web Vercel project.
 deploy/local/         Optional Redis, Postgres, and MinIO compose file.
 ```
 
-Postgres holds job rows. Redis holds job ids (`QUEUE_KEY`, default `secureai:jobs`). Object storage holds the bytes. A filename alone is not the media.
+Postgres holds job rows. Redis holds job ids (`QUEUE_KEY`, default `secureai:jobs`) plus an in-flight lease at `{QUEUE_KEY}:inflight`. Object storage holds the bytes. A filename alone is not the media.
 
-A worker that dies after Redis pops an id and before it finishes the row can leave that job `queued` or `processing` with nobody to retry it. Recovery is a later phase.
+A worker that dies after Redis pops an id keeps that id in the lease. Each loop, the worker sweeps leases older than `STUCK_JOB_SECONDS` (default 180, and it must be greater than `DETECTOR_TIMEOUT_SECONDS`). The job is requeued until `JOB_MAX_ATTEMPTS` (default 3), then marked failed with `Detection failed.` If `claim` or `fail` raises, the worker puts the id back or marks the row failed, then exits so the process supervisor restarts it. The id is not left only in the lease.
+
+`detect_video` runs in a child process. If it exceeds `DETECTOR_TIMEOUT_SECONDS` (default 60), the worker stops that process and fails the job with the same fixed detail. The traceback stays in the log.
 
 ## Auth
 
 Job routes are not public. `GET /health` is public and reports `auth` as `clerk` or `dev`.
 
-`AUTH_MODE` defaults to `clerk`. The API refuses to start until `CLERK_ISSUER` is set to the Clerk Frontend API origin, for example `https://<slug>.clerk.accounts.dev`. The API loads JWKS from `CLERK_JWKS_URL` or `{CLERK_ISSUER}/.well-known/jwks.json`, checks RS256, `exp`, `iss`, and `sub`, and checks `azp` when `CLERK_AUTHORIZED_PARTIES` is non-empty. Set that list in any deployed environment.
+`AUTH_MODE` defaults to `clerk`. The API refuses to start until `CLERK_ISSUER` is set to the Clerk Frontend API origin, for example `https://<slug>.clerk.accounts.dev`. The API loads JWKS from `CLERK_JWKS_URL` or `{CLERK_ISSUER}/.well-known/jwks.json`, checks RS256, `exp`, `iss`, and `sub`, and refreshes JWKS once when the token `kid` is not in the cache.
+
+`CLERK_AUTHORIZED_PARTIES` is a comma-separated list of allowed `azp` values (the Guardian origin). When the list is non-empty, a token whose `azp` is missing or not in the list is rejected. When the list is empty, the API skips the `azp` check and logs a warning. An empty list is only for local Clerk. A public API sets the list, and `GET /health` reports `"auth":"clerk"` in that mode.
+
+The web app asks Clerk for a session token on every poll. Session tokens last about a minute, and a detection can run longer than that.
 
 `AUTH_MODE=dev` accepts only `Authorization: Bearer dev` and stamps `DEV_AUTH_SUBJECT` (default `user_dev`). It is a private-workstation bypass. Do not put it on a public host. Junk tokens are rejected in this mode too. Anonymous requests are rejected in both modes.
 
@@ -64,11 +70,13 @@ export AUTH_MODE=dev
 export DATABASE_URL=postgresql+psycopg://secureai:secureai@127.0.0.1:5432/secureai
 export REDIS_URL=redis://127.0.0.1:6379/0
 export STORAGE_BACKEND=filesystem
-export MEDIA_ROOT=.media
+export MEDIA_ROOT=/var/lib/secureai/media
 export CORS_ORIGINS=http://localhost:3000
 cd apps/api
 uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000
 ```
+
+`MEDIA_ROOT` is an absolute path. The API command above runs with working directory `apps/api`. A relative `.media` would be `apps/api/.media` for the API and `./.media` for a worker started at the repo root, so the two processes would not see the same files. Create the directory first (`mkdir -p /var/lib/secureai/media`).
 
 The factory migrates on startup (`alembic upgrade head`). Importing `app.main` does not connect. You can also migrate by hand:
 
@@ -97,9 +105,17 @@ curl -s -X POST http://localhost:8000/v1/jobs \
   -d '{"object_key":"<key from the upload>","filename":"clip.mp4","content_type":"video/mp4","byte_size":128}'
 ```
 
-`POST /v1/uploads` returns `mode: direct` and `upload_url: /v1/media` for the filesystem backend. With `STORAGE_BACKEND=s3` it returns a presigned PUT URL and the object key. Keys look like `media/<user>/<32 hex>.<suffix>`.
+`POST /v1/uploads` returns `mode: direct` and `upload_url: /v1/media` for the filesystem backend. With `STORAGE_BACKEND=s3` it returns a presigned POST. The policy includes `content-length-range` from 1 byte through 50 MB, so a larger body is rejected by the bucket. Keys look like `media/<user>/<32 hex>.<suffix>`.
 
-S3 settings, when you use them: `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, optional `S3_ENDPOINT` (MinIO or Railway), `S3_REGION`.
+Job creation reads the object size and ETag from storage and stores those. The client-reported `byte_size` is not the size on the row. An empty object or one over 50 MB is rejected. If Redis rejects the id after the row insert, the API retries, then marks the row failed and returns 503. The row is not left `queued` with no id in Redis.
+
+Before the worker scores a file, it reads the size and ETag again. A rewrite after the job was accepted fails the job instead of being scored. A failed S3 download deletes its temp file.
+
+`POST /v1/uploads`, `POST /v1/media`, and `POST /v1/jobs` are rate limited per caller. Defaults are 60 uploads and 30 jobs per 60 seconds (`RATE_LIMIT_UPLOADS`, `RATE_LIMIT_JOBS`, `RATE_LIMIT_WINDOW_SECONDS`). `0` disables that bucket. With `QUEUE_BACKEND=redis` the counters live in Redis. A limited request returns 429 and `Too many requests`.
+
+`GET /v1/jobs` lists the caller's jobs, newest first.
+
+S3 settings, when you use them: `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, optional `S3_ENDPOINT` (MinIO or Railway), `S3_REGION`. `S3_AUTO_CREATE_BUCKET` defaults to false. The API and worker do not call `CreateBucket` unless you set `S3_AUTO_CREATE_BUCKET=true`, which is for MinIO or another local bucket only.
 
 ## Run the worker
 
@@ -121,7 +137,7 @@ Generate a tiny clip, store it, and score it (needs Redis, Postgres, and the sch
 python -m worker --demo --once
 ```
 
-`DETECTOR_MODE` defaults to `cpu` (OpenCV frame sample, no GPU, no downloaded weights). `DETECTOR_MODE=stub` hashes the path and does not open the file. Failed jobs store the fixed detail `Detection failed.` The traceback stays in the worker log.
+`DETECTOR_MODE` defaults to `cpu` (OpenCV frame sample, no GPU, no downloaded weights). `DETECTOR_MODE=stub` hashes the path and does not open the file. Failed jobs store the fixed detail `Detection failed.` The traceback stays in the worker log. `DETECTOR_TIMEOUT_SECONDS` bounds each `detect_video` call. `STUCK_JOB_SECONDS` and `JOB_MAX_ATTEMPTS` bound crash recovery.
 
 `apps/worker/pyproject.toml` marks dependencies as dynamic. `apps/worker/setup.py` points them at `packages/shared` and `packages/detector`, so a clean `pip install ./apps/worker` installs both and the worker imports. The editable checkout command above passes `--no-deps` so pip does not try to install those same paths a second time.
 
@@ -136,7 +152,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload` explains that a JWT is required and does not call the API.
+Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
 
 Private workstation, matching the API dev bypass:
 
@@ -160,12 +176,12 @@ PYTHONPATH=apps/api python -m pytest \
   apps/api/tests packages/shared/tests packages/detector/tests apps/worker/tests -q
 ```
 
-The end-to-end test skips when Redis or Postgres is down. It uploads a generated clip, runs `python -m worker --once`, and expects a completed job.
+The end-to-end test uploads a generated clip, runs `python -m worker --once`, and expects a completed job. It skips when Redis or Postgres is down. Set `REQUIRE_SERVICES=1` to fail instead of skip. The rebuild workflow sets that, because those services are part of the job. S3 is exercised with a fake client in `packages/shared/tests/test_storage.py` (presigned `content-length-range`, bucket auto-create off, temp-file cleanup). There is no live bucket in CI.
 
 CI is `.github/workflows/rebuild.yml`. It starts Redis and Postgres service containers and runs those tests. It does not build Docker images yet. The older workflows still cover the legacy tree.
 
 `apps/api/requirements-dev.txt` pins `httpx2` because Starlette's TestClient imports `httpx2`. That name is intentional.
 
-## Still later
+## Still later (Phase 3)
 
-Guardian history and a richer account page, billing, the legacy ensemble, stuck-job recovery, production Clerk authorized parties on a real project, and Docker image builds in CI. Solana stays deferred.
+Billing (Stripe), organizations, the legacy GPU ensemble, and Docker image builds in CI. Solana stays deferred. The legacy Flask tree stays in the repo.

@@ -6,6 +6,7 @@ MinIO, R2) is the deployed path. Object keys are server-generated.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import tempfile
 from dataclasses import dataclass
@@ -22,6 +23,22 @@ _SUFFIXES = {".mp4", ".mov", ".webm", ".avi", ".mkv"}
 class LocalMedia:
     path: Path
     cleanup: bool
+
+
+@dataclass(frozen=True)
+class ObjectStat:
+    """Size and fingerprint recorded at enqueue and checked again before scoring."""
+
+    size: int
+    etag: str
+
+
+@dataclass(frozen=True)
+class PresignedUpload:
+    """Browser POST. `fields` includes the policy that caps content-length-range."""
+
+    url: str
+    fields: dict[str, str]
 
 
 def sanitize_user(user_id: str) -> str:
@@ -72,7 +89,20 @@ class FileSystemStorage:
             raise FileNotFoundError(key)
         return LocalMedia(path=path, cleanup=False)
 
-    def presign_put(self, key: str, content_type: str | None) -> str | None:
+    def object_size(self, key: str) -> int | None:
+        stat = self.object_stat(key)
+        if stat is None:
+            return None
+        return stat.size
+
+    def object_stat(self, key: str) -> ObjectStat | None:
+        path = self._path(key)
+        if not path.is_file():
+            return None
+        data = path.read_bytes()
+        return ObjectStat(size=len(data), etag=hashlib.md5(data).hexdigest())
+
+    def presign_post(self, key: str, content_type: str | None) -> PresignedUpload | None:
         del key, content_type
         return None
 
@@ -91,10 +121,19 @@ class S3Storage:
 
     supports_presign = True
 
-    def __init__(self, client: object, bucket: str) -> None:
+    def __init__(
+        self,
+        client: object,
+        bucket: str,
+        *,
+        auto_create: bool = False,
+        max_bytes: int = 50_000_000,
+    ) -> None:
         self.client = client
         self.bucket = bucket
-        self._ensure_bucket()
+        self.max_bytes = max_bytes
+        if auto_create:
+            self._ensure_bucket()
 
     def put(self, key: str, data: bytes, content_type: str | None) -> None:
         self._check(key)
@@ -118,20 +157,56 @@ class S3Storage:
         handle = tempfile.NamedTemporaryFile(suffix=Path(key).suffix, delete=False)
         handle.close()
         dest = Path(handle.name)
-        self.client.download_file(self.bucket, key, str(dest))  # type: ignore[attr-defined]
+        try:
+            self.client.download_file(self.bucket, key, str(dest))  # type: ignore[attr-defined]
+        except Exception:
+            dest.unlink(missing_ok=True)
+            raise
         return LocalMedia(path=dest, cleanup=True)
 
-    def presign_put(self, key: str, content_type: str | None) -> str | None:
+    def object_size(self, key: str) -> int | None:
+        stat = self.object_stat(key)
+        if stat is None:
+            return None
+        return stat.size
+
+    def object_stat(self, key: str) -> ObjectStat | None:
         self._check(key)
-        return self.client.generate_presigned_url(  # type: ignore[attr-defined]
-            "put_object",
-            Params={
-                "Bucket": self.bucket,
-                "Key": key,
-                "ContentType": content_type or "application/octet-stream",
-            },
+        try:
+            head = self.client.head_object(Bucket=self.bucket, Key=key)  # type: ignore[attr-defined]
+        except Exception:
+            return None
+        length = head.get("ContentLength")
+        if length is None:
+            return None
+        etag = str(head.get("ETag", "")).strip('"')
+        return ObjectStat(size=int(length), etag=etag)
+
+    def presign_post(self, key: str, content_type: str | None) -> PresignedUpload | None:
+        """Presigned POST whose policy rejects bodies outside 1..max_bytes.
+
+        content-length-range is the cap. The worker later re-reads size and
+        ETag, so a rewrite after the job is accepted fails the job instead of
+        being scored.
+        """
+
+        self._check(key)
+        content_type = content_type or "application/octet-stream"
+        payload = self.client.generate_presigned_post(  # type: ignore[attr-defined]
+            Bucket=self.bucket,
+            Key=key,
+            Fields={"Content-Type": content_type},
+            Conditions=[
+                ["content-length-range", 1, self.max_bytes],
+                {"Content-Type": content_type},
+            ],
             ExpiresIn=900,
         )
+        url = payload.get("url") if isinstance(payload, dict) else None
+        fields = payload.get("fields") if isinstance(payload, dict) else None
+        if not isinstance(url, str) or not isinstance(fields, dict):
+            return None
+        return PresignedUpload(url=url, fields={str(name): str(value) for name, value in fields.items()})
 
     def _ensure_bucket(self) -> None:
         try:
@@ -160,5 +235,10 @@ def build_storage(settings: Settings) -> FileSystemStorage | S3Storage:
     if settings.storage_backend == "filesystem":
         return FileSystemStorage(Path(settings.media_root))
     if settings.storage_backend == "s3":
-        return S3Storage(build_s3_client(settings), settings.s3_bucket)
+        return S3Storage(
+            build_s3_client(settings),
+            settings.s3_bucket,
+            auto_create=settings.s3_auto_create_bucket,
+            max_bytes=settings.max_upload_bytes,
+        )
     raise RuntimeError(f"Unsupported STORAGE_BACKEND={settings.storage_backend!r}")

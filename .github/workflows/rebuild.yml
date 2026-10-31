@@ -1,6 +1,9 @@
 name: Rebuild
 
 # Lint, typecheck via next build, and pytest. This workflow does not build Docker images yet.
+# Redis and Postgres are service containers. REQUIRE_SERVICES=1 fails the job
+# when those tests cannot reach them. S3 is covered with a fake client in
+# packages/shared/tests/test_storage.py (no live bucket).
 
 on:
   pull_request:
@@ -74,6 +77,7 @@ jobs:
       MEDIA_ROOT: /tmp/secureai-media
       DETECTOR_MODE: cpu
       CORS_ORIGINS: http://localhost:3000
+      REQUIRE_SERVICES: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

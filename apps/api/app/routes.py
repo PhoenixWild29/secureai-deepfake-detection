@@ -32,6 +32,7 @@ class HealthResponse(BaseModel):
 class UploadIntent(BaseModel):
     filename: str = Field(min_length=1, max_length=255)
     content_type: str | None = Field(default=None, max_length=128)
+    byte_size: int | None = Field(default=None, ge=0, le=50_000_000)
 
 
 class UploadTicket(BaseModel):
@@ -40,6 +41,7 @@ class UploadTicket(BaseModel):
     upload_url: str
     object_key: str | None = None
     headers: dict[str, str] = Field(default_factory=dict)
+    fields: dict[str, str] = Field(default_factory=dict)
 
 
 class MediaStored(BaseModel):
@@ -67,26 +69,32 @@ def create_upload(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> UploadTicket:
-    """Tell the client where to put bytes. Filesystem uses the API; S3 is presigned."""
+    """Tell the client where to put bytes. Filesystem uses the API; S3 is a presigned POST."""
 
+    _limit(request, "uploads", user.subject)
     try:
         filename = clean_filename(body.filename)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid filename") from exc
+    settings = request.app.state.settings
+    if body.byte_size is not None and (
+        body.byte_size < 1 or body.byte_size > settings.max_upload_bytes
+    ):
+        raise HTTPException(status_code=413, detail="Upload exceeds the size limit")
 
     storage = request.app.state.storage
     content_type = body.content_type or "application/octet-stream"
     if storage.supports_presign:
         key = new_object_key(user.subject, filename)
-        url = storage.presign_put(key, content_type)
-        if not url:
+        ticket = storage.presign_post(key, content_type)
+        if ticket is None:
             raise HTTPException(status_code=500, detail="Could not prepare upload")
         return UploadTicket(
             mode="presigned",
-            method="PUT",
-            upload_url=url,
+            method="POST",
+            upload_url=ticket.url,
             object_key=key,
-            headers={"Content-Type": content_type},
+            fields=ticket.fields,
         )
     return UploadTicket(mode="direct", method="POST", upload_url="/v1/media")
 
@@ -97,8 +105,9 @@ async def upload_media(
     user: Annotated[AuthContext, Depends(require_user)],
     file: Annotated[UploadFile, File()],
 ) -> MediaStored:
-    """Store bytes for the filesystem backend. S3 clients PUT the presigned URL instead."""
+    """Store bytes for the filesystem backend. S3 clients POST the presigned form instead."""
 
+    _limit(request, "uploads", user.subject)
     settings = request.app.state.settings
     try:
         filename = clean_filename(file.filename or "")
@@ -128,27 +137,46 @@ def create_job(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> JobRecord:
-    """Create a Postgres row for an object this caller already stored, then queue its id."""
+    """Create a Postgres row for an object this caller already stored, then queue its id.
 
+    The stored size and etag come from object storage. The client byte_size is ignored.
+    If the queue rejects the id, the row is marked failed so it is not left queued forever.
+    """
+
+    _limit(request, "jobs", user.subject)
     try:
         filename = clean_filename(body.filename)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid filename") from exc
     if not is_owned_key(user.subject, body.object_key):
         raise HTTPException(status_code=400, detail="Upload not found")
-    if not request.app.state.storage.exists(body.object_key):
+
+    settings = request.app.state.settings
+    stat = request.app.state.storage.object_stat(body.object_key)
+    if stat is None:
         raise HTTPException(status_code=400, detail="Upload not found")
+    if stat.size < 1 or stat.size > settings.max_upload_bytes:
+        raise HTTPException(status_code=413, detail="Upload exceeds the size limit")
 
     job = request.app.state.store.create(
         user_id=user.subject,
         filename=filename,
         content_type=body.content_type,
-        byte_size=body.byte_size,
+        byte_size=stat.size,
         object_key=body.object_key,
+        object_etag=stat.etag,
     )
-    request.app.state.queue.publish(job.id)
+    _publish_or_fail(request, job)
     logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
     return job
+
+
+@router.get("/v1/jobs", response_model=list[JobRecord])
+def list_jobs(
+    request: Request,
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> list[JobRecord]:
+    return request.app.state.store.list_for_user(user.subject, limit=50)
 
 
 @router.get("/v1/jobs/{job_id}", response_model=JobRecord)
@@ -163,3 +191,24 @@ def get_job(
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+
+def _limit(request: Request, bucket: str, subject: str) -> None:
+    if not request.app.state.limiter.allow(bucket, subject):
+        raise HTTPException(status_code=429, detail="Too many requests")
+
+
+def _publish_or_fail(request: Request, job: JobRecord) -> None:
+    last: Exception | None = None
+    for _attempt in range(3):
+        try:
+            request.app.state.queue.publish(job.id)
+            return
+        except Exception as exc:
+            last = exc
+    logger.error("enqueue failed job_id=%s", job.id, exc_info=last)
+    try:
+        request.app.state.store.fail(job.id)
+    except Exception:
+        logger.exception("could not fail unqueued job_id=%s", job.id)
+    raise HTTPException(status_code=503, detail="Could not queue the job") from last

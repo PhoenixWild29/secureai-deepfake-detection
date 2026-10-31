@@ -20,6 +20,8 @@ export const config = {
   matcher: [
     "/upload",
     "/upload/:path*",
+    "/jobs",
+    "/jobs/:path*",
     "/sign-in",
     "/sign-in/:path*",
     "/sign-up",
