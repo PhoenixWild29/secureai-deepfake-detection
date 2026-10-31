@@ -6,7 +6,6 @@
     "watchPatterns": [
       "apps/api/**",
       "packages/shared/**",
-      "packages/detector/**",
       "deploy/railway/api.railway.json"
     ]
   },

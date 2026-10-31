@@ -4,10 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secureai-detector"
-version = "0.1.0"
-description = "CPU stub for SecureAI video detection (Phase 0)"
+version = "0.2.0"
+description = "CPU video detector for SecureAI (frame sample plus a fixed baseline)"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+  "numpy>=2,<3",
+  "opencv-python-headless>=4.10,<6",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

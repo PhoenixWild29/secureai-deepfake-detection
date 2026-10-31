@@ -1,20 +1,15 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-
-type JobResponse = {
-  id: string;
-  status: string;
-  filename: string;
-  prediction: string | null;
-  confidence: number | null;
-};
+import { submitDetection, type JobResponse } from "../../lib/api";
 
 type UploadFormProps = {
   apiUrl: string;
+  token?: string;
+  getToken?: () => Promise<string | null>;
 };
 
-export function UploadForm({ apiUrl }: UploadFormProps) {
+export function UploadForm({ apiUrl, token, getToken }: UploadFormProps) {
   const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,36 +18,24 @@ export function UploadForm({ apiUrl }: UploadFormProps) {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) {
-      setError("Choose a video first. Phase 0 sends the filename and size only.");
+      setError("Choose a video first.");
       setJob(null);
       return;
     }
-
     setPending(true);
     setError(null);
-    const base = apiUrl.replace(/\/$/, "");
-
+    setJob(null);
     try {
-      const created = await fetch(`${base}/v1/jobs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: file.name,
-          content_type: file.type || null,
-          byte_size: file.size,
-        }),
-      });
-      if (!created.ok) {
-        setJob(null);
-        setError(`API returned ${created.status}. Is it running at ${base}?`);
+      const bearer = token ?? (await getToken?.()) ?? null;
+      if (!bearer) {
+        setError("Sign in before uploading.");
         return;
       }
-      const ticket = (await created.json()) as JobResponse;
-      const fetched = await fetch(`${base}/v1/jobs/${ticket.id}`);
-      setJob(fetched.ok ? ((await fetched.json()) as JobResponse) : ticket);
-    } catch {
+      const finished = await submitDetection({ apiUrl, file, token: bearer });
+      setJob(finished);
+    } catch (caught) {
       setJob(null);
-      setError(`Could not reach the API at ${base}.`);
+      setError(caught instanceof Error ? caught.message : "Upload failed.");
     } finally {
       setPending(false);
     }
@@ -71,12 +54,11 @@ export function UploadForm({ apiUrl }: UploadFormProps) {
         }}
       />
       <button type="submit" disabled={pending}>
-        {pending ? "Queuing…" : "Queue detection"}
+        {pending ? "Detecting…" : "Run detection"}
       </button>
       <p className="note">
-        The file stays on this device. Phase 0 posts filename, type, and size to
-        the API and leaves the job queued. A separate worker cannot see that
-        ticket until Redis is connected in Phase 1.
+        The file is stored, then a worker scores a few frames. This page waits
+        for a completed or failed job.
       </p>
       {error ? (
         <p className="error" role="alert">
@@ -85,7 +67,10 @@ export function UploadForm({ apiUrl }: UploadFormProps) {
       ) : null}
       {job ? (
         <p className="result" aria-live="polite">
-          Queued <strong>{job.id}</strong> for {job.filename}. Status: {job.status}.
+          <strong>{job.id}</strong> · {job.filename} · {job.status}
+          {job.prediction ? ` · ${job.prediction}` : ""}
+          {job.confidence !== null ? ` · ${job.confidence}` : ""}
+          {job.detail ? ` · ${job.detail}` : ""}
         </p>
       ) : null}
     </form>

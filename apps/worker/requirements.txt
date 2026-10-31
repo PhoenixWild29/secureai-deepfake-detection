@@ -1,0 +1,9 @@
+# Pinned runtime for the worker image. Installed before the package so the
+# file: dependencies in pyproject.toml do not float these versions.
+sqlalchemy==2.1.6
+psycopg[binary]==3.3.6
+redis==8.1.0
+boto3==1.43.123
+pydantic==2.14.2
+numpy==2.5.4
+opencv-python-headless==5.0.0.93

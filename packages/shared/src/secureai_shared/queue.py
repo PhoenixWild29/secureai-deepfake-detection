@@ -1,112 +1,71 @@
-"""Phase 0 job queue.
-
-The product design requires Redis. This module does not connect to it.
-
-TODO(phase-1): add a RedisJobQueue that BRPOPs a list and stores the job row
-in Postgres. API and worker processes must share that queue. Delete the
-process-local MemoryJobQueue from the default path once Redis is required.
-"""
+"""Redis list of job ids. Postgres holds the rows. Memory is for unit tests."""
 
 from __future__ import annotations
 
-import os
-import threading
+from collections import deque
 from typing import Protocol
-from uuid import uuid4
 
-from secureai_shared.models import JobRecord, JobStatus
+from secureai_shared.settings import Settings
 
 
 class JobQueue(Protocol):
-    def enqueue(
-        self,
-        *,
-        filename: str,
-        content_type: str | None,
-        byte_size: int | None,
-    ) -> JobRecord: ...
+    def publish(self, job_id: str) -> None: ...
 
-    def get(self, job_id: str) -> JobRecord | None: ...
-
-    def claim_next(self) -> JobRecord | None: ...
-
-    def save(self, job: JobRecord) -> JobRecord: ...
+    def consume(self, timeout: float = 0) -> str | None: ...
 
 
 class MemoryJobQueue:
-    """Process-local queue. A second process cannot see these jobs."""
+    """Process-local id list. Two processes do not share it."""
 
     def __init__(self) -> None:
-        self._jobs: dict[str, JobRecord] = {}
-        self._order: list[str] = []
-        self._lock = threading.Lock()
+        self._ids: deque[str] = deque()
 
-    def enqueue(
-        self,
-        *,
-        filename: str,
-        content_type: str | None,
-        byte_size: int | None,
-    ) -> JobRecord:
-        job = JobRecord(
-            id=f"job_{uuid4().hex[:12]}",
-            filename=filename,
-            content_type=content_type,
-            byte_size=byte_size,
-            status=JobStatus.queued,
-        )
-        with self._lock:
-            self._jobs[job.id] = job
-            self._order.append(job.id)
-        return job
+    def publish(self, job_id: str) -> None:
+        self._ids.append(job_id)
 
-    def get(self, job_id: str) -> JobRecord | None:
-        with self._lock:
-            return self._jobs.get(job_id)
-
-    def claim_next(self) -> JobRecord | None:
-        with self._lock:
-            for job_id in self._order:
-                current = self._jobs[job_id]
-                if current.status is not JobStatus.queued:
-                    continue
-                claimed = current.model_copy(update={"status": JobStatus.processing})
-                self._jobs[job_id] = claimed
-                return claimed
-        return None
-
-    def save(self, job: JobRecord) -> JobRecord:
-        with self._lock:
-            if job.id not in self._jobs:
-                raise KeyError(job.id)
-            self._jobs[job.id] = job
-        return job
+    def consume(self, timeout: float = 0) -> str | None:
+        del timeout
+        if not self._ids:
+            return None
+        return self._ids.popleft()
 
 
 class RedisJobQueue:
-    """Placeholder. Constructing it is an error until Phase 1."""
+    """Shared queue. API LPUSHes ids; workers BRPOP them."""
 
-    def __init__(self, url: str) -> None:
-        self.url = url
-        raise NotImplementedError(
-            "QUEUE_BACKEND=redis is not implemented. Phase 1 will connect "
-            "Redis and Postgres. Use QUEUE_BACKEND=memory for the Phase 0 stub."
-        )
+    def __init__(self, url: str, *, key: str = "secureai:jobs") -> None:
+        import redis
+
+        if not url:
+            raise RuntimeError("QUEUE_BACKEND=redis requires REDIS_URL")
+        self.redis = redis.Redis.from_url(url, decode_responses=True)
+        self.key = key
+
+    def publish(self, job_id: str) -> None:
+        self.redis.lpush(self.key, job_id)
+
+    def consume(self, timeout: float = 0) -> str | None:
+        if timeout <= 0:
+            return self.redis.rpop(self.key)
+        try:
+            # redis-py can raise TimeoutError when BRPOP's socket wait ends
+            # with no payload. That is an empty poll, not a dead queue.
+            item = self.redis.brpop(self.key, timeout=max(1, int(timeout)))
+        except Exception as exc:
+            import redis
+
+            if not isinstance(exc, redis.exceptions.TimeoutError):
+                raise
+            return None
+        if item is None:
+            return None
+        _key, job_id = item
+        return job_id
 
 
-def build_queue() -> JobQueue:
-    """Build the queue selected by QUEUE_BACKEND.
-
-    Unset or `memory` returns a new MemoryJobQueue. `redis` raises
-    NotImplementedError even if REDIS_URL is present, so a stray secret
-    cannot silently change Phase 0 behavior.
-    """
-
-    backend = os.environ.get("QUEUE_BACKEND", "memory").strip().lower()
-    if backend in {"", "memory"}:
+def build_queue(settings: Settings) -> JobQueue:
+    if settings.queue_backend == "memory":
         return MemoryJobQueue()
-    if backend == "redis":
-        return RedisJobQueue(os.environ.get("REDIS_URL", ""))
-    raise ValueError(
-        f"Unsupported QUEUE_BACKEND={backend!r}. Phase 0 supports 'memory' only."
-    )
+    if settings.queue_backend == "redis":
+        return RedisJobQueue(settings.redis_url, key=settings.queue_key)
+    raise RuntimeError(f"Unsupported QUEUE_BACKEND={settings.queue_backend!r}")

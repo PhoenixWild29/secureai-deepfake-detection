@@ -1,42 +1,59 @@
-# Railway (Phase 0 stubs)
+# Railway (rebuild API and worker)
 
-Two CPU services. No GPU. No secrets in this repo. Postgres, Redis, and object storage are part of the product design and are **not** provisioned here.
+Two CPU services. No GPU. No secrets in this repo. Do not provision them from this change.
 
-These files are service-level Config as Code (`railway.json` shape). They are not a project graph. Do not also add `.railway/railway.ts` for the same services until a Railway project exists; each service should have one config model. When a project is linked, prefer one TypeScript project file and retire these manifests instead of owning the services twice.
+The files `deploy/railway/api.railway.json` and `deploy/railway/worker.railway.json` are reference Config as Code. Railway does **not** load them automatically. They do not sit at the service root, and a service with no config path keeps building the repository-root `Dockerfile`, which is the legacy Flask image.
 
-`railway.toml` is intentionally not used.
+## Config as Code is closing
 
-## Service settings
+Railway is closing Config as Code to new services. The sunset is **2026-12-01**. After that, set the same values in the service settings UI. Do not also add `.railway/railway.ts`. One source of settings per service. `railway.toml` is not used.
 
-Set the Railway **root directory** to the repository root for both services so the Dockerfiles can copy `packages/`. Paths inside the JSON files are relative to that root.
+Until the sunset, if you attach a config file, set the service **Config file path** explicitly:
 
-| Service | Config-as-code path | Dockerfile |
+| Service | Config file path | Dockerfile path |
 | --- | --- | --- |
 | `api` | `deploy/railway/api.railway.json` | `apps/api/Dockerfile` |
 | `worker` | `deploy/railway/worker.railway.json` | `apps/worker/Dockerfile` |
 
-Build locally:
+Root directory for both services is the **repository root**. The Dockerfiles copy `packages/`. A root directory of `apps/api` or `apps/worker` breaks those copies.
+
+In the service settings, set the builder to Dockerfile and the Dockerfile path to the table above. Leaving the Dockerfile path empty selects `/Dockerfile` and builds the legacy image.
+
+After 2026-12-01, enter those same Dockerfile paths, the API healthcheck path `/health`, and the restart policy in the dashboard. The JSON files stay as the checklist.
+
+Build locally from the repository root:
 
 ```bash
 docker build -f apps/api/Dockerfile -t secureai-api .
 docker build -f apps/worker/Dockerfile -t secureai-worker .
 ```
 
-The API listens on `$PORT` (default 8000) and serves `GET /health`. The worker process polls; it has no HTTP port.
+The API listens on `$PORT` (default 8000). The worker has no HTTP port. It BRPOPs the shared Redis list.
 
 ## Variables
 
-Set these in Railway. Do not commit values.
+Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these services.
 
-| Variable | Service | Phase 0 |
+| Variable | Service | Value |
 | --- | --- | --- |
 | `PORT` | api | Injected by Railway |
-| `QUEUE_BACKEND` | api, worker | `memory` (default). `redis` fails on purpose |
-| `CORS_ORIGINS` | api | Comma-separated Guardian origins, e.g. the Vercel URL |
-| `REDIS_URL` | api, worker | Reserved. Unread until Phase 1 |
-| `DATABASE_URL` | api | Reserved for Postgres job rows |
-| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | api, worker | Reserved for Railway object storage |
+| `AUTH_MODE` | api | `clerk` (the default). Required with `CLERK_ISSUER` |
+| `CLERK_ISSUER` | api | Clerk Frontend API origin, no trailing slash |
+| `CLERK_JWKS_URL` | api | Optional. Defaults to `{CLERK_ISSUER}/.well-known/jwks.json` |
+| `CLERK_AUTHORIZED_PARTIES` | api | Comma-separated allowed `azp` values, including the Vercel origin |
+| `DATABASE_URL` | api, worker | Postgres URL using the `postgresql+psycopg://` driver |
+| `REDIS_URL` | api, worker | Shared Redis instance |
+| `QUEUE_BACKEND` | api, worker | `redis` (the default) |
+| `QUEUE_KEY` | api, worker | Optional. Default `secureai:jobs`. Both services must match |
+| `STORAGE_BACKEND` | api, worker | `s3` for a Railway bucket, MinIO, or R2 |
+| `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | api, worker | Bucket credentials |
+| `S3_ENDPOINT` | api, worker | Railway or other S3-compatible endpoint. Empty for AWS |
+| `S3_REGION` | api, worker | Optional. Default `us-east-1` |
+| `CORS_ORIGINS` | api | Explicit Guardian origins, comma-separated. The API rejects `*` |
+| `DETECTOR_MODE` | worker | `cpu` (the default). `stub` does not read the file |
 
-Phase 1 adds Postgres, Redis, and a bucket to the project, then points `QUEUE_BACKEND` at Redis. Clerk JWT verification uses Clerk's JWKS on the API; the publishable key stays on Vercel, not here.
+`CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
+
+Start the API before the worker the first time. The API runs Alembic. The worker only reads and updates rows.
 
 Solana is out of scope.

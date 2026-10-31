@@ -1,3 +1,7 @@
+# Legacy Flask image. Rebuild services must not build this file.
+# Set the Railway Dockerfile path to apps/api/Dockerfile or apps/worker/Dockerfile.
+# See deploy/railway/README.md.
+#
 # SecureAI DeepFake Detection - Production Dockerfile
 
 FROM python:3.11-slim

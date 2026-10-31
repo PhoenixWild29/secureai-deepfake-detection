@@ -1,5 +1,5 @@
-"""CPU worker process for the Phase 0 job stub."""
+"""CPU worker process for the shared detection queue."""
 
-from worker.consumer import process_next
+from worker.consumer import process_job
 
-__all__ = ["process_next"]
+__all__ = ["process_job"]

@@ -1,5 +1,7 @@
 name: Rebuild
 
+# Lint, typecheck via next build, and pytest. This workflow does not build Docker images yet.
+
 on:
   pull_request:
   push:
@@ -38,6 +40,40 @@ jobs:
   api:
     name: API import and tests
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: secureai
+          POSTGRES_PASSWORD: secureai
+          POSTGRES_DB: secureai
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U secureai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      AUTH_MODE: dev
+      DEV_AUTH_SUBJECT: user_e2e
+      REDIS_URL: redis://127.0.0.1:6379/0
+      DATABASE_URL: postgresql+psycopg://secureai:secureai@127.0.0.1:5432/secureai
+      QUEUE_BACKEND: redis
+      QUEUE_KEY: secureai:jobs:ci
+      STORAGE_BACKEND: filesystem
+      MEDIA_ROOT: /tmp/secureai-media
+      DETECTOR_MODE: cpu
+      CORS_ORIGINS: http://localhost:3000
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,13 +85,16 @@ jobs:
           cache: pip
           cache-dependency-path: apps/api/requirements-dev.txt
 
+      - name: Install system libraries for OpenCV
+        run: sudo apt-get update && sudo apt-get install -y libglib2.0-0 libgomp1
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r apps/api/requirements-dev.txt
-          python -m pip install ./packages/shared ./packages/detector ./apps/worker
+          python -m pip install ./apps/worker
 
       - name: Import check and pytest
         run: |
-          PYTHONPATH=apps/api python -c "from app.main import app; assert app.title == 'SecureAI API'"
+          PYTHONPATH=apps/api python -c "from app.main import create_app; assert create_app.__name__ == 'create_app'"
           PYTHONPATH=apps/api python -m pytest apps/api/tests packages/shared/tests packages/detector/tests apps/worker/tests -q
