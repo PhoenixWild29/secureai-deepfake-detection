@@ -1,0 +1,123 @@
+:root {
+  color-scheme: light;
+  --bg: #f3f0e8;
+  --ink: #1b1916;
+  --muted: #5c564c;
+  --accent: #0f6b4c;
+  --accent-ink: #f7f4ee;
+  --line: #ddd6c8;
+  --card: #fffdf8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.shell {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.nav {
+  display: flex;
+  gap: 1.25rem;
+  align-items: baseline;
+  margin-bottom: 2.5rem;
+  font-size: 0.95rem;
+}
+
+.nav strong {
+  margin-right: auto;
+  letter-spacing: 0.01em;
+}
+
+.kicker {
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.1;
+  font-weight: 650;
+}
+
+.lede {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.card {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+input[type="file"] {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+button {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  border-radius: 2px;
+  padding: 0.7rem 1.1rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.note,
+.error,
+.result {
+  margin: 1rem 0 0;
+}
+
+.error {
+  color: #8a2b16;
+}
+
+.result {
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--line);
+}
