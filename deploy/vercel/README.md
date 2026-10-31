@@ -27,6 +27,8 @@ Set these in the Vercel project. Do not commit values. The app builds with the C
 
 On the API, set `CORS_ORIGINS` to this site's origin. Do not use `CORS_ORIGINS=*`. The API rejects that value.
 
-The API also needs `CLERK_ISSUER` and, for a deployed web origin, `CLERK_AUTHORIZED_PARTIES` including this site. Those variables belong on the API, not in the web project.
+The API also needs `CLERK_ISSUER` and `CLERK_AUTHORIZED_PARTIES` including this site. An empty allow-list skips the `azp` check and is only for local Clerk. Those variables belong on the API, not in the web project. `GET /health` on the API reports `"auth":"clerk"` in that mode.
+
+`/jobs` is the signed-in history page. `/jobs/{id}` is the report. The browser refreshes the Clerk session token while it polls.
 
 No blockchain or Solana variables.

@@ -18,6 +18,8 @@ export default function HomePage() {
         </p>
         <p>
           <Link href="/upload">Upload a video</Link>
+          {" · "}
+          <Link href="/jobs">Job history</Link>
         </p>
       </div>
     </main>
