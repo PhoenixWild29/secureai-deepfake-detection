@@ -1,5 +1,6 @@
 """Pydantic models shared by the API and the worker."""
 
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -13,31 +14,28 @@ class JobStatus(str, Enum):
 
 
 class JobRecord(BaseModel):
-    """One detection ticket.
-
-    Phase 0 stores these in process memory. Phase 1 persists them in Postgres
-    and moves video bytes to object storage.
-    """
+    """One detection ticket persisted in Postgres."""
 
     model_config = ConfigDict(frozen=True)
 
     id: str
+    user_id: str
     filename: str
     content_type: str | None = None
     byte_size: int | None = None
+    object_key: str
     status: JobStatus = JobStatus.queued
     prediction: str | None = None
     confidence: float | None = None
     detail: str | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 class AuthContext(BaseModel):
-    """Caller identity.
-
-    `mode` stays `stub` until Phase 1 verifies Clerk session JWTs.
-    """
+    """Caller identity from a verified Clerk session JWT, or the local dev bypass."""
 
     model_config = ConfigDict(frozen=True)
 
     subject: str
-    mode: str = Field(default="stub")
+    mode: str = Field(pattern="^(clerk|dev)$")

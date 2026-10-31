@@ -1,0 +1,122 @@
+"""Runtime settings. Secrets come from the environment, never from the repo."""
+
+from __future__ import annotations
+
+import os
+from collections.abc import Mapping
+from dataclasses import dataclass
+
+
+def _csv(value: str) -> tuple[str, ...]:
+    return tuple(part.strip() for part in value.split(",") if part.strip())
+
+
+@dataclass(frozen=True)
+class Settings:
+    auth_mode: str
+    clerk_issuer: str
+    clerk_jwks_url: str
+    clerk_authorized_parties: tuple[str, ...]
+    database_url: str
+    redis_url: str
+    queue_backend: str
+    queue_key: str
+    storage_backend: str
+    media_root: str
+    s3_endpoint: str
+    s3_bucket: str
+    s3_access_key_id: str
+    s3_secret_access_key: str
+    s3_region: str
+    cors_origins: tuple[str, ...]
+    dev_subject: str
+    max_upload_bytes: int
+
+
+def assert_explicit_origins(origins: tuple[str, ...]) -> None:
+    """Reject wildcard CORS. Job routes send Authorization, so * is not safe."""
+
+    if "*" in origins:
+        raise RuntimeError(
+            "CORS_ORIGINS=* is not allowed. List explicit origins, for example "
+            "http://localhost:3000. Do not use a wildcard on a deployed API."
+        )
+
+
+def load_settings(
+    environ: Mapping[str, str] | None = None,
+    *,
+    role: str = "api",
+) -> Settings:
+    """Load settings.
+
+    The API defaults to Clerk and refuses to boot without CLERK_ISSUER.
+    AUTH_MODE=dev is a workstation bypass. The worker does not check JWTs,
+    so it does not require CLERK_ISSUER.
+    """
+
+    env = os.environ if environ is None else environ
+    if role not in {"api", "worker"}:
+        raise RuntimeError(f"Unknown settings role {role!r}")
+
+    auth_mode = env.get("AUTH_MODE", "clerk").strip().lower() or "clerk"
+    if auth_mode not in {"clerk", "dev"}:
+        raise RuntimeError("AUTH_MODE must be 'clerk' or 'dev'")
+
+    issuer = env.get("CLERK_ISSUER", "").strip().rstrip("/")
+    if role == "api" and auth_mode == "clerk" and not issuer:
+        raise RuntimeError(
+            "Job routes require a verified Clerk JWT. Set CLERK_ISSUER to the "
+            "Clerk Frontend API origin (https://<slug>.clerk.accounts.dev) or "
+            "set AUTH_MODE=dev only on a private workstation. Do not expose "
+            "AUTH_MODE=dev on a public host."
+        )
+
+    origins = _csv(env.get("CORS_ORIGINS", "http://localhost:3000"))
+    if not origins:
+        origins = ("http://localhost:3000",)
+    assert_explicit_origins(origins)
+
+    queue_backend = env.get("QUEUE_BACKEND", "redis").strip().lower() or "redis"
+    if queue_backend not in {"redis", "memory"}:
+        raise RuntimeError("QUEUE_BACKEND must be 'redis' or 'memory'")
+    redis_url = env.get("REDIS_URL", "").strip()
+    if queue_backend == "redis" and not redis_url:
+        raise RuntimeError("QUEUE_BACKEND=redis requires REDIS_URL")
+
+    database_url = env.get("DATABASE_URL", "").strip()
+    if not database_url:
+        raise RuntimeError("DATABASE_URL is required")
+
+    storage_backend = env.get("STORAGE_BACKEND", "filesystem").strip().lower() or "filesystem"
+    if storage_backend not in {"filesystem", "s3"}:
+        raise RuntimeError("STORAGE_BACKEND must be 'filesystem' or 's3'")
+
+    s3_bucket = env.get("S3_BUCKET", "").strip()
+    s3_key = env.get("S3_ACCESS_KEY_ID", "").strip()
+    s3_secret = env.get("S3_SECRET_ACCESS_KEY", "").strip()
+    if storage_backend == "s3" and not (s3_bucket and s3_key and s3_secret):
+        raise RuntimeError(
+            "STORAGE_BACKEND=s3 requires S3_BUCKET, S3_ACCESS_KEY_ID, and S3_SECRET_ACCESS_KEY"
+        )
+
+    return Settings(
+        auth_mode=auth_mode,
+        clerk_issuer=issuer,
+        clerk_jwks_url=env.get("CLERK_JWKS_URL", "").strip(),
+        clerk_authorized_parties=_csv(env.get("CLERK_AUTHORIZED_PARTIES", "")),
+        database_url=database_url,
+        redis_url=redis_url,
+        queue_backend=queue_backend,
+        queue_key=env.get("QUEUE_KEY", "secureai:jobs").strip() or "secureai:jobs",
+        storage_backend=storage_backend,
+        media_root=env.get("MEDIA_ROOT", ".media").strip() or ".media",
+        s3_endpoint=env.get("S3_ENDPOINT", "").strip(),
+        s3_bucket=s3_bucket,
+        s3_access_key_id=s3_key,
+        s3_secret_access_key=s3_secret,
+        s3_region=env.get("S3_REGION", "us-east-1").strip() or "us-east-1",
+        cors_origins=origins,
+        dev_subject=env.get("DEV_AUTH_SUBJECT", "user_dev").strip() or "user_dev",
+        max_upload_bytes=50_000_000,
+    )

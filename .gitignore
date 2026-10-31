@@ -10,8 +10,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
 parts/
 sdist/
 var/
@@ -44,6 +44,7 @@ Thumbs.db
 
 # Application runtime (not committed)
 uploads/
+.media/
 results/
 logs/
 run/

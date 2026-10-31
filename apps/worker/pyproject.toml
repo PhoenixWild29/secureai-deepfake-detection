@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secureai-worker"
-version = "0.1.0"
-description = "SecureAI CPU job worker (Phase 0 stub)"
+version = "0.2.0"
+description = "SecureAI CPU worker. Consumes the shared Redis job queue."
 requires-python = ">=3.11"
-dependencies = []
+dynamic = ["dependencies"]
 
 [tool.setuptools.packages.find]
 where = ["."]

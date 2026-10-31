@@ -1,70 +1,172 @@
-import pytest
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from secureai_shared.queue import MemoryJobQueue
+from secureai_shared.storage import new_object_key
+from secureai_shared.settings import Settings
 
 
-@pytest.fixture
-def client() -> TestClient:
-    application = create_app(MemoryJobQueue())
-    with TestClient(application) as test_client:
-        yield test_client
+def test_import_does_not_connect() -> None:
+    import app.main as main
+
+    assert callable(main.create_app)
+    assert not hasattr(main, "app")
 
 
-def test_module_app_health() -> None:
-    from app.main import app
-
-    with TestClient(app) as test_client:
-        response = test_client.get("/health")
+def test_health_is_public_and_reports_auth_mode(stack) -> None:
+    client, _, _, _ = stack
+    response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "secureai-api"}
+    assert response.json() == {"status": "ok", "service": "secureai-api", "auth": "dev"}
 
 
-def test_create_and_fetch_job(client: TestClient) -> None:
+def test_job_routes_reject_anonymous_and_junk_tokens(stack) -> None:
+    client, _, _, _ = stack
+    missing = client.post("/v1/uploads", json={"filename": "clip.mp4"})
+    assert missing.status_code == 401
+    assert missing.json()["detail"] == "Authentication required"
+    junk = client.get(
+        "/v1/jobs/job_0123456789ab",
+        headers={"Authorization": "Bearer not-a-jwt"},
+    )
+    assert junk.status_code == 401
+
+
+def test_upload_and_queue_round_trip(stack) -> None:
+    client, store, queue, _ = stack
+    headers = {"Authorization": "Bearer dev"}
+    uploaded = client.post(
+        "/v1/media",
+        headers=headers,
+        files={"file": ("clip.mp4", b"video-bytes", "video/mp4")},
+    )
+    assert uploaded.status_code == 200
+    media = uploaded.json()
+    assert media["byte_size"] == len(b"video-bytes")
     created = client.post(
         "/v1/jobs",
-        json={"filename": "clip.mp4", "content_type": "video/mp4", "byte_size": 42},
+        headers=headers,
+        json={
+            "object_key": media["object_key"],
+            "filename": media["filename"],
+            "content_type": media["content_type"],
+            "byte_size": media["byte_size"],
+        },
     )
     assert created.status_code == 202
     body = created.json()
     assert body["status"] == "queued"
-    assert body["filename"] == "clip.mp4"
-    fetched = client.get(f"/v1/jobs/{body['id']}")
+    assert body["user_id"] == "user_dev"
+    assert queue.consume() == body["id"]
+    fetched = client.get(f"/v1/jobs/{body['id']}", headers=headers)
     assert fetched.status_code == 200
     assert fetched.json()["id"] == body["id"]
+    assert store.get(body["id"], user_id="other") is None
+    hidden = client.get(f"/v1/jobs/{body['id']}", headers=headers)
+    assert hidden.status_code == 200
 
 
-def test_missing_job(client: TestClient) -> None:
-    missing = client.get("/v1/jobs/job_0123456789ab")
-    assert missing.status_code == 404
-
-
-def test_malformed_job_id(client: TestClient) -> None:
-    missing = client.get("/v1/jobs/not-a-job")
-    assert missing.status_code == 404
-
-
-def test_bearer_token_is_not_verified(client: TestClient) -> None:
-    created = client.post(
-        "/v1/jobs",
-        headers={"Authorization": "Bearer not-a-real-jwt"},
-        json={"filename": "clip.mp4"},
+def test_other_user_cannot_read_a_job(stack) -> None:
+    client, store, _, storage = stack
+    key = new_object_key("user_other", "clip.mp4")
+    storage.put(key, b"abc", "video/mp4")
+    job = store.create(
+        user_id="user_other",
+        filename="clip.mp4",
+        content_type="video/mp4",
+        byte_size=3,
+        object_key=key,
     )
-    assert created.status_code == 202
+    response = client.get(f"/v1/jobs/{job.id}", headers={"Authorization": "Bearer dev"})
+    assert response.status_code == 404
 
 
-def test_rejects_empty_filename(client: TestClient) -> None:
-    rejected = client.post("/v1/jobs", json={"filename": ""})
-    assert rejected.status_code == 422
+def test_missing_and_malformed_jobs(stack) -> None:
+    client, _, _, _ = stack
+    headers = {"Authorization": "Bearer dev"}
+    assert client.get("/v1/jobs/job_0123456789ab", headers=headers).status_code == 404
+    assert client.get("/v1/jobs/not-a-job", headers=headers).status_code == 404
 
 
-def test_cors_allows_local_guardian(client: TestClient) -> None:
+def test_rejects_unowned_or_missing_object(stack) -> None:
+    client, _, queue, _ = stack
+    headers = {"Authorization": "Bearer dev"}
+    foreign = client.post(
+        "/v1/jobs",
+        headers=headers,
+        json={"object_key": new_object_key("someone_else", "clip.mp4"), "filename": "clip.mp4"},
+    )
+    assert foreign.status_code == 400
+    missing = client.post(
+        "/v1/jobs",
+        headers=headers,
+        json={"object_key": new_object_key("user_dev", "clip.mp4"), "filename": "clip.mp4"},
+    )
+    assert missing.status_code == 400
+    assert queue.consume() is None
+
+
+def test_rejects_oversized_upload(limited_client: TestClient) -> None:
+    response = limited_client.post(
+        "/v1/media",
+        headers={"Authorization": "Bearer dev"},
+        files={"file": ("clip.mp4", b"12345", "video/mp4")},
+    )
+    assert response.status_code == 413
+
+
+def test_filesystem_upload_ticket_is_direct(stack) -> None:
+    client, _, _, _ = stack
+    response = client.post(
+        "/v1/uploads",
+        headers={"Authorization": "Bearer dev"},
+        json={"filename": "clip.mp4", "content_type": "video/mp4"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "direct"
+    assert body["upload_url"] == "/v1/media"
+    assert body["object_key"] is None
+
+
+def test_cors_allows_local_guardian(stack) -> None:
+    client, _, _, _ = stack
     response = client.options(
         "/v1/jobs",
         headers={
             "Origin": "http://localhost:3000",
             "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type",
         },
     )
     assert response.headers.get("access-control-allow-origin") == "http://localhost:3000"
+
+
+def test_wildcard_cors_refuses_to_boot(tmp_path: Path) -> None:
+    base = Settings(
+        auth_mode="dev",
+        clerk_issuer="",
+        clerk_jwks_url="",
+        clerk_authorized_parties=(),
+        database_url="postgresql+psycopg://unused/unused",
+        redis_url="",
+        queue_backend="memory",
+        queue_key="secureai:jobs",
+        storage_backend="filesystem",
+        media_root=str(tmp_path),
+        s3_endpoint="",
+        s3_bucket="",
+        s3_access_key_id="",
+        s3_secret_access_key="",
+        s3_region="us-east-1",
+        cors_origins=("*",),
+        dev_subject="user_dev",
+        max_upload_bytes=50_000_000,
+    )
+    try:
+        create_app(settings=base, store=object(), queue=object(), storage=object())  # type: ignore[arg-type]
+    except RuntimeError as exc:
+        assert "CORS_ORIGINS" in str(exc)
+    else:
+        raise AssertionError("wildcard CORS should fail closed")
