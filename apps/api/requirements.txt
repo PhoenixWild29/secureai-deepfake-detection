@@ -1,0 +1,4 @@
+# Phase 0 API runtime. Pinned 2026-10-31. No torch, no GPU wheels.
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.14.2
