@@ -71,6 +71,12 @@ class AttestationKeys(BaseModel):
 
 
 def _client_host(request: Request) -> str:
+    """TCP peer. ``X-Forwarded-For`` is not read.
+
+    Behind a reverse proxy this is the proxy address, so every caller shares
+    one window. Trusting the header would let a client choose a fresh key.
+    """
+
     client = request.client
     if client is None or not client.host:
         return "unknown"
@@ -183,6 +189,11 @@ def verify_attestation(body: VerifyRequest, request: Request) -> VerifyResult:
 
     ``payload`` is verified as given. A valid result includes the public key
     that accepted it. Invalid signatures are ``valid: false``, not an error.
+    Only ``ATTESTATION_KEY_ID`` is loaded. After that id or the private key
+    changes, a signature made with the previous key does not verify.
+
+    The rate limit key is the TCP peer, not ``X-Forwarded-For``. Behind a
+    reverse proxy every caller shares one window.
     """
 
     _limit_public(request)
@@ -199,7 +210,11 @@ def verify_attestation(body: VerifyRequest, request: Request) -> VerifyResult:
 
 @router.get("/v1/attestations/keys", response_model=AttestationKeys)
 def attestation_keys(request: Request) -> AttestationKeys:
-    """Public key for the current ``ATTESTATION_KEY_ID``. No session is required."""
+    """Public key for the current ``ATTESTATION_KEY_ID``. No session is required.
+
+    Older key ids are not returned. The same TCP-peer rate limit as verify
+    applies, and ``X-Forwarded-For`` is not trusted.
+    """
 
     _limit_public(request)
     key = _configured_key(request)

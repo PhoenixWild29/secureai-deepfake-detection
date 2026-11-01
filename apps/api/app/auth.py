@@ -149,14 +149,16 @@ def require_admin(
     """Allow only Clerk sessions, or the dev bearer, listed in ``ADMIN_USER_IDS``.
 
     An API key is never an admin credential, even when its subject is listed.
-    An empty list allows nobody. The response does not echo the list or say
-    which check failed. In dev mode the subject is ``DEV_AUTH_SUBJECT``.
+    An empty list allows nobody. A signed-in caller who fails this check gets
+    the same 404 as an unknown path, so the response does not name the route
+    or echo the allow list. Anonymous callers still get 401 from
+    ``require_user``. In dev mode the subject is ``DEV_AUTH_SUBJECT``.
     """
 
     if user.mode == "api_key" or user.subject not in request.app.state.settings.admin_user_ids:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not Found",
         )
     return user
 

@@ -11,11 +11,11 @@ import threading
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -35,6 +35,9 @@ logger = logging.getLogger("secureai.billing")
 # Those terminal statuses drop the account to the free plan.
 ENTITLED_STATUSES = frozenset({"active", "trialing", "past_due"})
 _TERMINAL_STATUSES = frozenset({"canceled", "unpaid", "incomplete_expired"})
+# Stripe retries a webhook for about three days. Keep the recorded Checkout
+# plan a little longer, then drop it so abandoned sessions do not accumulate.
+_CHECKOUT_INTENT_TTL = timedelta(days=7)
 
 
 class OrgNotFound(Exception):
@@ -292,6 +295,11 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _prune_checkout_rows(session: Session, now: datetime) -> None:
+    cutoff = now - _CHECKOUT_INTENT_TTL
+    session.execute(delete(CheckoutIntentRow).where(CheckoutIntentRow.created_at < cutoff))
+
+
 def _new_org_id() -> str:
     return f"org_{uuid4().hex[:12]}"
 
@@ -466,13 +474,13 @@ def _checkout_plan(
     if price_id:
         plan = _known_plan(price_id, prices)
         if plan is None:
-            logger.warning("checkout price id is not a configured pro or team price; not using metadata.plan")
+            logger.error("paid checkout was not applied: price id is not a configured pro or team price")
         return plan
     session_id = obj.get("id") if isinstance(obj.get("id"), str) else None
     remembered = checkout_intents.get(session_id) if session_id else None
     if remembered in {"pro", "team"}:
         return remembered
-    logger.warning("checkout has no known price id; not using metadata.plan")
+    logger.error("paid checkout was not applied: no known price id")
     return None
 
 
@@ -601,7 +609,7 @@ class MemoryBillingStore:
         self._members: dict[str, dict[str, str]] = {}
         self._customers: dict[str, tuple[str, str]] = {}
         self._events: set[str] = set()
-        self._checkout_intents: dict[str, tuple[str, str]] = {}
+        self._checkout_intents: dict[str, tuple[str, str, datetime]] = {}
         self._lock = threading.Lock()
         self._quota_guards: dict[str, threading.Lock] = {}
 
@@ -691,15 +699,17 @@ class MemoryBillingStore:
     def remember_checkout(self, *, session_id: str, plan: str, price_id: str) -> None:
         if not session_id or plan not in {"pro", "team"} or not price_id:
             return
+        now = _now()
         with self._lock:
-            self._checkout_intents[session_id] = (plan, price_id)
+            self._prune_checkouts_locked(now)
+            self._checkout_intents[session_id] = (plan, price_id, now)
 
     def checkout_plan(self, session_id: str, *, prices: Mapping[str, str]) -> str | None:
         with self._lock:
             stored = self._checkout_intents.get(session_id)
         if stored is None:
             return None
-        plan, price_id = stored
+        plan, price_id, _created_at = stored
         if _known_plan(price_id, prices) != plan:
             return None
         return plan
@@ -714,6 +724,7 @@ class MemoryBillingStore:
     ) -> bool:
         del event_type
         with self._lock:
+            self._prune_checkouts_locked(_now())
             if event_id in self._events:
                 return False
             if update is not None:
@@ -794,6 +805,12 @@ class MemoryBillingStore:
         removed = _drop_newest_members(members, max(1, free_seat_limit))
         if removed:
             logger.info("clamped seats org_id=%s removed=%s", org_id, removed)
+
+    def _prune_checkouts_locked(self, now: datetime) -> None:
+        cutoff = now - _CHECKOUT_INTENT_TTL
+        stale = [key for key, value in self._checkout_intents.items() if value[2] < cutoff]
+        for key in stale:
+            del self._checkout_intents[key]
 
     def _reindex(self, kind: str, ident: str, customer_id: str | None) -> None:
         stale = [key for key, value in self._customers.items() if value == (kind, ident)]
@@ -1033,6 +1050,7 @@ class PostgresBillingStore:
             return
         now = _now()
         with self._session() as session:
+            _prune_checkout_rows(session, now)
             row = session.get(CheckoutIntentRow, session_id)
             if row is None:
                 session.add(
@@ -1070,6 +1088,7 @@ class PostgresBillingStore:
         with self._session() as session:
             if session.get(StripeEventRow, event_id) is not None:
                 return False
+            _prune_checkout_rows(session, _now())
             session.add(
                 StripeEventRow(
                     id=event_id,

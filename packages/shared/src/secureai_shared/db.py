@@ -90,6 +90,8 @@ class CheckoutIntentRow(Base):
     checkout.session.completed often has no line items. The webhook uses this
     row only when the event also has no price id, and only if `price_id` is
     still a configured Pro or Team price. metadata.plan is not consulted.
+    Rows older than 7 days are deleted when another session is saved or a
+    new Stripe event is applied.
     """
 
     __tablename__ = "checkout_intents"
@@ -101,7 +103,7 @@ class CheckoutIntentRow(Base):
 
 
 class WebhookEndpointRow(Base):
-    """One HTTPS endpoint per workspace. The signing secret stays in this row."""
+    """One HTTPS endpoint per workspace. The signing secret is stored in plaintext."""
 
     __tablename__ = "webhook_endpoints"
 

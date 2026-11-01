@@ -13,8 +13,7 @@ import time
 import urllib.request
 from collections.abc import Callable
 
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.exception_handlers import http_exception_handler
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.responses import Response
@@ -164,10 +163,14 @@ def create_app(
 
 
 async def _unhandled_exception(request: Request, exc: Exception) -> Response:
-    """Capture bugs. Deliberate HTTP responses keep their own handler."""
+    """Capture bugs that are not ``HTTPException``.
 
-    if isinstance(exc, HTTPException):
-        return await http_exception_handler(request, exc)
+    FastAPI registers ``HTTPException`` on its own and matches that class
+    before ``Exception``, so this function does not see deliberate 4xx or
+    5xx responses.
+    """
+
+    del request
     capture_exception(exc)
     # The type only. The message can hold a token, and the server already logs the traceback.
     logger.error("unhandled error type=%s", type(exc).__name__)

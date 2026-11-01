@@ -158,6 +158,29 @@ def capture_exception(exc: BaseException) -> None:
     sentry_sdk.capture_exception(exc)
 
 
+def flush_error_reporting(timeout: float = 2.0) -> None:
+    """Send queued events before a short-lived process exits.
+
+    Default integrations are off, so the SDK does not install an atexit
+    flush. The HTTP transport sends on a daemon thread. The worker calls
+    this from ``main`` before ``SystemExit``. A disabled DSN returns
+    immediately. The wait is capped so a stuck transport cannot hold the
+    process open.
+    """
+
+    if not _state.enabled:
+        return
+    import sentry_sdk
+
+    try:
+        client = sentry_sdk.get_client()
+        if not client.is_active():
+            return
+        sentry_sdk.flush(timeout=timeout)
+    except Exception as exc:
+        logger.warning("error reporting flush failed (%s)", type(exc).__name__)
+
+
 def scrub_event(event: dict[str, Any], hint: dict[str, Any]) -> dict[str, Any]:
     """Drop auth material, request bodies, and credential URLs before send.
 

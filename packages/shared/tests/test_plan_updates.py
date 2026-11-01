@@ -98,8 +98,11 @@ def test_known_price_wins_over_metadata_plan() -> None:
     assert update.status == "active"
 
 
-def test_checkout_metadata_plan_is_not_a_fallback() -> None:
-    unknown = plan_update_from_event(
+def test_checkout_metadata_plan_is_not_a_fallback(caplog: pytest.LogCaptureFixture) -> None:
+    import logging
+
+    with caplog.at_level(logging.ERROR, logger="secureai.billing"):
+        unknown = plan_update_from_event(
         {
             "type": "checkout.session.completed",
             "data": {
@@ -119,6 +122,10 @@ def test_checkout_metadata_plan_is_not_a_fallback() -> None:
     assert unknown.plan is None
     assert unknown.status is None
     assert unknown.replaces_subscription is False
+    assert any(
+        record.levelno == logging.ERROR and "paid checkout was not applied" in record.message
+        for record in caplog.records
+    )
 
     recorded = plan_update_from_event(
         {
@@ -157,6 +164,7 @@ def test_checkout_metadata_plan_is_not_a_fallback() -> None:
     assert missing is not None
     assert missing.plan is None
     assert missing.status is None
+    assert any("no known price id" in record.message for record in caplog.records)
 
 
 def test_invoice_does_not_leave_a_terminal_status() -> None:
@@ -396,3 +404,46 @@ def test_postgres_terminal_invoice_hard_deletes_seats_and_checkout_intent() -> N
     store.remember_checkout(session_id="cs_pg", plan="pro", price_id="price_pro")
     assert store.checkout_plan("cs_pg", prices=prices) == "pro"
     assert store.checkout_plan("cs_pg", prices={"price_other": "team"}) is None
+
+
+def test_old_checkout_intents_are_pruned() -> None:
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import create_engine, text
+
+    from secureai_shared.billing import MemoryBillingStore, PostgresBillingStore
+    from secureai_shared.db import Base
+
+    prices = {"price_pro": "pro", "price_team": "team"}
+    memory = MemoryBillingStore()
+    memory.remember_checkout(session_id="cs_old", plan="pro", price_id="price_pro")
+    plan, price_id, _created = memory._checkout_intents["cs_old"]  # noqa: SLF001
+    memory._checkout_intents["cs_old"] = (  # noqa: SLF001
+        plan,
+        price_id,
+        datetime.now(timezone.utc) - timedelta(days=8),
+    )
+    memory.remember_checkout(session_id="cs_new", plan="team", price_id="price_team")
+    assert memory.checkout_plan("cs_old", prices=prices) is None
+    assert memory.checkout_plan("cs_new", prices=prices) == "team"
+    plan, price_id, _created = memory._checkout_intents["cs_new"]  # noqa: SLF001
+    memory._checkout_intents["cs_new"] = (  # noqa: SLF001
+        plan,
+        price_id,
+        datetime.now(timezone.utc) - timedelta(days=8),
+    )
+    assert memory.apply_stripe_event("evt_prune", "invoice.paid", None) is True
+    assert memory.checkout_plan("cs_new", prices=prices) is None
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    store = PostgresBillingStore(engine=engine)
+    store.remember_checkout(session_id="cs_old", plan="pro", price_id="price_pro")
+    with engine.begin() as connection:
+        connection.execute(
+            text("UPDATE checkout_intents SET created_at = :stamp WHERE session_id = 'cs_old'"),
+            {"stamp": "2000-01-01 00:00:00"},
+        )
+    store.remember_checkout(session_id="cs_new", plan="pro", price_id="price_pro")
+    assert store.checkout_plan("cs_old", prices=prices) is None
+    assert store.checkout_plan("cs_new", prices=prices) == "pro"
