@@ -713,6 +713,212 @@ def test_post_webhook_rejects_a_private_address_in_the_same_answer(monkeypatch: 
         post_webhook("https://customer.example/hooks", b"{}", {}, 1)
 
 
+def _wait_for_dns_threads() -> None:
+    import threading
+    import time
+
+    deadline = time.monotonic() + 2
+    while time.monotonic() < deadline:
+        live = [
+            thread
+            for thread in threading.enumerate()
+            if thread.name == "secureai-webhook-dns" and thread.is_alive()
+        ]
+        if not live:
+            return
+        time.sleep(0.01)
+    raise AssertionError("webhook dns thread still running")
+
+
+def test_dns_time_comes_out_of_the_connect_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Lookup time is part of the TCP budget. TLS still gets the original timeout."""
+
+    import socket
+    import ssl
+
+    from secureai_shared import webhooks as webhook_module
+
+    clock = {"now": 100.0}
+
+    def monotonic() -> float:
+        return clock["now"]
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        clock["now"] += 0.3
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+
+    attempts: list[float] = []
+
+    class _Sock:
+        def __init__(self) -> None:
+            self.timeouts: list[float] = []
+
+        def setsockopt(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def settimeout(self, value: float) -> None:
+            self.timeouts.append(value)
+
+        def close(self) -> None:
+            return None
+
+    opened: list[_Sock] = []
+
+    def create_connection(
+        address: tuple[str, int], timeout: float, source_address: object = None
+    ) -> object:
+        del address, source_address
+        attempts.append(timeout)
+        clock["now"] += 0.1
+        sock = _Sock()
+        opened.append(sock)
+        return sock
+
+    def wrap_socket(self: object, sock: object, *args: object, **kwargs: object) -> object:
+        del self, sock, args, kwargs
+        raise ssl.SSLCertVerificationError("certificate verify failed")
+
+    monkeypatch.setattr(webhook_module.time, "monotonic", monotonic)
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(ssl.SSLContext, "wrap_socket", wrap_socket)
+    with pytest.raises(ssl.SSLCertVerificationError, match="certificate verify failed"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+    assert attempts == [pytest.approx(0.7)]
+    assert opened[0].timeouts == [1.0]
+
+
+def test_dns_that_uses_the_whole_timeout_does_not_connect(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+
+    from secureai_shared import webhooks as webhook_module
+
+    clock = {"now": 50.0}
+
+    def monotonic() -> float:
+        return clock["now"]
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        clock["now"] += 1
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(webhook_module.time, "monotonic", monotonic)
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(TimeoutError, match="webhook connect timed out"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+
+
+def test_stuck_dns_returns_within_the_timeout_and_counts_as_an_attempt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import socket
+    import threading
+    import time
+
+    release = threading.Event()
+    seen: dict[str, bool] = {}
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        seen["daemon"] = threading.current_thread().daemon
+        release.wait(2)
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    store = MemoryWebhookStore()
+    queue = MemoryWebhookQueue()
+    _endpoint(store)
+    job = _terminal(JobStatus.completed)
+    schedule_terminal(store, queue, job, now=WHEN)
+    started = time.monotonic()
+    try:
+        assert (
+            deliver_once(store, queue, post=post_webhook, timeout=0.2, max_attempts=5, now=WHEN)
+            is True
+        )
+        elapsed = time.monotonic() - started
+    finally:
+        release.set()
+        _wait_for_dns_threads()
+    assert seen["daemon"] is True
+    assert elapsed < 1.0
+    saved = store.delivery_for_job(job.id)
+    assert saved is not None
+    assert saved.status == "pending"
+    assert saved.attempt == 1
+    assert saved.last_error is not None
+    assert "webhook DNS timed out" in saved.last_error
+    assert saved.next_attempt_at == WHEN + timedelta(seconds=retry_delay_seconds(1))
+
+
+def test_busy_resolver_defers_without_counting_an_attempt(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+    import time
+
+    from secureai_shared import webhooks as webhook_module
+
+    def getaddrinfo(*_args: object, **_kwargs: object) -> list[tuple]:
+        raise AssertionError("resolved while the resolver was busy")
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    store = MemoryWebhookStore()
+    queue = MemoryWebhookQueue()
+    _endpoint(store)
+    job = _terminal(JobStatus.completed)
+    schedule_terminal(store, queue, job, now=WHEN)
+    held = 0
+    try:
+        for _ in range(webhook_module._DNS_LOOKUP_SLOTS):
+            assert webhook_module._DNS_SLOTS.acquire(blocking=False)
+            held += 1
+        started = time.monotonic()
+        assert (
+            deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=2, now=WHEN)
+            is True
+        )
+        assert time.monotonic() - started < 1.0
+        saved = store.delivery_for_job(job.id)
+        assert saved is not None
+        assert saved.attempt == 0
+        assert saved.status == "pending"
+        assert saved.last_error == "DNS resolver is busy"
+        assert saved.delivering_until is None
+        assert saved.next_attempt_at == WHEN + timedelta(seconds=webhook_module._DNS_BUSY_DELAY_SECONDS)
+        assert (
+            deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=2, now=WHEN)
+            is False
+        )
+    finally:
+        for _ in range(held):
+            webhook_module._DNS_SLOTS.release()
+
+    def post(url: str, body: bytes, headers: dict[str, str], timeout: float) -> int:
+        del url, body, headers, timeout
+        return 204
+
+    later = WHEN + timedelta(seconds=webhook_module._DNS_BUSY_DELAY_SECONDS)
+    assert deliver_once(store, queue, post=post, timeout=5, max_attempts=2, now=later) is True
+    done = store.delivery_for_job(job.id)
+    assert done is not None
+    assert done.status == "succeeded"
+    assert done.attempt == 1
+    assert done.last_status_code == 204
+
+
 def test_post_webhook_does_not_resolve_a_public_ip_literal(monkeypatch: pytest.MonkeyPatch) -> None:
     import socket
 

@@ -39,8 +39,8 @@ DEFAULT_POLL_SECONDS = 5.0
 SENTRY_FLUSH_SECONDS = 2.0
 # Claim, object download, and the row write are outside the detector timer.
 DRAIN_MARGIN_SECONDS = 8.0
-# post_webhook can spend the timeout on TCP, then the same timeout again
-# on TLS and the HTTP response. These seconds cover the delivery row write.
+# post_webhook spends the timeout on DNS and TCP together, then the same
+# timeout again on TLS and the HTTP response. These seconds cover the row write.
 WEBHOOK_JOIN_MARGIN_SECONDS = 2.0
 # Slack after that doubled timeout. The previous lease was one timeout plus
 # this many seconds. Shutdown joins for 2t+2, so the claim has to be 2t plus
@@ -85,10 +85,12 @@ def shutdown_drain_seconds() -> int:
 def webhook_shutdown_join_seconds(timeout_seconds: float) -> float:
     """How long shutdown waits for the webhook POST already in progress.
 
-    ``post_webhook`` uses ``timeout_seconds`` once for every TCP attempt,
-    then sets the socket timeout back to that same value for TLS and the
-    response. The margin covers the row write after the socket returns.
-    The join is bounded so a hung DNS lookup still lets ``main`` flush Sentry.
+    ``post_webhook`` spends ``timeout_seconds`` on DNS and every TCP attempt
+    together, then sets the socket timeout back to that same value for TLS
+    and the response. A lookup that exceeds the time left returns, so the
+    delivery thread is not stuck in ``getaddrinfo``. The margin covers the
+    row write after the socket returns. The join stays bounded so a lookup
+    that is still running on its daemon thread cannot hold ``main`` open.
     """
 
     return timeout_seconds * 2 + WEBHOOK_JOIN_MARGIN_SECONDS
@@ -97,13 +99,13 @@ def webhook_shutdown_join_seconds(timeout_seconds: float) -> float:
 def webhook_delivery_lease_seconds(timeout_seconds: float) -> float:
     """How long a claimed delivery stays leased to this worker.
 
-    ``post_webhook`` can spend ``timeout_seconds`` on TCP and the same value
-    again on TLS and the response. Shutdown joins that thread for
-    ``webhook_shutdown_join_seconds`` (2t+2). The lease is 2t+15, so it is
-    still in the future when that join hits its limit, including at the
-    maximum timeout of 30. The 15 seconds is the margin the previous lease
-    kept after a single timeout. A lease of t+15 expires during the join
-    once the timeout is above 13 seconds.
+    ``post_webhook`` can spend ``timeout_seconds`` on DNS and TCP together
+    and the same value again on TLS and the response. Shutdown joins that
+    thread for ``webhook_shutdown_join_seconds`` (2t+2). The lease is 2t+15,
+    so it is still in the future when that join hits its limit, including
+    at the maximum timeout of 30. The 15 seconds is the margin the previous
+    lease kept after a single timeout. A lease of t+15 expires during the
+    join once the timeout is above 13 seconds.
 
     The clock starts at the claim. It is not part of
     ``shutdown_drain_seconds``.
