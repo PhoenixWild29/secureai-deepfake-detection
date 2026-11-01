@@ -16,11 +16,20 @@ from collections.abc import Callable
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.attestation_routes import router as attestation_router
 from app.billing_routes import router as billing_router
 from app.migrate import run_migrations
 from app.routes import router
 from app.stripe_client import StripeBilling
 from app.webhook_routes import router as webhook_router
+from secureai_shared.attestation import (
+    AttestationKey,
+    AttestationKeyError,
+    AttestationStore,
+    MemoryAttestationStore,
+    PostgresAttestationStore,
+    load_attestation_key,
+)
 from secureai_shared.billing import BillingStore, MemoryBillingStore, PostgresBillingStore
 from secureai_shared.limits import RateLimiter, build_limiter
 from secureai_shared.queue import JobQueue, build_queue
@@ -44,6 +53,7 @@ def create_app(
     stripe: StripeBilling | None = None,
     webhooks: WebhookStore | None = None,
     webhook_queue: WebhookQueue | None = None,
+    attestations: AttestationStore | None = None,
 ) -> FastAPI:
     """Build the API. Real Postgres, Redis, and storage are created only when omitted."""
 
@@ -71,7 +81,7 @@ def create_app(
 
     app = FastAPI(
         title="SecureAI API",
-        version="0.5.0",
+        version="0.6.0",
         description=(
             "Detection jobs require a verified Clerk session JWT. "
             "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
@@ -81,6 +91,8 @@ def create_app(
             "lists those jobs and the ids that did not queue. "
             "GET /v1/jobs/{id}/report downloads a completed job as JSON. "
             "PDF export is not available yet. "
+            "POST /v1/jobs/{id}/attest signs a completed report. "
+            "POST /v1/attestations/verify checks that signature without a session. "
             "Plan quotas apply unless QUOTA_MODE=unlimited. "
             "Workspace owners can register one HTTPS webhook for terminal jobs."
         ),
@@ -99,6 +111,13 @@ def create_app(
     app.state.stripe = stripe if stripe is not None else StripeBilling(resolved)
     app.state.webhooks = webhooks
     app.state.webhook_queue = webhook_queue if webhook_queue is not None else build_webhook_queue(resolved)
+    app.state.attestation_key = _attestation_key(resolved)
+    if attestations is None:
+        if isinstance(store, PostgresJobStore):
+            attestations = PostgresAttestationStore(engine=store.engine)
+        else:
+            attestations = MemoryAttestationStore()
+    app.state.attestations = attestations
     app.state.fetch_jwks = fetch_jwks or _jwks_fetcher(resolved)
     app.add_middleware(
         CORSMiddleware,
@@ -109,7 +128,17 @@ def create_app(
     app.include_router(router)
     app.include_router(billing_router)
     app.include_router(webhook_router)
+    app.include_router(attestation_router)
     return app
+
+
+def _attestation_key(settings: Settings) -> AttestationKey | None:
+    if not settings.attestation_private_key:
+        return None
+    try:
+        return load_attestation_key(settings.attestation_private_key, settings.attestation_key_id)
+    except AttestationKeyError as exc:
+        raise RuntimeError(str(exc)) from exc
 
 
 def _warn_billing(settings: Settings) -> None:

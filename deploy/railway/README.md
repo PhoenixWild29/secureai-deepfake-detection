@@ -56,6 +56,9 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `RATE_LIMIT_JOBS` | api | Optional. Default `30` per window. `0` disables |
 | `RATE_LIMIT_UPLOADS` | api | Optional. Default `60` per window. `0` disables |
 | `RATE_LIMIT_WINDOW_SECONDS` | api | Optional. Default `60` |
+| `RATE_LIMIT_ATTESTATIONS` | api | Optional. Default `60` public verify and key reads per window. `0` disables |
+| `ATTESTATION_PRIVATE_KEY` | api | Unencrypted PKCS8 Ed25519 PEM. Empty disables attestation (503). Do not commit it |
+| `ATTESTATION_KEY_ID` | api | Optional key label. Default `v1`. Change it when you rotate the private key |
 | `MEDIA_ROOT` | api, worker | Only for `STORAGE_BACKEND=filesystem`. Use the same absolute path on both |
 | `CORS_ORIGINS` | api | Explicit Guardian origins, comma-separated. The API rejects `*` |
 | `DETECTOR_MODE` | worker | `cpu` (the default). `stub` does not read the file |
@@ -72,4 +75,4 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 
 Start the API before the worker the first time. The API runs Alembic. The worker only reads and updates rows.
 
-Solana is out of scope.
+Solana is out of scope. Report attestation is an API signature, not a chain anchor.
