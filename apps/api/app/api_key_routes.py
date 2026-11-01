@@ -16,9 +16,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from app.auth import API_KEY_PLAN_REQUIRED, require_session
-from app.tenancy import active_org, resolved_plan
-from secureai_shared.api_keys import ApiKeyLimit, ApiKeyNameError, ApiKeyRecord, may_use_api_key
+from app.auth import require_session
+from app.tenancy import WORKSPACE_MANAGER_ROLES, active_org, ensure_api_key_plan
+from secureai_shared.api_keys import ApiKeyLimit, ApiKeyNameError, ApiKeyRecord
 from secureai_shared.models import AuthContext
 
 logger = logging.getLogger("secureai.api.keys")
@@ -26,7 +26,6 @@ logger = logging.getLogger("secureai.api.keys")
 router = APIRouter()
 
 _KEY_ID = re.compile(r"key_[a-f0-9]{12}")
-_MANAGERS = frozenset({"owner", "admin"})
 
 
 class ApiKeyCreate(BaseModel):
@@ -72,7 +71,7 @@ def _scope(request: Request, user: AuthContext) -> tuple[str | None, str]:
 
 
 def _require_manager(org_id: str | None, role: str) -> None:
-    if org_id is not None and role not in _MANAGERS:
+    if org_id is not None and role not in WORKSPACE_MANAGER_ROLES:
         raise HTTPException(
             status_code=403,
             detail="Only a workspace owner or admin can manage API keys.",
@@ -80,12 +79,7 @@ def _require_manager(org_id: str | None, role: str) -> None:
 
 
 def _require_paid(request: Request, user: AuthContext, org_id: str | None) -> None:
-    plan = resolved_plan(request.app.state.billing, user.subject, org_id)
-    if plan is None:
-        raise HTTPException(status_code=403, detail="Not a member of this workspace")
-    if may_use_api_key(plan):
-        return
-    raise HTTPException(status_code=402, detail=API_KEY_PLAN_REQUIRED)
+    ensure_api_key_plan(request.app.state.billing, user.subject, org_id)
 
 
 @router.get("/v1/api-keys", response_model=list[ApiKeyView])

@@ -78,7 +78,7 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 
 API startup runs `alembic upgrade head`. Revision `20261101_0008` creates `api_keys` (SHA-256 hashes only). No new required variable. Pro and Team callers mint keys with `POST /v1/api-keys`; Free is 402.
 
-The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session whose `sub` is in `ADMIN_USER_IDS`. It reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text.
+The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session, or `Bearer dev` on a private workstation, whose subject is in `ADMIN_USER_IDS`. An API key is rejected even when that subject is listed. The route reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text.
 
 `CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
 

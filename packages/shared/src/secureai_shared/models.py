@@ -39,7 +39,8 @@ class AuthContext(BaseModel):
     """Caller identity from a Clerk session JWT, an API key, or the local dev bypass.
 
     ``api_key_org_id`` is set only for a workspace key. A personal key leaves
-    it empty so ``X-Org-Id`` still selects the workspace, the same as a session.
+    it empty so ``X-Org-Id`` still selects the workspace. That request is
+    gated on the workspace plan, not the personal plan.
     """
 
     model_config = ConfigDict(frozen=True)

@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.attestation import may_issue_attestation
@@ -266,13 +266,47 @@ class PostgresApiKeyStore:
         self.engine = engine
         self._max_active = max_active
         self._session_factory = sessionmaker(engine, expire_on_commit=False)  # type: ignore[arg-type]
+        # SQLite tests have no advisory lock. One process still cannot race
+        # itself. Postgres workers rely on the transaction lock below.
+        self._guards: dict[str, threading.Lock] = {}
+        self._guards_lock = threading.Lock()
 
     def create(self, *, user_id: str, org_id: str | None, name: str) -> tuple[ApiKeyRecord, str]:
         label = clean_key_name(name)
         secret = new_secret()
         digest = secret_hash(secret)
         now = _now()
+        scope = _scope_key(user_id, org_id)
+        if self.engine.dialect.name == "postgresql":
+            return self._insert(user_id, org_id, label, secret, digest, now, scope, lock_db=True)
+        with self._thread_guard(scope):
+            return self._insert(user_id, org_id, label, secret, digest, now, scope, lock_db=False)
+
+    def _insert(
+        self,
+        user_id: str,
+        org_id: str | None,
+        label: str,
+        secret: str,
+        digest: str,
+        now: datetime,
+        scope: str,
+        *,
+        lock_db: bool,
+    ) -> tuple[ApiKeyRecord, str]:
         with self._session() as session:
+            if lock_db:
+                # Count-then-insert races when nothing is locked: two workers
+                # can both see 24 live keys. There is no parent row for a
+                # personal scope, so a transaction advisory lock stands in
+                # for SELECT … FOR UPDATE. It releases on commit or rollback.
+                session.execute(
+                    text(
+                        "SELECT pg_advisory_xact_lock("
+                        "hashtext('secureai-api-key'), hashtext(:scope))"
+                    ),
+                    {"scope": scope},
+                )
             if self._active_count(session, user_id=user_id, org_id=org_id) >= self._max_active:
                 raise ApiKeyLimit()
             row = ApiKeyRow(
@@ -338,6 +372,16 @@ class PostgresApiKeyStore:
         query = _scope_clause(query, user_id=user_id, org_id=org_id)
         return int(session.scalar(query) or 0)
 
+    @contextmanager
+    def _thread_guard(self, scope: str) -> Iterator[None]:
+        with self._guards_lock:
+            guard = self._guards.get(scope)
+            if guard is None:
+                guard = threading.Lock()
+                self._guards[scope] = guard
+        with guard:
+            yield
+
     def _new_id(self, session: Session) -> str:
         for _attempt in range(5):
             key_id = "key_" + uuid4().hex[:12]
@@ -356,6 +400,12 @@ class PostgresApiKeyStore:
             raise
         finally:
             session.close()
+
+
+def _scope_key(user_id: str, org_id: str | None) -> str:
+    if org_id is not None:
+        return f"org:{org_id}"
+    return f"user:{user_id}"
 
 
 def _scope_clause(query: object, *, user_id: str, org_id: str | None) -> object:

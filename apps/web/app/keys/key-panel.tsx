@@ -116,7 +116,8 @@ function KeyForm({
       <h2>{orgId ? "Workspace keys" : "Personal keys"}</h2>
       <p className="meta">
         Pro or Team required. Send <code>Authorization: Bearer sai_…</code>. The secret is stored as a hash.
-        A workspace key only works for the workspace selected in the header.
+        A personal key sent with a workspace uses that workspace&apos;s plan. A workspace key only works for
+        this workspace while its creator is an owner or admin.
       </p>
       <label htmlFor="api-key-name">Name</label>
       <input
