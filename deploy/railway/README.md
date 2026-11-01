@@ -28,7 +28,7 @@ docker build -f apps/api/Dockerfile -t secureai-api .
 docker build -f apps/worker/Dockerfile -t secureai-worker .
 ```
 
-The API listens on `$PORT` (default 8000). The worker has no HTTP port. It BRPOPs the shared Redis list.
+The API listens on `$PORT` (default 8000). The worker has no HTTP port. It BRPOPs the shared Redis list. It also delivers workspace webhooks from `{QUEUE_KEY}:webhooks` on a background thread, so detection does not wait on that HTTP call.
 
 ## Variables
 
@@ -65,6 +65,8 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `STRIPE_PRICE_TEAM` | api | Optional recurring Price id for Team |
 | `PUBLIC_APP_URL` | api | Guardian origin, no trailing slash. Checkout and portal return here |
 | `QUOTA_MODE` | api | Optional `enforce` or `unlimited` |
+| `WEBHOOK_MAX_ATTEMPTS` | worker | Optional. Default `5`, maximum `10` |
+| `WEBHOOK_TIMEOUT_SECONDS` | worker | Optional. Default `10`, maximum `30` |
 
 `CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
 

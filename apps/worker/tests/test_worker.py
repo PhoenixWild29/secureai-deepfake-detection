@@ -158,6 +158,60 @@ def test_run_requeues_when_processing_raises(tmp_path: Path, monkeypatch: pytest
     assert queue.consume() == job.id
 
 
+def test_run_once_enqueues_a_webhook_without_posting(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AUTH_MODE", "dev")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://unused/unused")
+    monkeypatch.setenv("QUEUE_BACKEND", "memory")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("STORAGE_BACKEND", "filesystem")
+    monkeypatch.setenv("MEDIA_ROOT", str(tmp_path))
+    store = MemoryJobStore()
+    queue = MemoryJobQueue()
+    storage = FileSystemStorage(tmp_path)
+    org_id = "org_abcdef012345"
+    key = new_object_key("user_dev", "clip.mp4")
+    storage.put(key, b"clip-bytes", "video/mp4")
+    job = store.create(
+        user_id="user_dev",
+        filename="clip.mp4",
+        content_type="video/mp4",
+        byte_size=len(b"clip-bytes"),
+        object_key=key,
+        org_id=org_id,
+    )
+    queue.publish(job.id)
+    from secureai_shared.webhook_queue import MemoryWebhookQueue
+    from secureai_shared.webhooks import MemoryWebhookStore
+
+    webhooks = MemoryWebhookStore()
+    webhooks.upsert_endpoint(
+        org_id=org_id,
+        url="https://customer.example/hooks/secureai",
+        secret="signing-secret-value",
+        keep_secret=False,
+        notify_failures=True,
+    )
+    webhook_queue = MemoryWebhookQueue()
+    monkeypatch.setattr("worker.__main__.PostgresJobStore", lambda url: store)
+    monkeypatch.setattr("worker.__main__.build_queue", lambda settings: queue)
+    monkeypatch.setattr("worker.__main__.build_storage", lambda settings: storage)
+    monkeypatch.setattr("worker.__main__.open_webhook_store", lambda job_store: webhooks)
+    monkeypatch.setattr("worker.__main__.build_webhook_queue", lambda settings: webhook_queue)
+
+    def finish(job_store: MemoryJobStore, _storage: object, job_id: str, **_kwargs: object):
+        claimed = job_store.claim(job_id)
+        assert claimed is not None
+        return job_store.complete(job_id, prediction="real", confidence=0.5, attempt=claimed.attempt)
+
+    monkeypatch.setattr("worker.__main__.process_job", finish)
+    assert run(["--once"]) == 0
+    saved = webhooks.delivery_for_job(job.id)
+    assert saved is not None
+    assert saved.status == "pending"
+    assert saved.attempt == 0
+    assert webhook_queue.claim(now=saved.next_attempt_at.timestamp()) == saved.id
+
+
 def test_missing_database_exits(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.setenv("REDIS_URL", "redis://127.0.0.1:6379/0")

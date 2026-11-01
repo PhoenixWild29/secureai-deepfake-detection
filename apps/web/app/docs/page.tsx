@@ -62,6 +62,12 @@ export default function DocsPage() {
         session token.
       </p>
       <p>
+        A workspace owner can register one HTTPS URL. The worker POSTs the job id, status, prediction,
+        confidence, organization id, and timestamp when that workspace&apos;s job finishes. An optional
+        secret adds <code>X-SecureAI-Signature</code>. Personal jobs do not fire it. PDF is still not
+        available.
+      </p>
+      <p>
         PDF export is not available yet. TODO: render the same JSON report to PDF without adding a heavy
         dependency first.
       </p>

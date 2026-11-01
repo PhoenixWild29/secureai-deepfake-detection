@@ -20,12 +20,15 @@ from app.billing_routes import router as billing_router
 from app.migrate import run_migrations
 from app.routes import router
 from app.stripe_client import StripeBilling
+from app.webhook_routes import router as webhook_router
 from secureai_shared.billing import BillingStore, MemoryBillingStore, PostgresBillingStore
 from secureai_shared.limits import RateLimiter, build_limiter
 from secureai_shared.queue import JobQueue, build_queue
 from secureai_shared.settings import Settings, assert_explicit_origins, load_settings
 from secureai_shared.storage import FileSystemStorage, S3Storage, build_storage
 from secureai_shared.store import JobStore, PostgresJobStore
+from secureai_shared.webhook_queue import WebhookQueue, build_webhook_queue
+from secureai_shared.webhooks import MemoryWebhookStore, PostgresWebhookStore, WebhookStore
 
 logger = logging.getLogger("secureai.api")
 
@@ -39,6 +42,8 @@ def create_app(
     limiter: RateLimiter | None = None,
     billing: BillingStore | None = None,
     stripe: StripeBilling | None = None,
+    webhooks: WebhookStore | None = None,
+    webhook_queue: WebhookQueue | None = None,
 ) -> FastAPI:
     """Build the API. Real Postgres, Redis, and storage are created only when omitted."""
 
@@ -66,7 +71,7 @@ def create_app(
 
     app = FastAPI(
         title="SecureAI API",
-        version="0.4.0",
+        version="0.5.0",
         description=(
             "Detection jobs require a verified Clerk session JWT. "
             "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
@@ -76,7 +81,8 @@ def create_app(
             "lists those jobs and the ids that did not queue. "
             "GET /v1/jobs/{id}/report downloads a completed job as JSON. "
             "PDF export is not available yet. "
-            "Plan quotas apply unless QUOTA_MODE=unlimited."
+            "Plan quotas apply unless QUOTA_MODE=unlimited. "
+            "Workspace owners can register one HTTPS webhook for terminal jobs."
         ),
     )
     app.state.settings = resolved
@@ -84,17 +90,25 @@ def create_app(
     app.state.queue = queue
     app.state.storage = storage
     app.state.limiter = limiter if limiter is not None else build_limiter(resolved)
+    if webhooks is None:
+        if isinstance(store, PostgresJobStore):
+            webhooks = PostgresWebhookStore(engine=store.engine)
+        else:
+            webhooks = MemoryWebhookStore()
     app.state.billing = billing
     app.state.stripe = stripe if stripe is not None else StripeBilling(resolved)
+    app.state.webhooks = webhooks
+    app.state.webhook_queue = webhook_queue if webhook_queue is not None else build_webhook_queue(resolved)
     app.state.fetch_jwks = fetch_jwks or _jwks_fetcher(resolved)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(resolved.cors_origins),
-        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-Org-Id"],
     )
     app.include_router(router)
     app.include_router(billing_router)
+    app.include_router(webhook_router)
     return app
 
 

@@ -34,8 +34,9 @@ export default function TermsPage() {
       </p>
       <h2>The service</h2>
       <p>
-        Routes, quotas, and the detector can change. Outbound completion webhooks and PDF reports are
-        not part of this release. API keys for unattended Pro access are not issued yet.
+        Routes, quotas, and the detector can change. A workspace owner can register one HTTPS URL for
+        job results. PDF reports are not part of this release. API keys for unattended Pro access are
+        not issued yet.
       </p>
     </main>
   );

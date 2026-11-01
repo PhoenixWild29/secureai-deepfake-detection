@@ -21,6 +21,7 @@ from secureai_shared.models import AuthContext, JobRecord, JobStatus
 from secureai_shared.report import LIMITATIONS, load_report_detail
 from secureai_shared.storage import ObjectStat, clean_filename, is_owned_key, new_object_key
 from secureai_shared.store import UNQUEUED_FAILURE_DETAIL
+from secureai_shared.webhooks import schedule_terminal
 
 logger = logging.getLogger("secureai.api.jobs")
 
@@ -266,9 +267,14 @@ def create_job_batch(
             )
             for later_index, pending in enumerate(jobs[index + 1 :], start=index + 1):
                 try:
-                    request.app.state.store.fail(pending.id, detail=UNQUEUED_FAILURE_DETAIL)
+                    failed_row = request.app.state.store.fail(
+                        pending.id, detail=UNQUEUED_FAILURE_DETAIL
+                    )
                 except Exception:
                     logger.exception("could not fail unqueued job_id=%s", pending.id)
+                else:
+                    _note_terminal(request, failed_row)
+                # The id stays on `failed` even when the row update throws.
                 failed.append(
                     BatchItemFailure(
                         id=pending.id,
@@ -385,7 +391,20 @@ def _publish_or_fail(request: Request, job: JobRecord) -> None:
     try:
         # attempt stays 0. count_started skips this detail, so the 503 does not
         # spend a monthly job.
-        request.app.state.store.fail(job.id, detail=UNQUEUED_FAILURE_DETAIL)
+        failed = request.app.state.store.fail(job.id, detail=UNQUEUED_FAILURE_DETAIL)
     except Exception:
         logger.exception("could not fail unqueued job_id=%s", job.id)
+    else:
+        _note_terminal(request, failed)
     raise HTTPException(status_code=503, detail="Could not queue the job") from last
+
+
+def _note_terminal(request: Request, job: JobRecord | None) -> None:
+    """Enqueue a webhook id after a terminal write. HTTP happens on the worker."""
+
+    if job is None:
+        return
+    try:
+        schedule_terminal(request.app.state.webhooks, request.app.state.webhook_queue, job)
+    except Exception:
+        logger.exception("webhook schedule failed job_id=%s", job.id)

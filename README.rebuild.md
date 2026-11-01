@@ -7,9 +7,9 @@ Source for review is `main`.
 ## Layout
 
 ```
-apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON, and opens billing.
+apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON, opens billing, and sets a workspace webhook.
 apps/api/             FastAPI. Clerk JWT (or a private dev bypass), Postgres, Redis.
-apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API.
+apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API. A background thread delivers webhooks.
 packages/detector/    DETECTOR_MODE=cpu scores texture, motion, temporal stability, and a face or skin-region cue. DETECTOR_MODE=stub hashes the path.
 packages/shared/      Job models, Postgres store, Redis queue, object storage.
 deploy/railway/       Reference service settings. Not auto-loaded. See that README.
@@ -266,9 +266,51 @@ PDF is not implemented. TODO: render the same payload to PDF when a small depend
 
 Pro API keys are not issued. TODO: mint scoped keys for Pro and Team. Until then, job routes use the Clerk session token (or `Bearer dev` on a private workstation).
 
-Outbound completion webhooks are deferred. A per-user or per-org URL plus HMAC would need a new table, a secret, and a worker POST.
-
 Public pages: `/docs` (how detection works and its limits), `/privacy`, `/terms`, and `/.well-known/security.txt`.
+
+## Webhooks
+
+Phase 4 sends one workspace's terminal jobs to a single HTTPS URL. Personal jobs (no `X-Org-Id`) do not fire. Stripe billing webhooks are a different route and are unchanged.
+
+The owner or an admin registers the URL. Any member of that workspace can read it. A caller who is not a member gets 403, and the response does not include another workspace's URL. The signing secret is write-only: `GET` returns `secret_set`, never the secret. The secret is stored in Postgres so the worker can sign. Restrict database access the same way as `STRIPE_WEBHOOK_SECRET`.
+
+```bash
+curl -s -X PUT http://localhost:8000/v1/orgs/org_.../webhook \
+  -H 'Authorization: Bearer dev' \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com/hooks/secureai","secret":"replace-with-16-plus-chars","notify_failures":true}'
+curl -s http://localhost:8000/v1/orgs/org_.../webhook \
+  -H 'Authorization: Bearer dev'
+curl -s http://localhost:8000/v1/orgs/org_.../webhook/deliveries \
+  -H 'Authorization: Bearer dev'
+curl -s -X DELETE http://localhost:8000/v1/orgs/org_.../webhook \
+  -H 'Authorization: Bearer dev'
+```
+
+`PUT` replaces the URL. Omit `secret` to keep the current one. Send `"secret":""` to clear it. A new secret must be 16 to 256 characters. Omit `notify_failures` on an update to keep the current choice. A new endpoint defaults to sending failures. Set `notify_failures` to false to send only `completed`. The URL must be `https`, with no userinfo and no private or loopback host. Guardian's `/webhooks` page edits the workspace selected in the header.
+
+When a job reaches `completed` or `failed`, the API or the worker inserts one delivery row and publishes its id. That publish is a Redis `ZADD` (or the in-memory queue in tests). It does not open a socket. The long-running worker (`python -m worker`) posts from a background thread, so a slow receiver does not sit on the detection loop. `python -m worker --once` enqueues and exits; a long-running worker delivers later. The Redis key is `{QUEUE_KEY}:webhooks` (default `secureai:jobs:webhooks`). The API and the worker must use the same `QUEUE_KEY`.
+
+The body is compact JSON, the same bytes on every retry:
+
+```json
+{"confidence":0.5,"job_id":"job_...","org_id":"org_...","prediction":"fake","status":"completed","timestamp":"2026-11-01T12:00:00+00:00"}
+```
+
+`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate.
+
+When a secret is set, the worker also sends:
+
+```
+X-SecureAI-Timestamp: 1761998400
+X-SecureAI-Signature: t=1761998400,v1=<hex hmac sha256 of "{timestamp}.{raw body}">
+```
+
+The timestamp in the signature is the unix time of that attempt, not the `timestamp` field in the JSON. Compare with `hmac.compare_digest`. A missing secret means those two headers are omitted.
+
+A non-2xx response or a network error stays `pending` and is retried. The waits are 2s, 8s, 32s, 128s, then 300s. `WEBHOOK_MAX_ATTEMPTS` defaults to 5 (maximum 10). The next try after the cap is not sent. The row stores `attempt`, `last_status_code`, and a short `last_error`. `GET /v1/orgs/{id}/webhook` includes `last_delivery`. `GET .../webhook/deliveries` lists the latest 20. Delivery is at-least-once: a crash after the POST and before the row update can send the same body again. `WEBHOOK_TIMEOUT_SECONDS` defaults to 10 (maximum 30).
+
+`WEBHOOK_MAX_ATTEMPTS` and `WEBHOOK_TIMEOUT_SECONDS` are read by the worker. Empty values use the defaults.
 
 ## Still later
 
