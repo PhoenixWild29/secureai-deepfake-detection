@@ -85,10 +85,11 @@ export default function DocsPage() {
         Pro and Team can mint a key from the <Link href="/keys">API keys</Link> page. The secret starts
         with <code>sai_</code>, is shown once, and is stored only as a SHA-256 hash. Send{" "}
         <code>Authorization: Bearer sai_…</code>. A personal key may send <code>X-Org-Id</code>, and that
-        workspace has to be Pro or Team. A workspace key stays inside that workspace and stops working if
-        its creator is no longer an owner or admin. Free plans cannot create or use a key, including on a
-        private workstation. Revoking a key rejects it on the next request. Clerk session tokens still
-        work, and <code>AUTH_MODE=dev</code> still accepts <code>Bearer dev</code>.
+        workspace has to be Pro or Team. A workspace key stays inside that workspace. If its creator is
+        removed or demoted from owner or admin, the next use hard-revokes that key (401). Promoting them
+        later does not restore it. Free plans cannot create or use a key, including on a private
+        workstation. Revoking a key rejects it on the next request. Clerk session tokens still work, and{" "}
+        <code>AUTH_MODE=dev</code> still accepts <code>Bearer dev</code>.
       </p>
       <p>
         A workspace owner can register one HTTPS URL. The worker POSTs the job id, status, prediction,

@@ -76,7 +76,7 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `SENTRY_RELEASE` | api, worker | Optional release name. The SDK reads this env var when it is set |
 | `ADMIN_USER_IDS` | api | Comma-separated Clerk user ids for `GET /v1/admin/health`. Empty allows nobody |
 
-API startup runs `alembic upgrade head`. Revision `20261101_0008` creates `api_keys` (SHA-256 hashes only). No new required variable. Pro and Team callers mint keys with `POST /v1/api-keys`; Free is 402.
+API startup runs `alembic upgrade head`. Revision `20261101_0008` creates `api_keys` (SHA-256 hashes only). No new required variable. Pro and Team callers mint keys with `POST /v1/api-keys`; Free is 402. A workspace key whose minter is removed or demoted is hard-revoked on the next use (401). Promoting that person later does not restore the secret.
 
 The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session, or `Bearer dev` on a private workstation, whose subject is in `ADMIN_USER_IDS`. An API key is rejected even when that subject is listed. The route reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text.
 
