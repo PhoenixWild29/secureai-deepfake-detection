@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
-import { JobStillRunning, submitDetection, type JobResponse, type TokenSource } from "../../lib/api";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { enqueueDetections, fetchJob, type JobResponse, type TokenSource } from "../../lib/api";
+import { formatBytes, jobSummary, reviewSelection } from "../../lib/uploads";
 import { useWorkspace } from "../workspace";
 
 type UploadFormProps = {
@@ -11,62 +12,150 @@ type UploadFormProps = {
   getToken?: TokenSource;
 };
 
-function phaseLabel(status: string): string {
-  if (status === "processing") {
-    return "Scoring the video…";
-  }
-  if (status === "queued") {
-    return "Waiting for a worker…";
-  }
-  return "Checking the result…";
-}
+type TrackedJob = {
+  job: JobResponse;
+  orgId: string | null;
+  since: number;
+  settled: boolean;
+};
+
+const POLL_MS = 2000;
+const POLL_BUDGET_MS = 180_000;
 
 export function UploadForm({ apiUrl, token, getToken }: UploadFormProps) {
   const { orgId, ready } = useWorkspace();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [pending, setPending] = useState(false);
   const [phase, setPhase] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [job, setJob] = useState<JobResponse | null>(null);
+  const [notes, setNotes] = useState<string[]>([]);
+  const [tracked, setTracked] = useState<TrackedJob[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const trackedRef = useRef(tracked);
+  const tokenRef = useRef(token);
+  const getTokenRef = useRef(getToken);
 
-  const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
+  useEffect(() => {
+    // The poll interval reads these. Updating them here keeps that interval from restarting.
+    trackedRef.current = tracked;
+    tokenRef.current = token;
+    getTokenRef.current = getToken;
+  });
+
+  const source = useCallback<TokenSource>(
+    async () => tokenRef.current ?? (await getTokenRef.current?.()) ?? null,
+    [],
+  );
+  const review = reviewSelection(files.map((file) => ({ name: file.name, size: file.size, type: file.type })));
+  const selectionError = review.errors.join(" ");
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setInterval(() => {
+      if (cancelled) {
+        return;
+      }
+      const due = trackedRef.current.filter((item) => !item.settled && !isTerminal(item.job.status));
+      if (due.length === 0) {
+        return;
+      }
+      const now = Date.now();
+      for (const item of due) {
+        if (now - item.since >= POLL_BUDGET_MS) {
+          setTracked((current) =>
+            current.map((row) => (row.job.id === item.job.id ? { ...row, settled: true } : row)),
+          );
+          continue;
+        }
+        void fetchJob({
+          apiUrl,
+          jobId: item.job.id,
+          getToken: source,
+          orgId: item.orgId,
+        })
+          .then((next) => {
+            if (cancelled) {
+              return;
+            }
+            setTracked((current) => {
+              let changed = false;
+              const updated = current.map((row) => {
+                if (row.job.id !== next.id) {
+                  return row;
+                }
+                const settled = isTerminal(next.status);
+                if (
+                  row.settled === settled &&
+                  row.job.status === next.status &&
+                  row.job.prediction === next.prediction &&
+                  row.job.confidence === next.confidence &&
+                  row.job.detail === next.detail &&
+                  row.job.updated_at === next.updated_at
+                ) {
+                  return row;
+                }
+                changed = true;
+                return { ...row, job: next, settled };
+              });
+              return changed ? updated : current;
+            });
+          })
+          .catch(() => {
+            // Keep the last status. The report page is the place to retry a read.
+          });
+      }
+    }, POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [apiUrl, source]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!file) {
+    if (files.length === 0) {
       setError("Choose a video first.");
-      setJob(null);
       return;
     }
+    if (review.errors.length > 0) {
+      return;
+    }
+    const chosen = files;
+    const orgAtSubmit = orgId;
     setPending(true);
-    setPhase("Uploading…");
+    setPhase(`Uploading 1 of ${chosen.length}…`);
     setError(null);
-    setJob(null);
+    setNotes([]);
     try {
       const bearer = await source();
       if (!bearer) {
         setError("Sign in before uploading.");
         return;
       }
-      const finished = await submitDetection({
+      const queued = await enqueueDetections({
         apiUrl,
-        file,
+        files: chosen,
         getToken: source,
-        orgId,
-        onUpdate: (update) => {
-          setJob(update);
-          setPhase(phaseLabel(update.status));
-        },
+        orgId: orgAtSubmit,
+        onProgress: setPhase,
       });
-      setJob(finished);
-      setPhase(null);
-    } catch (caught) {
-      if (caught instanceof JobStillRunning) {
-        setJob(caught.job);
-        setError("This is taking longer than expected. The report keeps the latest status.");
-        return;
+      const since = Date.now();
+      setTracked((current) => {
+        const incoming = queued.jobs.map((job) => ({
+          job,
+          orgId: orgAtSubmit,
+          since,
+          settled: isTerminal(job.status),
+        }));
+        const incomingIds = new Set(incoming.map((item) => item.job.id));
+        return [...incoming, ...current.filter((item) => !incomingIds.has(item.job.id))];
+      });
+      setNotes(queued.notes);
+      setFiles([]);
+      if (inputRef.current) {
+        inputRef.current.value = "";
       }
-      setJob(null);
+    } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Upload failed.");
     } finally {
       setPending(false);
@@ -74,54 +163,88 @@ export function UploadForm({ apiUrl, token, getToken }: UploadFormProps) {
     }
   }
 
+  const buttonLabel = pending
+    ? phase ?? "Working…"
+    : files.length > 1
+      ? `Queue ${files.length} videos`
+      : "Run detection";
+
   return (
     <form className="card" onSubmit={onSubmit}>
-      <label htmlFor="video">Video file</label>
+      <label htmlFor="video">Video files</label>
       <input
+        ref={inputRef}
         id="video"
         name="video"
         type="file"
-        accept="video/*"
+        accept="video/*,.mkv,.mp4,.mov,.webm,.avi"
+        multiple
+        aria-describedby="upload-hint"
+        aria-invalid={selectionError ? true : undefined}
         onChange={(event) => {
-          setFile(event.target.files?.[0] ?? null);
+          setFiles(Array.from(event.target.files ?? []));
+          setError(null);
         }}
       />
-      <button type="submit" disabled={pending || !ready}>
-        {pending ? phase ?? "Working…" : "Run detection"}
-      </button>
-      <p className="note">
-        The file is stored, then a worker scores a few frames. This page keeps
-        checking until the job completes or fails.{" "}
-        {orgId
-          ? "This job is saved to the selected workspace."
-          : "This job is saved to your personal history."}
-      </p>
-      {pending && job ? (
-        <p className="note" aria-live="polite">
-          {job.id} · {job.status}
+      {files.length > 0 ? (
+        <ul className="picked">
+          {files.map((file, index) => (
+            <li key={`${file.name}:${file.size}:${file.lastModified}:${index}`}>
+              {file.name} · {formatBytes(file.size)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {selectionError ? (
+        <p className="error" role="alert">
+          {selectionError}
         </p>
       ) : null}
+      <button type="submit" disabled={pending || !ready || files.length === 0 || review.errors.length > 0}>
+        {buttonLabel}
+      </button>
+      <p className="note" id="upload-hint">
+        Add up to 10 videos, 50 MB each. They are stored and queued, then a worker scores each one. This form
+        stays available so you can add another batch.{" "}
+        {orgId ? "These jobs are saved to the selected workspace." : "These jobs are saved to your personal history."}
+      </p>
       {error ? (
         <p className="error" role="alert">
           {error}
-          {job ? (
-            <>
-              {" "}
-              <Link href={`/jobs/${job.id}`}>Open the report</Link>
-            </>
-          ) : null}
         </p>
       ) : null}
-      {job && !pending ? (
-        <p className="result" aria-live="polite">
-          <strong>{job.id}</strong> · {job.filename} · {job.status}
-          {job.prediction ? ` · ${job.prediction}` : ""}
-          {job.confidence !== null ? ` · ${job.confidence}` : ""}
-          {job.detail ? ` · ${job.detail}` : ""}
-          {" · "}
-          <Link href={`/jobs/${job.id}`}>Open the report</Link>
+      {notes.map((note, index) => (
+        <p className="error" role="alert" key={`${index}:${note}`}>
+          {note}
         </p>
+      ))}
+      {tracked.length > 0 ? (
+        <ul className="jobs" aria-live="polite">
+          {tracked.map((item) => (
+            <li key={item.job.id}>
+              <Link href={`/jobs/${item.job.id}`}>
+                <strong>{item.job.filename}</strong>
+                <span className="meta">{statusLine(item)}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </form>
   );
+}
+
+function isTerminal(status: string): boolean {
+  return status === "completed" || status === "failed";
+}
+
+function statusLine(item: TrackedJob): string {
+  const summary = jobSummary(item.job);
+  if (isTerminal(item.job.status)) {
+    return summary;
+  }
+  if (item.settled) {
+    return `${summary} · Open the report to keep watching.`;
+  }
+  return `${summary} · Checking again…`;
 }

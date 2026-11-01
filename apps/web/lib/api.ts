@@ -1,3 +1,5 @@
+import { jobRequest, type StoredUpload } from "./uploads";
+
 export type JobReportExport = {
   job_id: string;
   filename: string;
@@ -43,19 +45,6 @@ type StoredMedia = {
 
 export type TokenSource = () => Promise<string | null>;
 
-const POLL_INTERVAL_MS = 1000;
-const POLL_LIMIT = 180;
-
-export class JobStillRunning extends Error {
-  job: JobResponse;
-
-  constructor(job: JobResponse) {
-    super("Detection is still running.");
-    this.name = "JobStillRunning";
-    this.job = job;
-  }
-}
-
 export class ApiRequestError extends Error {
   status: number;
 
@@ -100,17 +89,95 @@ function orgHeaders(orgId?: string | null): Record<string, string> {
   return { "X-Org-Id": orgId };
 }
 
-export async function submitDetection(options: {
+export type BatchFailure = {
+  id: string;
+  index: number;
+  detail: string;
+};
+
+export type EnqueueResult = {
+  jobs: JobResponse[];
+  notes: string[];
+};
+
+export async function enqueueDetections(options: {
   apiUrl: string;
+  files: File[];
+  getToken: TokenSource;
+  orgId?: string | null;
+  onProgress?: (message: string) => void;
+}): Promise<EnqueueResult> {
+  const base = options.apiUrl.replace(/\/$/, "");
+  const stored: StoredMedia[] = [];
+  const notes: string[] = [];
+  for (let index = 0; index < options.files.length; index += 1) {
+    const file = options.files[index];
+    options.onProgress?.(`Uploading ${index + 1} of ${options.files.length}…`);
+    try {
+      stored.push(
+        await storeFile({
+          base,
+          file,
+          getToken: options.getToken,
+          orgId: options.orgId,
+        }),
+      );
+    } catch (caught) {
+      const message = caught instanceof Error ? caught.message : "Upload failed.";
+      notes.push(`${file.name}: ${message}`);
+      if (caught instanceof ApiRequestError && (caught.status === 401 || caught.status === 429)) {
+        const remaining = options.files.length - index - 1;
+        if (remaining > 0) {
+          notes.push(
+            remaining === 1 ? "1 more file was not uploaded." : `${remaining} more files were not uploaded.`,
+          );
+        }
+        break;
+      }
+    }
+  }
+  if (stored.length === 0) {
+    throw new Error(notes.join(" ") || "Upload failed.");
+  }
+  options.onProgress?.("Queuing…");
+  try {
+    const queued = await createJobs({
+      base,
+      stored,
+      getToken: options.getToken,
+      orgId: options.orgId,
+    });
+    for (const item of queued.failed) {
+      const filename = stored[item.index]?.filename ?? item.id;
+      notes.push(`${filename}: ${item.detail}`);
+      try {
+        queued.jobs.push(
+          await fetchJob({
+            apiUrl: base,
+            jobId: item.id,
+            getToken: options.getToken,
+            orgId: options.orgId,
+          }),
+        );
+      } catch {
+        // The note already names the file that did not queue.
+      }
+    }
+    return { jobs: queued.jobs, notes };
+  } catch (caught) {
+    const message = caught instanceof Error ? caught.message : "Could not queue the jobs.";
+    throw new Error(notes.length > 0 ? `${notes.join(" ")} ${message}` : message);
+  }
+}
+
+async function storeFile(options: {
+  base: string;
   file: File;
   getToken: TokenSource;
   orgId?: string | null;
-  onUpdate?: (job: JobResponse) => void;
-}): Promise<JobResponse> {
-  const base = options.apiUrl.replace(/\/$/, "");
+}): Promise<StoredMedia> {
   const contentType = options.file.type || "application/octet-stream";
-
-  const intent = await fetch(`${base}/v1/uploads`, {
+  const intent = await fetch(`${options.base}/v1/uploads`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${await authorized(options.getToken)}`,
@@ -124,19 +191,14 @@ export async function submitDetection(options: {
     }),
   });
   if (!intent.ok) {
-    throw new Error(await errorText(intent));
+    throw new ApiRequestError(intent.status, await errorText(intent));
   }
   const ticket = (await intent.json()) as UploadTicket;
-
-  let objectKey = ticket.object_key;
-  let filename = options.file.name;
-  let uploadedType: string | null = contentType;
-  let byteSize = options.file.size;
 
   if (ticket.mode === "direct") {
     const body = new FormData();
     body.append("file", options.file);
-    const stored = await fetch(`${base}${ticket.upload_url}`, {
+    const stored = await fetch(`${options.base}${ticket.upload_url}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${await authorized(options.getToken)}`,
@@ -145,66 +207,55 @@ export async function submitDetection(options: {
       body,
     });
     if (!stored.ok) {
-      throw new Error(await errorText(stored));
+      throw new ApiRequestError(stored.status, await errorText(stored));
     }
-    const media = (await stored.json()) as StoredMedia;
-    objectKey = media.object_key;
-    filename = media.filename;
-    uploadedType = media.content_type;
-    byteSize = media.byte_size;
-  } else {
-    const form = new FormData();
-    for (const [name, value] of Object.entries(ticket.fields ?? {})) {
-      form.append(name, value);
-    }
-    form.append("file", options.file);
-    const uploaded = await fetch(ticket.upload_url, { method: "POST", body: form });
-    if (!uploaded.ok) {
-      throw new Error(`Upload failed (${uploaded.status})`);
-    }
+    return (await stored.json()) as StoredMedia;
   }
 
-  if (!objectKey) {
+  const form = new FormData();
+  for (const [name, value] of Object.entries(ticket.fields ?? {})) {
+    form.append(name, value);
+  }
+  form.append("file", options.file);
+  const uploaded = await fetch(ticket.upload_url, { method: "POST", body: form });
+  if (!uploaded.ok) {
+    throw new Error(`Upload failed (${uploaded.status})`);
+  }
+  if (!ticket.object_key) {
     throw new Error("Upload did not return an object key");
   }
+  return {
+    object_key: ticket.object_key,
+    filename: options.file.name,
+    content_type: contentType,
+    byte_size: options.file.size,
+  };
+}
 
-  const created = await fetch(`${base}/v1/jobs`, {
+async function createJobs(options: {
+  base: string;
+  stored: StoredUpload[];
+  getToken: TokenSource;
+  orgId?: string | null;
+}): Promise<{ jobs: JobResponse[]; failed: BatchFailure[] }> {
+  const request = jobRequest(options.stored);
+  const created = await fetch(`${options.base}${request.path}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${await authorized(options.getToken)}`,
       "Content-Type": "application/json",
       ...orgHeaders(options.orgId),
     },
-    body: JSON.stringify({
-      object_key: objectKey,
-      filename,
-      content_type: uploadedType,
-      byte_size: byteSize,
-    }),
+    body: request.body,
   });
   if (!created.ok) {
-    throw new Error(await errorText(created));
+    throw new ApiRequestError(created.status, await errorText(created));
   }
-
-  let job = (await created.json()) as JobResponse;
-  options.onUpdate?.(job);
-  for (let attempt = 0; attempt < POLL_LIMIT; attempt += 1) {
-    if (job.status === "completed" || job.status === "failed") {
-      return job;
-    }
-    await new Promise((resolve) => {
-      setTimeout(resolve, POLL_INTERVAL_MS);
-    });
-    // Clerk session tokens last about a minute. Ask for a fresh one on each poll.
-    job = await fetchJob({
-      apiUrl: base,
-      jobId: job.id,
-      getToken: options.getToken,
-      orgId: options.orgId,
-    });
-    options.onUpdate?.(job);
+  if (options.stored.length === 1) {
+    return { jobs: [(await created.json()) as JobResponse], failed: [] };
   }
-  throw new JobStillRunning(job);
+  const body = (await created.json()) as { jobs?: JobResponse[]; failed?: BatchFailure[] };
+  return { jobs: body.jobs ?? [], failed: body.failed ?? [] };
 }
 
 export async function fetchJobReportPdf(options: {
