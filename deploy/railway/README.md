@@ -70,6 +70,12 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `QUOTA_MODE` | api | Optional `enforce` or `unlimited` |
 | `WEBHOOK_MAX_ATTEMPTS` | worker | Optional. Default `5`, maximum `10` |
 | `WEBHOOK_TIMEOUT_SECONDS` | worker | Optional. Default `10`, maximum `30` |
+| `SENTRY_DSN` | api, worker | Optional. Empty disables Sentry. Set it on each service that should report |
+| `SENTRY_ENVIRONMENT` | api, worker | Optional label such as `production`. Empty uses the SDK default `production` when `AUTH_MODE` is not `dev` |
+| `SENTRY_RELEASE` | api, worker | Optional release name. The SDK reads this env var when it is set |
+| `ADMIN_USER_IDS` | api | Comma-separated Clerk user ids for `GET /v1/admin/health`. Empty allows nobody |
+
+The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session whose `sub` is in `ADMIN_USER_IDS`. It reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text.
 
 `CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
 

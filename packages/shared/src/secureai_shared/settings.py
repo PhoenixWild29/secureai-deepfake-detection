@@ -56,6 +56,9 @@ class Settings:
     attestation_private_key: str = ""
     attestation_key_id: str = "v1"
     rate_limit_attestations: int = 60
+    sentry_dsn: str = ""
+    sentry_environment: str = ""
+    admin_user_ids: tuple[str, ...] = ()
 
 
 def assert_explicit_origins(origins: tuple[str, ...]) -> None:
@@ -198,6 +201,9 @@ def load_settings(
         attestation_private_key=attestation_pem,
         attestation_key_id=attestation_key_id,
         rate_limit_attestations=_nonnegative_int(env, "RATE_LIMIT_ATTESTATIONS", 60),
+        sentry_dsn=env.get("SENTRY_DSN", "").strip(),
+        sentry_environment=env.get("SENTRY_ENVIRONMENT", "").strip(),
+        admin_user_ids=_csv(env.get("ADMIN_USER_IDS", "")),
     )
 
 

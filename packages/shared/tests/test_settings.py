@@ -153,6 +153,37 @@ def test_explicit_quota_mode_overrides_the_dev_default() -> None:
         )
 
 
+def test_sentry_and_admin_allowlist_default_off() -> None:
+    settings = load_settings(
+        {
+            "AUTH_MODE": "dev",
+            "DATABASE_URL": "postgresql+psycopg://db",
+            "REDIS_URL": "redis://localhost:6379/0",
+        },
+        role="api",
+    )
+    assert settings.sentry_dsn == ""
+    assert settings.sentry_environment == ""
+    assert settings.admin_user_ids == ()
+
+
+def test_sentry_and_admin_allowlist_are_read() -> None:
+    settings = load_settings(
+        {
+            "AUTH_MODE": "dev",
+            "DATABASE_URL": "postgresql+psycopg://db",
+            "REDIS_URL": "redis://localhost:6379/0",
+            "SENTRY_DSN": " https://public@o0.ingest.sentry.io/1 ",
+            "SENTRY_ENVIRONMENT": "staging",
+            "ADMIN_USER_IDS": "user_a, user_b",
+        },
+        role="worker",
+    )
+    assert settings.sentry_dsn == "https://public@o0.ingest.sentry.io/1"
+    assert settings.sentry_environment == "staging"
+    assert settings.admin_user_ids == ("user_a", "user_b")
+
+
 def test_redis_backend_requires_url() -> None:
     with pytest.raises(RuntimeError, match="REDIS_URL"):
         load_settings({"AUTH_MODE": "dev", "DATABASE_URL": "postgresql+psycopg://db"}, role="worker")

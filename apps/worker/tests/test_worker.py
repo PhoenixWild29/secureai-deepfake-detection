@@ -216,3 +216,33 @@ def test_missing_database_exits(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.setenv("REDIS_URL", "redis://127.0.0.1:6379/0")
     assert run(["--once"]) == 2
+
+
+def test_worker_initializes_error_reporting_before_connections(monkeypatch: pytest.MonkeyPatch) -> None:
+    order: list[str] = []
+
+    def load_settings(*args: object, **kwargs: object) -> object:
+        del args, kwargs
+        order.append("settings")
+
+        class _Settings:
+            database_url = "postgresql+psycopg://unused/unused"
+
+        return _Settings()
+
+    def init(settings: object, *, service: str) -> bool:
+        del settings
+        order.append(service)
+        return False
+
+    class Store:
+        def __init__(self, url: str) -> None:
+            del url
+            order.append("store")
+            raise RuntimeError("stop")
+
+    monkeypatch.setattr("worker.__main__.load_settings", load_settings)
+    monkeypatch.setattr("worker.__main__.init_error_reporting", init)
+    monkeypatch.setattr("worker.__main__.PostgresJobStore", Store)
+    assert run(["--once"]) == 2
+    assert order == ["settings", "secureai-worker", "store"]

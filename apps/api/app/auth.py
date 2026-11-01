@@ -6,7 +6,7 @@ import logging
 from typing import Annotated, Callable
 
 import jwt
-from fastapi import Header, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, Request, status
 
 from secureai_shared.models import AuthContext
 from secureai_shared.settings import Settings
@@ -116,6 +116,24 @@ def require_user(
             detail="Authentication required",
         ) from exc
     logger.debug("auth subject=%s mode=%s", user.subject, user.mode)
+    return user
+
+
+def require_admin(
+    request: Request,
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> AuthContext:
+    """Allow only subjects listed in ``ADMIN_USER_IDS``.
+
+    An empty list allows nobody. The response does not echo the list.
+    In dev mode the subject is ``DEV_AUTH_SUBJECT``.
+    """
+
+    if user.subject not in request.app.state.settings.admin_user_ids:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
     return user
 
 

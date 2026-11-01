@@ -20,6 +20,7 @@ from pathlib import Path
 
 from secureai_shared.models import JobRecord
 from secureai_shared.queue import build_queue
+from secureai_shared.reporting import init_error_reporting
 from secureai_shared.settings import Settings, load_settings
 from secureai_shared.storage import build_storage, new_object_key
 from secureai_shared.store import PostgresJobStore
@@ -50,6 +51,7 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
 
     try:
         settings = load_settings(role="worker")
+        init_error_reporting(settings, service="secureai-worker")
         store = PostgresJobStore(settings.database_url)
         queue = build_queue(settings)
         storage = build_storage(settings)
