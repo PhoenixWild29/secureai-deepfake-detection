@@ -13,14 +13,11 @@ from typing import Annotated, Callable
 import jwt
 from fastapi import Depends, Header, HTTPException, Request, status
 
-from app.tenancy import resolved_plan
-from secureai_shared.api_keys import may_use_api_key
+from app.tenancy import WORKSPACE_MANAGER_ROLES, active_org
 from secureai_shared.models import AuthContext
 from secureai_shared.settings import Settings
 
 logger = logging.getLogger("secureai.api.auth")
-
-API_KEY_PLAN_REQUIRED = "API keys require a Pro or Team plan."
 
 
 class AuthError(Exception):
@@ -149,13 +146,14 @@ def require_admin(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> AuthContext:
-    """Allow only subjects listed in ``ADMIN_USER_IDS``.
+    """Allow only Clerk sessions, or the dev bearer, listed in ``ADMIN_USER_IDS``.
 
-    An empty list allows nobody. The response does not echo the list.
-    In dev mode the subject is ``DEV_AUTH_SUBJECT``.
+    An API key is never an admin credential, even when its subject is listed.
+    An empty list allows nobody. The response does not echo the list or say
+    which check failed. In dev mode the subject is ``DEV_AUTH_SUBJECT``.
     """
 
-    if user.subject not in request.app.state.settings.admin_user_ids:
+    if user.mode == "api_key" or user.subject not in request.app.state.settings.admin_user_ids:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required",
@@ -166,8 +164,11 @@ def require_admin(
 def _user_from_api_key(request: Request, token: str) -> AuthContext:
     """Resolve a ``sai_`` bearer to the same subject the key was minted for.
 
-    Unknown and revoked secrets are 401. A live key whose personal or
-    workspace plan is free is 402. The secret is not logged.
+    Unknown and revoked secrets are 401. The plan gate is the workspace
+    plan when ``X-Org-Id`` is set or the key is bound to a workspace, and
+    the personal plan otherwise. A free effective plan is 402. A workspace
+    key whose minter is no longer an owner or admin is revoked and 401.
+    The secret is not logged.
     """
 
     record = request.app.state.api_keys.authenticate(token)
@@ -177,23 +178,48 @@ def _user_from_api_key(request: Request, token: str) -> AuthContext:
             detail="Authentication required",
         )
     org_id = record.org_id
-    if org_id is not None and request.app.state.billing.membership(org_id, record.user_id) is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
-        )
-    plan = resolved_plan(request.app.state.billing, record.user_id, org_id)
-    if plan is None or not may_use_api_key(plan):
-        raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED,
-            detail=API_KEY_PLAN_REQUIRED,
-        )
-    request.app.state.api_keys.mark_used(record.id)
-    return AuthContext(
+    if org_id is not None:
+        _reject_workspace_key_without_manager(request, record.id, record.user_id, org_id)
+    user = AuthContext(
         subject=record.user_id,
         mode="api_key",
         api_key_id=record.id,
         api_key_org_id=org_id,
+    )
+    # Resolves X-Org-Id / the bound workspace and applies ensure_api_key_plan.
+    active_org(request, user)
+    request.app.state.api_keys.mark_used(record.id)
+    return user
+
+
+def _reject_workspace_key_without_manager(
+    request: Request,
+    key_id: str,
+    user_id: str,
+    org_id: str,
+) -> None:
+    """Revoke a workspace key whose minter is not currently a manager.
+
+    The key is a credential for that workspace, not a personal token. It
+    keeps working only while the minter is an owner or admin. Removal and
+    demotion to member both revoke it on the next use, so promoting the
+    minter later does not bring the same secret back. A current manager
+    mints a replacement. The row stays so the revocation is visible.
+    """
+
+    role = request.app.state.billing.membership(org_id, user_id)
+    if role in WORKSPACE_MANAGER_ROLES:
+        return
+    request.app.state.api_keys.revoke(key_id, user_id=user_id, org_id=org_id)
+    logger.info(
+        "api key revoked id=%s subject=%s org_id=%s reason=minter_not_manager",
+        key_id,
+        user_id,
+        org_id,
+    )
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Authentication required",
     )
 
 

@@ -305,6 +305,187 @@ def test_clerk_session_still_works_and_can_mint_a_key(tmp_path: Path) -> None:
         assert calls["n"] == before
 
 
+def test_personal_key_uses_the_workspace_plan(tmp_path: Path) -> None:
+    """A Pro personal key cannot call as a Free workspace.
+
+    The effective plan is the workspace when ``X-Org-Id`` is set, and the
+    personal plan otherwise. A dev session on that Free workspace is unchanged.
+    """
+
+    billing = MemoryBillingStore()
+    _grant(billing, user_id="user_dev", plan="pro", status="active")
+    app, store, storage = _app(tmp_path, billing=billing)
+    outsider = create_app(
+        settings=make_settings(tmp_path, quota_mode="enforce", dev_subject="user_other"),
+        store=store,
+        queue=MemoryJobQueue(),
+        storage=storage,
+        billing=billing,
+    )
+    with TestClient(app) as client, TestClient(outsider) as other:
+        created = client.post("/v1/api-keys", headers=AUTH, json={"name": "laptop"})
+        assert created.status_code == 201, created.text
+        secret = created.json()["secret"]
+        key_auth = {"Authorization": f"Bearer {secret}"}
+        free = client.post("/v1/orgs", headers=AUTH, json={"name": "Free"})
+        assert free.status_code == 201
+        free_id = free.json()["id"]
+        paid = client.post("/v1/orgs", headers=AUTH, json={"name": "Paid"})
+        paid_id = paid.json()["id"]
+        foreign = other.post("/v1/orgs", headers=AUTH, json={"name": "Foreign"})
+        foreign_id = foreign.json()["id"]
+
+        blocked = client.get("/v1/jobs", headers={**key_auth, "X-Org-Id": free_id})
+        assert blocked.status_code == 402
+        assert blocked.json()["detail"] == "API keys require a Pro or Team plan."
+        pdf = client.get(
+            "/v1/jobs/job_0123456789ab/report.pdf",
+            headers={**key_auth, "X-Org-Id": free_id},
+        )
+        assert pdf.status_code == 402
+        assert pdf.json()["detail"] == "API keys require a Pro or Team plan."
+        posted = client.post(
+            "/v1/jobs",
+            headers={**key_auth, "X-Org-Id": free_id},
+            json={"object_key": "uploads/user_dev/clip.mp4", "filename": "clip.mp4"},
+        )
+        assert posted.status_code == 402
+        assert posted.json()["detail"] == "API keys require a Pro or Team plan."
+        listed = client.get("/v1/api-keys", headers=AUTH)
+        assert listed.json()[0]["last_used_at"] is None
+
+        session_jobs = client.get("/v1/jobs", headers={**AUTH, "X-Org-Id": free_id})
+        assert session_jobs.status_code == 200
+        session_pdf = client.get(
+            "/v1/jobs/job_0123456789ab/report.pdf",
+            headers={**AUTH, "X-Org-Id": free_id},
+        )
+        assert session_pdf.status_code == 404
+        stranger = client.get("/v1/jobs", headers={**key_auth, "X-Org-Id": foreign_id})
+        assert stranger.status_code == 403
+        invalid = client.get("/v1/jobs", headers={**key_auth, "X-Org-Id": "not-an-org"})
+        assert invalid.status_code == 400
+
+        _grant(billing, org_id=paid_id, plan="team", status="past_due")
+        allowed = client.get("/v1/jobs", headers={**key_auth, "X-Org-Id": paid_id})
+        assert allowed.status_code == 200
+        _grant(billing, user_id="user_dev", plan="free", status="canceled")
+        personal = client.get("/v1/jobs", headers=key_auth)
+        assert personal.status_code == 402
+        still_paid = client.get("/v1/jobs", headers={**key_auth, "X-Org-Id": paid_id})
+        assert still_paid.status_code == 200
+        minted = client.post(
+            "/v1/api-keys",
+            headers={**AUTH, "X-Org-Id": paid_id},
+            json={"name": "ci"},
+        )
+        assert minted.status_code == 201, minted.text
+        assert client.post("/v1/api-keys", headers=AUTH, json={"name": "nope"}).status_code == 402
+
+
+def test_bound_key_follows_the_workspace_plan(tmp_path: Path) -> None:
+    billing = MemoryBillingStore()
+    app, _store, _storage = _app(tmp_path, billing=billing)
+    with TestClient(app) as client:
+        personal = client.post("/v1/api-keys", headers=AUTH, json={"name": "laptop"})
+        assert personal.status_code == 402
+        org = client.post("/v1/orgs", headers=AUTH, json={"name": "Studio"})
+        org_id = org.json()["id"]
+        _grant(billing, org_id=org_id, plan="team", status="active")
+        created = client.post(
+            "/v1/api-keys",
+            headers={**AUTH, "X-Org-Id": org_id},
+            json={"name": "ci"},
+        )
+        assert created.status_code == 201, created.text
+        secret = created.json()["secret"]
+        assert client.get("/v1/jobs", headers={"Authorization": f"Bearer {secret}"}).status_code == 200
+        _grant(billing, org_id=org_id, plan="free", status="canceled")
+        blocked = client.get("/v1/jobs", headers={"Authorization": f"Bearer {secret}"})
+        assert blocked.status_code == 402
+        assert blocked.json()["detail"] == "API keys require a Pro or Team plan."
+
+
+def test_api_key_cannot_call_admin_health(tmp_path: Path) -> None:
+    billing = MemoryBillingStore()
+    _grant(billing, user_id="user_dev", plan="pro", status="active")
+    app, _store, _storage = _app(tmp_path, billing=billing, admin_user_ids=("user_dev",))
+    with TestClient(app) as client:
+        created = client.post("/v1/api-keys", headers=AUTH, json={"name": "laptop"})
+        assert created.status_code == 201, created.text
+        secret = created.json()["secret"]
+        denied = client.get("/v1/admin/health", headers={"Authorization": f"Bearer {secret}"})
+        assert denied.status_code == 403
+        assert denied.json()["detail"] == "Admin access required"
+        assert "postgres" not in denied.text
+        assert "user_dev" not in denied.text
+        allowed = client.get("/v1/admin/health", headers=AUTH)
+        assert allowed.status_code in {200, 503}
+        assert allowed.json()["status"] in {"ok", "degraded"}
+
+
+def test_demoted_minter_workspace_key_is_revoked(tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
+    billing = MemoryBillingStore()
+    _grant(billing, user_id="user_dev", plan="pro", status="active")
+    app, store, storage = _app(tmp_path, billing=billing)
+    admin_app = create_app(
+        settings=make_settings(tmp_path, quota_mode="enforce", dev_subject="user_admin"),
+        store=store,
+        queue=MemoryJobQueue(),
+        storage=storage,
+        billing=billing,
+        api_keys=app.state.api_keys,
+    )
+    caplog.set_level(logging.INFO)
+    with TestClient(app) as client, TestClient(admin_app) as admin_client:
+        org = client.post("/v1/orgs", headers=AUTH, json={"name": "Studio"})
+        assert org.status_code == 201
+        org_id = org.json()["id"]
+        _grant(billing, org_id=org_id, plan="team", status="active")
+        added = client.post(
+            f"/v1/orgs/{org_id}/members",
+            headers=AUTH,
+            json={"user_id": "user_admin"},
+        )
+        assert added.status_code == 201
+        billing._members[org_id]["user_admin"] = "admin"
+        headers = {**AUTH, "X-Org-Id": org_id}
+        created = admin_client.post("/v1/api-keys", headers=headers, json={"name": "ci"})
+        assert created.status_code == 201, created.text
+        secret = created.json()["secret"]
+        key_id = created.json()["id"]
+        key_auth = {"Authorization": f"Bearer {secret}"}
+        assert admin_client.get("/v1/jobs", headers=key_auth).status_code == 200
+        owner = client.post("/v1/api-keys", headers=headers, json={"name": "owner"})
+        assert owner.status_code == 201, owner.text
+        owner_auth = {"Authorization": f"Bearer {owner.json()['secret']}"}
+
+        billing._members[org_id]["user_admin"] = "member"
+        blocked = admin_client.get("/v1/jobs", headers=key_auth)
+        assert blocked.status_code == 401
+        assert blocked.json()["detail"] == "Authentication required"
+        assert secret not in blocked.text
+        assert admin_client.get("/v1/jobs", headers=headers).status_code == 200
+        assert client.get("/v1/jobs", headers=owner_auth).status_code == 200
+        billing._members[org_id]["user_admin"] = "admin"
+        assert admin_client.get("/v1/jobs", headers=key_auth).status_code == 401
+        listed = client.get("/v1/api-keys", headers=headers)
+        row = next(item for item in listed.json() if item["id"] == key_id)
+        assert row["revoked_at"] is not None
+        assert secret not in listed.text
+        assert secret not in caplog.text
+        assert "minter_not_manager" in caplog.text
+
+        billing._members[org_id]["user_admin"] = "admin"
+        second = admin_client.post("/v1/api-keys", headers=headers, json={"name": "next"})
+        assert second.status_code == 201, second.text
+        second_auth = {"Authorization": f"Bearer {second.json()['secret']}"}
+        del billing._members[org_id]["user_admin"]
+        assert admin_client.get("/v1/jobs", headers=second_auth).status_code == 401
+        billing._members[org_id]["user_admin"] = "owner"
+        assert admin_client.get("/v1/jobs", headers=second_auth).status_code == 401
+
+
 def test_dev_bearer_is_unchanged(tmp_path: Path) -> None:
     app, _store, _storage = _app(tmp_path)
     with TestClient(app) as client:
