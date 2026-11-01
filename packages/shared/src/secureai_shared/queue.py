@@ -95,6 +95,10 @@ class RedisJobQueue:
             if item is None:
                 return None
             _key, job_id = item
+        # TODO: the pop and the inflight lease write are separate commands. A crash
+        # between them drops the id (it is off the list and not in the lease).
+        # Use a Lua script or BLMOVE so the lease exists before the id leaves the
+        # queue. Do this before more than one worker shares a public queue.
         if job_id:
             self._touch(job_id)
         return job_id

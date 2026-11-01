@@ -20,6 +20,7 @@ class JobRecord(BaseModel):
 
     id: str
     user_id: str
+    org_id: str | None = None
     filename: str
     content_type: str | None = None
     byte_size: int | None = None

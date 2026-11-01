@@ -19,7 +19,13 @@ def sweep_stuck(
     max_attempts: int,
     now: float | None = None,
 ) -> list[str]:
-    """Requeue leased jobs that outlived the detector timeout, or fail them."""
+    """Requeue leased jobs that outlived the detector timeout, or fail them.
+
+    TODO: the stale read, release, and republish are not one atomic claim. Two
+    workers can sweep the same lease, and release() does not check the attempt,
+    so a slow worker can release a newer claim. Compare-and-delete the lease and
+    release only when the stored attempt still matches.
+    """
 
     recovered: list[str] = []
     for job_id, attempts in queue.stale(lease_seconds, now=now):

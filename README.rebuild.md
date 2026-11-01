@@ -1,4 +1,4 @@
-# SecureAI rebuild (Phase 2)
+# SecureAI rebuild (Phase 3)
 
 The legacy Flask API (`api.py`), React Guardian (`secureai-guardian/`), and the repository-root `Dockerfile` stay in place. The saleable product lives under `apps/` and `packages/`.
 
@@ -7,7 +7,7 @@ Source for review is `main`.
 ## Layout
 
 ```
-apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, and shows a report.
+apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, and opens billing.
 apps/api/             FastAPI. Clerk JWT (or a private dev bypass), Postgres, Redis.
 apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API.
 packages/detector/    DETECTOR_MODE=cpu samples frames. DETECTOR_MODE=stub hashes the path.
@@ -182,6 +182,69 @@ CI is `.github/workflows/rebuild.yml`. It starts Redis and Postgres service cont
 
 `apps/api/requirements-dev.txt` pins `httpx2` because Starlette's TestClient imports `httpx2`. That name is intentional.
 
-## Still later (Phase 3)
+## Billing and workspaces
 
-Billing (Stripe), organizations, the legacy GPU ensemble, and Docker image builds in CI. Solana stays deferred. The legacy Flask tree stays in the repo.
+Plans are Free trial, Pro, and Team. Free trial is 10 jobs per month. Pro is 500. Team is 2,000 for the workspace. A free workspace has 3 seats. A Team workspace has 25. Override them with `QUOTA_FREE`, `QUOTA_PRO`, `QUOTA_TEAM`, `SEAT_LIMIT_FREE`, and `SEAT_LIMIT_TEAM`.
+
+A job counts when it is created, including jobs that later fail. The window is the Stripe subscription period when that period is current, otherwise the UTC calendar month. Personal jobs use the user plan. Jobs sent with `X-Org-Id` use the workspace plan and show up for every member.
+
+`POST /v1/jobs` returns **402** when a free-trial caller is over the cap, with `detail` telling them to upgrade. A Pro or Team caller who is over the included amount gets **403**. Uploads stay on the short rate limit. The monthly cap is the job.
+
+`GET /v1/billing` returns the plan, status, jobs used, jobs remaining (`jobs_limit`), the period, and the caller's workspaces. `jobs_limit` is null when quotas are unlimited.
+
+`POST /v1/billing/checkout` with `{"plan":"pro"}` opens Stripe Checkout for the personal account. `{"plan":"team","org_id":"org_..."}` does the same for a workspace the caller owns. `POST /v1/billing/portal` opens the Customer Portal. Both return `{url}`. Guardian's Billing page sends the browser there.
+
+`POST /v1/billing/webhook` accepts `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed`. It checks `Stripe-Signature` with `STRIPE_WEBHOOK_SECRET`. There is no Clerk token on that route. A bad signature is 400. The handler stores `stripe_customer_id`, subscription status, plan, and the current period on the user or the organization. Event ids are stored once.
+
+`past_due` keeps the paid plan. `canceled` returns the account to the free trial. An unpaid Checkout session does not grant Pro or Team.
+
+Clerk Organizations are not used. A workspace is a row in Postgres. `POST /v1/orgs` creates one and makes the caller the owner. `POST /v1/orgs/{id}/members` adds a Clerk user id. The owner cannot be removed. Guardian keeps the selected workspace in the browser and sends `X-Org-Id` on history, reports, new jobs, and billing.
+
+### Stripe environment
+
+Set these on the API. Do not commit values. Test mode first (`sk_test_...`, `whsec_...`, `price_...`).
+
+| Variable | Purpose |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Secret key for Checkout, Customer Portal, and Customer create |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret for `POST /v1/billing/webhook` |
+| `STRIPE_PRICE_PRO` | Recurring Price id for Pro |
+| `STRIPE_PRICE_TEAM` | Recurring Price id for Team. Omit it to hide Team checkout |
+| `PUBLIC_APP_URL` | Guardian origin, no trailing slash. Default `http://localhost:3000`. Success, cancel, and portal return URLs are under `/billing` |
+| `QUOTA_MODE` | `enforce` or `unlimited`. Default: `unlimited` when `AUTH_MODE=dev` and `STRIPE_SECRET_KEY` is empty; otherwise `enforce` |
+
+Empty `STRIPE_SECRET_KEY` disables Checkout and the portal (HTTP 503, `Billing is not configured`). In `AUTH_MODE=dev` the API logs a warning and does not enforce quotas, so local job flow keeps working. Set `QUOTA_MODE=enforce` to apply the free trial on that workstation. `AUTH_MODE=clerk` without a Stripe key stays on the free trial and logs that Checkout is disabled. A missing `STRIPE_WEBHOOK_SECRET` while the secret key is set logs that subscription updates cannot be verified.
+
+### Test-mode walkthrough
+
+In the Stripe dashboard (test mode), create two recurring prices and copy the price ids. Point a webhook at `https://<api-host>/v1/billing/webhook` for the five events above, or forward locally:
+
+```bash
+stripe listen --forward-to localhost:8000/v1/billing/webhook
+```
+
+Put the printed `whsec_...` in `STRIPE_WEBHOOK_SECRET`. Use card `4242 4242 4242 4242` in Checkout. Then:
+
+```bash
+curl -s http://localhost:8000/v1/billing -H 'Authorization: Bearer dev'
+curl -s -X POST http://localhost:8000/v1/billing/checkout \
+  -H 'Authorization: Bearer dev' \
+  -H 'Content-Type: application/json' \
+  -d '{"plan":"pro"}'
+```
+
+The checkout response is a Stripe URL. After the webhook, `GET /v1/billing` shows `"plan":"pro"`. Open Guardian at `/billing` to see the remaining quota, create a workspace, and use Upgrade or Manage billing.
+
+The API tests sign fixture events with a test webhook secret and replace Checkout calls. They do not contact Stripe.
+
+## Still later
+
+The legacy GPU ensemble and Docker image builds in CI. Solana stays deferred. The legacy Flask tree stays in the repo.
+
+These queue and storage races are still open. Do them before running more than one worker or putting media on a public bucket:
+
+- Pop and the in-flight lease write are two Redis commands. A crash between them drops the id. Use a Lua script or `BLMOVE`.
+- `sweep_stuck` reads a stale lease, releases, and republishes as separate steps. `release` does not check the attempt, so a slow worker can release a newer claim.
+- S3 download does not send `IfMatch` (or VersionId), so a rewrite between the head check and the GET can be scored.
+
+`_finish` now locks the job row with `FOR UPDATE`. The Redis rate limiter now runs `INCR` and `EXPIRE` in one script.

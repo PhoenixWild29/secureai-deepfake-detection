@@ -59,6 +59,12 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `MEDIA_ROOT` | api, worker | Only for `STORAGE_BACKEND=filesystem`. Use the same absolute path on both |
 | `CORS_ORIGINS` | api | Explicit Guardian origins, comma-separated. The API rejects `*` |
 | `DETECTOR_MODE` | worker | `cpu` (the default). `stub` does not read the file |
+| `STRIPE_SECRET_KEY` | api | Stripe test or live secret. Empty disables Checkout and, with `AUTH_MODE=clerk`, leaves callers on the free trial |
+| `STRIPE_WEBHOOK_SECRET` | api | Signing secret for `POST /v1/billing/webhook` |
+| `STRIPE_PRICE_PRO` | api | Recurring Price id for Pro |
+| `STRIPE_PRICE_TEAM` | api | Optional recurring Price id for Team |
+| `PUBLIC_APP_URL` | api | Guardian origin, no trailing slash. Checkout and portal return here |
+| `QUOTA_MODE` | api | Optional `enforce` or `unlimited` |
 
 `CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
 

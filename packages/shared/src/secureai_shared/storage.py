@@ -158,6 +158,9 @@ class S3Storage:
         handle.close()
         dest = Path(handle.name)
         try:
+            # TODO: download_file does not send IfMatch=etag (or VersionId). A rewrite
+            # between the head check and this GET can still be scored. Pass the job
+            # etag once object storage is on a public bucket.
             self.client.download_file(self.bucket, key, str(dest))  # type: ignore[attr-defined]
         except Exception:
             dest.unlink(missing_ok=True)

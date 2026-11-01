@@ -29,6 +29,8 @@ On the API, set `CORS_ORIGINS` to this site's origin. Do not use `CORS_ORIGINS=*
 
 The API also needs `CLERK_ISSUER` and `CLERK_AUTHORIZED_PARTIES` including this site. An empty allow-list skips the `azp` check and is only for local Clerk. Those variables belong on the API, not in the web project. `GET /health` on the API reports `"auth":"clerk"` in that mode.
 
-`/jobs` is the signed-in history page. `/jobs/{id}` is the report. The browser refreshes the Clerk session token while it polls.
+`/jobs` is the signed-in history page. `/jobs/{id}` is the report. `/billing` shows the plan, remaining jobs, and workspaces, and sends the browser to Stripe Checkout or the Customer Portal. The browser refreshes the Clerk session token while it polls.
+
+Stripe keys stay on the API. Set `PUBLIC_APP_URL` there to this site's origin so Checkout can return to `/billing`. Do not put `STRIPE_SECRET_KEY` on the Vercel project.
 
 No blockchain or Solana variables.

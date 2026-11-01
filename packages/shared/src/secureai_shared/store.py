@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.db import JobRow
@@ -15,6 +15,20 @@ from secureai_shared.models import JobRecord, JobStatus
 
 # Client-visible failure text. Never store exception messages or paths here.
 PUBLIC_FAILURE_DETAIL = "Detection failed."
+
+
+def _visible(job: JobRecord | None, *, user_id: str, org_id: str | None) -> JobRecord | None:
+    """Personal reads hide workspace jobs. Workspace reads require that workspace."""
+
+    if job is None:
+        return None
+    if org_id is not None:
+        if job.org_id != org_id:
+            return None
+        return job
+    if job.user_id != user_id or job.org_id is not None:
+        return None
+    return job
 
 
 def _can_finish(job: JobRecord, *, attempt: int | None, require_processing: bool) -> bool:
@@ -39,6 +53,7 @@ def _record_from_row(row: JobRow) -> JobRecord:
     return JobRecord(
         id=row.id,
         user_id=row.user_id,
+        org_id=row.org_id,
         filename=row.filename,
         content_type=row.content_type,
         byte_size=row.byte_size,
@@ -64,13 +79,24 @@ class JobStore(Protocol):
         byte_size: int | None,
         object_key: str,
         object_etag: str | None = None,
+        org_id: str | None = None,
     ) -> JobRecord: ...
 
-    def get(self, job_id: str, *, user_id: str) -> JobRecord | None: ...
+    def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None: ...
 
     def get_any(self, job_id: str) -> JobRecord | None: ...
 
     def list_for_user(self, user_id: str, *, limit: int = 50) -> list[JobRecord]: ...
+
+    def list_for_org(self, org_id: str, *, limit: int = 50) -> list[JobRecord]: ...
+
+    def count_started(
+        self,
+        *,
+        user_id: str,
+        org_id: str | None,
+        since: datetime,
+    ) -> int: ...
 
     def claim(self, job_id: str) -> JobRecord | None: ...
 
@@ -102,11 +128,13 @@ class MemoryJobStore:
         byte_size: int | None,
         object_key: str,
         object_etag: str | None = None,
+        org_id: str | None = None,
     ) -> JobRecord:
         now = _now()
         job = JobRecord(
             id=_new_id(),
             user_id=user_id,
+            org_id=org_id,
             filename=filename,
             content_type=content_type,
             byte_size=byte_size,
@@ -121,12 +149,10 @@ class MemoryJobStore:
             self._rows[job.id] = job
         return job
 
-    def get(self, job_id: str, *, user_id: str) -> JobRecord | None:
+    def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None:
         with self._lock:
             job = self._rows.get(job_id)
-        if job is None or job.user_id != user_id:
-            return None
-        return job
+        return _visible(job, user_id=user_id, org_id=org_id)
 
     def get_any(self, job_id: str) -> JobRecord | None:
         with self._lock:
@@ -134,9 +160,30 @@ class MemoryJobStore:
 
     def list_for_user(self, user_id: str, *, limit: int = 50) -> list[JobRecord]:
         with self._lock:
-            rows = [job for job in self._rows.values() if job.user_id == user_id]
+            rows = [
+                job for job in self._rows.values() if job.user_id == user_id and job.org_id is None
+            ]
         rows.sort(key=lambda job: job.created_at, reverse=True)
         return rows[:limit]
+
+    def list_for_org(self, org_id: str, *, limit: int = 50) -> list[JobRecord]:
+        with self._lock:
+            rows = [job for job in self._rows.values() if job.org_id == org_id]
+        rows.sort(key=lambda job: job.created_at, reverse=True)
+        return rows[:limit]
+
+    def count_started(self, *, user_id: str, org_id: str | None, since: datetime) -> int:
+        with self._lock:
+            rows = self._rows.values()
+            if org_id is not None:
+                matched = [job for job in rows if job.org_id == org_id and job.created_at >= since]
+            else:
+                matched = [
+                    job
+                    for job in rows
+                    if job.user_id == user_id and job.org_id is None and job.created_at >= since
+                ]
+        return len(matched)
 
     def claim(self, job_id: str) -> JobRecord | None:
         with self._lock:
@@ -234,11 +281,13 @@ class PostgresJobStore:
         byte_size: int | None,
         object_key: str,
         object_etag: str | None = None,
+        org_id: str | None = None,
     ) -> JobRecord:
         now = _now()
         row = JobRow(
             id=_new_id(),
             user_id=user_id,
+            org_id=org_id,
             filename=filename,
             content_type=content_type,
             byte_size=byte_size,
@@ -257,12 +306,11 @@ class PostgresJobStore:
             session.commit()
             return _record_from_row(row)
 
-    def get(self, job_id: str, *, user_id: str) -> JobRecord | None:
+    def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None:
         with self._session() as session:
             row = session.get(JobRow, job_id)
-            if row is None or row.user_id != user_id:
-                return None
-            return _record_from_row(row)
+            visible = _visible(None if row is None else _record_from_row(row), user_id=user_id, org_id=org_id)
+            return visible
 
     def get_any(self, job_id: str) -> JobRecord | None:
         with self._session() as session:
@@ -275,11 +323,31 @@ class PostgresJobStore:
         with self._session() as session:
             rows = session.scalars(
                 select(JobRow)
-                .where(JobRow.user_id == user_id)
+                .where(JobRow.user_id == user_id, JobRow.org_id.is_(None))
                 .order_by(JobRow.created_at.desc())
                 .limit(limit)
             ).all()
             return [_record_from_row(row) for row in rows]
+
+    def list_for_org(self, org_id: str, *, limit: int = 50) -> list[JobRecord]:
+        with self._session() as session:
+            rows = session.scalars(
+                select(JobRow)
+                .where(JobRow.org_id == org_id)
+                .order_by(JobRow.created_at.desc())
+                .limit(limit)
+            ).all()
+            return [_record_from_row(row) for row in rows]
+
+    def count_started(self, *, user_id: str, org_id: str | None, since: datetime) -> int:
+        with self._session() as session:
+            query = select(func.count()).select_from(JobRow).where(JobRow.created_at >= since)
+            if org_id is not None:
+                query = query.where(JobRow.org_id == org_id)
+            else:
+                query = query.where(JobRow.user_id == user_id, JobRow.org_id.is_(None))
+            total = session.scalar(query)
+            return int(total or 0)
 
     def claim(self, job_id: str) -> JobRecord | None:
         with self._session() as session:
@@ -345,7 +413,8 @@ class PostgresJobStore:
         require_processing: bool,
     ) -> JobRecord | None:
         with self._session() as session:
-            row = session.get(JobRow, job_id)
+            # Lock the row so the status check and the write commit together.
+            row = session.scalar(select(JobRow).where(JobRow.id == job_id).with_for_update())
             if row is None or not _can_finish(
                 _record_from_row(row),
                 attempt=attempt,
