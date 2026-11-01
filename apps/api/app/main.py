@@ -81,7 +81,7 @@ def create_app(
 
     app = FastAPI(
         title="SecureAI API",
-        version="0.6.0",
+        version="0.7.0",
         description=(
             "Detection jobs require a verified Clerk session JWT. "
             "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
@@ -90,7 +90,8 @@ def create_app(
             "If the queue stops after some ids are accepted, the 202 body "
             "lists those jobs and the ids that did not queue. "
             "GET /v1/jobs/{id}/report downloads a completed job as JSON. "
-            "PDF export is not available yet. "
+            "GET /v1/jobs/{id}/report.pdf downloads that report as a PDF "
+            "for Pro or Team, or for a dev workstation with unlimited quota. "
             "POST /v1/jobs/{id}/attest signs a completed report. "
             "POST /v1/attestations/verify checks that signature without a session. "
             "Plan quotas apply unless QUOTA_MODE=unlimited. "

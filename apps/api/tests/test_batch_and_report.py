@@ -283,7 +283,7 @@ def test_report_json_for_a_completed_job(stack) -> None:
     assert body["prediction"] == "real"
     assert body["model"] == "cpu-multisignal-v1"
     assert body["signals"]["texture"] == 0.2
-    assert body["pdf_available"] is False
+    assert body["pdf_available"] is True
     assert "not a trained deepfake classifier" in body["limitations"]
 
     hidden = client.get(f"/v1/jobs/{job_id}/report")

@@ -11,3 +11,4 @@ PyJWT[crypto]==2.15.1
 cryptography==41.0.7
 boto3==1.43.123
 stripe==16.1.0
+fpdf2==2.9.0

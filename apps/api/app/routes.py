@@ -15,10 +15,12 @@ from pydantic import BaseModel, Field
 
 from app.auth import require_user
 from app.batch_quota import accept_batch
+from app.pdf_report import PDF_PLAN_REQUIRED, render_job_report_pdf
 from app.quota import accept_job
 from app.tenancy import active_org
+from secureai_shared.billing import effective_plan
 from secureai_shared.models import AuthContext, JobRecord, JobStatus
-from secureai_shared.report import LIMITATIONS, load_report_detail
+from secureai_shared.report import LIMITATIONS, load_report_detail, may_export_pdf
 from secureai_shared.storage import ObjectStat, clean_filename, is_owned_key, new_object_key
 from secureai_shared.store import UNQUEUED_FAILURE_DETAIL
 from secureai_shared.webhooks import schedule_terminal
@@ -91,7 +93,7 @@ class BatchAccepted(BaseModel):
 
 
 class JobReportExport(BaseModel):
-    """JSON download for a completed job. PDF is not generated yet."""
+    """JSON download for a completed job. PDF is ``GET /v1/jobs/{id}/report.pdf``."""
 
     job_id: str
     filename: str
@@ -101,7 +103,7 @@ class JobReportExport(BaseModel):
     model: str | None
     signals: dict[str, float]
     limitations: str
-    pdf_available: bool = False
+    pdf_available: bool = True
     created_at: datetime
     updated_at: datetime
 
@@ -331,8 +333,8 @@ def export_job_report(
 ) -> JobReportExport:
     """Download a completed job as JSON.
 
-    TODO: add a PDF body when a small renderer is chosen. ``pdf_available``
-    stays false until then. The same route will keep returning this JSON.
+    ``pdf_available`` means this API can render ``GET .../report.pdf``. It does
+    not mean the caller's plan is entitled to that download.
     """
 
     job = get_job(job_id, request, user)
@@ -349,9 +351,69 @@ def export_job_report(
         model=model,
         signals=signals,
         limitations=LIMITATIONS,
+        pdf_available=True,
         created_at=job.created_at,
         updated_at=job.updated_at,
     )
+
+
+@router.get(
+    "/v1/jobs/{job_id}/report.pdf",
+    response_class=Response,
+    responses={200: {"content": {"application/pdf": {}}, "description": "Completed job report"}},
+)
+def export_job_report_pdf(
+    job_id: str,
+    request: Request,
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> Response:
+    """Download a completed job as a one-page PDF.
+
+    Visibility matches the JSON report. Pro and Team can download. A free plan
+    is 402 unless this process is ``AUTH_MODE=dev`` with ``QUOTA_MODE=unlimited``.
+    """
+
+    job = get_job(job_id, request, user)
+    if job.status is not JobStatus.completed:
+        raise HTTPException(status_code=409, detail="Job is not complete")
+    org_id = active_org(request, user)
+    _require_pdf_plan(request, user, org_id)
+    model, signals = load_report_detail(job.detail)
+    body = render_job_report_pdf(
+        job_id=job.id,
+        org_id=job.org_id,
+        filename=job.filename,
+        status=job.status.value,
+        prediction=job.prediction,
+        confidence=job.confidence,
+        model=model,
+        signals=signals,
+        created_at=job.created_at,
+        updated_at=job.updated_at,
+        limitations=LIMITATIONS,
+    )
+    logger.info("pdf report job_id=%s", job.id)
+    return Response(
+        content=body,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{job.id}.pdf"'},
+    )
+
+
+def _require_pdf_plan(request: Request, user: AuthContext, org_id: str | None) -> None:
+    settings = request.app.state.settings
+    billing = request.app.state.billing
+    if org_id is not None:
+        summary = billing.org_summary(org_id, user_id=user.subject)
+        if summary is None:
+            raise HTTPException(status_code=403, detail="Not a member of this workspace")
+        plan = effective_plan(summary.plan, summary.subscription_status)
+    else:
+        account = billing.user_account(user.subject)
+        plan = effective_plan(account.plan, account.subscription_status)
+    if may_export_pdf(auth_mode=settings.auth_mode, quota_mode=settings.quota_mode, plan=plan):
+        return
+    raise HTTPException(status_code=402, detail=PDF_PLAN_REQUIRED)
 
 
 def _stored_upload(request: Request, user: AuthContext, body: JobCreate) -> tuple[str, ObjectStat]:
