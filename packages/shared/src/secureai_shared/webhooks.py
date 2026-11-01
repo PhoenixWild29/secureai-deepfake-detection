@@ -814,6 +814,20 @@ def _blocked_host(host: str) -> bool:
     return not literal.is_global
 
 
+def _connect_budget(timeout: object) -> float | None:
+    """Seconds of shared connect budget, or None when there is no deadline.
+
+    Delivery passes a numeric timeout. ``http.client`` stores
+    ``socket._GLOBAL_DEFAULT_TIMEOUT`` when a connection is built without
+    one. That sentinel is not a number. It is handled like ``None``: no
+    deadline, and each TCP attempt blocks.
+    """
+
+    if timeout is None or timeout is socket._GLOBAL_DEFAULT_TIMEOUT:
+        return None
+    return float(timeout)  # type: ignore[arg-type]
+
+
 class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     """TLS to ``host`` over addresses from one resolution, tried in order.
 
@@ -828,6 +842,9 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     the request. A TLS failure, including a certificate failure, is not
     caught and does not try another address. The hostname is not resolved
     again. ``None`` disables the budget and each attempt blocks.
+    ``socket._GLOBAL_DEFAULT_TIMEOUT``, which ``http.client`` stores when
+    a connection is built without a timeout, is not a number and is
+    treated the same way.
     """
 
     def __init__(
@@ -846,11 +863,12 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
         if not self._pinned_addresses:
             raise OSError("webhook connect has no pinned address")
         last_error: OSError | None = None
-        timeout = self.timeout
         # One monotonic deadline for every pinned address. ``create_connection``
         # treats a per-call timeout as "this attempt may block this long", so
         # passing the original timeout each time would allow N times the budget.
-        deadline = None if timeout is None else time.monotonic() + float(timeout)
+        # ``None`` and ``socket._GLOBAL_DEFAULT_TIMEOUT`` have no deadline.
+        budget = _connect_budget(self.timeout)
+        deadline = None if budget is None else time.monotonic() + budget
         for address in self._pinned_addresses:
             if deadline is None:
                 attempt_timeout: float | None = None
@@ -870,8 +888,8 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
                 last_error = exc
                 continue
             self.sock = sock
-            if timeout is not None:
-                self.sock.settimeout(float(timeout))
+            if budget is not None:
+                self.sock.settimeout(budget)
             try:
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             except OSError as exc:
