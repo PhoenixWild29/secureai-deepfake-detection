@@ -28,10 +28,12 @@ only for the time still left. A response that asks the connection to
 close still has its body read. The socket stays open until that reader
 finishes. The status line is the delivery result. At most 2048 bytes of
 the body are read, and only so the response can finish. A chunked body
-that ends early raises IncompleteRead after that status is known. The
-status still stands, so a 2xx is delivered and a non-2xx is retried as
-that code. A short Content-Length body does not raise. A timeout, or a
-close before the status line, is still a failed attempt. TLS and the
+that ends early raises IncompleteRead after that status is known. A
+timeout, a connection reset, or an SSL EOF while reading the body is an
+OSError after that same status. Either way the status still stands, so
+a 2xx is delivered and a non-2xx is retried as that code. A short
+Content-Length body does not raise. A timeout or a close before the
+status line is still a failed attempt. TLS and the
 Host header still use the
 original hostname, so a DNS answer that changes
 between the check and the connect cannot move the socket onto a private
@@ -338,6 +340,24 @@ def deliver_once(
 _RESPONSE_READ_LIMIT = 2048
 
 
+def _close_quietly(
+    closer: http_client.HTTPConnection | http_client.HTTPResponse,
+) -> None:
+    """Close ``closer`` and ignore a socket error from a peer already gone.
+
+    ``HTTPResponse.close`` and ``HTTPConnection.close`` run after the
+    status is known, and also on the way out when the status never
+    arrived. A reset or SSL EOF during that cleanup must not replace
+    the status, and must not replace the network error that already
+    explains a missing status.
+    """
+
+    try:
+        closer.close()
+    except OSError:
+        pass
+
+
 def _send_webhook(
     connection: http_client.HTTPConnection,
     path: str,
@@ -355,8 +375,10 @@ def _send_webhook(
     as that code so the caller records it instead of a transport error.
     ``read`` of a fixed length does not raise ``IncompleteRead`` for a
     short ``Content-Length`` body; the bytes that arrived are enough.
-    A timeout or any other error still propagates. A close before the
-    status line never produces a status, so that attempt fails.
+    A timeout, ``ECONNRESET``, or ``SSLEOFError`` during that read is an
+    ``OSError`` (SSL errors are ``OSError`` subclasses). The status is
+    already known, so those are kept the same way. An ``OSError`` before
+    the status line still propagates, and that attempt has no status.
     """
 
     try:
@@ -366,23 +388,27 @@ def _send_webhook(
             status = int(response.status)
             try:
                 response.read(_RESPONSE_READ_LIMIT)
-            except http_client.IncompleteRead:
-                # The status was parsed before the body. Keep it.
+            except (http_client.IncompleteRead, OSError):
+                # The status was parsed before this read. IncompleteRead is
+                # a short chunk. Timeout, ECONNRESET, and SSL EOF are
+                # OSError from the socket. Keep the status either way.
                 pass
             return status
         finally:
             # Drop the makefile reader before returning. On Connection: close,
             # getresponse already handed the socket to that reader, so this
-            # is what releases the file descriptor.
-            response.close()
+            # is what releases the file descriptor. A reset peer can raise
+            # from close; that must not replace the status already parsed.
+            _close_quietly(response)
     finally:
-        connection.close()
+        _close_quietly(connection)
 
 
 def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: float) -> int:
     """POST JSON and return the status code. Redirects are not followed.
 
-    A truncated body does not replace the status. See ``_send_webhook``.
+    A truncated body, or a socket error while reading it, does not
+    replace a status that was already parsed. See ``_send_webhook``.
     """
 
     parts = urlsplit(url)

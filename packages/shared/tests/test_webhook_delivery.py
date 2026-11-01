@@ -1404,8 +1404,62 @@ class _TlsPeer:
         self._thread.join(3)
 
 
-def _serve_tls_response(tmp_path: object, payload: bytes) -> _TlsPeer:
-    """One loopback TLS request, then ``payload``, then the socket closes."""
+def _request_content_length(head: bytes) -> int | None:
+    """Return ``Content-Length`` from a header block, or None if it is absent."""
+
+    for line in head.split(b"\r\n")[1:]:
+        name, sep, value = line.partition(b":")
+        if sep and name.strip().lower() == b"content-length":
+            return int(value.strip())
+    return None
+
+
+def _read_http_request(
+    tls: socket.socket,
+    *,
+    headers_ready: threading.Event | None = None,
+) -> bytes:
+    """Read one HTTP/1.1 request, headers plus its ``Content-Length`` body.
+
+    ``http.client`` writes the header block and the body as separate
+    sends. One ``recv`` can return the headers while the body is still
+    unsent. Replying and closing then leaves those bytes unread, and the
+    kernel answers with RST. Python 3.13 reports that as ``ECONNRESET``
+    before the client has a status line. This waits until the body bytes
+    named by ``Content-Length`` have arrived. A request with no
+    ``Content-Length`` is complete at the header block. ``headers_ready``
+    is set once the headers are in and the body is not, before the next
+    read blocks.
+    """
+
+    buf = bytearray()
+    while True:
+        chunk = tls.recv(65536)
+        if not chunk:
+            return bytes(buf)
+        buf += chunk
+        raw = bytes(buf)
+        head, sep, rest = raw.partition(b"\r\n\r\n")
+        if not sep:
+            continue
+        length = _request_content_length(head)
+        if length is None or len(rest) >= length:
+            return raw
+        if headers_ready is not None:
+            headers_ready.set()
+
+
+def _abort_tcp(conn: socket.socket) -> None:
+    """Drop ``conn`` with RST. A FIN would be a clean close, not ``ECONNRESET``."""
+
+    import struct
+
+    conn.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+    conn.close()
+
+
+def _serve_tls_exchange(tmp_path: object, exchange) -> _TlsPeer:
+    """Accept one loopback TLS connection and run ``exchange(conn, tls)``."""
 
     server_context, client_context = _webhook_tls_contexts(tmp_path)
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1425,23 +1479,146 @@ def _serve_tls_response(tmp_path: object, payload: bytes) -> _TlsPeer:
             tls = server_context.wrap_socket(conn, server_side=True)  # type: ignore[attr-defined]
             try:
                 tls.settimeout(5)
-                tls.recv(65536)
-                if payload:
-                    tls.sendall(payload)
+                exchange(conn, tls)
             finally:
-                tls.close()
+                try:
+                    tls.close()
+                except OSError:
+                    pass
         except OSError:
-            conn.close()
+            try:
+                conn.close()
+            except OSError:
+                pass
 
     thread = threading.Thread(target=serve, daemon=True)
     thread.start()
     return _TlsPeer(port, client_context, listener, thread)
 
 
+def _serve_tls_response(
+    tmp_path: object,
+    payload: bytes,
+    *,
+    headers_ready: threading.Event | None = None,
+) -> _TlsPeer:
+    """One loopback TLS request, then ``payload``, then the socket closes.
+
+    The request is read through the end of its body before ``payload`` is
+    sent. Closing earlier resets a client that is still writing.
+    """
+
+    def exchange(conn: socket.socket, tls: socket.socket) -> None:
+        del conn
+        _read_http_request(tls, headers_ready=headers_ready)
+        if payload:
+            tls.sendall(payload)
+
+    return _serve_tls_exchange(tmp_path, exchange)
+
+
+def _body_read_oserror(name: str) -> OSError:
+    """One of the body-read socket errors that used to retry a parsed 2xx."""
+
+    import errno
+    import ssl
+
+    if name == "TimeoutError":
+        return TimeoutError("timed out")
+    if name == "ConnectionResetError":
+        return ConnectionResetError(errno.ECONNRESET, "Connection reset by peer")
+    if name == "SSLEOFError":
+        return ssl.SSLEOFError(8, "EOF occurred in violation of protocol")
+    raise AssertionError(name)
+
+
+def _inject_body_read_error(monkeypatch: pytest.MonkeyPatch, error: OSError) -> dict[str, object]:
+    """Raise ``error`` from the deadline socket once the body read starts.
+
+    Header reads use the real socket. ``HTTPResponse.read`` is the real
+    method, so this checks that ``http.client`` lets the socket error out
+    for ``_send_webhook`` to keep the status it already parsed.
+    """
+
+    import http.client
+
+    from secureai_shared.webhooks import _DeadlineSocket
+
+    reading = {"body": False}
+    seen: dict[str, object] = {"n": 0, "types": []}
+    original_read = http.client.HTTPResponse.read
+    original_recv = _DeadlineSocket.recv
+    original_recv_into = _DeadlineSocket.recv_into
+
+    def read(self: http.client.HTTPResponse, amt: int | None = None) -> bytes:
+        reading["body"] = True
+        try:
+            return original_read(self, amt)
+        except OSError as exc:
+            count = seen["n"]
+            assert isinstance(count, int)
+            seen["n"] = count + 1
+            kinds = seen["types"]
+            assert isinstance(kinds, list)
+            kinds.append(type(exc).__name__)
+            raise
+
+    def recv(self: object, buflen: int, flags: int = 0) -> bytes:
+        if reading["body"]:
+            raise error
+        return original_recv(self, buflen, flags)  # type: ignore[arg-type]
+
+    def recv_into(self: object, buffer: object, nbytes: int | None = None, flags: int = 0) -> int:
+        if reading["body"]:
+            raise error
+        if nbytes is None:
+            return original_recv_into(self, buffer)  # type: ignore[arg-type]
+        return original_recv_into(self, buffer, nbytes, flags)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(http.client.HTTPResponse, "read", read)
+    monkeypatch.setattr(_DeadlineSocket, "recv", recv)
+    monkeypatch.setattr(_DeadlineSocket, "recv_into", recv_into)
+    return seen
+
+
+def _watch_body_read(
+    monkeypatch: pytest.MonkeyPatch,
+    started: threading.Event | None = None,
+) -> dict[str, object]:
+    """Count ``OSError`` from the real ``HTTPResponse.read``.
+
+    ``started`` is set at the beginning of the read, before it blocks, so
+    a peer can reset the socket while that read is in progress.
+    """
+
+    import http.client
+
+    seen: dict[str, object] = {"n": 0, "types": []}
+    original = http.client.HTTPResponse.read
+
+    def read(self: http.client.HTTPResponse, amt: int | None = None) -> bytes:
+        if started is not None:
+            started.set()
+        try:
+            return original(self, amt)
+        except OSError as exc:
+            count = seen["n"]
+            assert isinstance(count, int)
+            seen["n"] = count + 1
+            kinds = seen["types"]
+            assert isinstance(kinds, list)
+            kinds.append(type(exc).__name__)
+            raise
+
+    monkeypatch.setattr(http.client.HTTPResponse, "read", read)
+    return seen
+
+
 def _deliver_post_webhook(
     monkeypatch: pytest.MonkeyPatch,
     port: int,
     client_context: object,
+    timeout: float = 5,
 ):
     """Run one real ``post_webhook`` delivery against ``port``."""
 
@@ -1457,7 +1634,17 @@ def _deliver_post_webhook(
     )
     job = _terminal(JobStatus.completed)
     assert schedule_terminal(store, queue, job, now=WHEN) is not None
-    assert deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=5, now=WHEN) is True
+    assert (
+        deliver_once(
+            store,
+            queue,
+            post=post_webhook,
+            timeout=timeout,
+            max_attempts=5,
+            now=WHEN,
+        )
+        is True
+    )
     saved = store.delivery_for_job(job.id)
     assert saved is not None
     return saved
@@ -1861,6 +2048,227 @@ def test_close_before_the_status_line_is_still_a_failure(
     assert saved.last_status_code is None
     assert saved.last_error is not None
     assert "IncompleteRead" not in saved.last_error
+
+
+@pytest.mark.parametrize("status_code", [200, 500])
+@pytest.mark.parametrize("error_name", ["TimeoutError", "ConnectionResetError", "SSLEOFError"])
+def test_oserror_during_body_read_keeps_the_parsed_status(
+    tmp_path: object,
+    monkeypatch: pytest.MonkeyPatch,
+    status_code: int,
+    error_name: str,
+) -> None:
+    """A socket error after the status line does not replace that status.
+
+    ``IncompleteRead`` already kept the status. ``TimeoutError``,
+    ``ECONNRESET``, and ``SSLEOFError`` are raised from the deadline
+    socket during the real ``HTTPResponse.read``, after the status line
+    was parsed. A 2xx is delivered. A non-2xx stays that code and uses
+    the normal retry wait. Retrying a 2xx would send the event again.
+    """
+
+    seen = _inject_body_read_error(monkeypatch, _body_read_oserror(error_name))
+    reason = "OK" if status_code == 200 else "Internal Server Error"
+    # The body is withheld so ``read`` has to touch the socket. A short
+    # buffered body would return without raising.
+    payload = (
+        f"HTTP/1.1 {status_code} {reason}\r\n".encode()
+        + b"Content-Length: 64\r\nConnection: close\r\n\r\n"
+    )
+    hold = threading.Event()
+
+    def exchange(conn: socket.socket, tls: socket.socket) -> None:
+        del conn
+        _read_http_request(tls)
+        tls.sendall(payload)
+        hold.wait(5)
+
+    peer = _serve_tls_exchange(tmp_path, exchange)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        hold.set()
+        peer.close()
+    assert seen["types"] == [error_name]
+    assert saved.attempt == 1
+    assert saved.last_status_code == status_code
+    if status_code == 200:
+        assert saved.status == "succeeded"
+        assert saved.last_error is None
+        return
+    assert saved.status == "pending"
+    assert saved.last_error == f"HTTP {status_code}"
+    assert saved.next_attempt_at == WHEN + timedelta(seconds=retry_delay_seconds(1))
+
+
+def test_response_close_oserror_after_2xx_is_still_delivered(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A reset while dropping the reader must not retry a parsed 200.
+
+    The body can arrive, and the peer can still raise ``OSError`` from
+    ``HTTPResponse.close``. That cleanup runs after the status is known.
+    Letting it propagate would store a network error and send the event
+    again.
+    """
+
+    import errno
+    import http.client
+
+    seen = {"n": 0}
+    original = http.client.HTTPResponse.close
+
+    def close(self: http.client.HTTPResponse) -> None:
+        seen["n"] += 1
+        original(self)
+        raise ConnectionResetError(errno.ECONNRESET, "Connection reset by peer")
+
+    monkeypatch.setattr(http.client.HTTPResponse, "close", close)
+    payload = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+    peer = _serve_tls_response(tmp_path, payload)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert seen["n"] >= 1
+    assert saved.status == "succeeded"
+    assert saved.attempt == 1
+    assert saved.last_status_code == 200
+    assert saved.last_error is None
+
+
+def test_timeout_during_body_read_delivers_a_parsed_2xx(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A real read timeout after 200 is a delivered event.
+
+    The peer sends the status and then holds the rest of a
+    ``Content-Length`` body. ``HTTPResponse.read`` raises ``TimeoutError``.
+    The row is succeeded with that 200, not a transport error.
+    """
+
+    hold = threading.Event()
+    seen = _watch_body_read(monkeypatch)
+
+    def exchange(conn: socket.socket, tls: socket.socket) -> None:
+        del conn
+        _read_http_request(tls)
+        tls.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 64\r\nConnection: close\r\n\r\n")
+        hold.wait(5)
+
+    peer = _serve_tls_exchange(tmp_path, exchange)
+    try:
+        saved = _deliver_post_webhook(
+            monkeypatch, peer.port, peer.client_context, timeout=1.0
+        )
+    finally:
+        hold.set()
+        peer.close()
+    assert seen["types"] == ["TimeoutError"]
+    assert saved.status == "succeeded"
+    assert saved.attempt == 1
+    assert saved.last_status_code == 200
+    assert saved.last_error is None
+
+
+def test_reset_during_body_read_delivers_a_parsed_2xx(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A real TCP abort after 200 does not retry the event.
+
+    The peer sends the status line and then resets the connection.
+    ``SO_LINGER`` 0 discards bytes still queued, so the abort waits until
+    the client has parsed the status and started the body read. OpenSSL
+    on this platform can surface that abort as a short read instead of
+    ``ECONNRESET`` or ``SSLEOFError``. Either shape is a delivered 200.
+    The injected socket errors cover the exception shape.
+    """
+
+    started = threading.Event()
+    _watch_body_read(monkeypatch, started)
+
+    def exchange(conn: socket.socket, tls: socket.socket) -> None:
+        _read_http_request(tls)
+        tls.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 64\r\nConnection: close\r\n\r\n")
+        if not started.wait(5):
+            return
+        _abort_tcp(conn)
+
+    peer = _serve_tls_exchange(tmp_path, exchange)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert saved.status == "succeeded"
+    assert saved.attempt == 1
+    assert saved.last_status_code == 200
+    assert saved.last_error is None
+
+
+def test_reset_before_the_status_line_is_a_network_error(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """RST before any status line is still a failed attempt.
+
+    The same socket errors are kept only after a status has been parsed.
+    A peer that accepts the POST and resets without a response has not
+    accepted the event. The row stays pending with no status code.
+    """
+
+    def exchange(conn: socket.socket, tls: socket.socket) -> None:
+        _read_http_request(tls)
+        _abort_tcp(conn)
+
+    peer = _serve_tls_exchange(tmp_path, exchange)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert saved.status == "pending"
+    assert saved.attempt == 1
+    assert saved.last_status_code is None
+    assert saved.last_error is not None
+    assert not saved.last_error.startswith("HTTP ")
+    assert "IncompleteRead" not in saved.last_error
+
+
+def test_serve_tls_response_reads_the_request_before_replying(tmp_path: object) -> None:
+    """The loopback peer reads the POST body before it sends the status.
+
+    Headers and body are separate writes. A single ``recv`` that returns
+    the headers, then a reply and a close, resets the client on Python
+    3.13 because the body is still unread. No status bytes may arrive
+    until that body has been sent.
+    """
+
+    headers_ready = threading.Event()
+    payload = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+    peer = _serve_tls_response(tmp_path, payload, headers_ready=headers_ready)
+    raw = socket.create_connection(("127.0.0.1", peer.port), timeout=5)
+    try:
+        raw.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        tls = peer.client_context.wrap_socket(raw, server_hostname="webhook.test")  # type: ignore[attr-defined]
+        tls.sendall(b"POST /hooks HTTP/1.1\r\nHost: webhook.test\r\nContent-Length: 2\r\n\r\n")
+        assert headers_ready.wait(5)
+        tls.settimeout(0.4)
+        with pytest.raises(TimeoutError):
+            tls.recv(4096)
+        tls.settimeout(5)
+        tls.sendall(b"{}")
+        data = bytearray()
+        while len(data) < len(payload):
+            chunk = tls.recv(4096)
+            if not chunk:
+                break
+            data += chunk
+        assert bytes(data).startswith(b"HTTP/1.1 200 ")
+        assert bytes(data).endswith(b"ok")
+    finally:
+        try:
+            raw.close()
+        except OSError:
+            pass
+        peer.close()
 
 
 def test_postgres_endpoint_round_trip() -> None:
