@@ -76,7 +76,7 @@ def test_revision_is_head() -> None:
     root = Path(__file__).resolve().parents[1]
     config = Config(str(root / "alembic.ini"))
     config.set_main_option("script_location", str(root / "alembic"))
-    assert ScriptDirectory.from_config(config).get_current_head() == "20261101_0009"
+    assert ScriptDirectory.from_config(config).get_current_head() == "20261101_0010"
 
 
 def test_free_plan_cannot_create_or_use_a_key(tmp_path: Path) -> None:

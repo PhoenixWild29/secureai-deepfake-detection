@@ -273,6 +273,25 @@ export async function fetchAttestationKeys(apiUrl: string): Promise<void> {
   }
 }
 
+export async function deleteJob(options: {
+  apiUrl: string;
+  jobId: string;
+  getToken: TokenSource;
+  orgId?: string | null;
+}): Promise<void> {
+  const base = options.apiUrl.replace(/\/$/, "");
+  const fetched = await fetch(`${base}/v1/jobs/${options.jobId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${await authorized(options.getToken)}`,
+      ...orgHeaders(options.orgId),
+    },
+  });
+  if (!fetched.ok) {
+    throw new ApiRequestError(fetched.status, await errorText(fetched));
+  }
+}
+
 export async function fetchJob(options: {
   apiUrl: string;
   jobId: string;

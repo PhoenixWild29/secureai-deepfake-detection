@@ -64,6 +64,10 @@ class FakeS3:
             raise RuntimeError("download failed")
         Path(dest).write_bytes(body)
 
+    def delete_object(self, *, Bucket: str, Key: str) -> None:
+        del Bucket
+        self.objects.pop(Key, None)
+
 
 def test_presign_caps_content_length_and_skips_bucket_create() -> None:
     client = FakeS3()
@@ -110,6 +114,17 @@ def test_materialize_sends_if_match_and_rejects_a_rewrite() -> None:
         assert client.extra == {"IfMatch": '"new-etag"'}
     finally:
         saved.path.unlink(missing_ok=True)
+
+
+def test_delete_object_removes_the_bytes_and_ignores_a_missing_key() -> None:
+    client = FakeS3()
+    storage = S3Storage(client, "secureai")
+    key = new_object_key("user_dev", "clip.mp4")
+    client.objects[key] = (b"abcdef", "abc123")
+    storage.delete(key)
+    assert key not in client.objects
+    assert storage.object_stat(key) is None
+    storage.delete(key)
 
 
 def test_failed_download_removes_the_temp_file() -> None:

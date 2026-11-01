@@ -108,6 +108,8 @@ def create_app(
             "An API key cannot call it. "
             "AUTH_MODE=dev accepts Bearer dev and is a private-workstation "
             "bypass. Do not expose that mode on a public host. "
+            "DELETE /v1/jobs/{id} removes the video and the score. "
+            "The monthly count stays. "
             "POST /v1/jobs/batch queues several stored objects in one request. "
             "If the queue stops after some ids are accepted, the 202 body "
             "lists those jobs and the ids that did not queue. "

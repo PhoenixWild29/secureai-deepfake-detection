@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Fragment, useEffect, useRef, useState } from "react";
 import {
   ApiRequestError,
+  deleteJob,
   fetchAttestationKeys,
   fetchJob,
   fetchJobAttestation,
@@ -26,8 +28,10 @@ const POLL_MS = 2000;
 const POLL_BUDGET_MS = 180_000;
 
 export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
+  const router = useRouter();
   const { orgId, ready } = useWorkspace();
   const scope = orgId ?? "";
+  const removed = useRef(false);
   const [job, setJob] = useState<JobResponse | null>(null);
   const [loadedScope, setLoadedScope] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +46,8 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
   const [attesting, setAttesting] = useState(false);
   const [attestationError, setAttestationError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready) {
@@ -52,9 +58,12 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
     const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
 
     async function load(): Promise<boolean> {
+      if (removed.current) {
+        return true;
+      }
       try {
         const next = await fetchJob({ apiUrl, jobId, getToken: source, orgId });
-        if (cancelled) {
+        if (cancelled || removed.current) {
           return true;
         }
         setJob(next);
@@ -64,7 +73,7 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
         setWaiting(!done);
         return done;
       } catch (caught) {
-        if (!cancelled) {
+        if (!cancelled && !removed.current) {
           setLoadedScope(scope);
           setError(caught instanceof Error ? caught.message : "Could not load this job.");
           setWaiting(false);
@@ -216,6 +225,27 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
     }
   }
 
+  async function onDelete(): Promise<void> {
+    if (
+      !window.confirm(
+        "Delete this job and its video? It leaves history. The monthly quota does not reset.",
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
+      await deleteJob({ apiUrl, jobId, getToken: source, orgId });
+      removed.current = true;
+      router.push("/jobs");
+    } catch (caught) {
+      setDeleteError(caught instanceof Error ? caught.message : "Could not delete this job.");
+      setDeleting(false);
+    }
+  }
+
   async function copySignature(): Promise<void> {
     if (!attestation) {
       return;
@@ -274,6 +304,20 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
       {waiting && !terminal ? <p className="note">Still {currentJob.status}. Checking again…</p> : null}
       {!waiting && !terminal ? (
         <p className="note">Still {currentJob.status}. Refresh this page to keep watching.</p>
+      ) : null}
+      {currentJob.status === "processing" ? (
+        <p className="note">You can delete this video after scoring finishes.</p>
+      ) : (
+        <div className="actions">
+          <button type="button" className="danger" onClick={() => void onDelete()} disabled={deleting}>
+            {deleting ? "Deleting…" : "Delete job and video"}
+          </button>
+        </div>
+      )}
+      {deleteError ? (
+        <p className="error" role="alert">
+          {deleteError}
+        </p>
       ) : null}
       {currentError ? (
         <p className="error" role="alert">

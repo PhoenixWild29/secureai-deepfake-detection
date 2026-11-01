@@ -18,7 +18,8 @@ export default function TermsPage() {
       <h2>Your uploads</h2>
       <p>
         Upload only video you have the right to analyze. You are responsible for the file, the filename,
-        and what you do with the score.
+        and what you do with the score. You can delete a job and its video from the report. That removes
+        it from history and does not restore a monthly job.
       </p>
       <h2>The score</h2>
       <p>

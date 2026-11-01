@@ -3,20 +3,43 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import and_, create_engine, func, not_, select, tuple_
+from sqlalchemy import and_, create_engine, func, not_, select, text, tuple_
 from sqlalchemy.orm import Session, sessionmaker
 
-from secureai_shared.db import JobRow
+from secureai_shared.db import JobRow, JobTombstoneRow
 from secureai_shared.models import JobRecord, JobStatus
 
 # Client-visible failure text. Never store exception messages or paths here.
 PUBLIC_FAILURE_DETAIL = "Detection failed."
 # Publish failed before the id reached Redis. These rows do not spend quota.
 UNQUEUED_FAILURE_DETAIL = "Could not queue the job."
+
+
+class DiscardState(str, Enum):
+    """Result of removing a job the caller can already see.
+
+    ``busy`` means a worker holds the row in ``processing``. ``missing``
+    means the row is already gone. ``removed`` means the row was deleted.
+    """
+
+    removed = "removed"
+    busy = "busy"
+    missing = "missing"
+
+
+@dataclass(frozen=True)
+class _QuotaTombstone:
+    job_id: str
+    user_id: str
+    org_id: str | None
+    created_at: datetime
 
 
 def _visible(job: JobRecord | None, *, user_id: str, org_id: str | None) -> JobRecord | None:
@@ -61,6 +84,28 @@ def _quota_clause():
             JobRow.detail == UNQUEUED_FAILURE_DETAIL,
         )
     )
+
+
+def _tombstone_count(
+    session: Session,
+    *,
+    user_id: str,
+    org_id: str | None,
+    since: datetime,
+) -> int:
+    query = (
+        select(func.count())
+        .select_from(JobTombstoneRow)
+        .where(JobTombstoneRow.created_at >= since)
+    )
+    if org_id is not None:
+        query = query.where(JobTombstoneRow.org_id == org_id)
+    else:
+        query = query.where(
+            JobTombstoneRow.user_id == user_id,
+            JobTombstoneRow.org_id.is_(None),
+        )
+    return int(session.scalar(query) or 0)
 
 
 def _now() -> datetime:
@@ -197,10 +242,20 @@ class JobStore(Protocol):
         detail: str | None = None,
     ) -> JobRecord | None: ...
 
+    def discard(self, job_id: str, *, delete_object: Callable[[str], None]) -> DiscardState:
+        """Delete a job that is not processing, then erase its video when unused.
+
+        ``delete_object`` runs only when no other job still references the
+        object key, and it runs before the row is removed. A raise leaves
+        the row in place. A job that counted toward the quota leaves a
+        tombstone. A job that never reached the queue does not.
+        """
+
 
 class MemoryJobStore:
     def __init__(self) -> None:
         self._rows: dict[str, JobRecord] = {}
+        self._tombstones: dict[str, _QuotaTombstone] = {}
         self._lock = threading.Lock()
 
     def create(
@@ -311,7 +366,16 @@ class MemoryJobStore:
                     for job in rows
                     if job.user_id == user_id and job.org_id is None and job.created_at >= since
                 ]
-        return sum(1 for job in matched if _counts_toward_quota(job))
+            tombs = [
+                row
+                for row in self._tombstones.values()
+                if row.created_at >= since
+                and (
+                    (org_id is not None and row.org_id == org_id)
+                    or (org_id is None and row.user_id == user_id and row.org_id is None)
+                )
+            ]
+        return sum(1 for job in matched if _counts_toward_quota(job)) + len(tombs)
 
     def claim(self, job_id: str) -> JobRecord | None:
         with self._lock:
@@ -404,6 +468,30 @@ class MemoryJobStore:
             )
             self._rows[job_id] = finished
             return finished
+
+    def discard(self, job_id: str, *, delete_object: Callable[[str], None]) -> DiscardState:
+        with self._lock:
+            job = self._rows.get(job_id)
+            if job is None:
+                return DiscardState.missing
+            if job.status is JobStatus.processing:
+                return DiscardState.busy
+            key = job.object_key
+            shared = any(
+                other.id != job_id and other.object_key == key for other in self._rows.values()
+            )
+            # Raise before any mutation so a storage error keeps the job.
+            if not shared:
+                delete_object(key)
+            if _counts_toward_quota(job):
+                self._tombstones[job.id] = _QuotaTombstone(
+                    job_id=job.id,
+                    user_id=job.user_id,
+                    org_id=job.org_id,
+                    created_at=job.created_at,
+                )
+            del self._rows[job_id]
+            return DiscardState.removed
 
 
 class PostgresJobStore:
@@ -541,7 +629,50 @@ class PostgresJobStore:
             else:
                 query = query.where(JobRow.user_id == user_id, JobRow.org_id.is_(None))
             total = session.scalar(query)
-            return int(total or 0)
+            tombs = _tombstone_count(session, user_id=user_id, org_id=org_id, since=since)
+            return int(total or 0) + tombs
+
+    def discard(self, job_id: str, *, delete_object: Callable[[str], None]) -> DiscardState:
+        with self._session() as session:
+            row = session.scalar(select(JobRow).where(JobRow.id == job_id).with_for_update())
+            if row is None:
+                return DiscardState.missing
+            if row.status == JobStatus.processing.value:
+                return DiscardState.busy
+            key = row.object_key
+            # Two deletes of the same bytes take this lock in the same order.
+            # The second sees the first row already gone and is the one that
+            # erases the object. Creating another job does not take the lock.
+            if session.get_bind().dialect.name == "postgresql":
+                session.execute(
+                    text(
+                        "SELECT pg_advisory_xact_lock("
+                        "hashtext('secureai-job-object'), hashtext(:object_key))"
+                    ),
+                    {"object_key": key},
+                )
+            others = session.scalar(
+                select(func.count())
+                .select_from(JobRow)
+                .where(JobRow.object_key == key, JobRow.id != job_id)
+            )
+            record = _record_from_row(row)
+            # Storage runs before the row is removed. A raise rolls the
+            # transaction back on session close and leaves the job in place.
+            if not others:
+                delete_object(key)
+            if _counts_toward_quota(record):
+                session.add(
+                    JobTombstoneRow(
+                        job_id=row.id,
+                        user_id=row.user_id,
+                        org_id=row.org_id,
+                        created_at=row.created_at,
+                    )
+                )
+            session.delete(row)
+            session.commit()
+            return DiscardState.removed
 
     def claim(self, job_id: str) -> JobRecord | None:
         with self._session() as session:

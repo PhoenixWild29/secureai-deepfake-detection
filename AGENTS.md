@@ -130,7 +130,7 @@ docker build -f apps/worker/Dockerfile -t secureai-worker .
 
 ### Migrations
 
-Alembic scripts are `apps/api/alembic/versions/`. `apps/api/alembic.ini` is the config file; startup sets `script_location` to `apps/api/alembic`. Head revision is `20261101_0009` (job-list keyset indexes; `20261101_0008` is `api_keys`, SHA-256 hashes only). Chain: `20261031_0001` through `20261101_0009`.
+Alembic scripts are `apps/api/alembic/versions/`. `apps/api/alembic.ini` is the config file; startup sets `script_location` to `apps/api/alembic`. Head revision is `20261101_0010` (`job_tombstones` so a deleted job still counts toward quota; `20261101_0009` is the job-list keyset indexes). Chain: `20261031_0001` through `20261101_0010`.
 
 From `apps/api`, with Postgres up:
 

@@ -18,12 +18,12 @@ from app.auth import require_user
 from app.batch_quota import accept_batch
 from app.pdf_report import PDF_PLAN_REQUIRED, render_job_report_pdf
 from app.quota import accept_job
-from app.tenancy import active_org
+from app.tenancy import WORKSPACE_MANAGER_ROLES, active_org
 from secureai_shared.billing import effective_plan
 from secureai_shared.models import AuthContext, JobRecord, JobStatus
 from secureai_shared.report import LIMITATIONS, load_report_detail, may_export_pdf
 from secureai_shared.storage import ObjectStat, clean_filename, is_owned_key, new_object_key
-from secureai_shared.store import UNQUEUED_FAILURE_DETAIL
+from secureai_shared.store import UNQUEUED_FAILURE_DETAIL, DiscardState
 from secureai_shared.webhooks import schedule_terminal
 
 logger = logging.getLogger("secureai.api.jobs")
@@ -345,6 +345,60 @@ def get_job(
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return job
+
+
+@router.delete("/v1/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_job(
+    job_id: str,
+    request: Request,
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> Response:
+    """Remove a job the caller can read, and delete its video when nothing else uses it.
+
+    A personal job can be removed by its owner. A workspace job can be removed
+    by the person who uploaded it, or by an owner or admin. A job that is
+    still ``processing`` is 409. The monthly quota does not decrease. A
+    webhook delivery that was already queued is not recalled. The id may
+    still be waiting on the job queue; the next worker pop finds no row and
+    drops the lease.
+    """
+
+    if JOB_ID.fullmatch(job_id) is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    org_id = active_org(request, user)
+    store = request.app.state.store
+    job = store.get(job_id, user_id=user.subject, org_id=org_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if job.org_id is not None and job.user_id != user.subject:
+        role = request.app.state.billing.membership(job.org_id, user.subject)
+        if role not in WORKSPACE_MANAGER_ROLES:
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    "Only the person who uploaded this job, or a workspace "
+                    "owner or admin, can delete it."
+                ),
+            )
+
+    def _erase(key: str) -> None:
+        try:
+            request.app.state.storage.delete(key)
+        except Exception as exc:
+            logger.exception("object delete failed job_id=%s", job.id)
+            raise HTTPException(status_code=500, detail="Could not delete the video") from exc
+
+    state = store.discard(job.id, delete_object=_erase)
+    if state is DiscardState.busy:
+        raise HTTPException(
+            status_code=409,
+            detail="This job is still scoring. Try again when it finishes.",
+        )
+    if state is DiscardState.missing:
+        raise HTTPException(status_code=404, detail="Job not found")
+    request.app.state.attestations.delete(job.id)
+    logger.info("deleted job_id=%s subject=%s", job.id, user.subject)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/v1/jobs/{job_id}/report", response_model=JobReportExport)

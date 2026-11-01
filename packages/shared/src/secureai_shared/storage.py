@@ -110,6 +110,11 @@ class FileSystemStorage:
         del key, content_type
         return None
 
+    def delete(self, key: str) -> None:
+        """Remove the object. A missing file is already gone."""
+
+        self._path(key).unlink(missing_ok=True)
+
     def _path(self, key: str) -> Path:
         if _KEY.fullmatch(key) is None:
             raise ValueError("invalid object key")
@@ -222,6 +227,12 @@ class S3Storage:
         if not isinstance(url, str) or not isinstance(fields, dict):
             return None
         return PresignedUpload(url=url, fields={str(name): str(value) for name, value in fields.items()})
+
+    def delete(self, key: str) -> None:
+        """Remove the object. A missing key is already gone."""
+
+        self._check(key)
+        self.client.delete_object(Bucket=self.bucket, Key=key)  # type: ignore[attr-defined]
 
     def _ensure_bucket(self) -> None:
         try:

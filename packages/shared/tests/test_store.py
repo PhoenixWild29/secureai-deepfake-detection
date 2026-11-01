@@ -8,7 +8,13 @@ from sqlalchemy.exc import IntegrityError
 from secureai_shared.db import JobRow
 from secureai_shared.models import JobRecord, JobStatus
 from secureai_shared.storage import new_object_key
-from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore, PostgresJobStore
+from secureai_shared.store import (
+    PUBLIC_FAILURE_DETAIL,
+    UNQUEUED_FAILURE_DETAIL,
+    DiscardState,
+    MemoryJobStore,
+    PostgresJobStore,
+)
 
 
 def test_memory_create_many_rolls_back_the_batch(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -365,3 +371,120 @@ def test_postgres_history_page_seeks_the_keyset_index() -> None:
     assert all(job.org_id == "org_0123456789ab" for job in org_page)
     assert all((job.created_at, job.id) < org_before for job in org_page)
     assert org_page == sorted(org_page, key=lambda job: (job.created_at, job.id), reverse=True)
+
+
+def _exercise_discard(store: MemoryJobStore | PostgresJobStore) -> None:
+    """Removing a job drops the row and keeps the monthly count.
+
+    A shared object is erased only with the last job. A storage error leaves
+    the row. A job that never reached the queue still does not count.
+    Processing cannot be removed.
+    """
+
+    since = datetime(2020, 1, 1, tzinfo=timezone.utc)
+    org_id = "org_0123456789ab"
+    personal_key = new_object_key("user_a", "clip.mp4")
+    personal = store.create(
+        user_id="user_a",
+        filename="secret-name.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=personal_key,
+        object_etag="etag-1",
+    )
+    shared_key = new_object_key("user_a", "shared.mp4")
+    first = store.create(
+        user_id="user_a",
+        filename="shared.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=shared_key,
+        org_id=org_id,
+    )
+    second = store.create(
+        user_id="user_b",
+        filename="shared-again.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=shared_key,
+        org_id=org_id,
+    )
+    missed_key = new_object_key("user_a", "missed.mp4")
+    missed = store.create(
+        user_id="user_a",
+        filename="missed.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=missed_key,
+    )
+    assert store.fail(missed.id, detail=UNQUEUED_FAILURE_DETAIL) is not None
+    busy_key = new_object_key("user_a", "busy.mp4")
+    busy = store.create(
+        user_id="user_a",
+        filename="busy.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=busy_key,
+    )
+    assert store.claim(busy.id) is not None
+    fragile = store.create(
+        user_id="user_a",
+        filename="fragile.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=new_object_key("user_a", "fragile.mp4"),
+    )
+
+    # personal, busy, and fragile count. missed never reached the queue.
+    # Both workspace rows count for the org and not for a personal total.
+    assert store.count_started(user_id="user_a", org_id=None, since=since) == 3
+    assert store.count_started(user_id="user_a", org_id=org_id, since=since) == 2
+
+    erased: list[str] = []
+    assert store.discard(personal.id, delete_object=erased.append) is DiscardState.removed
+    assert erased == [personal_key]
+    assert store.get(personal.id, user_id="user_a") is None
+    assert store.get_any(personal.id) is None
+    assert store.claim(personal.id) is None
+    assert {job.id for job in store.list_for_user("user_a")} == {missed.id, busy.id, fragile.id}
+    assert store.discard(personal.id, delete_object=erased.append) is DiscardState.missing
+    assert store.count_started(user_id="user_a", org_id=None, since=since) == 3
+
+    assert store.discard(first.id, delete_object=erased.append) is DiscardState.removed
+    assert shared_key not in erased
+    kept = store.get_any(second.id)
+    assert kept is not None
+    assert kept.filename == "shared-again.mp4"
+    assert store.discard(second.id, delete_object=erased.append) is DiscardState.removed
+    assert erased[-1] == shared_key
+    assert store.list_for_org(org_id) == []
+    assert store.count_started(user_id="user_a", org_id=org_id, since=since) == 2
+    assert store.count_started(user_id="user_b", org_id=None, since=since) == 0
+
+    assert store.discard(missed.id, delete_object=erased.append) is DiscardState.removed
+    assert erased[-1] == missed_key
+    assert store.count_started(user_id="user_a", org_id=None, since=since) == 3
+
+    def boom(_key: str) -> None:
+        raise RuntimeError("disk")
+
+    with pytest.raises(RuntimeError, match="disk"):
+        store.discard(fragile.id, delete_object=boom)
+    still = store.get_any(fragile.id)
+    assert still is not None
+    assert still.filename == "fragile.mp4"
+    assert still.status is JobStatus.queued
+
+    assert store.discard(busy.id, delete_object=erased.append) is DiscardState.busy
+    assert busy_key not in erased
+    still_busy = store.get_any(busy.id)
+    assert still_busy is not None
+    assert still_busy.status is JobStatus.processing
+
+
+def test_memory_discard_keeps_quota_and_the_last_object() -> None:
+    _exercise_discard(MemoryJobStore())
+
+
+def test_postgres_discard_keeps_quota_and_the_last_object() -> None:
+    _exercise_discard(_postgres_store())
