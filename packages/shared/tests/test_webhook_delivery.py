@@ -587,6 +587,70 @@ def test_pinned_connect_without_addresses_is_not_a_resolve_failure() -> None:
     assert "did not resolve" not in str(raised.value)
 
 
+def test_pinned_connect_accepts_the_default_timeout_sentinel(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """``http.client`` stores ``socket._GLOBAL_DEFAULT_TIMEOUT`` when timeout is omitted.
+
+    That sentinel is not a number. Connecting with it must not raise
+    TypeError. It follows the same path as ``None``: no shared deadline,
+    and the TCP attempt blocks.
+    """
+
+    import socket
+    import ssl
+
+    from secureai_shared.webhooks import _PinnedHTTPSConnection
+
+    seen: dict[str, object] = {}
+
+    class _Sock:
+        def __init__(self) -> None:
+            self.timeouts: list[object] = []
+
+        def setsockopt(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def settimeout(self, value: object) -> None:
+            self.timeouts.append(value)
+
+        def close(self) -> None:
+            return None
+
+    def create_connection(
+        address: tuple[str, int],
+        timeout: object = socket._GLOBAL_DEFAULT_TIMEOUT,
+        source_address: object = None,
+    ) -> object:
+        del source_address
+        seen["address"] = address
+        seen["timeout"] = timeout
+        sock = _Sock()
+        seen["sock"] = sock
+        return sock
+
+    def wrap_socket(self: object, sock: object, *args: object, **kwargs: object) -> object:
+        del self, args, kwargs
+        return sock
+
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(ssl.SSLContext, "wrap_socket", wrap_socket)
+    connection = _PinnedHTTPSConnection(
+        "customer.example",
+        443,
+        addresses=["1.1.1.1"],
+        timeout=socket._GLOBAL_DEFAULT_TIMEOUT,  # type: ignore[arg-type]
+        context=ssl.create_default_context(),
+    )
+    assert connection.timeout is socket._GLOBAL_DEFAULT_TIMEOUT
+    connection.connect()
+    assert seen["address"] == ("1.1.1.1", 443)
+    assert seen["timeout"] is None
+    sock = seen["sock"]
+    assert isinstance(sock, _Sock)
+    assert sock.timeouts == []
+
+
 def test_post_webhook_resolve_failure_says_it_did_not_resolve(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
