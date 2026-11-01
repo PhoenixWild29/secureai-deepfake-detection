@@ -2,7 +2,7 @@
 
 The legacy Flask API (`api.py`), React Guardian (`secureai-guardian/`), and the repository-root `Dockerfile` stay in place. The saleable product lives under `apps/` and `packages/`.
 
-Source for review is `main`.
+Source for review is `main`. Cursor Cloud agents follow [AGENTS.md](AGENTS.md) to run and test this tree.
 
 ## Layout
 
