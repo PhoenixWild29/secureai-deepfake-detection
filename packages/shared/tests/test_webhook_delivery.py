@@ -354,6 +354,9 @@ def test_post_webhook_tries_each_validated_address_in_order(monkeypatch: pytest.
         def setsockopt(self, *_args: object, **_kwargs: object) -> None:
             return None
 
+        def settimeout(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
         def close(self) -> None:
             return None
 
@@ -401,6 +404,8 @@ def test_post_webhook_tries_each_validated_address_in_order(monkeypatch: pytest.
 
 
 def test_post_webhook_stops_after_the_first_address_connects(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A certificate failure is not a connect failure and does not try the next address."""
+
     import socket
     import ssl
 
@@ -417,6 +422,9 @@ def test_post_webhook_stops_after_the_first_address_connects(monkeypatch: pytest
         def setsockopt(self, *_args: object, **_kwargs: object) -> None:
             return None
 
+        def settimeout(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
         def close(self) -> None:
             return None
 
@@ -429,14 +437,171 @@ def test_post_webhook_stops_after_the_first_address_connects(monkeypatch: pytest
 
     def wrap_socket(self: object, sock: object, *args: object, **kwargs: object) -> object:
         del self, sock, args, kwargs
-        raise TimeoutError("tls stopped")
+        raise ssl.SSLCertVerificationError("certificate verify failed")
 
     monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
     monkeypatch.setattr(socket, "create_connection", create_connection)
     monkeypatch.setattr(ssl.SSLContext, "wrap_socket", wrap_socket)
-    with pytest.raises(TimeoutError, match="tls stopped"):
+    with pytest.raises(ssl.SSLCertVerificationError, match="certificate verify failed") as raised:
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+    assert type(raised.value) is ssl.SSLCertVerificationError
+    assert attempts == ["1.1.1.1"]
+
+
+def test_post_webhook_shares_one_connect_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Later addresses receive only the time left, then the socket gets the full timeout."""
+
+    import socket
+    import ssl
+
+    from secureai_shared import webhooks as webhook_module
+
+    clock = {"now": 1_000.0}
+
+    def monotonic() -> float:
+        return clock["now"]
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("9.9.9.9", 0)),
+        ]
+
+    attempts: list[tuple[str, float]] = []
+
+    class _Sock:
+        def __init__(self) -> None:
+            self.timeouts: list[float] = []
+
+        def setsockopt(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def settimeout(self, value: float) -> None:
+            self.timeouts.append(value)
+
+        def close(self) -> None:
+            return None
+
+    opened: list[_Sock] = []
+
+    def create_connection(
+        address: tuple[str, int], timeout: float, source_address: object = None
+    ) -> object:
+        del source_address
+        attempts.append((address[0], timeout))
+        clock["now"] += 0.4
+        if address[0] != "9.9.9.9":
+            raise OSError(address[0])
+        sock = _Sock()
+        opened.append(sock)
+        return sock
+
+    def wrap_socket(self: object, sock: object, *args: object, **kwargs: object) -> object:
+        del self, sock, args, kwargs
+        raise ssl.SSLCertVerificationError("certificate verify failed")
+
+    monkeypatch.setattr(webhook_module.time, "monotonic", monotonic)
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(ssl.SSLContext, "wrap_socket", wrap_socket)
+    with pytest.raises(ssl.SSLCertVerificationError, match="certificate verify failed"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+    assert [item[0] for item in attempts] == ["1.1.1.1", "8.8.8.8", "9.9.9.9"]
+    assert attempts[0][1] == pytest.approx(1.0)
+    assert attempts[1][1] == pytest.approx(0.6)
+    assert attempts[2][1] == pytest.approx(0.2)
+    assert opened[0].timeouts == [1.0]
+
+
+def test_post_webhook_stops_when_the_connect_budget_is_spent(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+
+    from secureai_shared import webhooks as webhook_module
+
+    clock = {"now": 500.0}
+
+    def monotonic() -> float:
+        return clock["now"]
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0)),
+        ]
+
+    attempts: list[str] = []
+
+    def create_connection(
+        address: tuple[str, int], timeout: float, source_address: object = None
+    ) -> object:
+        del source_address
+        attempts.append(address[0])
+        clock["now"] += timeout
+        raise TimeoutError("slow")
+
+    monkeypatch.setattr(webhook_module.time, "monotonic", monotonic)
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(TimeoutError, match="slow") as raised:
         post_webhook("https://customer.example/hooks", b"{}", {}, 1)
     assert attempts == ["1.1.1.1"]
+    assert "did not resolve" not in str(raised.value)
+
+
+def test_post_webhook_does_not_connect_when_the_budget_is_already_spent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import socket
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0))]
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(TimeoutError, match="webhook connect timed out") as raised:
+        post_webhook("https://customer.example/hooks", b"{}", {}, 0)
+    assert "did not resolve" not in str(raised.value)
+
+
+def test_pinned_connect_without_addresses_is_not_a_resolve_failure() -> None:
+    import ssl
+
+    from secureai_shared.webhooks import _PinnedHTTPSConnection
+
+    connection = _PinnedHTTPSConnection(
+        "customer.example",
+        443,
+        addresses=[],
+        timeout=1,
+        context=ssl.create_default_context(),
+    )
+    with pytest.raises(OSError, match="no pinned address") as raised:
+        connection.connect()
+    assert "did not resolve" not in str(raised.value)
+
+
+def test_post_webhook_resolve_failure_says_it_did_not_resolve(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import socket
+
+    def getaddrinfo(*_args: object, **_kwargs: object) -> list[tuple]:
+        raise socket.gaierror(socket.EAI_NONAME, "Name or service not known")
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(RuntimeError, match="webhook host did not resolve"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
 
 
 def test_post_webhook_raises_the_last_connect_error(monkeypatch: pytest.MonkeyPatch) -> None:
