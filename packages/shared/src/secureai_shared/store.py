@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import and_, create_engine, func, not_, select
+from sqlalchemy import and_, create_engine, func, not_, or_, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.db import JobRow
@@ -67,6 +67,33 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _before_clause(created_at: datetime, job_id: str):
+    """Rows strictly older than the keyset ``(created_at, job_id)``.
+
+    ``created_at`` is newest-first. ``job_id`` breaks ties so two rows written
+    in one batch, which share a timestamp, stay on a stable page boundary.
+    """
+
+    return or_(
+        JobRow.created_at < created_at,
+        and_(JobRow.created_at == created_at, JobRow.id < job_id),
+    )
+
+
+def _page(
+    rows: list[JobRecord],
+    *,
+    limit: int,
+    before: tuple[datetime, str] | None,
+) -> list[JobRecord]:
+    """Newest first, then the next older page when ``before`` is set."""
+
+    if before is not None:
+        rows = [job for job in rows if (job.created_at, job.id) < before]
+    rows.sort(key=lambda job: (job.created_at, job.id), reverse=True)
+    return rows[:limit]
+
+
 def _new_id() -> str:
     return f"job_{uuid4().hex[:12]}"
 
@@ -120,9 +147,21 @@ class JobStore(Protocol):
 
     def get_any(self, job_id: str) -> JobRecord | None: ...
 
-    def list_for_user(self, user_id: str, *, limit: int = 50) -> list[JobRecord]: ...
+    def list_for_user(
+        self,
+        user_id: str,
+        *,
+        limit: int = 50,
+        before: tuple[datetime, str] | None = None,
+    ) -> list[JobRecord]: ...
 
-    def list_for_org(self, org_id: str, *, limit: int = 50) -> list[JobRecord]: ...
+    def list_for_org(
+        self,
+        org_id: str,
+        *,
+        limit: int = 50,
+        before: tuple[datetime, str] | None = None,
+    ) -> list[JobRecord]: ...
 
     def count_started(
         self,
@@ -233,19 +272,29 @@ class MemoryJobStore:
         with self._lock:
             return self._rows.get(job_id)
 
-    def list_for_user(self, user_id: str, *, limit: int = 50) -> list[JobRecord]:
+    def list_for_user(
+        self,
+        user_id: str,
+        *,
+        limit: int = 50,
+        before: tuple[datetime, str] | None = None,
+    ) -> list[JobRecord]:
         with self._lock:
             rows = [
                 job for job in self._rows.values() if job.user_id == user_id and job.org_id is None
             ]
-        rows.sort(key=lambda job: job.created_at, reverse=True)
-        return rows[:limit]
+        return _page(rows, limit=limit, before=before)
 
-    def list_for_org(self, org_id: str, *, limit: int = 50) -> list[JobRecord]:
+    def list_for_org(
+        self,
+        org_id: str,
+        *,
+        limit: int = 50,
+        before: tuple[datetime, str] | None = None,
+    ) -> list[JobRecord]:
         with self._lock:
             rows = [job for job in self._rows.values() if job.org_id == org_id]
-        rows.sort(key=lambda job: job.created_at, reverse=True)
-        return rows[:limit]
+        return _page(rows, limit=limit, before=before)
 
     def count_started(self, *, user_id: str, org_id: str | None, since: datetime) -> int:
         with self._lock:
@@ -444,23 +493,35 @@ class PostgresJobStore:
                 return None
             return _record_from_row(row)
 
-    def list_for_user(self, user_id: str, *, limit: int = 50) -> list[JobRecord]:
+    def list_for_user(
+        self,
+        user_id: str,
+        *,
+        limit: int = 50,
+        before: tuple[datetime, str] | None = None,
+    ) -> list[JobRecord]:
         with self._session() as session:
+            query = select(JobRow).where(JobRow.user_id == user_id, JobRow.org_id.is_(None))
+            if before is not None:
+                query = query.where(_before_clause(*before))
             rows = session.scalars(
-                select(JobRow)
-                .where(JobRow.user_id == user_id, JobRow.org_id.is_(None))
-                .order_by(JobRow.created_at.desc())
-                .limit(limit)
+                query.order_by(JobRow.created_at.desc(), JobRow.id.desc()).limit(limit)
             ).all()
             return [_record_from_row(row) for row in rows]
 
-    def list_for_org(self, org_id: str, *, limit: int = 50) -> list[JobRecord]:
+    def list_for_org(
+        self,
+        org_id: str,
+        *,
+        limit: int = 50,
+        before: tuple[datetime, str] | None = None,
+    ) -> list[JobRecord]:
         with self._session() as session:
+            query = select(JobRow).where(JobRow.org_id == org_id)
+            if before is not None:
+                query = query.where(_before_clause(*before))
             rows = session.scalars(
-                select(JobRow)
-                .where(JobRow.org_id == org_id)
-                .order_by(JobRow.created_at.desc())
-                .limit(limit)
+                query.order_by(JobRow.created_at.desc(), JobRow.id.desc()).limit(limit)
             ).all()
             return [_record_from_row(row) for row in rows]
 

@@ -292,13 +292,25 @@ export async function fetchJob(options: {
   return (await fetched.json()) as JobResponse;
 }
 
+export type JobPage = {
+  jobs: JobResponse[];
+  hasMore: boolean;
+};
+
 export async function listJobs(options: {
   apiUrl: string;
   getToken: TokenSource;
   orgId?: string | null;
-}): Promise<JobResponse[]> {
+  before?: { createdAt: string; id: string } | null;
+}): Promise<JobPage> {
   const base = options.apiUrl.replace(/\/$/, "");
-  const fetched = await fetch(`${base}/v1/jobs`, {
+  const params = new URLSearchParams();
+  if (options.before) {
+    params.set("before", options.before.createdAt);
+    params.set("before_id", options.before.id);
+  }
+  const query = params.toString();
+  const fetched = await fetch(`${base}/v1/jobs${query ? `?${query}` : ""}`, {
     headers: {
       Authorization: `Bearer ${await authorized(options.getToken)}`,
       ...orgHeaders(options.orgId),
@@ -307,5 +319,8 @@ export async function listJobs(options: {
   if (!fetched.ok) {
     throw new Error(await errorText(fetched));
   }
-  return (await fetched.json()) as JobResponse[];
+  return {
+    jobs: (await fetched.json()) as JobResponse[],
+    hasMore: fetched.headers.get("X-Has-More") === "true",
+  };
 }

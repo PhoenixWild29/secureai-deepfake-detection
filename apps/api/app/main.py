@@ -153,6 +153,7 @@ def create_app(
         allow_origins=list(resolved.cors_origins),
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-Org-Id"],
+        expose_headers=["X-Has-More"],
     )
     app.include_router(router)
     app.include_router(api_key_router)
