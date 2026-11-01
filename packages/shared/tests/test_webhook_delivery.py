@@ -299,11 +299,19 @@ def test_post_webhook_connects_to_the_validated_address(monkeypatch: pytest.Monk
     seen: dict[str, object] = {}
     original_init = _PinnedHTTPSConnection.__init__
 
-    def init(self: object, host: str, port: int, *, address: str, timeout: float, context: object) -> None:
+    def init(
+        self: object,
+        host: str,
+        port: int,
+        *,
+        addresses: list[str],
+        timeout: float,
+        context: object,
+    ) -> None:
         seen["host"] = host
-        seen["pinned"] = address
+        seen["pinned"] = list(addresses)
         seen["port"] = port
-        original_init(self, host, port, address=address, timeout=timeout, context=context)  # type: ignore[arg-type]
+        original_init(self, host, port, addresses=addresses, timeout=timeout, context=context)  # type: ignore[arg-type]
 
     def create_connection(address: tuple[str, int], timeout: float, source_address: object = None) -> object:
         del timeout, source_address
@@ -317,9 +325,144 @@ def test_post_webhook_connects_to_the_validated_address(monkeypatch: pytest.Monk
         post_webhook("https://customer.example/hooks", b"{}", {}, 3)
     assert lookups["n"] == 1
     assert seen["host"] == "customer.example"
-    assert seen["pinned"] == "8.8.8.8"
+    assert seen["pinned"] == ["8.8.8.8"]
     assert seen["port"] == 443
     assert seen["connected"] == ("8.8.8.8", 443)
+
+
+def test_post_webhook_tries_each_validated_address_in_order(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+    import ssl
+
+    from secureai_shared.webhooks import _PinnedHTTPSConnection
+
+    lookups = {"n": 0}
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del port, args, kwargs
+        assert host == "customer.example"
+        lookups["n"] += 1
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0)),
+        ]
+
+    attempts: list[tuple[str, int]] = []
+
+    class _Sock:
+        def setsockopt(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    def create_connection(
+        address: tuple[str, int], timeout: float, source_address: object = None
+    ) -> object:
+        del timeout, source_address
+        attempts.append(address)
+        if address[0] == "1.1.1.1":
+            raise OSError("unreachable")
+        return _Sock()
+
+    seen: dict[str, object] = {}
+    original_init = _PinnedHTTPSConnection.__init__
+
+    def init(
+        self: object,
+        host: str,
+        port: int,
+        *,
+        addresses: list[str],
+        timeout: float,
+        context: object,
+    ) -> None:
+        seen["host"] = host
+        seen["addresses"] = list(addresses)
+        original_init(self, host, port, addresses=addresses, timeout=timeout, context=context)  # type: ignore[arg-type]
+
+    def wrap_socket(self: object, sock: object, *args: object, **kwargs: object) -> object:
+        del self, sock, args
+        seen["sni"] = kwargs.get("server_hostname")
+        raise TimeoutError("tls stopped")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(_PinnedHTTPSConnection, "__init__", init)
+    monkeypatch.setattr(ssl.SSLContext, "wrap_socket", wrap_socket)
+    with pytest.raises(TimeoutError, match="tls stopped"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 3)
+    assert lookups["n"] == 1
+    assert seen["host"] == "customer.example"
+    assert seen["addresses"] == ["1.1.1.1", "8.8.8.8"]
+    assert attempts == [("1.1.1.1", 443), ("8.8.8.8", 443)]
+    assert seen["sni"] == "customer.example"
+
+
+def test_post_webhook_stops_after_the_first_address_connects(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+    import ssl
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0)),
+        ]
+
+    attempts: list[str] = []
+
+    class _Sock:
+        def setsockopt(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+        def close(self) -> None:
+            return None
+
+    def create_connection(
+        address: tuple[str, int], timeout: float, source_address: object = None
+    ) -> object:
+        del timeout, source_address
+        attempts.append(address[0])
+        return _Sock()
+
+    def wrap_socket(self: object, sock: object, *args: object, **kwargs: object) -> object:
+        del self, sock, args, kwargs
+        raise TimeoutError("tls stopped")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(ssl.SSLContext, "wrap_socket", wrap_socket)
+    with pytest.raises(TimeoutError, match="tls stopped"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+    assert attempts == ["1.1.1.1"]
+
+
+def test_post_webhook_raises_the_last_connect_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("1.1.1.1", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0)),
+        ]
+
+    attempts: list[str] = []
+
+    def create_connection(
+        address: tuple[str, int], timeout: float, source_address: object = None
+    ) -> object:
+        del timeout, source_address
+        attempts.append(address[0])
+        raise ConnectionRefusedError(address[0])
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(ConnectionRefusedError, match="8.8.8.8"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+    assert attempts == ["1.1.1.1", "8.8.8.8"]
 
 
 def test_post_webhook_rejects_a_private_address_in_the_same_answer(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -6,7 +6,8 @@ does not wait on the customer's server. A secret, when set, signs the raw
 body with HMAC-SHA256. The secret is stored in plaintext and is never
 returned by the API.
 
-Delivery resolves the hostname once and connects to that address. TLS and
+Delivery resolves the hostname once and tries each validated address in
+that order. A connect failure falls through to the next address. TLS and
 the Host header still use the original hostname, so a DNS answer that
 changes between the check and the connect cannot move the socket onto a
 private address. Any TCP port is accepted. A public address that proxies
@@ -25,7 +26,7 @@ import socket
 import ssl
 import sys
 import threading
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
@@ -279,17 +280,17 @@ def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: flo
     host = parts.hostname
     if parts.scheme != "https" or not host:
         raise RuntimeError("webhook URL must be https")
-    address = _resolve_public_address(host)
+    addresses = _resolve_public_addresses(host)
     port = parts.port or 443
     path = parts.path or "/"
     if parts.query:
         path = f"{path}?{parts.query}"
     # ``host`` stays the URL hostname so the Host header and SNI match the
-    # certificate. ``address`` is the IP this call already accepted.
+    # certificate. ``addresses`` are the IPs this call already accepted.
     connection = _PinnedHTTPSConnection(
         host,
         port,
-        address=address,
+        addresses=addresses,
         timeout=timeout,
         context=ssl.create_default_context(),
     )
@@ -808,64 +809,83 @@ def _blocked_host(host: str) -> bool:
 
 
 class _PinnedHTTPSConnection(http_client.HTTPSConnection):
-    """TLS to ``host`` over a socket that is already bound to ``address``."""
+    """TLS to ``host`` over addresses from one resolution, tried in order.
+
+    Host and SNI stay ``host``. A TCP connect failure tries the next address.
+    A TLS failure does not. The hostname is not resolved again.
+    """
 
     def __init__(
         self,
         host: str,
         port: int,
         *,
-        address: str,
+        addresses: Sequence[str],
         timeout: float,
         context: ssl.SSLContext,
     ) -> None:
         super().__init__(host, port, timeout=timeout, context=context)
-        self._pinned_address = address
+        self._pinned_addresses = tuple(addresses)
 
     def connect(self) -> None:
-        sys.audit("http.client.connect", self, self._pinned_address, self.port)
-        self.sock = socket.create_connection(
-            (self._pinned_address, self.port),
-            self.timeout,
-            self.source_address,
-        )
-        try:
-            self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        except OSError as exc:
-            if exc.errno != errno.ENOPROTOOPT:
-                raise
-        if self._tunnel_host:
-            self._tunnel()
-        server_hostname = self._tunnel_host or self.host
-        self.sock = self._context.wrap_socket(self.sock, server_hostname=server_hostname)
+        last_error: OSError | None = None
+        for address in self._pinned_addresses:
+            sys.audit("http.client.connect", self, address, self.port)
+            try:
+                sock = socket.create_connection(
+                    (address, self.port),
+                    self.timeout,
+                    self.source_address,
+                )
+            except OSError as exc:
+                last_error = exc
+                continue
+            self.sock = sock
+            try:
+                self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            except OSError as exc:
+                if exc.errno != errno.ENOPROTOOPT:
+                    raise
+            if self._tunnel_host:
+                self._tunnel()
+            server_hostname = self._tunnel_host or self.host
+            self.sock = self._context.wrap_socket(self.sock, server_hostname=server_hostname)
+            return
+        if last_error is not None:
+            raise last_error
+        raise OSError("webhook host did not resolve")
 
 
-def _resolve_public_address(host: str) -> str:
-    """Return one public address. Reject the host if any answer is not public.
+def _resolve_public_addresses(host: str) -> list[str]:
+    """Return every public address, in resolver order.
 
-    The caller connects to the returned address and does not resolve again.
+    Reject the host if any answer is not public. The caller tries the
+    returned addresses and does not resolve again.
     """
 
     if _blocked_host(host):
         raise RuntimeError("webhook host is not a public address")
     literal = _literal_ip(host)
     if literal is not None:
-        return host
+        return [host]
     try:
         infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
     except socket.gaierror as exc:
         raise RuntimeError("webhook host did not resolve") from exc
     if not infos:
         raise RuntimeError("webhook host did not resolve")
-    chosen: str | None = None
+    chosen: list[str] = []
+    seen: set[str] = set()
     for info in infos:
         raw = info[4][0]
         address = ipaddress.ip_address(raw.split("%", 1)[0])
         if not address.is_global:
             raise RuntimeError("webhook host is not a public address")
-        if chosen is None:
-            chosen = raw
-    if chosen is None:
+        if raw in seen:
+            continue
+        seen.add(raw)
+        chosen.append(raw)
+    if not chosen:
         raise RuntimeError("webhook host did not resolve")
     return chosen
 

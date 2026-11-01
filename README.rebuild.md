@@ -363,7 +363,7 @@ The body is compact JSON, the same bytes on every retry:
 {"confidence":0.5,"job_id":"job_...","org_id":"org_...","prediction":"fake","status":"completed","timestamp":"2026-11-01T12:00:00+00:00"}
 ```
 
-`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate. The worker resolves the hostname once and opens the socket to that address. The Host header and the certificate name stay the hostname, so a DNS answer that changes after the check cannot point that connection at a private address. Any TCP port is still accepted. A public address that proxies somewhere else is outside this check. Two owners saving the endpoint at the same time: the second write updates the row instead of failing the request.
+`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate. The worker resolves the hostname once and tries those addresses in order, stopping at the first TCP connection that succeeds. The Host header and the certificate name stay the hostname, so a DNS answer that changes after the check cannot point that connection at a private address. Any TCP port is still accepted. A public address that proxies somewhere else is outside this check. Two owners saving the endpoint at the same time: the second write updates the row instead of failing the request.
 
 When a secret is set, the worker also sends:
 
