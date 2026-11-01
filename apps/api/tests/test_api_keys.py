@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 import jwt
-from httpx import Response
+from httpx2 import Response
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from cryptography.hazmat.primitives.asymmetric import rsa
