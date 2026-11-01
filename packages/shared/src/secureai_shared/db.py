@@ -67,6 +67,27 @@ class JobRow(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
+class JobTombstoneRow(Base):
+    """Quota placeholder left after a job row is deleted.
+
+    History reads ``jobs`` only, so this row has no filename, score, or
+    object key. ``created_at`` is the original job time, which keeps the
+    row inside the same billing period. Rows that never counted (a job
+    that failed before it reached the queue) do not get a placeholder.
+    """
+
+    __tablename__ = "job_tombstones"
+    __table_args__ = (
+        Index("ix_job_tombstones_user_created", "user_id", "created_at"),
+        Index("ix_job_tombstones_org_created", "org_id", "created_at"),
+    )
+
+    job_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    org_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class BillingAccountRow(Base):
     """Personal Stripe customer. Team subscriptions live on the organization."""
 

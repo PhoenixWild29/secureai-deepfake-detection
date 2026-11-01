@@ -250,6 +250,12 @@ button.secondary {
   border: 1px solid var(--line);
 }
 
+button.danger {
+  background: transparent;
+  color: #8a2b16;
+  border: 1px solid #e4cfc8;
+}
+
 .field {
   margin-top: 1.25rem;
 }

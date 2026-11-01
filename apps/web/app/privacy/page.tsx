@@ -22,6 +22,12 @@ export default function PrivacyPage() {
         <li>A job row: status, prediction, confidence, and, when the CPU detector finishes, a short JSON note of the signals.</li>
         <li>Your Clerk user id. A workspace job also stores the organization id and is visible to members of that workspace.</li>
       </ul>
+      <h2>Removing a job</h2>
+      <p>
+        The report page can delete a job and its video. The score leaves history. The monthly job count does not.
+        A workspace owner or admin can delete another member&apos;s job. A webhook that was already queued can still
+        be delivered. A copy you already downloaded is on your machine.
+      </p>
       <h2>What this release does not do</h2>
       <ul>
         <li>It does not train a model on your upload.</li>

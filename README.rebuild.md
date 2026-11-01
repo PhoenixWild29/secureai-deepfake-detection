@@ -121,6 +121,8 @@ Before the worker scores a file, it reads the size and ETag again. A rewrite aft
 
 `20261101_0009` adds the indexes those two lists seek. `ix_jobs_personal_created_id` is `(user_id, created_at DESC, id DESC)` where `org_id` is null. `ix_jobs_org_created_id` is `(org_id, created_at DESC, id DESC)` where `org_id` is not null. The migration drops `ix_jobs_user_id` and `ix_jobs_org_id`, which could find the rows but still sorted every match. `ix_jobs_status` stays. No new environment variable.
 
+`DELETE /v1/jobs/{id}` removes a job the caller can read. The video is deleted when no other job still uses that object. The score, filename, and attestation row go with the job. History no longer lists it. The monthly quota does not decrease: a job that counted leaves a row in `job_tombstones` (`20261101_0010`) with the original `created_at` and no filename, score, or object key. A job that failed before it reached Redis still does not count. A job in `processing` is 409. The person who uploaded a workspace job can delete it, and so can an owner or admin. Another member is 403. A webhook delivery that was already queued is still sent. The job id can remain on the Redis list until a worker pops it, finds no row, and drops the lease. Guardian's report page has the button. No new environment variable. Redeploy the API so startup can apply `20261101_0010`. The worker image does not need a code change for this route.
+
 S3 settings, when you use them: `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, optional `S3_ENDPOINT` (MinIO or Railway), `S3_REGION`. `S3_AUTO_CREATE_BUCKET` defaults to false. The API and worker do not call `CreateBucket` unless you set `S3_AUTO_CREATE_BUCKET=true`, which is for MinIO or another local bucket only.
 
 ## Run the worker
@@ -198,7 +200,7 @@ CI is `.github/workflows/rebuild.yml`. It starts Redis and Postgres service cont
 
 Plans are Free trial, Pro, and Team. Free trial is 10 jobs per month. Pro is 500. Team is 2,000 for the workspace. A free workspace has 3 seats. A Team workspace has 25. Override them with `QUOTA_FREE`, `QUOTA_PRO`, `QUOTA_TEAM`, `SEAT_LIMIT_FREE`, and `SEAT_LIMIT_TEAM`.
 
-A job counts when it is created, including jobs that later fail during detection. A job that never reached Redis (`Could not queue the job.`, attempt 0) does not count. The window is the Stripe subscription period when that period is current, otherwise the UTC calendar month. Personal jobs use the user plan. Jobs sent with `X-Org-Id` use the workspace plan and show up for every member. The count and the insert hold the account or organization row lock, so concurrent creates cannot overshoot the cap.
+A job counts when it is created, including jobs that later fail during detection and jobs the caller deletes. A job that never reached Redis (`Could not queue the job.`, attempt 0) does not count, and deleting that row does not make it count. The window is the Stripe subscription period when that period is current, otherwise the UTC calendar month. Personal jobs use the user plan. Jobs sent with `X-Org-Id` use the workspace plan and show up for every member. The count and the insert hold the account or organization row lock, so concurrent creates cannot overshoot the cap.
 
 `POST /v1/jobs` returns **402** when a free-trial caller is over the cap, with `detail` telling them to upgrade. A Pro or Team caller who is over the included amount gets **403**. Uploads stay on the short rate limit. The monthly cap is the job.
 

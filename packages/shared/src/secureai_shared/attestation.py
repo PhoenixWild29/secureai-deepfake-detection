@@ -249,6 +249,8 @@ class AttestationStore(Protocol):
 
     def save(self, record: AttestationRecord) -> AttestationRecord: ...
 
+    def delete(self, job_id: str) -> None: ...
+
 
 class MemoryAttestationStore:
     def __init__(self) -> None:
@@ -266,6 +268,10 @@ class MemoryAttestationStore:
                 return current
             self._rows[record.job_id] = record
             return record
+
+    def delete(self, job_id: str) -> None:
+        with self._lock:
+            self._rows.pop(job_id, None)
 
 
 class PostgresAttestationStore:
@@ -335,6 +341,12 @@ class PostgresAttestationStore:
             row.signature = record.signature
             row.created_at = record.created_at
             return record
+
+    def delete(self, job_id: str) -> None:
+        with self._session() as session:
+            row = session.get(JobAttestationRow, job_id)
+            if row is not None:
+                session.delete(row)
 
     def _find(self, session: Session, job_id: str) -> JobAttestationRow | None:
         return session.get(JobAttestationRow, job_id)

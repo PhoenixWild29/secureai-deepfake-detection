@@ -53,17 +53,34 @@ def _drop(name: str) -> None:
     engine.dispose()
 
 
-def _job_indexes(url: str) -> dict[str, str]:
+def _indexes(url: str, table: str) -> dict[str, str]:
     engine = create_engine(url)
     with engine.connect() as connection:
         rows = connection.execute(
             text(
                 "SELECT indexname, indexdef FROM pg_indexes "
-                "WHERE schemaname = 'public' AND tablename = 'jobs'"
-            )
+                "WHERE schemaname = 'public' AND tablename = :table"
+            ),
+            {"table": table},
         ).all()
     engine.dispose()
     return {name: definition for name, definition in rows}
+
+
+def _columns(url: str, table: str) -> list[tuple[str, str, str]]:
+    engine = create_engine(url)
+    with engine.connect() as connection:
+        rows = connection.execute(
+            text(
+                "SELECT column_name, data_type, is_nullable "
+                "FROM information_schema.columns "
+                "WHERE table_schema = 'public' AND table_name = :table "
+                "ORDER BY ordinal_position"
+            ),
+            {"table": table},
+        ).all()
+    engine.dispose()
+    return [(name, data_type, nullable) for name, data_type, nullable in rows]
 
 
 def test_alembic_job_indexes_match_the_model() -> None:
@@ -79,12 +96,12 @@ def test_alembic_job_indexes_match_the_model() -> None:
         config = Config(str(root / "alembic.ini"))
         config.set_main_option("script_location", str(root / "alembic"))
         command.upgrade(config, "head")
-        from_alembic = _job_indexes(_database_url(migrated))
+        from_alembic = _indexes(_database_url(migrated), "jobs")
 
         model_engine = create_engine(_database_url(modeled))
         Base.metadata.create_all(model_engine)
         model_engine.dispose()
-        from_model = _job_indexes(_database_url(modeled))
+        from_model = _indexes(_database_url(modeled), "jobs")
         assert from_alembic == from_model
         assert "ix_jobs_personal_created_id" in from_alembic
         assert "ix_jobs_org_created_id" in from_alembic
@@ -96,15 +113,27 @@ def test_alembic_job_indexes_match_the_model() -> None:
         assert "created_at DESC" in from_alembic["ix_jobs_personal_created_id"]
         assert "id DESC" in from_alembic["ix_jobs_org_created_id"]
 
+        migrated_url = _database_url(migrated)
+        modeled_url = _database_url(modeled)
+        assert _indexes(migrated_url, "job_tombstones") == _indexes(modeled_url, "job_tombstones")
+        assert _columns(migrated_url, "job_tombstones") == _columns(modeled_url, "job_tombstones")
+        assert "ix_job_tombstones_user_created" in _indexes(migrated_url, "job_tombstones")
+        assert "ix_job_tombstones_org_created" in _indexes(migrated_url, "job_tombstones")
+
         command.downgrade(config, "20261101_0008")
-        downgraded = _job_indexes(_database_url(migrated))
+        downgraded = _indexes(_database_url(migrated), "jobs")
         assert "ix_jobs_user_id" in downgraded
         assert "ix_jobs_org_id" in downgraded
         assert "ix_jobs_personal_created_id" not in downgraded
         assert "ix_jobs_org_created_id" not in downgraded
 
+        assert _indexes(_database_url(migrated), "job_tombstones") == {}
+
         command.upgrade(config, "head")
-        assert _job_indexes(_database_url(migrated)) == from_model
+        assert _indexes(_database_url(migrated), "jobs") == from_model
+        assert _indexes(_database_url(migrated), "job_tombstones") == _indexes(
+            _database_url(modeled), "job_tombstones"
+        )
     finally:
         if previous is None:
             os.environ.pop("DATABASE_URL", None)

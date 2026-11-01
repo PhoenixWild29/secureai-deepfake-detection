@@ -1,7 +1,7 @@
 from secureai_shared.models import JobStatus
 from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.storage import new_object_key
-from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore
+from secureai_shared.store import PUBLIC_FAILURE_DETAIL, DiscardState, MemoryJobStore
 from worker.recovery import rescue_popped, sweep_stuck
 
 
@@ -135,6 +135,44 @@ def test_rescue_republishes_when_claim_never_landed() -> None:
     assert store.get_any(job_id) is not None
     assert store.get_any(job_id).status is JobStatus.queued  # type: ignore[union-attr]
     assert queue.consume() == job_id
+
+
+def test_sweep_and_rescue_drop_a_removed_job_without_a_webhook() -> None:
+    """A delete that wins before claim leaves no row. The lease is acked.
+
+    The id is not published again, and the terminal hook is not called, so
+    a removed job does not become a failure webhook.
+    """
+
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.discard(job_id, delete_object=lambda _key: None) is DiscardState.removed
+    current = queue._inflight[job_id]  # noqa: SLF001
+    if len(current) == 2:
+        queue._inflight[job_id] = (1_000.0, current[1])  # noqa: SLF001
+    else:
+        queue._inflight[job_id] = (1_000.0, current[1], current[2])  # noqa: SLF001
+    notes: list[str] = []
+    recovered = sweep_stuck(
+        store,
+        queue,
+        lease_seconds=10,
+        max_attempts=3,
+        now=2_000,
+        on_terminal=lambda job: notes.append(job.id),
+    )
+    assert recovered == []
+    assert notes == []
+    assert queue.consume() is None
+    assert job_id not in queue._inflight  # noqa: SLF001
+
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.discard(job_id, delete_object=lambda _key: None) is DiscardState.removed
+    rescue_popped(store, queue, job_id, on_terminal=lambda job: notes.append(job.id))
+    assert notes == []
+    assert queue.consume() is None
+    assert job_id not in queue._inflight  # noqa: SLF001
 
 
 def test_rescue_requeues_when_fail_raises() -> None:
