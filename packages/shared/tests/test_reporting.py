@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from secureai_shared.reporting import (
     error_reporting_enabled,
     init_error_reporting,
+    install_error_log_redaction,
     redact_text,
     scrub_event,
 )
@@ -166,6 +168,40 @@ def test_scrub_event_drops_auth_bodies_and_secrets() -> None:
     assert "person@example.com" not in blob
 
 
+def test_scrub_event_redacts_logentry_params_and_exception_values() -> None:
+    """LoggingIntegration copies record.args as a tuple and the exception text separately."""
+
+    presigned = (
+        "https://bucket.s3.amazonaws.com/obj.mp4"
+        "?X-Amz-Signature=0123456789abcdefdeadbeef"
+        "&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE"
+    )
+    event = {
+        "message": f"download failed {presigned}",
+        "logentry": {
+            "message": "download failed %s %s",
+            "formatted": f"download failed {presigned} token=another-secret-value",
+            "params": (presigned, "token=another-secret-value"),
+        },
+        "exception": {
+            "values": [
+                {
+                    "type": "RuntimeError",
+                    "value": f"get failed {presigned}",
+                }
+            ]
+        },
+    }
+    scrubbed = scrub_event(event, {})
+    blob = str(scrubbed)
+    assert "0123456789abcdefdeadbeef" not in blob
+    assert "AKIAIOSFODNN7EXAMPLE" not in blob
+    assert "another-secret-value" not in blob
+    assert scrubbed["logentry"]["params"][1] == "token=[Filtered]"
+    assert "obj.mp4?[Filtered]" in scrubbed["logentry"]["formatted"]
+    assert "obj.mp4?[Filtered]" in scrubbed["exception"]["values"][0]["value"]
+
+
 def test_redact_text_covers_sentry_dsn_userinfo() -> None:
     raw = "dsn https://abc123def@o0.ingest.sentry.io/1 and Bearer eyJhbGciOi"
     cleaned = redact_text(raw)
@@ -182,3 +218,91 @@ def test_redact_text_hides_api_key_secrets_and_keeps_prefixes() -> None:
     assert "sai_[Filtered]" in cleaned
     bearer = redact_text("Authorization Bearer " + secret)
     assert secret not in bearer
+
+
+def test_redact_text_strips_query_tokens_and_presigned_urls() -> None:
+    cleaned = redact_text("failed https://api.example/v1/jobs?token=super-secret-value&ok=1")
+    assert "super-secret-value" not in cleaned
+    assert "?token=[Filtered]" in cleaned
+    assert "ok=1" in cleaned
+    fragment = redact_text("token=super-secret-value&ok=1")
+    assert "super-secret-value" not in fragment
+    assert fragment.startswith("token=[Filtered]")
+    signed = redact_text("callback https://hooks.example/in?signature=abcdef0123456789&id=1")
+    assert "abcdef0123456789" not in signed
+    assert "https://hooks.example/in?[Filtered]" in signed
+    presigned = (
+        "https://bucket.s3.amazonaws.com/media/user/ab.mp4"
+        "?X-Amz-Algorithm=AWS4-HMAC-SHA256"
+        "&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20261101%2Fus-east-1%2Fs3%2Faws4_request"
+        "&X-Amz-Date=20261101T000000Z"
+        "&X-Amz-Expires=900"
+        "&X-Amz-SignedHeaders=host"
+        "&X-Amz-Signature=0123456789abcdefdeadbeef"
+    )
+    hidden = redact_text(f"download failed {presigned}")
+    assert "0123456789abcdefdeadbeef" not in hidden
+    assert "AKIAIOSFODNN7EXAMPLE" not in hidden
+    assert "https://bucket.s3.amazonaws.com/media/user/ab.mp4?[Filtered]" in hidden
+
+
+def test_redact_text_drops_sqlalchemy_parameter_values() -> None:
+    raw = (
+        "(psycopg.errors.NotNullViolation) null value\n"
+        "[SQL: INSERT INTO webhook_endpoints (secret) VALUES (%(secret)s)]\n"
+        "[parameters: {'secret': 'customer-signing-secret-12345'}]\n"
+        "(Background on this error at: https://sqlalche.me/e/20/gkpj)"
+    )
+    cleaned = redact_text(raw)
+    assert "customer-signing-secret-12345" not in cleaned
+    assert "INSERT INTO webhook_endpoints" in cleaned
+    assert "[parameters: [Filtered]]" in cleaned
+
+
+def test_error_log_filter_redacts_presigned_urls_and_leaves_info() -> None:
+    install_error_log_redaction()
+    log = logging.getLogger("secureai.worker")
+    presigned = (
+        "https://bucket.s3.amazonaws.com/obj.mp4?X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2Fdate"
+        "&X-Amz-Signature=0123456789abcdefdeadbeef"
+    )
+    info_records: list[logging.LogRecord] = []
+    warning_records: list[logging.LogRecord] = []
+    error_records: list[logging.LogRecord] = []
+
+    class _Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            if record.levelno >= logging.ERROR:
+                error_records.append(record)
+            elif record.levelno >= logging.WARNING:
+                warning_records.append(record)
+            else:
+                info_records.append(record)
+
+    handler = _Capture()
+    handler.setLevel(logging.INFO)
+    log.addHandler(handler)
+    log.setLevel(logging.INFO)
+    try:
+        log.info("upload url %s", presigned)
+        log.warning("presign %s", presigned)
+        try:
+            raise RuntimeError(f"get failed {presigned}?token=another-secret-value")
+        except RuntimeError:
+            log.exception("job failed job_id=%s", "job_abc")
+    finally:
+        log.removeHandler(handler)
+
+    assert info_records
+    assert "AKIAIOSFODNN7EXAMPLE" in info_records[0].getMessage()
+    assert warning_records
+    warning = warning_records[0].getMessage()
+    assert "0123456789abcdefdeadbeef" not in warning
+    assert "AKIAIOSFODNN7EXAMPLE" not in warning
+    assert "obj.mp4?[Filtered]" in warning
+    rendered = logging.Formatter().format(error_records[0])
+    assert "0123456789abcdefdeadbeef" not in rendered
+    assert "AKIAIOSFODNN7EXAMPLE" not in rendered
+    assert "another-secret-value" not in rendered
+    assert "job failed job_id=job_abc" in rendered
+    assert "media" not in rendered or "obj.mp4?[Filtered]" in rendered

@@ -462,7 +462,7 @@ class PostgresWebhookStore:
                 raise RuntimeError("PostgresWebhookStore requires a database url or an engine")
             from sqlalchemy import create_engine
 
-            engine = create_engine(database_url, pool_pre_ping=True)
+            engine = create_engine(database_url, pool_pre_ping=True, hide_parameters=True)
         self.engine = engine
         self._session_factory = sessionmaker(engine, expire_on_commit=False)  # type: ignore[arg-type]
 

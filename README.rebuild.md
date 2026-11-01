@@ -266,7 +266,7 @@ curl -s -X POST http://localhost:8000/v1/jobs/batch \
 
 PDF uses the same plan rule as attestation. Pro and Team can download. The plan is the workspace plan when `X-Org-Id` is set, and the personal plan otherwise. `past_due` still counts as paid. A free plan is 402 with `PDF export requires a Pro or Team plan.` `AUTH_MODE=dev` with `QUOTA_MODE=unlimited` (the workstation default when Stripe is unset) can download on the free plan. `AUTH_MODE=clerk` always requires Pro or Team, including when `QUOTA_MODE=unlimited`.
 
-The renderer is [fpdf2](https://pypi.org/project/fpdf2/) 2.9.0, pinned in `apps/api/requirements.txt`. It writes text with the built-in Helvetica font and does not launch a browser. Characters outside Windows-1252 are replaced with `?`.
+The renderer is [fpdf2](https://pypi.org/project/fpdf2/) 2.9.0, pinned in `apps/api/requirements.txt`. It writes text with the built-in Helvetica font (Windows-1252) and does not launch a browser. Characters outside Windows-1252 are replaced with `?`. The PDF lists at most 12 signals and says when more were stored.
 
 ```bash
 curl -s http://localhost:8000/v1/jobs/job_.../report.pdf \
@@ -274,7 +274,7 @@ curl -s http://localhost:8000/v1/jobs/job_.../report.pdf \
   -o report.pdf
 ```
 
-Guardian's completed report page puts Download PDF next to the JSON and the attestation. If that route returns 409 or 404, the page hides the PDF button and keeps the rest of the report. A plan rejection shows the error and leaves the page usable.
+Guardian's completed report page puts Download PDF next to the JSON and the attestation. If that route returns 409 or 404, the page hides the PDF button and keeps the rest of the report. A plan rejection (402) shows the error and disables the PDF button so it cannot be clicked again.
 
 ## Report attestation
 

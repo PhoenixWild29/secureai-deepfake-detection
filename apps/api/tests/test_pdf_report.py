@@ -257,3 +257,38 @@ def test_clerk_unlimited_still_requires_a_paid_plan(tmp_path: Path) -> None:
         blocked = client.get(f"/v1/jobs/{job_id}/report.pdf", headers=headers)
     assert blocked.status_code == 402
     assert blocked.json()["detail"] == "PDF export requires a Pro or Team plan."
+
+
+def test_render_accepts_windows_1252_punctuation_and_caps_signals() -> None:
+    now = datetime(2026, 11, 1, tzinfo=timezone.utc)
+    signals = {
+        "texture": 0.2,
+        "motion": 0.1,
+        "temporal": 0.3,
+        "region": 0.0,
+    }
+    for index in range(20):
+        signals[f"extra{index:02d}"] = 0.01
+    data = render_job_report_pdf(
+        job_id="job_subject\u2019id",
+        org_id=None,
+        filename="director\u2019s cut\u2014final.mp4",
+        status="completed",
+        prediction="real",
+        confidence=0.84,
+        model="cpu-multisignal-v1",
+        signals=signals,
+        created_at=now,
+        updated_at=now,
+        limitations=LIMITATIONS,
+    )
+    assert data.startswith(b"%PDF")
+    text = _pdf_text(data)
+    assert "director" in text
+    assert "final.mp4" in text
+    assert "Texture" in text
+    assert "extra00" in text
+    assert "extra07" in text
+    assert "extra08" not in text
+    assert "12 additional signals omitted." in text
+    assert len(re.findall(rb"/Type /Page[^s]", data)) == 1

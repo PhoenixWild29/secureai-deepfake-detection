@@ -13,6 +13,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
 
 from app.auth import require_user
 from app.routes import get_job
@@ -147,7 +148,21 @@ def issue_attestation(
         signature=signature,
         created_at=datetime.now(timezone.utc),
     )
-    stored = request.app.state.attestations.save(record)
+    try:
+        stored = request.app.state.attestations.save(record)
+    except IntegrityError:
+        # The store normally absorbs a concurrent first insert. If it still
+        # raises, return the winner (200) or 409. Never an unhandled 500.
+        logger.info("attestation insert conflict job_id=%s", job.id)
+        found = request.app.state.attestations.get(job.id)
+        if (
+            found is None
+            or found.payload != record.payload
+            or found.key_id != record.key_id
+            or found.signature != record.signature
+        ):
+            raise HTTPException(status_code=409, detail="Attestation already exists") from None
+        stored = found
     logger.info("attestation job_id=%s key_id=%s", job.id, stored.key_id)
     response.headers["Content-Disposition"] = f'attachment; filename="{job.id}.attestation.json"'
     return AttestationIssue(

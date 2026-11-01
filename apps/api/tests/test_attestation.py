@@ -10,10 +10,11 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 
 from app.main import create_app
+from secureai_shared.attestation import ALGORITHM, NOT_CONFIGURED, AttestationRecord
 from conftest import make_settings
-from secureai_shared.attestation import NOT_CONFIGURED
 from secureai_shared.billing import MemoryBillingStore, PlanUpdate
 from secureai_shared.limits import MemoryRateLimiter
 from secureai_shared.queue import MemoryJobQueue
@@ -33,7 +34,15 @@ def _pem() -> str:
     ).decode()
 
 
-def _app(tmp_path: Path, *, pem: str | None = None, limiter=None, billing=None, **overrides: object):
+def _app(
+    tmp_path: Path,
+    *,
+    pem: str | None = None,
+    limiter=None,
+    billing=None,
+    attestations=None,
+    **overrides: object,
+):
     settings = make_settings(
         tmp_path,
         attestation_private_key="" if pem is None else pem,
@@ -48,6 +57,7 @@ def _app(tmp_path: Path, *, pem: str | None = None, limiter=None, billing=None, 
         storage=storage,
         limiter=limiter,
         billing=billing,
+        attestations=attestations,
     )
     return app, store, storage
 
@@ -260,3 +270,66 @@ def test_verify_is_rate_limited(tmp_path: Path) -> None:
         limited = client.post("/v1/attestations/verify", json=body)
     assert limited.status_code == 429
     assert limited.json()["detail"] == "Too many requests"
+
+
+class _ConflictStore:
+    """First save raises the primary-key race after remembering the row."""
+
+    def __init__(self, *, winner: AttestationRecord | None = None) -> None:
+        self.row = winner
+        self.calls = 0
+
+    def get(self, job_id: str) -> AttestationRecord | None:
+        if self.row is None or self.row.job_id != job_id:
+            return None
+        return self.row
+
+    def save(self, record: AttestationRecord) -> AttestationRecord:
+        self.calls += 1
+        if self.row is None:
+            self.row = record
+        raise IntegrityError("INSERT", {}, Exception("duplicate key"))
+
+
+def test_concurrent_first_attest_returns_the_stored_row(tmp_path: Path) -> None:
+    store = _ConflictStore()
+    app, jobs, storage = _app(tmp_path, pem=_pem(), quota_mode="unlimited", attestations=store)
+    with TestClient(app) as client:
+        job_id = _complete(client, jobs, storage)
+        issued = client.post(f"/v1/jobs/{job_id}/attest", headers=AUTH)
+    assert issued.status_code == 200
+    body = issued.json()
+    assert body["signature"]
+    assert body["algorithm"] == ALGORITHM
+    assert store.calls == 1
+    assert store.row is not None
+    assert body["payload"] == store.row.payload
+
+
+def test_conflicting_attest_is_409_not_500(tmp_path: Path) -> None:
+    from datetime import datetime, timezone
+
+    winner = AttestationRecord(
+        job_id="unused",
+        key_id="other",
+        algorithm=ALGORITHM,
+        payload='{"job_id":"other"}',
+        signature="bm90LXRoZS1zYW1l",
+        created_at=datetime(2026, 11, 1, tzinfo=timezone.utc),
+    )
+    store = _ConflictStore(winner=winner)
+    app, jobs, storage = _app(tmp_path, pem=_pem(), quota_mode="unlimited", attestations=store)
+    with TestClient(app) as client:
+        job_id = _complete(client, jobs, storage)
+        winner = AttestationRecord(
+            job_id=job_id,
+            key_id=winner.key_id,
+            algorithm=winner.algorithm,
+            payload=winner.payload,
+            signature=winner.signature,
+            created_at=winner.created_at,
+        )
+        store.row = winner
+        conflict = client.post(f"/v1/jobs/{job_id}/attest", headers=AUTH)
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"] == "Attestation already exists"

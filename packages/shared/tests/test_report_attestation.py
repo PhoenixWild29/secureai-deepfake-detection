@@ -7,6 +7,9 @@ from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -23,6 +26,7 @@ from secureai_shared.attestation import (
     may_issue_attestation,
     normalize_pem,
 )
+from secureai_shared.db import Base, JobRow
 from secureai_shared.settings import load_settings
 from secureai_shared.storage import new_object_key
 from secureai_shared.store import PostgresJobStore
@@ -197,3 +201,81 @@ def test_postgres_store_keeps_the_first_signature() -> None:
     assert loaded is not None
     assert loaded.signature == "bmV3"
     assert loaded.created_at == WHEN + timedelta(seconds=9)
+
+
+def _sqlite_attestation_store() -> tuple[PostgresAttestationStore, str]:
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    job_id = "job_abc123abc123"
+    with Session(engine) as session:
+        session.add(
+            JobRow(
+                id=job_id,
+                user_id="user_dev",
+                org_id=None,
+                filename="clip.mp4",
+                content_type="video/mp4",
+                byte_size=4,
+                object_key="media/user_dev/" + ("a" * 32) + ".mp4",
+                object_etag=None,
+                status="completed",
+                prediction="real",
+                confidence=0.5,
+                detail=None,
+                attempt=0,
+                created_at=WHEN,
+                updated_at=WHEN,
+            )
+        )
+        session.commit()
+    return PostgresAttestationStore(engine=engine), job_id
+
+
+def _record(job_id: str, signature: str = "c2ln") -> AttestationRecord:
+    return AttestationRecord(
+        job_id=job_id,
+        key_id="v1",
+        algorithm=ALGORITHM,
+        payload=_payload(job_id=job_id),
+        signature=signature,
+        created_at=WHEN,
+    )
+
+
+def test_insert_conflict_returns_the_first_attestation() -> None:
+    store, job_id = _sqlite_attestation_store()
+    record = _record(job_id)
+    assert store.save(record).signature == "c2ln"
+
+    def boom(candidate: AttestationRecord) -> AttestationRecord:
+        del candidate
+        raise IntegrityError("INSERT", {}, Exception("duplicate key"))
+
+    store._write = boom  # type: ignore[method-assign]
+    again = store.save(replace(record, created_at=WHEN + timedelta(seconds=4)))
+    assert again.signature == "c2ln"
+    stored_at = again.created_at
+    if stored_at.tzinfo is None:
+        stored_at = stored_at.replace(tzinfo=timezone.utc)
+    assert stored_at == WHEN
+
+
+def test_insert_conflict_still_updates_a_different_signature() -> None:
+    store, job_id = _sqlite_attestation_store()
+    record = _record(job_id)
+    assert store.save(record).signature == "c2ln"
+    real = store._write
+    state = {"raised": False}
+
+    def once(candidate: AttestationRecord) -> AttestationRecord:
+        if not state["raised"]:
+            state["raised"] = True
+            raise IntegrityError("INSERT", {}, Exception("duplicate key"))
+        return real(candidate)
+
+    store._write = once  # type: ignore[method-assign]
+    updated = store.save(replace(record, signature="bmV3", created_at=WHEN + timedelta(seconds=9)))
+    assert updated.signature == "bmV3"
+    loaded = store.get(job_id)
+    assert loaded is not None
+    assert loaded.signature == "bmV3"
