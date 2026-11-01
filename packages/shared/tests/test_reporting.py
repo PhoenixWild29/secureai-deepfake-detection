@@ -168,6 +168,40 @@ def test_scrub_event_drops_auth_bodies_and_secrets() -> None:
     assert "person@example.com" not in blob
 
 
+def test_scrub_event_redacts_logentry_params_and_exception_values() -> None:
+    """LoggingIntegration copies record.args as a tuple and the exception text separately."""
+
+    presigned = (
+        "https://bucket.s3.amazonaws.com/obj.mp4"
+        "?X-Amz-Signature=0123456789abcdefdeadbeef"
+        "&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE"
+    )
+    event = {
+        "message": f"download failed {presigned}",
+        "logentry": {
+            "message": "download failed %s %s",
+            "formatted": f"download failed {presigned} token=another-secret-value",
+            "params": (presigned, "token=another-secret-value"),
+        },
+        "exception": {
+            "values": [
+                {
+                    "type": "RuntimeError",
+                    "value": f"get failed {presigned}",
+                }
+            ]
+        },
+    }
+    scrubbed = scrub_event(event, {})
+    blob = str(scrubbed)
+    assert "0123456789abcdefdeadbeef" not in blob
+    assert "AKIAIOSFODNN7EXAMPLE" not in blob
+    assert "another-secret-value" not in blob
+    assert scrubbed["logentry"]["params"][1] == "token=[Filtered]"
+    assert "obj.mp4?[Filtered]" in scrubbed["logentry"]["formatted"]
+    assert "obj.mp4?[Filtered]" in scrubbed["exception"]["values"][0]["value"]
+
+
 def test_redact_text_covers_sentry_dsn_userinfo() -> None:
     raw = "dsn https://abc123def@o0.ingest.sentry.io/1 and Bearer eyJhbGciOi"
     cleaned = redact_text(raw)
@@ -233,12 +267,15 @@ def test_error_log_filter_redacts_presigned_urls_and_leaves_info() -> None:
         "&X-Amz-Signature=0123456789abcdefdeadbeef"
     )
     info_records: list[logging.LogRecord] = []
+    warning_records: list[logging.LogRecord] = []
     error_records: list[logging.LogRecord] = []
 
     class _Capture(logging.Handler):
         def emit(self, record: logging.LogRecord) -> None:
             if record.levelno >= logging.ERROR:
                 error_records.append(record)
+            elif record.levelno >= logging.WARNING:
+                warning_records.append(record)
             else:
                 info_records.append(record)
 
@@ -248,6 +285,7 @@ def test_error_log_filter_redacts_presigned_urls_and_leaves_info() -> None:
     log.setLevel(logging.INFO)
     try:
         log.info("upload url %s", presigned)
+        log.warning("presign %s", presigned)
         try:
             raise RuntimeError(f"get failed {presigned}?token=another-secret-value")
         except RuntimeError:
@@ -257,6 +295,11 @@ def test_error_log_filter_redacts_presigned_urls_and_leaves_info() -> None:
 
     assert info_records
     assert "AKIAIOSFODNN7EXAMPLE" in info_records[0].getMessage()
+    assert warning_records
+    warning = warning_records[0].getMessage()
+    assert "0123456789abcdefdeadbeef" not in warning
+    assert "AKIAIOSFODNN7EXAMPLE" not in warning
+    assert "obj.mp4?[Filtered]" in warning
     rendered = logging.Formatter().format(error_records[0])
     assert "0123456789abcdefdeadbeef" not in rendered
     assert "AKIAIOSFODNN7EXAMPLE" not in rendered

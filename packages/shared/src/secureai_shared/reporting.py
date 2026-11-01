@@ -159,7 +159,13 @@ def capture_exception(exc: BaseException) -> None:
 
 
 def scrub_event(event: dict[str, Any], hint: dict[str, Any]) -> dict[str, Any]:
-    """Drop auth material, request bodies, and credential URLs before send."""
+    """Drop auth material, request bodies, and credential URLs before send.
+
+    LoggingIntegration builds the event in ``callHandlers``, after logger
+    filters and before handler filters. A log-derived event therefore depends
+    on this function: ``message``, ``logentry`` (including tuple ``params``),
+    and exception values all go through ``redact_text``.
+    """
 
     del hint
     request = event.get("request")
@@ -219,12 +225,13 @@ def redact_text(value: str) -> str:
 
 
 def install_error_log_redaction(target: logging.Logger | None = None) -> None:
-    """Redact ERROR records before they are written.
+    """Redact WARNING and ERROR records before they are written.
 
     With no argument this attaches to ``secureai.worker``, so a failed job
     cannot log a presigned URL. Passing a logger also covers that logger's
     current handlers. Handler filters run for records that propagate from
-    child loggers; a filter on the root logger itself does not.
+    child loggers; a filter on the root logger itself does not. INFO stays
+    intact.
     """
 
     log = logging.getLogger("secureai.worker") if target is None else target
@@ -234,10 +241,10 @@ def install_error_log_redaction(target: logging.Logger | None = None) -> None:
 
 
 class _ErrorRedactingFilter(logging.Filter):
-    """Apply ``redact_text`` to ERROR records, including traceback text."""
+    """Apply ``redact_text`` from WARNING up, including traceback text."""
 
     def filter(self, record: logging.LogRecord) -> bool:
-        if record.levelno < logging.ERROR:
+        if record.levelno < logging.WARNING:
             return True
         if isinstance(record.msg, str):
             record.msg = redact_text(record.msg)
@@ -356,18 +363,22 @@ def _scrub_tree(value: Any) -> None:
             if isinstance(key, str) and _sensitive_key(key):
                 value[key] = _FILTERED
                 continue
-            if isinstance(current, (bytes, bytearray)):
-                value[key] = _FILTERED
-            elif isinstance(current, str):
-                value[key] = redact_text(current)
-            else:
-                _scrub_tree(current)
+            value[key] = _scrubbed_value(current)
         return
     if isinstance(value, list):
         for index, item in enumerate(value):
-            if isinstance(item, (bytes, bytearray)):
-                value[index] = _FILTERED
-            elif isinstance(item, str):
-                value[index] = redact_text(item)
-            else:
-                _scrub_tree(item)
+            value[index] = _scrubbed_value(item)
+
+
+def _scrubbed_value(current: Any) -> Any:
+    """Redact one event value. Tuples are copied because logentry params are tuples."""
+
+    if isinstance(current, (bytes, bytearray)):
+        return _FILTERED
+    if isinstance(current, str):
+        return redact_text(current)
+    if isinstance(current, tuple):
+        return tuple(_scrubbed_value(item) for item in current)
+    if isinstance(current, (dict, list)):
+        _scrub_tree(current)
+    return current

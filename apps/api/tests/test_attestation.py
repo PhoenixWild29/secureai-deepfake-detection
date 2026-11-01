@@ -13,9 +13,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
 from app.main import create_app
-from secureai_shared.attestation import ALGORITHM, AttestationRecord
+from secureai_shared.attestation import ALGORITHM, NOT_CONFIGURED, AttestationRecord
 from conftest import make_settings
-from secureai_shared.attestation import NOT_CONFIGURED
 from secureai_shared.billing import MemoryBillingStore, PlanUpdate
 from secureai_shared.limits import MemoryRateLimiter
 from secureai_shared.queue import MemoryJobQueue

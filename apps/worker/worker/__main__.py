@@ -48,8 +48,9 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
-    # Handler filters cover library ERROR logs that propagate to the root
-    # handler, including a presigned URL inside a storage exception.
+    # Handler filters cover library WARNING and ERROR logs that propagate to
+    # the root handler, including a presigned URL inside a storage exception.
+    # Logger filters do not run for those propagated records.
     install_error_log_redaction(logging.getLogger())
 
     try:
