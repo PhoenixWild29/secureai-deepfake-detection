@@ -6,7 +6,8 @@ of the list onto itself only wakes a blocking worker; it does not remove
 the id. `claim_stale` refreshes a stale lease and republishes that id in
 one script, and only when the attempt it observed is still current.
 If the id is already on the list, the script leaves one copy where it is
-and does not push another. `ack` and `release` of a lease compare that attempt and its generation,
+and does not push another. `ack` and `release` of a lease
+compare that attempt and its generation,
 so a slow worker cannot delete a lease `claim_stale` has already refreshed.
 Claiming a stale lease bumps the generation and keeps the attempt, which
 stops the old ack from clearing the requeued lease and resetting the
@@ -15,12 +16,15 @@ attempt counter.
 
 from __future__ import annotations
 
+import logging
 import threading
 import time
 from collections import deque
 from typing import Protocol
 
 from secureai_shared.settings import Settings
+
+logger = logging.getLogger("secureai.queue")
 
 # Lease value is "<started>:<attempts>:<generation>". Pop and claim_stale
 # each increment generation. Ack and renew of an older generation are no-ops,
@@ -81,6 +85,10 @@ return {job_id, attempts, generation}
 # put until the next pop. A second sweeper sees a fresh timestamp and does
 # not publish again. A later sweeper, after this lease ages out, also does
 # not publish again while a copy is still on the list.
+# LPOS requires Redis 6.0.6 or newer. It scans the list, so it is O(N) in
+# the number of ids waiting. The script returns 1 after a push, 2 when the
+# lease was refreshed and a copy was already waiting, and 0 when nothing
+# changed. Callers treat only 1 as a publish.
 _CLAIM_STALE = (
     _LEASE_PARSE
     + """
@@ -109,7 +117,7 @@ end
 generation = generation + 1
 redis.call('HSET', KEYS[1], ARGV[1], ARGV[3] .. ':' .. attempts .. ':' .. generation)
 if waiting > 0 then
-  return 0
+  return 2
 end
 redis.call('LPUSH', KEYS[2], ARGV[1])
 return 1
@@ -265,6 +273,7 @@ class MemoryJobQueue:
             waiting = self._collapse_waiting_locked(job_id)
             self._inflight[job_id] = (clock, seen, generation + 1)
             if waiting:
+                _log_refresh_without_publish(job_id, attempts)
                 return False
             self._ids.append(job_id)
             return True
@@ -442,6 +451,8 @@ class RedisJobQueue:
                 args=[job_id, int(attempts), int(clock), float(lease_seconds)],
             )
         )
+        if won == 2:
+            _log_refresh_without_publish(job_id, attempts)
         return won == 1
 
     def _expected(self, job_id: str, attempt: int | None) -> tuple[int | None, int]:
@@ -478,6 +489,14 @@ class RedisJobQueue:
                 raise
             return False
         return peeked is not None
+
+
+def _log_refresh_without_publish(job_id: str, attempts: int) -> None:
+    logger.info(
+        "lease refreshed without publish job_id=%s attempts=%s",
+        job_id,
+        attempts,
+    )
 
 
 def _parse_lease(raw: str) -> tuple[float, int, int]:

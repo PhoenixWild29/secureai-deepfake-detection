@@ -1,5 +1,8 @@
+import logging
 import os
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 
 import pytest
 
@@ -80,6 +83,7 @@ def test_pop_and_stale_claim_are_single_scripts() -> None:
     assert "LPOS" in claim and "LREM" in claim
     assert "ARGV[2]" in claim
     assert "generation" in claim
+    assert "if waiting > 0 then\n  return 2\nend" in claim
     assert "HDEL" in ack and "ARGV[2]" in ack
     assert "expected_gen" in ack
     assert "HSET" in renew and "ARGV[2]" in renew
@@ -121,10 +125,16 @@ def _assert_aged_requeue_stays_single(queue) -> None:
     first = queue.held_attempt("job_wait")
     assert first == 1
     later = time.time() + 30
-    assert queue.claim_stale("job_wait", first, now=later, lease_seconds=10) is True
+    with _queue_log_capture() as published:
+        assert queue.claim_stale("job_wait", first, now=later, lease_seconds=10) is True
+    assert published == []
     queue.publish("job_newer")
-    assert queue.claim_stale("job_wait", first, now=later + 10, lease_seconds=10) is False
-    assert queue.claim_stale("job_wait", first, now=later + 20, lease_seconds=10) is False
+    with _queue_log_capture() as refreshed:
+        assert queue.claim_stale("job_wait", first, now=later + 10, lease_seconds=10) is False
+    assert refreshed == [f"lease refreshed without publish job_id=job_wait attempts={first}"]
+    with _queue_log_capture() as aged_again:
+        assert queue.claim_stale("job_wait", first, now=later + 20, lease_seconds=10) is False
+    assert aged_again == [f"lease refreshed without publish job_id=job_wait attempts={first}"]
     assert queue.ack("job_wait", attempt=first) is False
     assert queue.consume() == "job_wait"
     assert queue.held_attempt("job_wait") == 2
@@ -160,6 +170,82 @@ def test_aged_requeue_does_not_duplicate_the_waiting_id() -> None:
 
 def test_extra_waiting_copies_collapse_to_one() -> None:
     _assert_extra_copies_collapse_to_one(MemoryJobQueue())
+
+
+def test_claim_stale_logs_a_refresh_that_does_not_publish(caplog: pytest.LogCaptureFixture) -> None:
+    queue = MemoryJobQueue()
+    queue.publish("job_wait")
+    assert queue.consume() == "job_wait"
+    first = queue.held_attempt("job_wait")
+    assert first == 1
+    later = time.time() + 30
+    with caplog.at_level(logging.INFO, logger="secureai.queue"):
+        assert queue.claim_stale("job_wait", first, now=later, lease_seconds=10) is True
+    assert _queue_logs(caplog) == []
+    caplog.clear()
+    with caplog.at_level(logging.INFO, logger="secureai.queue"):
+        assert queue.claim_stale("job_wait", first, now=later + 10, lease_seconds=10) is False
+    assert _queue_logs(caplog) == [
+        f"lease refreshed without publish job_id=job_wait attempts={first}"
+    ]
+    caplog.clear()
+    with caplog.at_level(logging.INFO, logger="secureai.queue"):
+        assert queue.claim_stale("job_wait", first, now=later + 10, lease_seconds=10) is False
+    assert _queue_logs(caplog) == []
+
+
+def test_redis_claim_stale_logs_only_the_no_publish_refresh(caplog: pytest.LogCaptureFixture) -> None:
+    result = {"value": 2}
+
+    class Redis:
+        def register_script(self, script: str):
+            def run(keys, args):  # noqa: ARG001
+                if "LPOS" not in script:
+                    return None
+                return result["value"]
+
+            return run
+
+    queue = RedisJobQueue("redis://unused", client=Redis())
+    with caplog.at_level(logging.INFO, logger="secureai.queue"):
+        assert queue.claim_stale("job_a", 1, now=50, lease_seconds=10) is False
+    assert _queue_logs(caplog) == ["lease refreshed without publish job_id=job_a attempts=1"]
+    caplog.clear()
+    result["value"] = 0
+    with caplog.at_level(logging.INFO, logger="secureai.queue"):
+        assert queue.claim_stale("job_a", 1, now=50, lease_seconds=10) is False
+    assert _queue_logs(caplog) == []
+    caplog.clear()
+    result["value"] = 1
+    with caplog.at_level(logging.INFO, logger="secureai.queue"):
+        assert queue.claim_stale("job_a", 1, now=50, lease_seconds=10) is True
+    assert _queue_logs(caplog) == []
+
+
+def _queue_logs(caplog: pytest.LogCaptureFixture) -> list[str]:
+    return [record.getMessage() for record in caplog.records if record.name == "secureai.queue"]
+
+
+@contextmanager
+def _queue_log_capture() -> Iterator[list[str]]:
+    records: list[str] = []
+
+    class _Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            if record.name == "secureai.queue":
+                records.append(record.getMessage())
+
+    log = logging.getLogger("secureai.queue")
+    handler = _Capture()
+    handler.setLevel(logging.INFO)
+    previous = log.level
+    log.setLevel(logging.INFO)
+    log.addHandler(handler)
+    try:
+        yield records
+    finally:
+        log.removeHandler(handler)
+        log.setLevel(previous)
 
 
 def test_build_queue_defaults_to_memory_when_configured() -> None:
