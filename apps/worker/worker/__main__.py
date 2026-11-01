@@ -20,7 +20,7 @@ from pathlib import Path
 
 from secureai_shared.models import JobRecord
 from secureai_shared.queue import build_queue
-from secureai_shared.reporting import init_error_reporting, install_error_log_redaction
+from secureai_shared.reporting import flush_error_reporting, init_error_reporting, install_error_log_redaction
 from secureai_shared.settings import Settings, load_settings
 from secureai_shared.storage import build_storage, new_object_key
 from secureai_shared.store import PostgresJobStore
@@ -208,7 +208,15 @@ def _publish_demo(store: PostgresJobStore, queue: object, storage: object) -> No
 
 
 def main() -> None:
-    raise SystemExit(run(install_signal_handlers=True))
+    code = 1
+    try:
+        code = run(install_signal_handlers=True)
+    finally:
+        # LoggingIntegration queues ERROR records on a daemon thread.
+        # Flush before SystemExit so a configuration failure or --once
+        # job is not dropped when the process ends.
+        flush_error_reporting()
+    raise SystemExit(code)
 
 
 if __name__ == "__main__":

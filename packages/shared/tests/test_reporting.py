@@ -7,6 +7,7 @@ from typing import Any
 
 from secureai_shared.reporting import (
     error_reporting_enabled,
+    flush_error_reporting,
     init_error_reporting,
     install_error_log_redaction,
     redact_text,
@@ -50,6 +51,37 @@ def _settings(**overrides: object) -> Settings:
     }
     values.update(overrides)
     return Settings(**values)  # type: ignore[arg-type]
+
+
+def test_flush_error_reporting_is_quiet_when_disabled(monkeypatch) -> None:
+    import sentry_sdk
+
+    monkeypatch.setattr("secureai_shared.reporting._state.enabled", False)
+
+    def fail(*_args: object, **_kwargs: object) -> bool:
+        raise AssertionError("flush")
+
+    monkeypatch.setattr(sentry_sdk, "flush", fail)
+    flush_error_reporting()
+
+
+def test_flush_error_reporting_waits_for_the_transport(monkeypatch) -> None:
+    import sentry_sdk
+
+    calls: list[float] = []
+
+    class _Client:
+        def is_active(self) -> bool:
+            return True
+
+    monkeypatch.setattr(sentry_sdk, "get_client", lambda: _Client())
+    monkeypatch.setattr(sentry_sdk, "flush", lambda timeout=2.0: calls.append(timeout) or True)
+    monkeypatch.setattr("secureai_shared.reporting._state.enabled", True)
+    try:
+        flush_error_reporting(timeout=0.25)
+    finally:
+        monkeypatch.setattr("secureai_shared.reporting._state.enabled", False)
+    assert calls == [0.25]
 
 
 def test_sentry_disabled_without_dsn() -> None:

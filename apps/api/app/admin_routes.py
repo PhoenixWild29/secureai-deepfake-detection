@@ -45,7 +45,7 @@ def admin_health(
 
     ``200`` means every check succeeded. ``503`` means the caller is an
     admin and at least one dependency did not answer. The body has no URL,
-    bucket, or key.
+    bucket, or key. A signed-in non-admin, including an API key, is 404.
     """
 
     del user

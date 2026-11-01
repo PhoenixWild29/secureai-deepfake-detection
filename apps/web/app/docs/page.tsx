@@ -53,7 +53,8 @@ export default function DocsPage() {
         <code>POST /v1/jobs/batch</code> accepts up to 10 stored object keys, charges the same jobs rate
         limit once per item, and checks the same quota before inserting rows. If the queue stops after
         some ids are accepted, the 202 response lists those jobs and the ids that did not queue. Those
-        ids do not spend the monthly cap. If nothing was queued, the response is 503.{" "}
+        ids do not spend the monthly cap. If nothing was queued, the response is 503 and the detail is{" "}
+        <code>Could not queue the job.</code>{" "}
         <code>GET /v1/jobs/{"{id}"}/report</code> downloads a completed job as JSON.{" "}
         <code>GET /v1/jobs/{"{id}"}/report.pdf</code> downloads the same fields as a one-page PDF.{" "}
         <code>POST /v1/jobs/{"{id}"}/attest</code> signs that completed report for a Pro or Team plan.
@@ -79,7 +80,8 @@ export default function DocsPage() {
         key. A valid verify response includes that public key too. If the server has no attestation key, these
         routes answer 503 and Guardian shows a short note instead of the download. Issuing requires Pro or
         Team. A private workstation in dev mode with quotas left unlimited can issue on the free plan.
-        Checking a signature does not require a plan or an account.
+        Checking a signature does not require a plan or an account. The server keeps one signing key.
+        After that key or its id is rotated, signatures from the previous key id no longer verify.
       </p>
       <p>
         Pro and Team can mint a key from the <Link href="/keys">API keys</Link> page. The secret starts

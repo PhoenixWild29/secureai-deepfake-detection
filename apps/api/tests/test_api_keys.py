@@ -415,8 +415,8 @@ def test_api_key_cannot_call_admin_health(tmp_path: Path) -> None:
         assert created.status_code == 201, created.text
         secret = created.json()["secret"]
         denied = client.get("/v1/admin/health", headers={"Authorization": f"Bearer {secret}"})
-        assert denied.status_code == 403
-        assert denied.json()["detail"] == "Admin access required"
+        assert denied.status_code == 404
+        assert denied.json()["detail"] == "Not Found"
         assert "postgres" not in denied.text
         assert "user_dev" not in denied.text
         allowed = client.get("/v1/admin/health", headers=AUTH)

@@ -40,8 +40,8 @@ def test_admin_health_forbids_non_admin(tmp_path: Path) -> None:
     client, _, _, _ = _client(tmp_path, settings)
     with client:
         response = client.get("/v1/admin/health", headers={"Authorization": "Bearer dev"})
-    assert response.status_code == 403
-    assert response.json()["detail"] == "Admin access required"
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Not Found"
     assert "user_admin" not in response.text
     assert "postgres" not in response.text
     assert settings.database_url not in response.text
@@ -86,6 +86,29 @@ def test_admin_health_degraded_hides_the_exception(tmp_path: Path, monkeypatch) 
     assert "dbpassword" not in response.text
     assert "db.internal" not in response.text
     assert "detail" not in body
+
+
+def test_http_exception_is_not_reported(tmp_path: Path, monkeypatch) -> None:
+    from fastapi import HTTPException
+
+    seen: list[BaseException] = []
+    monkeypatch.setattr("app.main.capture_exception", seen.append)
+    app = create_app(
+        settings=make_settings(tmp_path),
+        store=MemoryJobStore(),
+        queue=MemoryJobQueue(),
+        storage=FileSystemStorage(tmp_path),
+    )
+
+    @app.get("/_test/missing")
+    def missing() -> None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.get("/_test/missing")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Job not found"}
+    assert seen == []
 
 
 def test_unhandled_exception_is_captured_without_echoing_it(tmp_path: Path, monkeypatch) -> None:

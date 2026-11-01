@@ -250,6 +250,7 @@ def test_failed_enqueue_marks_the_row_failed(tmp_path: Path) -> None:
             json={"object_key": key, "filename": "clip.mp4", "byte_size": 1},
         )
     assert response.status_code == 503
+    assert response.json()["detail"] == UNQUEUED_FAILURE_DETAIL
     rows = list(store._rows.values())  # noqa: SLF001
     assert len(rows) == 1
     assert rows[0].status.value == "failed"

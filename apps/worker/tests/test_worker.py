@@ -10,7 +10,7 @@ from secureai_shared.report import load_report_detail
 from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.storage import FileSystemStorage, new_object_key
 from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore
-from worker.__main__ import run
+from worker.__main__ import main, run
 from worker.consumer import process_job
 
 
@@ -216,6 +216,28 @@ def test_missing_database_exits(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DATABASE_URL", raising=False)
     monkeypatch.setenv("REDIS_URL", "redis://127.0.0.1:6379/0")
     assert run(["--once"]) == 2
+
+
+def test_main_flushes_error_reporting_before_exit(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("worker.__main__.run", lambda **_kwargs: 7)
+    flushed: list[str] = []
+    monkeypatch.setattr("worker.__main__.flush_error_reporting", lambda: flushed.append("flushed"))
+    with pytest.raises(SystemExit) as caught:
+        main()
+    assert caught.value.code == 7
+    assert flushed == ["flushed"]
+
+
+def test_main_flushes_error_reporting_when_run_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    def boom(**_kwargs: object) -> int:
+        raise RuntimeError("queue down")
+
+    monkeypatch.setattr("worker.__main__.run", boom)
+    flushed: list[str] = []
+    monkeypatch.setattr("worker.__main__.flush_error_reporting", lambda: flushed.append("flushed"))
+    with pytest.raises(RuntimeError, match="queue down"):
+        main()
+    assert flushed == ["flushed"]
 
 
 def test_worker_initializes_error_reporting_before_connections(monkeypatch: pytest.MonkeyPatch) -> None:

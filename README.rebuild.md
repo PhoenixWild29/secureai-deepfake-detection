@@ -204,7 +204,9 @@ A job counts when it is created, including jobs that later fail during detection
 
 Events are not applied in arrival order. A subscription update, delete, or invoice is ignored when its event `created` time is older than the one already stored, or when `current_period_end` is older and the event has no `created` time. The same subscription id is not moved from a terminal status (`canceled`, `unpaid`, `incomplete_expired`) back to an entitled status by an event that is not newer. `invoice.paid` and `invoice.payment_failed` do not move a terminal status at all, even when that invoice is newer than the delete or the unpaid update. A delete, update, or invoice whose subscription id is not the stored `stripe_subscription_id` does not change the account. Only a newer `checkout.session.completed` may replace that id. That is what stops a late `customer.subscription.updated` after `deleted` from restoring a plan, what stops a late invoice from turning `canceled` into `active` or `past_due` (which would make Checkout return 409), and what stops an old subscription's delete from wiping a replacement Checkout.
 
-Paid plans are taken from `STRIPE_PRICE_PRO` and `STRIPE_PRICE_TEAM` only. Checkout reads a line-item price id when the event has one. When it does not, Checkout uses the plan recorded for that session at creation, and only if that session's price id is still one of those two. `metadata.plan` is not read. An unknown price id does not upgrade the account. A later subscription event corrects the plan when its price id is one of those two.
+Paid plans are taken from `STRIPE_PRICE_PRO` and `STRIPE_PRICE_TEAM` only. Checkout reads a line-item price id when the event has one. When it does not, Checkout uses the plan recorded for that session at creation, and only if that session's price id is still one of those two. `metadata.plan` is not read. An unknown price id does not upgrade the account. A later subscription event corrects the plan when its price id is one of those two. A paid session that cannot be named is logged at error, because the customer may already have been charged.
+
+That recorded plan lives in `checkout_intents`. Rows older than 7 days are deleted when another Checkout session is saved or a new Stripe event is applied. Stripe retries a webhook for about 3 days, so a late `checkout.session.completed` with no price id can still find its row. There is no migration for this cleanup.
 
 `past_due` keeps the paid plan for the dunning window. This API does not expire `past_due` by itself. Stripe billing settings must end dunning in `unpaid` or `canceled` (Smart Retries, then cancel or mark the subscription unpaid). Those terminal statuses return the account to the free trial. `canceled` does that as well. Leave Smart Retries on that ending state before any live key is considered. An unpaid Checkout session does not grant Pro or Team.
 
@@ -280,7 +282,7 @@ Guardian's completed report page puts Download PDF next to the JSON and the atte
 
 Phase 4c signs a completed report with Ed25519. It is not Solana and not a chain anchor. The signature shows that this API's attestation key issued one canonical JSON payload. It does not show that the clip is real or synthetic, and it is not legal evidence. The detector limitations in the payload are the same text as the JSON report.
 
-Set `ATTESTATION_PRIVATE_KEY` to an unencrypted PKCS8 Ed25519 PEM. A one-line env value may use `\n` between the PEM lines. `ATTESTATION_KEY_ID` defaults to `v1`. Change that id when you rotate the key. Only the current key verifies. If the private key is unset, `POST /v1/jobs/{id}/attest`, `POST /v1/attestations/verify`, and `GET /v1/attestations/keys` return 503 with `Attestation is not configured`.
+Set `ATTESTATION_PRIVATE_KEY` to an unencrypted PKCS8 Ed25519 PEM. A one-line env value may use `\n` between the PEM lines. `ATTESTATION_KEY_ID` defaults to `v1`. Change that id when you rotate the key. The API loads one key. After the private key or the id changes, attestations signed with the previous `key_id` stop verifying, including when the verifier omits `key_id`. `GET /v1/attestations/keys` returns only the current public key. Re-issue anything that still needs to verify. If the private key is unset, `POST /v1/jobs/{id}/attest`, `POST /v1/attestations/verify`, and `GET /v1/attestations/keys` return 503 with `Attestation is not configured`.
 
 Generate a key for a private workstation and do not commit it:
 
@@ -300,7 +302,7 @@ curl -s -X POST http://localhost:8000/v1/jobs/job_.../attest \
 
 The response is the verify body. `payload` is a string of compact JSON, not a nested object. The signature is standard base64 over those exact UTF-8 bytes. `algorithm` is `Ed25519`. The same payload and key return the stored signature. The row is `job_attestations` (`job_id`, `key_id`, `signature`, `created_at`).
 
-Verify does not use Clerk. `RATE_LIMIT_ATTESTATIONS` defaults to 60 per window per client address. `0` disables it.
+Verify does not use Clerk. `RATE_LIMIT_ATTESTATIONS` defaults to 60 per window. The key is the TCP peer (`request.client.host`). The API does not read `X-Forwarded-For`. Behind Railway, or any other reverse proxy, that peer is the proxy, so every caller shares one window. Trusting the header would let a client pick a new key on each request. `0` disables the limit. The process is not started with proxy headers.
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/attestations/verify \
@@ -326,7 +328,7 @@ curl -s -X DELETE http://localhost:8000/v1/api-keys/key_... \
   -H 'Authorization: Bearer dev'
 ```
 
-A free plan is 402 with `API keys require a Pro or Team plan.` That includes `AUTH_MODE=dev` with `QUOTA_MODE=unlimited`. `past_due` still counts as paid. The plan is the workspace plan when the request has `X-Org-Id` or the key is bound to a workspace, and the personal plan otherwise. A personal Pro key sent as a Free workspace is 402. Send `X-Org-Id` to mint a workspace key; the caller must be an owner or admin, and the workspace plan must be Pro or Team. A workspace key is limited to that org. It keeps working only while its minter is still an owner or admin. Removal or demotion to member revokes it on the next use (401), and promoting that person later does not restore the secret. Revoke is immediate. Unknown and revoked secrets are 401. An API key cannot mint another key, and it cannot call `GET /v1/admin/health` (403, same as a non-admin). `RATE_LIMIT_API_KEYS` defaults to 10 creates per window per user (`0` disables). Each scope can hold 25 live keys. On Postgres, creates for one scope take a transaction advisory lock so two workers cannot both pass that cap. Guardian's `/keys` page follows the workspace selected in the header.
+A free plan is 402 with `API keys require a Pro or Team plan.` That includes `AUTH_MODE=dev` with `QUOTA_MODE=unlimited`. `past_due` still counts as paid. The plan is the workspace plan when the request has `X-Org-Id` or the key is bound to a workspace, and the personal plan otherwise. A personal Pro key sent as a Free workspace is 402. Send `X-Org-Id` to mint a workspace key; the caller must be an owner or admin, and the workspace plan must be Pro or Team. A workspace key is limited to that org. It keeps working only while its minter is still an owner or admin. Removal or demotion to member revokes it on the next use (401), and promoting that person later does not restore the secret. Revoke is immediate. Unknown and revoked secrets are 401. An API key cannot mint another key, and it cannot call `GET /v1/admin/health` (404, same as a signed-in non-admin). Anonymous callers of that route still get 401. `RATE_LIMIT_API_KEYS` defaults to 10 creates per window per user (`0` disables). Each scope can hold 25 live keys. On Postgres, creates for one scope take a transaction advisory lock so two workers cannot both pass that cap. Guardian's `/keys` page follows the workspace selected in the header.
 
 Clerk session checks are unchanged. `AUTH_MODE=dev` still accepts only `Bearer dev` plus `sai_` keys. Other bearers are rejected.
 
@@ -336,7 +338,7 @@ Public pages: `/docs` (how detection works and its limits), `/privacy`, `/terms`
 
 Phase 4 sends one workspace's terminal jobs to a single HTTPS URL. Personal jobs (no `X-Org-Id`) do not fire. Stripe billing webhooks are a different route and are unchanged.
 
-The owner or an admin registers the URL. Any member of that workspace can read it. A caller who is not a member gets 403, and the response does not include another workspace's URL. The signing secret is write-only: `GET` returns `secret_set`, never the secret. The secret is stored in Postgres so the worker can sign. Restrict database access the same way as `STRIPE_WEBHOOK_SECRET`.
+The owner or an admin registers the URL. Any member of that workspace can read it. A caller who is not a member gets 403, and the response does not include another workspace's URL. The signing secret is write-only: `GET` returns `secret_set`, never the secret. The secret is stored in plaintext in Postgres so the worker can sign. Restrict database access the same way as `STRIPE_WEBHOOK_SECRET`.
 
 ```bash
 curl -s -X PUT http://localhost:8000/v1/orgs/org_.../webhook \
@@ -361,7 +363,7 @@ The body is compact JSON, the same bytes on every retry:
 {"confidence":0.5,"job_id":"job_...","org_id":"org_...","prediction":"fake","status":"completed","timestamp":"2026-11-01T12:00:00+00:00"}
 ```
 
-`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate.
+`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate. The worker resolves the hostname once and opens the socket to that address. The Host header and the certificate name stay the hostname, so a DNS answer that changes after the check cannot point that connection at a private address. Any TCP port is still accepted. A public address that proxies somewhere else is outside this check. Two owners saving the endpoint at the same time: the second write updates the row instead of failing the request.
 
 When a secret is set, the worker also sends:
 
@@ -380,11 +382,11 @@ A non-2xx response or a network error stays `pending` and is retried. The waits 
 
 `SENTRY_DSN` turns on Sentry for the API and the worker. Leave it empty and neither process imports the SDK or sends events. Set the same DSN on both Railway services, or only on the one you want to watch. `SENTRY_ENVIRONMENT` labels the event (`production`, `staging`, `development`). When it is empty, a dev workstation (`AUTH_MODE=dev`) is labeled `development` and a Clerk deploy is labeled `production` by the SDK. `SENTRY_RELEASE` is optional. The SDK reads it when it is set.
 
-Events do not include auth headers, cookies, request bodies, or local variables. A database or Redis URL in an exception message is sent with the userinfo replaced. Do not put media bytes or secrets into log messages. The API captures unhandled exceptions. The worker captures `ERROR` logs, which is how a failed job is already recorded.
+Events do not include auth headers, cookies, request bodies, or local variables. A database or Redis URL in an exception message is sent with the userinfo replaced. Do not put media bytes or secrets into log messages. The API captures unhandled exceptions. The worker captures `ERROR` logs, which is how a failed job is already recorded. Default integrations are off, so the SDK does not flush on exit. The worker calls `flush` for up to 2 seconds before it exits, including after a configuration failure or `--once`. No new variable controls that wait.
 
 `GET /health` stays public and shallow (`status`, `service`, `auth`). Railway's healthcheck stays on `/health`. Do not point it at the admin route. A down dependency must not restart the API, and that route requires a session.
 
-`GET /v1/admin/health` requires `Authorization: Bearer <session>` and a subject listed in `ADMIN_USER_IDS` (comma-separated Clerk user ids, the same `sub` the API already stores). An empty list allows nobody. Anyone else gets 401 or 403 and no dependency details. An allowlisted caller gets Postgres, Redis, and object storage as `ok` or `error`, plus `storage_backend` (`filesystem` or `s3`). `200` means all three answered. `503` means the caller is an admin and at least one did not. The body has no URL, bucket, key, or exception text.
+`GET /v1/admin/health` requires `Authorization: Bearer <session>` and a subject listed in `ADMIN_USER_IDS` (comma-separated Clerk user ids, the same `sub` the API already stores). An empty list allows nobody. A missing or invalid session is 401. A signed-in caller who is not on the list, including an API key whose subject is listed, is 404 `Not Found` with no dependency details. That matches an unknown path. An allowlisted session gets Postgres, Redis, and object storage as `ok` or `error`, plus `storage_backend` (`filesystem` or `s3`). `200` means all three answered. `503` means the caller is an admin and at least one did not. The body has no URL, bucket, key, or exception text. The S3 probe is `HeadBucket`. On AWS that call requires `s3:ListBucket`. A key that can `PutObject` but cannot list the bucket reports storage as `error` while uploads still work. The filesystem probe creates and deletes a dotfile under `MEDIA_ROOT`.
 
 Local dev, with the API on port 8000 and `ADMIN_USER_IDS` including `DEV_AUTH_SUBJECT`:
 

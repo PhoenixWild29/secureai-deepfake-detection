@@ -56,10 +56,10 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `RATE_LIMIT_JOBS` | api | Optional. Default `30` per window. `0` disables |
 | `RATE_LIMIT_UPLOADS` | api | Optional. Default `60` per window. `0` disables |
 | `RATE_LIMIT_WINDOW_SECONDS` | api | Optional. Default `60` |
-| `RATE_LIMIT_ATTESTATIONS` | api | Optional. Default `60` public verify and key reads per window. `0` disables |
+| `RATE_LIMIT_ATTESTATIONS` | api | Optional. Default `60` public verify and key reads per window, keyed by the TCP peer. `0` disables. `X-Forwarded-For` is not trusted, so a reverse proxy shares one window |
 | `RATE_LIMIT_API_KEYS` | api | Optional. Default `10` API key creates per window per user. `0` disables |
 | `ATTESTATION_PRIVATE_KEY` | api | Unencrypted PKCS8 Ed25519 PEM. Empty disables attestation (503). Do not commit it |
-| `ATTESTATION_KEY_ID` | api | Optional key label. Default `v1`. Change it when you rotate the private key |
+| `ATTESTATION_KEY_ID` | api | Optional key label. Default `v1`. Change it with the private key. Previous key ids stop verifying; only the current key is loaded |
 | `MEDIA_ROOT` | api, worker | Only for `STORAGE_BACKEND=filesystem`. Use the same absolute path on both |
 | `CORS_ORIGINS` | api | Explicit Guardian origins, comma-separated. The API rejects `*` |
 | `DETECTOR_MODE` | worker | `cpu` (the default). `stub` does not read the file |
@@ -78,7 +78,11 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 
 API startup runs `alembic upgrade head`. Revision `20261101_0008` creates `api_keys` (SHA-256 hashes only). No new required variable. Pro and Team callers mint keys with `POST /v1/api-keys`; Free is 402. A workspace key whose minter is removed or demoted is hard-revoked on the next use (401). Promoting that person later does not restore the secret.
 
-The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session, or `Bearer dev` on a private workstation, whose subject is in `ADMIN_USER_IDS`. An API key is rejected even when that subject is listed. The route reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text.
+The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session, or `Bearer dev` on a private workstation, whose subject is in `ADMIN_USER_IDS`. An API key is 404 even when that subject is listed, the same as any other signed-in non-admin. Anonymous callers are 401. The route reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text. The S3 probe is `HeadBucket`, which AWS authorizes as `s3:ListBucket`. A key that can write objects but cannot list the bucket shows storage as `error` while uploads still succeed.
+
+The worker flushes Sentry for up to 2 seconds before it exits. Leave `SENTRY_DSN` empty to send nothing. No extra variable is required.
+
+Workspace webhook delivery connects to the public address it just resolved and keeps the hostname for TLS. Signing secrets are stored in plaintext in `webhook_endpoints`. Any HTTPS port is accepted. `RATE_LIMIT_ATTESTATIONS` uses the TCP peer, not `X-Forwarded-For`. After an attestation key rotation, old `key_id` values no longer verify.
 
 `CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
 

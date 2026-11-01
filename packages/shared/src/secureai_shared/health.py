@@ -74,6 +74,8 @@ def check_storage(storage: object) -> None:
             probe.unlink(missing_ok=True)
         return
     if isinstance(storage, S3Storage):
+        # HeadBucket is authorized as s3:ListBucket on AWS. PutObject alone
+        # can still upload while this check reports error.
         storage.client.head_bucket(Bucket=storage.bucket)  # type: ignore[attr-defined]
         return
     raise RuntimeError("storage unavailable")

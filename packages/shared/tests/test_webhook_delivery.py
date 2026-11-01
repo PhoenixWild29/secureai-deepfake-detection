@@ -282,6 +282,127 @@ def test_post_webhook_rejects_private_targets_before_connect() -> None:
         post_webhook("https://127.0.0.1/hooks", b"{}", {}, 1)
 
 
+def test_post_webhook_connects_to_the_validated_address(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+
+    from secureai_shared.webhooks import _PinnedHTTPSConnection
+
+    lookups = {"n": 0}
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        lookups["n"] += 1
+        if lookups["n"] == 1:
+            return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 0))]
+
+    seen: dict[str, object] = {}
+    original_init = _PinnedHTTPSConnection.__init__
+
+    def init(self: object, host: str, port: int, *, address: str, timeout: float, context: object) -> None:
+        seen["host"] = host
+        seen["pinned"] = address
+        seen["port"] = port
+        original_init(self, host, port, address=address, timeout=timeout, context=context)  # type: ignore[arg-type]
+
+    def create_connection(address: tuple[str, int], timeout: float, source_address: object = None) -> object:
+        del timeout, source_address
+        seen["connected"] = address
+        raise TimeoutError("stopped")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    monkeypatch.setattr(_PinnedHTTPSConnection, "__init__", init)
+    with pytest.raises(TimeoutError, match="stopped"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 3)
+    assert lookups["n"] == 1
+    assert seen["host"] == "customer.example"
+    assert seen["pinned"] == "8.8.8.8"
+    assert seen["port"] == 443
+    assert seen["connected"] == ("8.8.8.8", 443)
+
+
+def test_post_webhook_rejects_a_private_address_in_the_same_answer(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del host, port, args, kwargs
+        return [
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0)),
+            (socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 0)),
+        ]
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(RuntimeError, match="not a public"):
+        post_webhook("https://customer.example/hooks", b"{}", {}, 1)
+
+
+def test_post_webhook_does_not_resolve_a_public_ip_literal(monkeypatch: pytest.MonkeyPatch) -> None:
+    import socket
+
+    def getaddrinfo(*_args: object, **_kwargs: object) -> list[tuple]:
+        raise AssertionError("resolved")
+
+    seen: dict[str, object] = {}
+
+    def create_connection(address: tuple[str, int], timeout: float, source_address: object = None) -> object:
+        del timeout, source_address
+        seen["address"] = address
+        raise TimeoutError("stopped")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    with pytest.raises(TimeoutError, match="stopped"):
+        post_webhook("https://8.8.8.8/hooks", b"{}", {}, 1)
+    assert seen["address"] == ("8.8.8.8", 443)
+
+
+def test_upsert_retries_when_a_concurrent_insert_wins(monkeypatch: pytest.MonkeyPatch) -> None:
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import Session
+
+    from secureai_shared.db import Base
+    from secureai_shared.webhooks import PostgresWebhookStore
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    store = PostgresWebhookStore(engine=engine)
+    created = store.upsert_endpoint(
+        org_id="org_race",
+        url=URL,
+        secret=SECRET,
+        keep_secret=False,
+        notify_failures=True,
+    )
+    assert created.secret == SECRET
+    original = Session.get
+    state = {"hide": True}
+
+    def get(self: Session, entity: object, ident: object, *args: object, **kwargs: object) -> object:
+        if state["hide"] and getattr(entity, "__name__", "") == "WebhookEndpointRow":
+            state["hide"] = False
+            return None
+        return original(self, entity, ident, *args, **kwargs)
+
+    monkeypatch.setattr(Session, "get", get)
+    saved = store.upsert_endpoint(
+        org_id="org_race",
+        url="https://customer.example/hooks/next",
+        secret=None,
+        keep_secret=True,
+        notify_failures=None,
+    )
+    assert saved.url == "https://customer.example/hooks/next"
+    assert saved.secret == SECRET
+    again = store.get_endpoint("org_race")
+    assert again is not None
+    assert again.secret == SECRET
+
+
 def test_webhook_queue_follows_the_job_backend() -> None:
     settings = load_settings(
         {

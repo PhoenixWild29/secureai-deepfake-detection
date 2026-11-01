@@ -459,7 +459,7 @@ def _publish_or_fail(request: Request, job: JobRecord) -> None:
         logger.exception("could not fail unqueued job_id=%s", job.id)
     else:
         _note_terminal(request, failed)
-    raise HTTPException(status_code=503, detail="Could not queue the job") from last
+    raise HTTPException(status_code=503, detail=UNQUEUED_FAILURE_DETAIL) from last
 
 
 def _note_terminal(request: Request, job: JobRecord | None) -> None:
