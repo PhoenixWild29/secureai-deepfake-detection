@@ -184,7 +184,7 @@ PYTHONPATH=apps/api python -m pytest \
 
 The end-to-end test uploads a generated clip, runs `python -m worker --once`, and expects a completed job. It skips when Redis or Postgres is down. Set `REQUIRE_SERVICES=1` to fail instead of skip. The rebuild workflow sets that, because those services are part of the job. S3 is exercised with a fake client in `packages/shared/tests/test_storage.py` (presigned `content-length-range`, bucket auto-create off, temp-file cleanup). There is no live bucket in CI.
 
-CI is `.github/workflows/rebuild.yml`. It starts Redis and Postgres service containers and runs those tests. It does not build Docker images yet. The older workflows still cover the legacy tree.
+CI is `.github/workflows/rebuild.yml`. It starts Redis and Postgres service containers and runs those tests. After that API job succeeds, it builds `apps/api/Dockerfile` and `apps/worker/Dockerfile` from the repository root (`docker build -f apps/api/Dockerfile .` and the worker equivalent). Either image failing the build fails the workflow. The builds are validation only: the workflow does not log in to a registry and does not push. The older workflows still cover the legacy tree.
 
 `apps/api/requirements-dev.txt` pins `httpx2` because Starlette's TestClient imports `httpx2`. That name is intentional.
 
@@ -400,4 +400,4 @@ There is no Guardian admin page. Call the route with a Clerk session token.
 
 ## Still later
 
-The legacy GPU ensemble and Docker image builds in CI. Solana stays deferred. Signed attestation does not replace that. The legacy Flask tree stays in the repo.
+The legacy GPU ensemble stays later. CI builds the rebuild API and worker images and does not push them. Solana stays deferred. Signed attestation does not replace that. The legacy Flask tree stays in the repo.

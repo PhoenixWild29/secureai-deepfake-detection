@@ -1,6 +1,7 @@
 name: Rebuild
 
-# Lint, typecheck via next build, and pytest. This workflow does not build Docker images yet.
+# Lint, typecheck via next build, and pytest, then build the API and worker
+# images. Image jobs are validation only: they do not log in or push.
 # Redis and Postgres are service containers. REQUIRE_SERVICES=1 fails the job
 # when those tests cannot reach them. S3 is covered with a fake client in
 # packages/shared/tests/test_storage.py (no live bucket).
@@ -102,3 +103,29 @@ jobs:
         run: |
           PYTHONPATH=apps/api python -c "from app.main import create_app; assert create_app.__name__ == 'create_app'"
           PYTHONPATH=apps/api python -m pytest apps/api/tests packages/shared/tests packages/detector/tests apps/worker/tests -q
+
+  # Build after the API job so a failing unit or API test does not spend a
+  # Docker build. Context is the repository root. The API Dockerfile copies
+  # packages/shared. The worker Dockerfile copies packages/ (shared and
+  # detector) and apps/worker. Legacy GHCR workflows publish the repository-root
+  # Dockerfile only, and only on workflow_dispatch. These tags are not pushed.
+  images:
+    name: Build ${{ matrix.image }} image
+    runs-on: ubuntu-latest
+    needs: api
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: api
+            dockerfile: apps/api/Dockerfile
+            tag: secureai-api
+          - image: worker
+            dockerfile: apps/worker/Dockerfile
+            tag: secureai-worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -f "${{ matrix.dockerfile }}" -t "${{ matrix.tag }}" .
