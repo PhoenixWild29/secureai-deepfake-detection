@@ -43,6 +43,23 @@ def test_memory_queue_is_fifo_and_process_local() -> None:
     assert first.consume() is None
 
 
+def _assert_slow_ack_keeps_the_requeued_lease(queue) -> None:
+    """Ack of the popped attempt must not drop the lease claim_stale refreshed."""
+
+    queue.publish("job_slow")
+    assert queue.consume() == "job_slow"
+    first = queue.held_attempt("job_slow")
+    assert first == 1
+    later = time.time() + 30
+    assert queue.claim_stale("job_slow", first, now=later, lease_seconds=10) is True
+    assert queue.ack("job_slow", attempt=first) is False
+    assert queue.stale(10, now=later + 30) == [("job_slow", 1)]
+    assert queue.consume() == "job_slow"
+    assert queue.held_attempt("job_slow") == 2
+    assert queue.ack("job_slow", attempt=2) is True
+    assert queue.held_attempt("job_slow") is None
+
+
 def test_pop_and_stale_claim_are_single_scripts() -> None:
     scripts: list[str] = []
 
@@ -61,8 +78,11 @@ def test_pop_and_stale_claim_are_single_scripts() -> None:
     assert "BLMOVE" not in pop
     assert "HSET" in claim and "LPUSH" in claim
     assert "ARGV[2]" in claim
+    assert "generation" in claim
     assert "HDEL" in ack and "ARGV[2]" in ack
+    assert "expected_gen" in ack
     assert "HSET" in renew and "ARGV[2]" in renew
+    assert "expected_gen" in renew
 
 
 def test_claim_stale_publishes_once_and_ack_keeps_a_newer_lease() -> None:
@@ -80,6 +100,12 @@ def test_claim_stale_publishes_once_and_ack_keeps_a_newer_lease() -> None:
     assert newer == 2
     assert queue.ack("job_a", attempt=first) is False
     assert queue.ack("job_a", attempt=newer) is True
+    assert queue.held_attempt("job_a") is None
+    assert queue._held == {}  # noqa: SLF001
+
+
+def test_slow_worker_ack_after_claim_stale_does_not_reset_attempts() -> None:
+    _assert_slow_ack_keeps_the_requeued_lease(MemoryJobQueue())
 
 
 def test_build_queue_defaults_to_memory_when_configured() -> None:
@@ -105,7 +131,10 @@ def test_redis_publish_and_consume() -> None:
     queue.publish("job_abc")
     assert queue.consume(timeout=0) == "job_abc"
     queue.ack("job_abc")
+    assert queue.held_attempt("job_abc") is None
+    assert queue._held == {}  # noqa: SLF001
     assert queue.consume(timeout=0) is None
+    _assert_slow_ack_keeps_the_requeued_lease(RedisJobQueue(url, key=key))
     assert queue.consume(timeout=1) is None
     client.delete(key)
     client.delete(f"{key}:inflight")

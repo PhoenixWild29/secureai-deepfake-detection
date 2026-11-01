@@ -5,8 +5,11 @@ cannot drop an id that has left the list but is not yet leased. `BLMOVE`
 of the list onto itself only wakes a blocking worker; it does not remove
 the id. `claim_stale` refreshes a stale lease and republishes that id in
 one script, and only when the attempt it observed is still current.
-`ack` and `release` of a lease compare that attempt, so a slow worker
-cannot delete a newer claim.
+`ack` and `release` of a lease compare that attempt and its generation,
+so a slow worker cannot delete a lease `claim_stale` has already refreshed.
+Claiming a stale lease bumps the generation and keeps the attempt, which
+stops the old ack from clearing the requeued lease and resetting the
+attempt counter.
 """
 
 from __future__ import annotations
@@ -18,40 +21,72 @@ from typing import Protocol
 
 from secureai_shared.settings import Settings
 
+# Lease value is "<started>:<attempts>:<generation>". Pop and claim_stale
+# each increment generation. Ack and renew of an older generation are no-ops,
+# so they cannot clear or extend the lease claim_stale just wrote.
+_LEASE_PARSE = """
+local function parse_lease(raw)
+  local sep = string.find(raw, ':', 1, true)
+  if not sep then
+    return nil
+  end
+  local started = tonumber(string.sub(raw, 1, sep - 1))
+  local rest = string.sub(raw, sep + 1)
+  local sep2 = string.find(rest, ':', 1, true)
+  local attempts, generation
+  if sep2 then
+    attempts = tonumber(string.sub(rest, 1, sep2 - 1))
+    generation = tonumber(string.sub(rest, sep2 + 1)) or 0
+  else
+    attempts = tonumber(rest)
+    generation = 0
+  end
+  if not started or not attempts then
+    return nil
+  end
+  return started, attempts, generation
+end
+"""
+
 # RPOP and HSET run in one script. The id is on the lease before the script
 # returns, and Redis applies the script atomically.
-_POP_AND_LEASE = """
+_POP_AND_LEASE = (
+    _LEASE_PARSE
+    + """
 local job_id = redis.call('RPOP', KEYS[1])
 if not job_id then
   return nil
 end
-local raw = redis.call('HGET', KEYS[2], job_id)
 local attempts = 0
+local generation = 0
+local raw = redis.call('HGET', KEYS[2], job_id)
 if raw then
-  local sep = string.find(raw, ':', 1, true)
-  if sep then
-    attempts = tonumber(string.sub(raw, sep + 1)) or 0
+  local started, seen, gen = parse_lease(raw)
+  if seen then
+    attempts = seen
+    generation = gen
   end
 end
 attempts = attempts + 1
-redis.call('HSET', KEYS[2], job_id, ARGV[1] .. ':' .. attempts)
-return {job_id, attempts}
+generation = generation + 1
+redis.call('HSET', KEYS[2], job_id, ARGV[1] .. ':' .. attempts .. ':' .. generation)
+return {job_id, attempts, generation}
 """
+)
 
 # Compare the observed attempt and age, then refresh the lease and LPUSH.
-# A second sweeper sees a fresh timestamp and does not publish again.
-_CLAIM_STALE = """
+# Generation changes so the worker that still holds the old one cannot ack
+# this lease. The attempt count stays put until the next pop. A second
+# sweeper sees a fresh timestamp and does not publish again.
+_CLAIM_STALE = (
+    _LEASE_PARSE
+    + """
 local raw = redis.call('HGET', KEYS[1], ARGV[1])
 if not raw then
   return 0
 end
-local sep = string.find(raw, ':', 1, true)
-if not sep then
-  return 0
-end
-local started = tonumber(string.sub(raw, 1, sep - 1))
-local attempts = tonumber(string.sub(raw, sep + 1))
-if attempts ~= tonumber(ARGV[2]) then
+local started, attempts, generation = parse_lease(raw)
+if not attempts or attempts ~= tonumber(ARGV[2]) then
   return 0
 end
 local now = tonumber(ARGV[3])
@@ -59,44 +94,52 @@ local lease = tonumber(ARGV[4])
 if now - started < lease then
   return 0
 end
-redis.call('HSET', KEYS[1], ARGV[1], ARGV[3] .. ':' .. ARGV[2])
+generation = generation + 1
+redis.call('HSET', KEYS[1], ARGV[1], ARGV[3] .. ':' .. attempts .. ':' .. generation)
 redis.call('LPUSH', KEYS[2], ARGV[1])
 return 1
 """
+)
 
-_ACK_ATTEMPT = """
+_ACK_ATTEMPT = (
+    _LEASE_PARSE
+    + """
 local raw = redis.call('HGET', KEYS[1], ARGV[1])
 if not raw then
   return 0
 end
-local sep = string.find(raw, ':', 1, true)
-if not sep then
+local started, attempts, generation = parse_lease(raw)
+if not attempts or attempts ~= tonumber(ARGV[2]) then
   return 0
 end
-local attempts = tonumber(string.sub(raw, sep + 1))
-if attempts ~= tonumber(ARGV[2]) then
+local expected_gen = tonumber(ARGV[3])
+if expected_gen >= 0 and generation ~= expected_gen then
   return 0
 end
 redis.call('HDEL', KEYS[1], ARGV[1])
 return 1
 """
+)
 
-_RENEW_ATTEMPT = """
+_RENEW_ATTEMPT = (
+    _LEASE_PARSE
+    + """
 local raw = redis.call('HGET', KEYS[1], ARGV[1])
 if not raw then
   return 0
 end
-local sep = string.find(raw, ':', 1, true)
-if not sep then
+local started, attempts, generation = parse_lease(raw)
+if not attempts or attempts ~= tonumber(ARGV[2]) then
   return 0
 end
-local attempts = tonumber(string.sub(raw, sep + 1))
-if attempts ~= tonumber(ARGV[2]) then
+local expected_gen = tonumber(ARGV[4])
+if expected_gen >= 0 and generation ~= expected_gen then
   return 0
 end
-redis.call('HSET', KEYS[1], ARGV[1], ARGV[3] .. ':' .. attempts)
+redis.call('HSET', KEYS[1], ARGV[1], ARGV[3] .. ':' .. attempts .. ':' .. generation)
 return 1
 """
+)
 
 
 class JobQueue(Protocol):
@@ -127,8 +170,9 @@ class MemoryJobQueue:
 
     def __init__(self) -> None:
         self._ids: deque[str] = deque()
-        self._inflight: dict[str, tuple[float, int]] = {}
-        self._held: dict[str, int] = {}
+        self._inflight: dict[str, tuple[float, int] | tuple[float, int, int]] = {}
+        # attempt, generation for the lease this process popped. Pruned on ack.
+        self._held: dict[str, tuple[int, int]] = {}
         self._mutex = threading.Lock()
 
     def publish(self, job_id: str) -> None:
@@ -141,12 +185,15 @@ class MemoryJobQueue:
             if not self._ids:
                 return None
             job_id = self._ids.popleft()
-            attempt = self._touch_locked(job_id)
-            self._held[job_id] = attempt
+            attempt, generation = self._touch_locked(job_id)
+            self._held[job_id] = (attempt, generation)
             return job_id
 
     def held_attempt(self, job_id: str) -> int | None:
-        return self._held.get(job_id)
+        local = self._held.get(job_id)
+        if local is None:
+            return None
+        return local[0]
 
     def ack(self, job_id: str, *, attempt: int | None = None) -> bool:
         with self._mutex:
@@ -163,18 +210,21 @@ class MemoryJobQueue:
             current = self._inflight.get(job_id)
             if current is None:
                 return False
-            _started, attempts = current
+            _started, attempts, generation = _lease_parts(current)
             expected = self._expected(job_id, attempt)
             if expected is None or attempts != expected:
                 return False
-            self._inflight[job_id] = (time.time() if now is None else now, attempts)
+            if not self._generation_matches(job_id, expected, generation):
+                return False
+            self._inflight[job_id] = (time.time() if now is None else now, attempts, generation)
             return True
 
     def stale(self, older_than: float, *, now: float | None = None) -> list[tuple[str, int]]:
         clock = time.time() if now is None else now
         with self._mutex:
             found: list[tuple[str, int]] = []
-            for job_id, (started, attempts) in self._inflight.items():
+            for job_id, raw in self._inflight.items():
+                started, attempts, _generation = _lease_parts(raw)
                 if clock - started >= older_than:
                     found.append((job_id, attempts))
             return found
@@ -192,34 +242,70 @@ class MemoryJobQueue:
             current = self._inflight.get(job_id)
             if current is None:
                 return False
-            started, seen = current
+            started, seen, generation = _lease_parts(current)
             if seen != attempts or clock - started < lease_seconds:
                 return False
-            self._inflight[job_id] = (clock, seen)
+            # Keep the attempt. A new generation makes the popped worker's
+            # ack a no-op, so it cannot drop this lease or restart the counter.
+            self._inflight[job_id] = (clock, seen, generation + 1)
             self._ids.append(job_id)
             return True
 
-    def _touch_locked(self, job_id: str, *, now: float | None = None) -> int:
+    def _touch_locked(self, job_id: str, *, now: float | None = None) -> tuple[int, int]:
         clock = time.time() if now is None else now
-        _started, attempts = self._inflight.get(job_id, (clock, 0))
+        current = self._inflight.get(job_id)
+        if current is None:
+            attempts, generation = 0, 0
+        else:
+            _started, attempts, generation = _lease_parts(current)
         attempt = attempts + 1
-        self._inflight[job_id] = (clock, attempt)
-        return attempt
+        generation += 1
+        self._inflight[job_id] = (clock, attempt, generation)
+        return attempt, generation
 
     def _expected(self, job_id: str, attempt: int | None) -> int | None:
         if attempt is not None:
             return attempt
-        return self._held.get(job_id)
+        local = self._held.get(job_id)
+        if local is None:
+            return None
+        return local[0]
+
+    def _generation_matches(self, job_id: str, expected: int, generation: int) -> bool:
+        """False when this process still holds an older generation of `expected`.
+
+        A caller with no local record (the sweeper) matches on the attempt
+        alone. The worker that popped the old generation must not.
+        """
+
+        local = self._held.get(job_id)
+        if local is None or local[0] != expected:
+            return True
+        return local[1] == generation
 
     def _drop_locked(self, job_id: str, attempt: int | None) -> bool:
         current = self._inflight.get(job_id)
         if current is None:
+            self._forget_held(job_id, attempt)
             return False
+        _started, attempts, generation = _lease_parts(current)
         expected = self._expected(job_id, attempt)
-        if expected is None or current[1] != expected:
+        if expected is None or attempts != expected:
+            self._forget_held(job_id, attempt)
+            return False
+        if not self._generation_matches(job_id, expected, generation):
+            self._forget_held(job_id, expected)
             return False
         self._inflight.pop(job_id, None)
+        self._forget_held(job_id, expected)
         return True
+
+    def _forget_held(self, job_id: str, attempt: int | None) -> None:
+        local = self._held.get(job_id)
+        if local is None:
+            return
+        if attempt is None or local[0] == attempt:
+            self._held.pop(job_id, None)
 
 
 class RedisJobQueue:
@@ -235,7 +321,8 @@ class RedisJobQueue:
         self.redis = client
         self.key = key
         self.inflight_key = f"{key}:inflight"
-        self._held: dict[str, int] = {}
+        # attempt, generation for the lease this process popped. Pruned on ack.
+        self._held: dict[str, tuple[int, int]] = {}
         self._pop_lease = client.register_script(_POP_AND_LEASE)  # type: ignore[attr-defined]
         self._claim_stale = client.register_script(_CLAIM_STALE)  # type: ignore[attr-defined]
         self._ack_attempt = client.register_script(_ACK_ATTEMPT)  # type: ignore[attr-defined]
@@ -250,19 +337,26 @@ class RedisJobQueue:
         result = self._pop_lease(keys=[self.key, self.inflight_key], args=[int(time.time())])
         if not result:
             return None
-        job_id, attempts = result
-        attempt = int(attempts)
-        self._held[str(job_id)] = attempt
-        return str(job_id)
+        job_id = str(result[0])
+        attempt = int(result[1])
+        generation = int(result[2]) if len(result) > 2 else 0
+        self._held[job_id] = (attempt, generation)
+        return job_id
 
     def held_attempt(self, job_id: str) -> int | None:
-        return self._held.get(job_id)
+        local = self._held.get(job_id)
+        if local is None:
+            return None
+        return local[0]
 
     def ack(self, job_id: str, *, attempt: int | None = None) -> bool:
-        expected = attempt if attempt is not None else self._held.get(job_id)
+        expected, generation = self._expected(job_id, attempt)
         if expected is None:
             return False
-        removed = int(self._ack_attempt(keys=[self.inflight_key], args=[job_id, int(expected)]))
+        removed = int(
+            self._ack_attempt(keys=[self.inflight_key], args=[job_id, int(expected), int(generation)])
+        )
+        self._forget_held(job_id, expected)
         return removed == 1
 
     def renew(
@@ -272,12 +366,15 @@ class RedisJobQueue:
         now: float | None = None,
         attempt: int | None = None,
     ) -> bool:
-        expected = attempt if attempt is not None else self._held.get(job_id)
+        expected, generation = self._expected(job_id, attempt)
         if expected is None:
             return False
         clock = time.time() if now is None else now
         updated = int(
-            self._renew_attempt(keys=[self.inflight_key], args=[job_id, int(expected), int(clock)])
+            self._renew_attempt(
+                keys=[self.inflight_key],
+                args=[job_id, int(expected), int(clock), int(generation)],
+            )
         )
         return updated == 1
 
@@ -285,7 +382,7 @@ class RedisJobQueue:
         clock = time.time() if now is None else now
         found: list[tuple[str, int]] = []
         for job_id, raw in self.redis.hgetall(self.inflight_key).items():
-            started, attempts = _parse_lease(raw)
+            started, attempts, _generation = _parse_lease(raw)
             if clock - started >= older_than:
                 found.append((job_id, attempts))
         return found
@@ -307,6 +404,23 @@ class RedisJobQueue:
         )
         return won == 1
 
+    def _expected(self, job_id: str, attempt: int | None) -> tuple[int | None, int]:
+        local = self._held.get(job_id)
+        if attempt is None:
+            if local is None:
+                return None, -1
+            return local[0], local[1]
+        if local is not None and local[0] == attempt:
+            return attempt, local[1]
+        return attempt, -1
+
+    def _forget_held(self, job_id: str, attempt: int | None) -> None:
+        local = self._held.get(job_id)
+        if local is None:
+            return
+        if attempt is None or local[0] == attempt:
+            self._held.pop(job_id, None)
+
     def _wait(self, timeout: float) -> bool:
         """Block until the list is non-empty without removing an id.
 
@@ -326,9 +440,21 @@ class RedisJobQueue:
         return peeked is not None
 
 
-def _parse_lease(raw: str) -> tuple[float, int]:
-    started, attempts = raw.split(":", 1)
-    return float(started), int(attempts)
+def _parse_lease(raw: str) -> tuple[float, int, int]:
+    parts = raw.split(":")
+    if len(parts) == 2:
+        started, attempts = parts
+        return float(started), int(attempts), 0
+    started, attempts, generation = parts
+    return float(started), int(attempts), int(generation)
+
+
+def _lease_parts(raw: tuple[float, int] | tuple[float, int, int]) -> tuple[float, int, int]:
+    if len(raw) == 2:
+        started, attempts = raw
+        return float(started), int(attempts), 0
+    started, attempts, generation = raw
+    return float(started), int(attempts), int(generation)
 
 
 def build_queue(settings: Settings) -> JobQueue:

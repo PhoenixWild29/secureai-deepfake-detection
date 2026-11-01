@@ -22,10 +22,12 @@ def sweep_stuck(
     """Requeue leased jobs that outlived the detector timeout, or fail them.
 
     `claim_stale` refreshes the lease and republishes the id in one step, and
-    only if the attempt this sweep observed is still the stored attempt.
-    `release` is attempt-aware, so a slow worker cannot move a newer claim
-    back to queued. The database release commits before the republish, so a
-    worker that pops the id can claim the row.
+    only if the attempt this sweep observed is still the stored attempt. It
+    bumps the lease generation and leaves the attempt count unchanged, so the
+    worker that popped the old generation cannot ack the new lease or reset
+    the attempt counter. `release` is attempt-aware, so a slow worker cannot
+    move a newer claim back to queued. The database release commits before
+    the republish, so a worker that pops the id can claim the row.
     """
 
     recovered: list[str] = []
