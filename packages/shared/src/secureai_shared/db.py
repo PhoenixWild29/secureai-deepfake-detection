@@ -82,3 +82,19 @@ class StripeEventRow(Base):
     id: Mapped[str] = mapped_column(String(255), primary_key=True)
     event_type: Mapped[str] = mapped_column(String(128), nullable=False)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CheckoutIntentRow(Base):
+    """Plan recorded when this API created a Checkout session.
+
+    checkout.session.completed often has no line items. The webhook uses this
+    row only when the event also has no price id, and only if `price_id` is
+    still a configured Pro or Team price. metadata.plan is not consulted.
+    """
+
+    __tablename__ = "checkout_intents"
+
+    session_id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    plan: Mapped[str] = mapped_column(String(16), nullable=False)
+    price_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

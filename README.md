@@ -6,7 +6,7 @@ This project implements a comprehensive deepfake detection system combining AI a
 
 The saleable API, worker, and Guardian app live under `apps/`. Phase 3 adds Stripe Checkout, the Customer Portal, plan quotas, and workspaces. Setup and the test-mode walkthrough are in [README.rebuild.md](README.rebuild.md).
 
-API billing variables (test mode, never commit values): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_TEAM`, `PUBLIC_APP_URL`. See `apps/api/.env.example`.
+API billing variables (test mode, never commit values): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_TEAM`, `PUBLIC_APP_URL`. See `apps/api/.env.example`. Stripe stays in test mode. In the Stripe dashboard, Smart Retries must end dunning in `unpaid` or `canceled`. This API does not expire `past_due` on its own, and a late invoice cannot move those terminal statuses back to `active` or `past_due`.
 
 ## Guardian Web Hardening
 
