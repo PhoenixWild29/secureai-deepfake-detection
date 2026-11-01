@@ -1,5 +1,7 @@
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
@@ -191,6 +193,91 @@ def test_list_jobs_is_owner_scoped(stack) -> None:
     assert [row["id"] for row in body] == [created.json()["id"]]
     assert body[0]["byte_size"] == len(b"video-bytes")
     assert body[0]["object_etag"]
+    assert listed.headers["x-has-more"] == "false"
+
+
+def test_list_jobs_pages_older_than_the_last_row(stack, monkeypatch: pytest.MonkeyPatch) -> None:
+    client, store, _queue, _storage = stack
+    ids = iter(
+        (
+            "job_00000000000a",
+            "job_00000000000b",
+            "job_00000000000c",
+            "job_00000000000d",
+        )
+    )
+    monkeypatch.setattr("secureai_shared.store._new_id", lambda: next(ids))
+    moment = datetime(2026, 11, 1, 12, 0, tzinfo=timezone.utc)
+    created: list[str] = []
+    for name, when in (
+        ("older.mp4", moment),
+        ("tied.mp4", moment),
+        ("newest.mp4", moment + timedelta(seconds=5)),
+    ):
+        job = store.create(
+            user_id="user_dev",
+            filename=name,
+            content_type="video/mp4",
+            byte_size=1,
+            object_key=new_object_key("user_dev", name),
+        )
+        store._rows[job.id] = job.model_copy(update={"created_at": when})  # noqa: SLF001
+        created.append(job.id)
+    workspace = store.create(
+        user_id="user_dev",
+        filename="workspace.mp4",
+        content_type="video/mp4",
+        byte_size=1,
+        object_key=new_object_key("user_dev", "workspace.mp4"),
+        org_id="org_0123456789ab",
+    )
+    store._rows[workspace.id] = workspace.model_copy(  # noqa: SLF001
+        update={"created_at": moment + timedelta(hours=1)}
+    )
+    headers = {"Authorization": "Bearer dev", "Origin": "http://localhost:3000"}
+    first = client.get("/v1/jobs", headers=headers, params={"limit": 2})
+    assert first.status_code == 200
+    assert first.headers["x-has-more"] == "true"
+    assert "x-has-more" in first.headers["access-control-expose-headers"].lower()
+    body = first.json()
+    assert [row["id"] for row in body] == [created[2], created[1]]
+    assert workspace.id not in {row["id"] for row in body}
+
+    second = client.get(
+        "/v1/jobs",
+        headers=headers,
+        params={"limit": 2, "before": body[-1]["created_at"], "before_id": body[-1]["id"]},
+    )
+    assert second.status_code == 200
+    assert second.headers["x-has-more"] == "false"
+    assert [row["id"] for row in second.json()] == [created[0]]
+
+    missing_id = client.get(
+        "/v1/jobs",
+        headers=headers,
+        params={"before": "2026-11-01T12:00:00Z"},
+    )
+    assert missing_id.status_code == 400
+    missing_time = client.get(
+        "/v1/jobs",
+        headers=headers,
+        params={"before_id": created[0]},
+    )
+    assert missing_time.status_code == 400
+    naive = client.get(
+        "/v1/jobs",
+        headers=headers,
+        params={"before": "2026-11-01T12:00:00", "before_id": created[0]},
+    )
+    assert naive.status_code == 400
+    malformed = client.get(
+        "/v1/jobs",
+        headers=headers,
+        params={"before": "2026-11-01T12:00:00Z", "before_id": "not-a-job"},
+    )
+    assert malformed.status_code == 400
+    oversized = client.get("/v1/jobs", headers=headers, params={"limit": 51})
+    assert oversized.status_code == 422
 
 
 def test_rate_limit_on_job_create(tmp_path: Path) -> None:

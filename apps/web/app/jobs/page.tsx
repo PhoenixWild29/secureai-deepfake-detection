@@ -12,7 +12,7 @@ export default async function JobsPage() {
       <main>
         <p className="kicker">Account</p>
         <h1>History</h1>
-        <p className="lede">Jobs for the signed-in account.</p>
+        <p className="lede">Jobs for the signed-in account. Newest first, 50 at a time.</p>
         <ClerkJobList apiUrl={base} />
       </main>
     );
@@ -22,7 +22,7 @@ export default async function JobsPage() {
       <main>
         <p className="kicker">Local only</p>
         <h1>History</h1>
-        <p className="lede">Jobs for the dev credential on this workstation.</p>
+        <p className="lede">Jobs for the dev credential on this workstation. Newest first, 50 at a time.</p>
         <JobList apiUrl={base} token="dev" />
       </main>
     );

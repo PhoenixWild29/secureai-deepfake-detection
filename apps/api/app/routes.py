@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile, status
 from pydantic import BaseModel, Field
 
 from app.auth import require_user
@@ -29,6 +29,9 @@ from secureai_shared.webhooks import schedule_terminal
 logger = logging.getLogger("secureai.api.jobs")
 
 JOB_ID = re.compile(r"job_[a-f0-9]{12}")
+# One page of history. Callers pass the last row to read the next older page.
+JOB_PAGE_MAX = 50
+HAS_MORE = "X-Has-More"
 
 router = APIRouter()
 
@@ -302,12 +305,31 @@ def create_job_batch(
 @router.get("/v1/jobs", response_model=list[JobRecord])
 def list_jobs(
     request: Request,
+    response: Response,
     user: Annotated[AuthContext, Depends(require_user)],
+    limit: Annotated[int, Query(ge=1, le=JOB_PAGE_MAX)] = JOB_PAGE_MAX,
+    before: datetime | None = None,
+    before_id: str | None = None,
 ) -> list[JobRecord]:
+    """List this caller's jobs, newest first.
+
+    The page holds at most 50 rows. Pass ``before`` and ``before_id`` from
+    the last row to read the next older page. ``X-Has-More`` is ``true``
+    when another page exists. A personal list omits workspace jobs.
+    ``X-Org-Id`` lists that workspace.
+    """
+
     org_id = active_org(request, user)
+    cursor = _page_cursor(before, before_id)
+    # One extra row tells the caller whether the next page exists, and is
+    # not returned.
     if org_id is not None:
-        return request.app.state.store.list_for_org(org_id, limit=50)
-    return request.app.state.store.list_for_user(user.subject, limit=50)
+        rows = request.app.state.store.list_for_org(org_id, limit=limit + 1, before=cursor)
+    else:
+        rows = request.app.state.store.list_for_user(user.subject, limit=limit + 1, before=cursor)
+    has_more = len(rows) > limit
+    response.headers[HAS_MORE] = "true" if has_more else "false"
+    return rows[:limit]
 
 
 @router.get("/v1/jobs/{job_id}", response_model=JobRecord)
@@ -415,6 +437,20 @@ def _require_pdf_plan(request: Request, user: AuthContext, org_id: str | None) -
     if may_export_pdf(auth_mode=settings.auth_mode, quota_mode=settings.quota_mode, plan=plan):
         return
     raise HTTPException(status_code=402, detail=PDF_PLAN_REQUIRED)
+
+
+def _page_cursor(before: datetime | None, before_id: str | None) -> tuple[datetime, str] | None:
+    """Keyset of the last row on the previous page, or None for the first page."""
+
+    if before is None and before_id is None:
+        return None
+    if before is None or before_id is None:
+        raise HTTPException(status_code=400, detail="before and before_id are both required")
+    if before.tzinfo is None or before.utcoffset() is None:
+        raise HTTPException(status_code=400, detail="before must include a timezone")
+    if JOB_ID.fullmatch(before_id) is None:
+        raise HTTPException(status_code=400, detail="Invalid before_id")
+    return before.astimezone(timezone.utc), before_id
 
 
 def _stored_upload(request: Request, user: AuthContext, body: JobCreate) -> tuple[str, ObjectStat]:

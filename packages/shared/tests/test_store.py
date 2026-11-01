@@ -1,9 +1,12 @@
 import os
+from datetime import datetime, timedelta, timezone
 
 import pytest
+from sqlalchemy import update
 from sqlalchemy.exc import IntegrityError
 
-from secureai_shared.models import JobStatus
+from secureai_shared.db import JobRow
+from secureai_shared.models import JobRecord, JobStatus
 from secureai_shared.storage import new_object_key
 from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore, PostgresJobStore
 
@@ -163,3 +166,101 @@ def test_postgres_create_many_rolls_back_on_unique_violation(
     assert kept.status is JobStatus.queued
     assert store.get_any("job_aa11bb22cc01") is None
     assert store.get_any("job_aa11bb22cc02") is None
+
+
+def _stamp_memory(store: MemoryJobStore, job: JobRecord, when: datetime) -> None:
+    store._rows[job.id] = job.model_copy(update={"created_at": when})  # noqa: SLF001
+
+
+def _stamp_postgres(store: PostgresJobStore, job: JobRecord, when: datetime) -> None:
+    with store.engine.begin() as connection:
+        connection.execute(update(JobRow).where(JobRow.id == job.id).values(created_at=when))
+
+
+def _assert_history_pages(store: MemoryJobStore | PostgresJobStore, stamp) -> None:
+    """Newest page, then the older page, including two rows that share a timestamp.
+
+    A workspace job newer than every personal row stays off the personal pages.
+    A personal row stays off the workspace page.
+    """
+
+    moment = datetime(2026, 11, 1, 12, 0, tzinfo=timezone.utc)
+    older = store.create(
+        user_id="user_a",
+        filename="older.mp4",
+        content_type="video/mp4",
+        byte_size=1,
+        object_key=new_object_key("user_a", "older.mp4"),
+    )
+    tied = store.create(
+        user_id="user_a",
+        filename="tied.mp4",
+        content_type="video/mp4",
+        byte_size=1,
+        object_key=new_object_key("user_a", "tied.mp4"),
+    )
+    newest = store.create(
+        user_id="user_a",
+        filename="newest.mp4",
+        content_type="video/mp4",
+        byte_size=1,
+        object_key=new_object_key("user_a", "newest.mp4"),
+    )
+    workspace = store.create(
+        user_id="user_a",
+        filename="workspace.mp4",
+        content_type="video/mp4",
+        byte_size=1,
+        object_key=new_object_key("user_a", "workspace.mp4"),
+        org_id="org_0123456789ab",
+    )
+    stamp(store, older, moment)
+    stamp(store, tied, moment)
+    stamp(store, newest, moment + timedelta(seconds=5))
+    stamp(store, workspace, moment + timedelta(hours=1))
+
+    # tied.id > older.id, so the shared timestamp orders tied ahead of older.
+    assert tied.id > older.id
+    first = store.list_for_user("user_a", limit=2)
+    assert [job.id for job in first] == [newest.id, tied.id]
+    second = store.list_for_user("user_a", limit=2, before=(first[-1].created_at, first[-1].id))
+    assert [job.id for job in second] == [older.id]
+    assert store.list_for_user("user_a", limit=2, before=(second[-1].created_at, second[-1].id)) == []
+    org_page = store.list_for_org("org_0123456789ab", limit=2)
+    assert [job.id for job in org_page] == [workspace.id]
+    assert (
+        store.list_for_org(
+            "org_0123456789ab",
+            limit=2,
+            before=(org_page[0].created_at, org_page[0].id),
+        )
+        == []
+    )
+
+
+def test_memory_list_pages_past_a_shared_timestamp(monkeypatch: pytest.MonkeyPatch) -> None:
+    store = MemoryJobStore()
+    ids = iter(
+        (
+            "job_00000000000a",
+            "job_00000000000b",
+            "job_00000000000c",
+            "job_00000000000d",
+        )
+    )
+    monkeypatch.setattr("secureai_shared.store._new_id", lambda: next(ids))
+    _assert_history_pages(store, _stamp_memory)
+
+
+def test_postgres_list_pages_past_a_shared_timestamp(monkeypatch: pytest.MonkeyPatch) -> None:
+    store = _postgres_store()
+    ids = iter(
+        (
+            "job_00000000000a",
+            "job_00000000000b",
+            "job_00000000000c",
+            "job_00000000000d",
+        )
+    )
+    monkeypatch.setattr("secureai_shared.store._new_id", lambda: next(ids))
+    _assert_history_pages(store, _stamp_postgres)
