@@ -1,6 +1,9 @@
 # Build context must be the repository root:
 #   docker build -f apps/api/Dockerfile -t secureai-api .
 #
+# apps/api/Dockerfile.dockerignore replaces the root .dockerignore for this
+# file. The context is packages/shared and apps/api, not the legacy weights.
+#
 # This is the rebuild API image. The repository-root Dockerfile is the legacy
 # Flask image. Set the Railway Dockerfile path to apps/api/Dockerfile.
 FROM python:3.12-slim-bookworm
