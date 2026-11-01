@@ -7,16 +7,21 @@ body with HMAC-SHA256. The secret is stored in plaintext and is never
 returned by the API.
 
 Delivery resolves the hostname once and tries each validated address in
-that order. A connect failure falls through to the next address while
-time remains. The caller's timeout is one budget for every TCP attempt,
-not a fresh timeout per address. When that budget is spent, later
-addresses are not tried. After a TCP connection succeeds, the socket
-timeout is the original value again for the TLS handshake and the HTTP
-exchange. TLS and the Host header still use the original hostname, so a
-DNS answer that changes between the check and the connect cannot move
-the socket onto a private address. A TLS failure does not try another
-address. Any TCP port is accepted. A public address that proxies
-elsewhere is outside this check.
+that order. Name lookup and TCP share the caller's timeout. Time spent
+resolving is time later addresses do not get. A lookup that does not
+finish in the time left does not open a socket. The lookup runs on a
+daemon thread, so a stuck resolver cannot hold the delivery thread past
+that timeout. Two lookups may be in flight. While both are still
+running, the next attempt waits one second and does not count. A connect
+failure falls through to the next address while time remains. That
+remaining time is one budget for every TCP attempt, not a fresh timeout
+per address. When that budget is spent, later addresses are not tried.
+After a TCP connection succeeds, the socket timeout is the original value
+again for the TLS handshake and the HTTP exchange. TLS and the Host
+header still use the original hostname, so a DNS answer that changes
+between the check and the connect cannot move the socket onto a private
+address. A TLS failure does not try another address. Any TCP port is
+accepted. A public address that proxies elsewhere is outside this check.
 """
 
 from __future__ import annotations
@@ -65,6 +70,17 @@ class WebhookConfigError(ValueError):
     def __init__(self, detail: str) -> None:
         super().__init__(detail)
         self.detail = detail
+
+
+class WebhookResolverBusy(Exception):
+    """Every DNS slot is still in a lookup. Retry this attempt without counting it."""
+
+
+# libc getaddrinfo cannot be cancelled. A stuck lookup keeps its slot until
+# it returns, on a daemon thread, and the delivery thread moves on.
+_DNS_LOOKUP_SLOTS = 2
+_DNS_BUSY_DELAY_SECONDS = 1.0
+_DNS_SLOTS = threading.BoundedSemaphore(_DNS_LOOKUP_SLOTS)
 
 
 @dataclass(frozen=True)
@@ -286,13 +302,18 @@ def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: flo
     host = parts.hostname
     if parts.scheme != "https" or not host:
         raise RuntimeError("webhook URL must be https")
-    addresses = _resolve_public_addresses(host)
+    started = time.monotonic()
+    addresses = _resolve_public_addresses(host, timeout=timeout)
+    remaining = timeout - (time.monotonic() - started)
+    if remaining <= 0:
+        raise TimeoutError("webhook connect timed out")
     port = parts.port or 443
     path = parts.path or "/"
     if parts.query:
         path = f"{path}?{parts.query}"
     # ``host`` stays the URL hostname so the Host header and SNI match the
     # certificate. ``addresses`` are the IPs this call already accepted.
+    # ``timeout`` stays the TLS budget. DNS time is removed from the TCP budget.
     connection = _PinnedHTTPSConnection(
         host,
         port,
@@ -300,6 +321,7 @@ def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: flo
         timeout=timeout,
         context=ssl.create_default_context(),
     )
+    connection._connect_timeout = remaining
     try:
         connection.request("POST", path, body=body, headers=dict(headers))
         response = connection.getresponse()
@@ -710,6 +732,9 @@ def _deliver_claimed(
         headers[SIGNATURE_HEADER] = signature_header(endpoint.secret, timestamp, body)
     try:
         code = post(endpoint.url, body, headers, timeout)
+    except WebhookResolverBusy:
+        _defer_busy(store, queue, claimed, now=now)
+        return
     except Exception as exc:
         logger.info("webhook post failed delivery_id=%s", claimed.id)
         _finish_failure(
@@ -746,6 +771,40 @@ def _deliver_claimed(
         code=status_code,
         error=error,
     )
+
+
+def _defer_busy(
+    store: WebhookStore,
+    queue: WebhookQueue,
+    claimed: WebhookDelivery,
+    *,
+    now: datetime,
+) -> None:
+    """Put the row back without counting an attempt.
+
+    The resolver slots are full, so this delivery did not look up a name
+    and did not open a socket. Counting it would burn ``max_attempts``
+    while two other lookups are stuck. The next try waits one second.
+    """
+
+    token = claimed.claim_token
+    if token is None:
+        return
+    nxt = now + timedelta(seconds=_DNS_BUSY_DELAY_SECONDS)
+    stored = store.record_result(
+        claimed.id,
+        claim_token=token,
+        status="pending",
+        attempt=claimed.attempt,
+        last_status_code=None,
+        last_error="DNS resolver is busy",
+        next_attempt_at=nxt,
+        now=now,
+    )
+    if stored is None:
+        return
+    queue.publish(claimed.id, available_at=nxt.timestamp())
+    logger.info("webhook dns busy delivery_id=%s", claimed.id)
 
 
 def _finish_failure(
@@ -832,15 +891,16 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     """TLS to ``host`` over addresses from one resolution, tried in order.
 
     Host and SNI stay ``host``. A TCP connect failure tries the next address
-    while time remains in ``timeout``. That value is one budget shared by
-    every address attempt. Each attempt receives only the time still left.
-    When the budget is spent, later addresses are not tried and the last
-    connect error is raised. If the budget was already spent before any
-    attempt, ``connect`` raises ``TimeoutError``. After TCP connects, the
-    socket timeout is set back to the original ``timeout`` for the TLS
-    handshake and the HTTP exchange, so a later address does not shrink
-    the request. A TLS failure, including a certificate failure, is not
-    caught and does not try another address. The hostname is not resolved
+    while time remains in ``_connect_timeout``. That value defaults to
+    ``timeout`` and is one budget shared by every address attempt. Delivery
+    shortens it by the time DNS already used. Each attempt receives only the
+    time still left. When the budget is spent, later addresses are not tried
+    and the last connect error is raised. If the budget was already spent
+    before any attempt, ``connect`` raises ``TimeoutError``. After TCP
+    connects, the socket timeout is set back to the original ``timeout`` for
+    the TLS handshake and the HTTP exchange, so a later address does not
+    shrink the request. A TLS failure, including a certificate failure, is
+    not caught and does not try another address. The hostname is not resolved
     again. ``None`` disables the budget and each attempt blocks.
     ``socket._GLOBAL_DEFAULT_TIMEOUT``, which ``http.client`` stores when
     a connection is built without a timeout, is not a number and is
@@ -858,6 +918,7 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     ) -> None:
         super().__init__(host, port, timeout=timeout, context=context)
         self._pinned_addresses = tuple(addresses)
+        self._connect_timeout: object = timeout
 
     def connect(self) -> None:
         if not self._pinned_addresses:
@@ -867,7 +928,10 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
         # treats a per-call timeout as "this attempt may block this long", so
         # passing the original timeout each time would allow N times the budget.
         # ``None`` and ``socket._GLOBAL_DEFAULT_TIMEOUT`` have no deadline.
-        budget = _connect_budget(self.timeout)
+        # TLS uses ``self.timeout``, which delivery leaves at the caller's
+        # original timeout after DNS has already reduced ``_connect_timeout``.
+        budget = _connect_budget(self._connect_timeout)
+        tls_budget = _connect_budget(self.timeout)
         deadline = None if budget is None else time.monotonic() + budget
         for address in self._pinned_addresses:
             if deadline is None:
@@ -888,8 +952,8 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
                 last_error = exc
                 continue
             self.sock = sock
-            if budget is not None:
-                self.sock.settimeout(budget)
+            if tls_budget is not None:
+                self.sock.settimeout(tls_budget)
             try:
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             except OSError as exc:
@@ -905,11 +969,57 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
         raise TimeoutError("webhook connect timed out")
 
 
-def _resolve_public_addresses(host: str) -> list[str]:
+def _getaddrinfo_bounded(host: str, timeout: float) -> list:
+    """Resolve ``host`` without holding the caller past ``timeout``.
+
+    ``getaddrinfo`` has no deadline. It runs on a daemon thread that keeps
+    one of ``_DNS_LOOKUP_SLOTS`` until it returns. The caller raises
+    ``TimeoutError`` when the wait expires and leaves that thread alone.
+    A full set of slots raises ``WebhookResolverBusy`` immediately.
+    The slot is released before the caller is woken, so the next lookup
+    can take it.
+    """
+
+    if timeout <= 0:
+        raise TimeoutError("webhook connect timed out")
+    if not _DNS_SLOTS.acquire(blocking=False):
+        raise WebhookResolverBusy("webhook DNS resolver is busy")
+    done = threading.Event()
+    outcome_infos: list | None = None
+    outcome_error: Exception | None = None
+
+    def run() -> None:
+        nonlocal outcome_infos, outcome_error
+        try:
+            outcome_infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+        except Exception as exc:
+            outcome_error = exc
+        finally:
+            _DNS_SLOTS.release()
+            done.set()
+
+    thread = threading.Thread(target=run, name="secureai-webhook-dns", daemon=True)
+    try:
+        thread.start()
+    except Exception:
+        _DNS_SLOTS.release()
+        raise
+    if not done.wait(timeout):
+        raise TimeoutError("webhook DNS timed out")
+    if outcome_error is not None:
+        raise outcome_error
+    if outcome_infos is None:
+        raise TimeoutError("webhook DNS timed out")
+    return outcome_infos
+
+
+def _resolve_public_addresses(host: str, *, timeout: float) -> list[str]:
     """Return every public address, in resolver order.
 
     Reject the host if any answer is not public. The caller tries the
-    returned addresses and does not resolve again.
+    returned addresses and does not resolve again. ``timeout`` bounds the
+    lookup. A non-positive timeout raises ``TimeoutError`` before any
+    lookup, which is the same error as a connect budget that is already spent.
     """
 
     if _blocked_host(host):
@@ -917,8 +1027,10 @@ def _resolve_public_addresses(host: str) -> list[str]:
     literal = _literal_ip(host)
     if literal is not None:
         return [host]
+    if timeout <= 0:
+        raise TimeoutError("webhook connect timed out")
     try:
-        infos = socket.getaddrinfo(host, None, type=socket.SOCK_STREAM)
+        infos = _getaddrinfo_bounded(host, timeout)
     except socket.gaierror as exc:
         raise RuntimeError("webhook host did not resolve") from exc
     if not infos:
