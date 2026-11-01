@@ -99,6 +99,8 @@ def create_app(
             "workspace in X-Org-Id. The secret is returned once and stored as "
             "a SHA-256 hash. Free plans cannot create or use a key. "
             "A personal key with X-Org-Id uses that workspace plan. "
+            "A workspace key can only name its own organization, including "
+            "ids in the path or body. "
             "A workspace key is hard-revoked on next use (401) if its minter "
             "is removed or demoted, and promotion does not restore it. "
             "GET /v1/admin/health reports Postgres, Redis, and object storage "

@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.auth import require_user
-from app.tenancy import ORG_ID
+from app.tenancy import ORG_ID, ensure_api_key_org
 from secureai_shared.models import AuthContext
 from secureai_shared.webhooks import WebhookConfigError, WebhookDelivery, validate_secret, validate_webhook_url
 
@@ -53,10 +53,11 @@ class WebhookView(BaseModel):
     last_delivery: DeliveryView | None
 
 
-def _role(request: Request, org_id: str, user_id: str) -> str:
+def _role(request: Request, org_id: str, user: AuthContext) -> str:
+    ensure_api_key_org(user, org_id)
     if ORG_ID.fullmatch(org_id) is None:
         raise HTTPException(status_code=404, detail="Organization not found")
-    role = request.app.state.billing.membership(org_id, user_id)
+    role = request.app.state.billing.membership(org_id, user.subject)
     if role is None:
         raise HTTPException(status_code=403, detail="Not a member of this workspace")
     return role
@@ -108,7 +109,7 @@ def get_webhook(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> WebhookView:
-    role = _role(request, org_id, user.subject)
+    role = _role(request, org_id, user)
     return _view(request, org_id, role)
 
 
@@ -119,7 +120,7 @@ def put_webhook(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> WebhookView:
-    role = _role(request, org_id, user.subject)
+    role = _role(request, org_id, user)
     if role not in _MANAGERS:
         raise HTTPException(status_code=403, detail="Only a workspace owner or admin can manage webhooks.")
     try:
@@ -155,7 +156,7 @@ def delete_webhook(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> None:
-    role = _role(request, org_id, user.subject)
+    role = _role(request, org_id, user)
     if role not in _MANAGERS:
         raise HTTPException(status_code=403, detail="Only a workspace owner or admin can manage webhooks.")
     request.app.state.webhooks.delete_endpoint(org_id)
@@ -168,6 +169,6 @@ def list_deliveries(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> list[DeliveryView]:
-    _role(request, org_id, user.subject)
+    _role(request, org_id, user)
     rows = request.app.state.webhooks.list_deliveries(org_id, limit=20)
     return [_delivery_view(row) for row in rows]

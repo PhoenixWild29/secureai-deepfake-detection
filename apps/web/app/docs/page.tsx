@@ -87,7 +87,10 @@ export default function DocsPage() {
         Pro and Team can mint a key from the <Link href="/keys">API keys</Link> page. The secret starts
         with <code>sai_</code>, is shown once, and is stored only as a SHA-256 hash. Send{" "}
         <code>Authorization: Bearer sai_…</code>. A personal key may send <code>X-Org-Id</code>, and that
-        workspace has to be Pro or Team. A workspace key stays inside that workspace. If its creator is
+        workspace has to be Pro or Team. A workspace key stays inside that workspace, including
+        member, webhook, Checkout, and portal routes that name an organization in the path or body.
+        It cannot create another workspace. Team Checkout with no organization id uses the bound
+        workspace. If its creator is
         removed or demoted from owner or admin, the next use hard-revokes that key (401). Promoting them
         later does not restore it. Free plans cannot create or use a key, including on a private
         workstation. Revoking a key rejects it on the next request. Clerk session tokens still work, and{" "}
