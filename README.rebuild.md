@@ -206,7 +206,7 @@ Events are not applied in arrival order. A subscription update, delete, or invoi
 
 Paid plans are taken from `STRIPE_PRICE_PRO` and `STRIPE_PRICE_TEAM` only. Checkout reads a line-item price id when the event has one. When it does not, Checkout uses the plan recorded for that session at creation, and only if that session's price id is still one of those two. `metadata.plan` is not read. An unknown price id does not upgrade the account. A later subscription event corrects the plan when its price id is one of those two. A paid session that cannot be named is logged at error, because the customer may already have been charged.
 
-That recorded plan lives in `checkout_intents`. Rows older than 7 days are deleted when another Checkout session is saved or a new Stripe event is applied. Stripe retries a webhook for about 3 days, so a late `checkout.session.completed` with no price id can still find its row. There is no migration for this cleanup.
+That recorded plan lives in `checkout_intents`. Rows older than 7 days are deleted when another Checkout session is saved or a Stripe event is applied, including an event id that was already stored. Stripe retries a webhook for about 3 days, so a late `checkout.session.completed` with no price id can still find its row. There is no migration for this cleanup.
 
 `past_due` keeps the paid plan for the dunning window. This API does not expire `past_due` by itself. Stripe billing settings must end dunning in `unpaid` or `canceled` (Smart Retries, then cancel or mark the subscription unpaid). Those terminal statuses return the account to the free trial. `canceled` does that as well. Leave Smart Retries on that ending state before any live key is considered. An unpaid Checkout session does not grant Pro or Team.
 

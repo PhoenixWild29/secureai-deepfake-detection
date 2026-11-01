@@ -1085,15 +1085,19 @@ class PostgresBillingStore:
         *,
         free_seat_limit: int = 3,
     ) -> bool:
+        now = _now()
         with self._session() as session:
+            # Match MemoryBillingStore: prune before the duplicate check, and
+            # keep that delete when this event id was already stored.
+            _prune_checkout_rows(session, now)
             if session.get(StripeEventRow, event_id) is not None:
+                session.commit()
                 return False
-            _prune_checkout_rows(session, _now())
             session.add(
                 StripeEventRow(
                     id=event_id,
                     event_type=event_type[:128],
-                    received_at=_now(),
+                    received_at=now,
                 )
             )
             if update is not None:

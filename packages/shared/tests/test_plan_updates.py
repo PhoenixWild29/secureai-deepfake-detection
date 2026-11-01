@@ -447,3 +447,52 @@ def test_old_checkout_intents_are_pruned() -> None:
     store.remember_checkout(session_id="cs_new", plan="pro", price_id="price_pro")
     assert store.checkout_plan("cs_old", prices=prices) is None
     assert store.checkout_plan("cs_new", prices=prices) == "pro"
+
+
+def test_stripe_event_prune_order_matches_across_stores() -> None:
+    """Both stores prune checkout intents before the duplicate-event check.
+
+    A repeated event id returns False and still drops intents older than 7 days.
+    """
+
+    from datetime import datetime, timedelta, timezone
+
+    from sqlalchemy import create_engine, text
+
+    from secureai_shared.billing import BillingStore, MemoryBillingStore, PostgresBillingStore
+    from secureai_shared.db import Base
+
+    prices = {"price_pro": "pro"}
+    stale = datetime.now(timezone.utc) - timedelta(days=8)
+
+    def age(store: BillingStore, session_id: str) -> None:
+        if isinstance(store, MemoryBillingStore):
+            plan, price_id, _created = store._checkout_intents[session_id]  # noqa: SLF001
+            store._checkout_intents[session_id] = (plan, price_id, stale)  # noqa: SLF001
+            return
+        assert isinstance(store, PostgresBillingStore)
+        with store.engine.begin() as connection:
+            connection.execute(
+                text(
+                    "UPDATE checkout_intents SET created_at = :stamp WHERE session_id = :session_id"
+                ),
+                {"stamp": "2000-01-01 00:00:00", "session_id": session_id},
+            )
+
+    def script(store: BillingStore) -> None:
+        store.remember_checkout(session_id="cs_old", plan="pro", price_id="price_pro")
+        age(store, "cs_old")
+        assert store.apply_stripe_event("evt_shared", "invoice.paid", None) is True
+        assert store.checkout_plan("cs_old", prices=prices) is None
+        store.remember_checkout(session_id="cs_later", plan="pro", price_id="price_pro")
+        age(store, "cs_later")
+        assert store.checkout_plan("cs_later", prices=prices) == "pro"
+        assert store.apply_stripe_event("evt_shared", "invoice.paid", None) is False
+        assert store.checkout_plan("cs_later", prices=prices) is None
+        store.remember_checkout(session_id="cs_fresh", plan="pro", price_id="price_pro")
+        assert store.checkout_plan("cs_fresh", prices=prices) == "pro"
+
+    script(MemoryBillingStore())
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    script(PostgresBillingStore(engine=engine))
