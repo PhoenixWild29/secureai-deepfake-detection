@@ -82,7 +82,7 @@ The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Cle
 
 The worker flushes Sentry for up to 2 seconds before it exits. Leave `SENTRY_DSN` empty to send nothing. No extra variable is required.
 
-Workspace webhook delivery connects to the public address it just resolved and keeps the hostname for TLS. Signing secrets are stored in plaintext in `webhook_endpoints`. Any HTTPS port is accepted. `RATE_LIMIT_ATTESTATIONS` uses the TCP peer, not `X-Forwarded-For`. After an attestation key rotation, old `key_id` values no longer verify.
+Workspace webhook delivery tries each public address from one resolution, in order, and keeps the hostname for TLS. Signing secrets are stored in plaintext in `webhook_endpoints`. Any HTTPS port is accepted. `RATE_LIMIT_ATTESTATIONS` uses the TCP peer, not `X-Forwarded-For`. After an attestation key rotation, old `key_id` values no longer verify.
 
 `CORS_ORIGINS=*` is not a safe production value. Job routes send `Authorization`, and the process exits if that wildcard is set.
 

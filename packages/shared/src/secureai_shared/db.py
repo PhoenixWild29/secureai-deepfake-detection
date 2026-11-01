@@ -91,7 +91,7 @@ class CheckoutIntentRow(Base):
     row only when the event also has no price id, and only if `price_id` is
     still a configured Pro or Team price. metadata.plan is not consulted.
     Rows older than 7 days are deleted when another session is saved or a
-    new Stripe event is applied.
+    Stripe event is applied, including an event id that was already stored.
     """
 
     __tablename__ = "checkout_intents"

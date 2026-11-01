@@ -206,7 +206,7 @@ Events are not applied in arrival order. A subscription update, delete, or invoi
 
 Paid plans are taken from `STRIPE_PRICE_PRO` and `STRIPE_PRICE_TEAM` only. Checkout reads a line-item price id when the event has one. When it does not, Checkout uses the plan recorded for that session at creation, and only if that session's price id is still one of those two. `metadata.plan` is not read. An unknown price id does not upgrade the account. A later subscription event corrects the plan when its price id is one of those two. A paid session that cannot be named is logged at error, because the customer may already have been charged.
 
-That recorded plan lives in `checkout_intents`. Rows older than 7 days are deleted when another Checkout session is saved or a new Stripe event is applied. Stripe retries a webhook for about 3 days, so a late `checkout.session.completed` with no price id can still find its row. There is no migration for this cleanup.
+That recorded plan lives in `checkout_intents`. Rows older than 7 days are deleted when another Checkout session is saved or a Stripe event is applied, including an event id that was already stored. Stripe retries a webhook for about 3 days, so a late `checkout.session.completed` with no price id can still find its row. There is no migration for this cleanup.
 
 `past_due` keeps the paid plan for the dunning window. This API does not expire `past_due` by itself. Stripe billing settings must end dunning in `unpaid` or `canceled` (Smart Retries, then cancel or mark the subscription unpaid). Those terminal statuses return the account to the free trial. `canceled` does that as well. Leave Smart Retries on that ending state before any live key is considered. An unpaid Checkout session does not grant Pro or Team.
 
@@ -363,7 +363,7 @@ The body is compact JSON, the same bytes on every retry:
 {"confidence":0.5,"job_id":"job_...","org_id":"org_...","prediction":"fake","status":"completed","timestamp":"2026-11-01T12:00:00+00:00"}
 ```
 
-`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate. The worker resolves the hostname once and opens the socket to that address. The Host header and the certificate name stay the hostname, so a DNS answer that changes after the check cannot point that connection at a private address. Any TCP port is still accepted. A public address that proxies somewhere else is outside this check. Two owners saving the endpoint at the same time: the second write updates the row instead of failing the request.
+`timestamp` is the job's `updated_at` in UTC. `prediction` and `confidence` are null when the job failed. Headers are `Content-Type: application/json` and `User-Agent: SecureAI-Webhooks/1`. Redirects are not followed. The certificate must validate. The worker resolves the hostname once and tries those addresses in order, stopping at the first TCP connection that succeeds. The Host header and the certificate name stay the hostname, so a DNS answer that changes after the check cannot point that connection at a private address. Any TCP port is still accepted. A public address that proxies somewhere else is outside this check. Two owners saving the endpoint at the same time: the second write updates the row instead of failing the request.
 
 When a secret is set, the worker also sends:
 
