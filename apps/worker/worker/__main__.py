@@ -42,6 +42,10 @@ DRAIN_MARGIN_SECONDS = 8.0
 # post_webhook can spend the timeout on TCP, then the same timeout again
 # on TLS and the HTTP response. These seconds cover the delivery row write.
 WEBHOOK_JOIN_MARGIN_SECONDS = 2.0
+# Slack after that doubled timeout. The previous lease was one timeout plus
+# this many seconds. Shutdown joins for 2t+2, so the claim has to be 2t plus
+# the same margin or a join that hits its limit has already expired the row.
+WEBHOOK_LEASE_MARGIN_SECONDS = 15.0
 
 
 def shutdown_drain_seconds() -> int:
@@ -62,6 +66,11 @@ def shutdown_drain_seconds() -> int:
     is scored, and an idle shutdown is the poll plus
     ``webhook_shutdown_join_seconds`` plus the Sentry flush. Both fit here
     for the default webhook timeout and for the maximum of 30 seconds.
+
+    The delivery lease is ``webhook_delivery_lease_seconds`` (2t+15), counted
+    from the claim. At timeout 30 the join is 62 seconds and the lease is 75,
+    so the claim still covers a join that starts with the claim. Idle shutdown
+    at that timeout is 5 + 62 + 2 = 69 seconds. This drain stays 75.
     """
 
     total = (
@@ -83,6 +92,24 @@ def webhook_shutdown_join_seconds(timeout_seconds: float) -> float:
     """
 
     return timeout_seconds * 2 + WEBHOOK_JOIN_MARGIN_SECONDS
+
+
+def webhook_delivery_lease_seconds(timeout_seconds: float) -> float:
+    """How long a claimed delivery stays leased to this worker.
+
+    ``post_webhook`` can spend ``timeout_seconds`` on TCP and the same value
+    again on TLS and the response. Shutdown joins that thread for
+    ``webhook_shutdown_join_seconds`` (2t+2). The lease is 2t+15, so it is
+    still in the future when that join hits its limit, including at the
+    maximum timeout of 30. The 15 seconds is the margin the previous lease
+    kept after a single timeout. A lease of t+15 expires during the join
+    once the timeout is above 13 seconds.
+
+    The clock starts at the claim. It is not part of
+    ``shutdown_drain_seconds``.
+    """
+
+    return timeout_seconds * 2 + WEBHOOK_LEASE_MARGIN_SECONDS
 
 
 def warn_if_detector_timeout_exceeds_drain(timeout_seconds: float) -> None:
@@ -286,7 +313,9 @@ def _serve_webhooks(
                 post=post_webhook,
                 timeout=settings.webhook_timeout_seconds,
                 max_attempts=settings.webhook_max_attempts,
-                lease_seconds=settings.webhook_timeout_seconds + 15,
+                lease_seconds=webhook_delivery_lease_seconds(
+                    settings.webhook_timeout_seconds
+                ),
             )
         except Exception:
             logger.exception("webhook delivery error")

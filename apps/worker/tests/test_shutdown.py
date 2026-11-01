@@ -12,6 +12,7 @@ import time
 from datetime import datetime, timezone
 from inspect import signature
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -28,8 +29,11 @@ from worker.__main__ import (
     DEFAULT_POLL_SECONDS,
     SENTRY_FLUSH_SECONDS,
     WEBHOOK_JOIN_MARGIN_SECONDS,
+    WEBHOOK_LEASE_MARGIN_SECONDS,
+    _serve_webhooks,
     run,
     shutdown_drain_seconds,
+    webhook_delivery_lease_seconds,
     webhook_shutdown_join_seconds,
     warn_if_detector_timeout_exceeds_drain,
 )
@@ -74,6 +78,57 @@ def test_webhook_shutdown_join_fits_in_the_platform_drain() -> None:
     assert webhook_shutdown_join_seconds(Settings.webhook_timeout_seconds) == (
         2 * Settings.webhook_timeout_seconds + WEBHOOK_JOIN_MARGIN_SECONDS
     )
+    # The lease is counted from the claim. At the maximum timeout it is 75
+    # seconds and the join is 62. Idle shutdown stays 5 + 62 + 2 = 69.
+    assert webhook_delivery_lease_seconds(maximum_webhook_timeout) == 75.0
+    assert webhook_shutdown_join_seconds(maximum_webhook_timeout) == 62.0
+    assert idle == 69.0
+    assert webhook_delivery_lease_seconds(maximum_webhook_timeout) >= (
+        webhook_shutdown_join_seconds(maximum_webhook_timeout)
+    )
+
+
+@pytest.mark.parametrize("timeout", [10.0, 13.0, 14.0, 30.0])
+def test_delivery_lease_covers_the_shutdown_join(timeout: float) -> None:
+    # t+15 covers the join 2t+2 only while t is at most 13. Above that,
+    # including the allowed maximum of 30, the claim expired during the join.
+    lease = webhook_delivery_lease_seconds(timeout)
+    join_for = webhook_shutdown_join_seconds(timeout)
+    previous_lease = timeout + WEBHOOK_LEASE_MARGIN_SECONDS
+    assert lease == 2 * timeout + WEBHOOK_LEASE_MARGIN_SECONDS
+    assert join_for == 2 * timeout + WEBHOOK_JOIN_MARGIN_SECONDS
+    assert lease >= join_for
+    assert lease - join_for == WEBHOOK_LEASE_MARGIN_SECONDS - WEBHOOK_JOIN_MARGIN_SECONDS
+    if timeout > 13:
+        assert previous_lease < join_for
+    else:
+        assert previous_lease >= join_for
+
+
+@pytest.mark.parametrize("timeout", [10.0, 14.0, 30.0])
+def test_serve_webhooks_claims_with_the_lease_that_covers_the_join(
+    timeout: float,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: dict[str, float] = {}
+    stop = {"flag": False}
+
+    def deliver_once(*_args: object, **kwargs: object) -> bool:
+        lease = kwargs["lease_seconds"]
+        posted_timeout = kwargs["timeout"]
+        assert isinstance(lease, (int, float))
+        assert isinstance(posted_timeout, (int, float))
+        seen["lease_seconds"] = float(lease)
+        seen["timeout"] = float(posted_timeout)
+        stop["flag"] = True
+        return False
+
+    monkeypatch.setattr("worker.__main__.deliver_once", deliver_once)
+    settings = SimpleNamespace(webhook_timeout_seconds=timeout, webhook_max_attempts=5)
+    _serve_webhooks(stop, None, None, settings)  # type: ignore[arg-type]
+    assert seen["timeout"] == timeout
+    assert seen["lease_seconds"] == webhook_delivery_lease_seconds(timeout)
+    assert seen["lease_seconds"] >= webhook_shutdown_join_seconds(timeout)
 
 
 @pytest.mark.parametrize("timeout", [60.0, 59.0, 1.0])
