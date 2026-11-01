@@ -37,6 +37,8 @@ export function JobList({ apiUrl, token, getToken }: JobListProps) {
     }
     const ticket = request.current + 1;
     request.current = ticket;
+    // loadOlder clears loadingMore only while this ticket still matches.
+    setLoadingMore(false);
     let cancelled = false;
     const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
     void (async () => {
@@ -105,6 +107,7 @@ export function JobList({ apiUrl, token, getToken }: JobListProps) {
         };
       });
     } finally {
+      // A newer first-page fetch owns the button. It clears loadingMore itself.
       if (request.current === ticket) {
         setLoadingMore(false);
       }

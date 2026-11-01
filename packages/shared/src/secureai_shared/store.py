@@ -72,6 +72,8 @@ def _before_clause(created_at: datetime, job_id: str):
 
     ``created_at`` is newest-first. ``job_id`` breaks ties so two rows written
     in one batch, which share a timestamp, stay on a stable page boundary.
+    ``id < job_id`` uses the column collation. Ids are ``job_`` plus lowercase
+    hex, which sorts the same as the in-memory code-point order.
     """
 
     return or_(
