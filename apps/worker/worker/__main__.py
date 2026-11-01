@@ -51,7 +51,8 @@ def shutdown_drain_seconds() -> int:
 
     The sum uses the default poll, the default detector timeout, and the
     default Sentry flush. It does not read ``DETECTOR_TIMEOUT_SECONDS``.
-    A larger timeout needs a larger platform drain.
+    A larger timeout needs a larger platform drain. ``run`` warns once at
+    startup when the configured timeout is greater than this default.
     """
 
     total = (
@@ -61,6 +62,30 @@ def shutdown_drain_seconds() -> int:
         + DRAIN_MARGIN_SECONDS
     )
     return math.ceil(total)
+
+
+def warn_if_detector_timeout_exceeds_drain(timeout_seconds: float) -> None:
+    """Warn when the env timeout is longer than the platform drain budget.
+
+    ``shutdown_drain_seconds`` and ``deploy/railway/worker.railway.json`` stay
+    on the default detector timeout (60). Raising ``DETECTOR_TIMEOUT_SECONDS``
+    without raising ``drainingSeconds`` by the same amount lets Railway
+    SIGKILL a job that is still inside ``detect_video``.
+    """
+
+    default_timeout = Settings.detector_timeout_seconds
+    if timeout_seconds <= default_timeout:
+        return
+    delta = timeout_seconds - default_timeout
+    logger.warning(
+        "DETECTOR_TIMEOUT_SECONDS=%g is greater than the default %g tracked by "
+        "shutdown_drain_seconds() (drainingSeconds=%s). The drain budget may be "
+        "short. Raise drainingSeconds by %g.",
+        timeout_seconds,
+        default_timeout,
+        shutdown_drain_seconds(),
+        delta,
+    )
 
 
 def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False) -> int:
@@ -95,6 +120,9 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     except Exception:
         logger.exception("worker configuration failed")
         return 2
+
+    # Once, before the poll loop. The drain budget does not follow the env.
+    warn_if_detector_timeout_exceeds_drain(settings.detector_timeout_seconds)
 
     def note_terminal(job: JobRecord) -> None:
         try:

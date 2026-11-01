@@ -32,7 +32,7 @@ The API listens on `$PORT` (default 8000). `apps/api/docker_entrypoint.py` repla
 
 The worker has no HTTP port. It BRPOPs the shared Redis list. It also delivers workspace webhooks from `{QUEUE_KEY}:webhooks` on a background thread, so detection does not wait on that HTTP call. The image starts `python -m worker` as PID 1. That process handles SIGTERM: it stops taking new ids, finishes the job it already popped, and exits. `python -m worker --once` scores one job and exits, which stops webhook delivery. Do not wrap the start command in a shell. Do not set a healthcheck path. The process does not listen, so a path would fail and the restart policy would cycle it.
 
-`worker.railway.json` sets `drainingSeconds` to 75. That is the default poll (5 seconds) plus the default detector timeout (60 seconds) plus the Sentry flush (2 seconds) plus 8 seconds. SIGTERM during the Redis wait does not cancel that wait, and an id popped before the flag is checked is still scored. A shorter drain SIGKILLs the worker and leaves that id leased until `STUCK_JOB_SECONDS` (default 180). If you raise `DETECTOR_TIMEOUT_SECONDS` above 60, raise `drainingSeconds` by the same amount. There is no `healthcheckTimeout` on this service.
+`worker.railway.json` sets `drainingSeconds` to 75. That is the default poll (5 seconds) plus the default detector timeout (60 seconds) plus the Sentry flush (2 seconds) plus 8 seconds. SIGTERM during the Redis wait does not cancel that wait, and an id popped before the flag is checked is still scored. A shorter drain SIGKILLs the worker and leaves that id leased until `STUCK_JOB_SECONDS` (default 180). If you raise `DETECTOR_TIMEOUT_SECONDS` above 60, raise `drainingSeconds` by the same amount. The worker logs that warning once at startup and includes the delta. There is no `healthcheckTimeout` on this service.
 
 ## Variables
 
@@ -54,7 +54,7 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `S3_ENDPOINT` | api, worker | Railway or other S3-compatible endpoint. Empty for AWS |
 | `S3_REGION` | api, worker | Optional. Default `us-east-1` |
 | `S3_AUTO_CREATE_BUCKET` | api, worker | Leave unset or `false` in production. `true` is for MinIO/local only |
-| `DETECTOR_TIMEOUT_SECONDS` | worker | Optional. Default `60`. Hard stop around `detect_video`. Raising it means raising `drainingSeconds` by the same amount |
+| `DETECTOR_TIMEOUT_SECONDS` | worker | Optional. Default `60`. Hard stop around `detect_video`. Raising it means raising `drainingSeconds` by the same amount. The worker warns once at startup when it is above 60 |
 | `STUCK_JOB_SECONDS` | worker | Optional. Default `180`. Must be greater than the detector timeout |
 | `JOB_MAX_ATTEMPTS` | worker | Optional. Default `3` |
 | `RATE_LIMIT_JOBS` | api | Optional. Default `30` per window. `0` disables |
