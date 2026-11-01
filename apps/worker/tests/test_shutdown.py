@@ -1,4 +1,4 @@
-"""SIGTERM finishes the popped job, and the Railway drain covers that wait."""
+"""SIGTERM finishes the popped job and the webhook POST already in progress."""
 
 from __future__ import annotations
 
@@ -8,6 +8,8 @@ import math
 import os
 import signal
 import threading
+import time
+from datetime import datetime, timezone
 from inspect import signature
 from pathlib import Path
 
@@ -19,17 +21,29 @@ from secureai_shared.reporting import flush_error_reporting
 from secureai_shared.settings import Settings
 from secureai_shared.storage import FileSystemStorage, new_object_key
 from secureai_shared.store import MemoryJobStore
+from secureai_shared.webhook_queue import MemoryWebhookQueue
+from secureai_shared.webhooks import MemoryWebhookStore
 from worker.__main__ import (
     DRAIN_MARGIN_SECONDS,
     DEFAULT_POLL_SECONDS,
     SENTRY_FLUSH_SECONDS,
+    WEBHOOK_JOIN_MARGIN_SECONDS,
     run,
     shutdown_drain_seconds,
+    webhook_shutdown_join_seconds,
     warn_if_detector_timeout_exceeds_drain,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 WORKER_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _live_webhook_threads() -> list[threading.Thread]:
+    return [
+        thread
+        for thread in threading.enumerate()
+        if thread.name == "secureai-webhooks" and thread.is_alive()
+    ]
 
 
 def test_shutdown_drain_covers_poll_detection_and_sentry_flush() -> None:
@@ -44,6 +58,22 @@ def test_shutdown_drain_covers_poll_detection_and_sentry_flush() -> None:
     )
     # deploy/railway/README.md and worker.railway.json both use this number.
     assert shutdown_drain_seconds() == 75
+
+
+def test_webhook_shutdown_join_fits_in_the_platform_drain() -> None:
+    # load_settings caps WEBHOOK_TIMEOUT_SECONDS at 30. An idle SIGTERM
+    # spends the current poll, then this join, then the Sentry flush.
+    maximum_webhook_timeout = 30.0
+    idle = (
+        DEFAULT_POLL_SECONDS
+        + webhook_shutdown_join_seconds(maximum_webhook_timeout)
+        + SENTRY_FLUSH_SECONDS
+    )
+    assert idle <= shutdown_drain_seconds()
+    assert shutdown_drain_seconds() == 75
+    assert webhook_shutdown_join_seconds(Settings.webhook_timeout_seconds) == (
+        2 * Settings.webhook_timeout_seconds + WEBHOOK_JOIN_MARGIN_SECONDS
+    )
 
 
 @pytest.mark.parametrize("timeout", [60.0, 59.0, 1.0])
@@ -225,12 +255,12 @@ def test_sigterm_finishes_the_popped_job_and_leaves_the_next(
     signal.signal(signal.SIGTERM, swallow)
     try:
         assert run([], install_signal_handlers=True) == 0
+        assert _live_webhook_threads() == []
     finally:
         signal.signal(signal.SIGTERM, previous_term)
         signal.signal(signal.SIGINT, previous_int)
-        for thread in threading.enumerate():
-            if thread.name == "secureai-webhooks":
-                thread.join(timeout=2)
+        for thread in _live_webhook_threads():
+            thread.join(timeout=2)
 
     assert leaked == []
     assert seen == [jobs[0].id]
@@ -241,3 +271,231 @@ def test_sigterm_finishes_the_popped_job_and_leaves_the_next(
     assert waiting is not None
     assert waiting.status is JobStatus.queued
     assert queue.consume() == jobs[1].id
+
+
+class _WaitingQueue(MemoryJobQueue):
+    """BRPOP stand-in. MemoryJobQueue.consume returns immediately and ignores timeout."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.waits = 0
+
+    def consume(self, timeout: float = 0) -> str | None:
+        self.waits += 1
+        if self.waits > 40:
+            raise RuntimeError("webhook shutdown did not stop the poll")
+        if timeout > 0:
+            time.sleep(timeout)
+        return None
+
+
+def _arm_webhook_worker(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    queue: MemoryJobQueue,
+) -> tuple[MemoryWebhookStore, MemoryWebhookQueue]:
+    monkeypatch.setenv("AUTH_MODE", "dev")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://unused/unused")
+    monkeypatch.setenv("QUEUE_BACKEND", "memory")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("STORAGE_BACKEND", "filesystem")
+    monkeypatch.setenv("MEDIA_ROOT", str(tmp_path))
+    monkeypatch.delenv("SENTRY_DSN", raising=False)
+    webhooks = MemoryWebhookStore()
+    webhook_queue = MemoryWebhookQueue()
+    monkeypatch.setattr("worker.__main__.PostgresJobStore", lambda url: MemoryJobStore())
+    monkeypatch.setattr("worker.__main__.build_queue", lambda settings: queue)
+    monkeypatch.setattr(
+        "worker.__main__.build_storage",
+        lambda settings: FileSystemStorage(tmp_path),
+    )
+    monkeypatch.setattr("worker.__main__.open_webhook_store", lambda job_store: webhooks)
+    monkeypatch.setattr("worker.__main__.build_webhook_queue", lambda settings: webhook_queue)
+    return webhooks, webhook_queue
+
+
+def _seed_deliveries(webhooks: MemoryWebhookStore, webhook_queue: MemoryWebhookQueue) -> tuple[str, str]:
+    when = datetime(2026, 11, 1, tzinfo=timezone.utc)
+    org_id = "org_abcdef012345"
+    webhooks.upsert_endpoint(
+        org_id=org_id,
+        url="https://hooks.example/secureai",
+        secret=None,
+        keep_secret=False,
+        notify_failures=True,
+    )
+    ids: list[str] = []
+    for job_id in ("job_one", "job_two"):
+        delivery = webhooks.create_delivery(
+            org_id=org_id,
+            job_id=job_id,
+            payload='{"job_id":"%s"}' % job_id,
+            now=when,
+        )
+        assert delivery is not None
+        webhook_queue.publish(delivery.id, available_at=when.timestamp())
+        ids.append(delivery.id)
+    return ids[0], ids[1]
+
+
+def test_sigterm_records_the_inflight_webhook_and_leaves_the_next_queued(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    queue = _WaitingQueue()
+    webhooks, webhook_queue = _arm_webhook_worker(monkeypatch, tmp_path, queue)
+    first_id, second_id = _seed_deliveries(webhooks, webhook_queue)
+    release = threading.Event()
+    calls: list[bytes] = []
+    original_signal = signal.signal
+
+    def post(url: str, body: bytes, headers: object, timeout: float) -> int:
+        del url, headers, timeout
+        calls.append(bytes(body))
+        os.kill(os.getpid(), signal.SIGTERM)
+        # Return only after the handler has set the stop flag, so a second
+        # claim cannot sneak in between the signal and deliver_once returning.
+        release.wait(timeout=3)
+        return 204
+
+    def capture(signum: int, handler: object):
+        def wrapped(num: int, frame: object) -> None:
+            handler(num, frame)  # type: ignore[operator]
+            release.set()
+
+        return original_signal(signum, wrapped)
+
+    monkeypatch.setattr("worker.__main__.post_webhook", post)
+    monkeypatch.setattr(signal, "signal", capture)
+    previous_term = signal.getsignal(signal.SIGTERM)
+    previous_int = signal.getsignal(signal.SIGINT)
+    try:
+        with caplog.at_level(logging.WARNING, logger="secureai.worker"):
+            assert run(["--poll-seconds", "0.05"], install_signal_handlers=True) == 0
+        assert _live_webhook_threads() == []
+    finally:
+        original_signal(signal.SIGTERM, previous_term)
+        original_signal(signal.SIGINT, previous_int)
+        release.set()
+        for thread in _live_webhook_threads():
+            thread.join(timeout=2)
+
+    assert calls == [b'{"job_id":"job_one"}'] or calls == [b'{"job_id":"job_two"}']
+    assert len(calls) == 1
+    saved = [webhooks.get_delivery(first_id), webhooks.get_delivery(second_id)]
+    succeeded = [row for row in saved if row is not None and row.status == "succeeded"]
+    pending = [row for row in saved if row is not None and row.status == "pending"]
+    assert len(succeeded) == 1
+    assert len(pending) == 1
+    assert succeeded[0].attempt == 1
+    assert succeeded[0].last_status_code == 204
+    assert succeeded[0].claim_token is None
+    assert pending[0].attempt == 0
+    assert pending[0].claim_token is None
+    assert pending[0].delivering_until is None
+    assert webhook_queue.claim(now=time.time()) == pending[0].id
+    assert not any(
+        "did not finish within" in record.getMessage()
+        for record in caplog.records
+        if record.levelno >= logging.WARNING
+    )
+
+
+def test_shutdown_join_limit_leaves_the_claim_leased(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    queue = _WaitingQueue()
+    webhooks, webhook_queue = _arm_webhook_worker(monkeypatch, tmp_path, queue)
+    first_id, second_id = _seed_deliveries(webhooks, webhook_queue)
+    hold = threading.Event()
+    monkeypatch.setattr(
+        "worker.__main__.webhook_shutdown_join_seconds",
+        lambda timeout_seconds: 0.2,
+    )
+
+    def post(url: str, body: bytes, headers: object, timeout: float) -> int:
+        del url, body, headers, timeout
+        os.kill(os.getpid(), signal.SIGTERM)
+        hold.wait(timeout=2)
+        return 204
+
+    monkeypatch.setattr("worker.__main__.post_webhook", post)
+    previous_term = signal.getsignal(signal.SIGTERM)
+    previous_int = signal.getsignal(signal.SIGINT)
+    signal.signal(signal.SIGTERM, lambda _signum, _frame: None)
+    try:
+        with caplog.at_level(logging.WARNING, logger="secureai.worker"):
+            assert run(["--poll-seconds", "0.05"], install_signal_handlers=True) == 0
+        claimed = [
+            row
+            for row in (webhooks.get_delivery(first_id), webhooks.get_delivery(second_id))
+            if row is not None and row.claim_token
+        ]
+        waiting = [
+            row
+            for row in (webhooks.get_delivery(first_id), webhooks.get_delivery(second_id))
+            if row is not None and row.claim_token is None
+        ]
+        assert len(claimed) == 1
+        assert len(waiting) == 1
+        assert claimed[0].status == "pending"
+        assert claimed[0].attempt == 0
+        assert waiting[0].status == "pending"
+        assert waiting[0].attempt == 0
+        assert webhook_queue.claim(now=time.time()) == waiting[0].id
+        warnings = [
+            record.getMessage()
+            for record in caplog.records
+            if record.levelno == logging.WARNING and record.name == "secureai.worker"
+        ]
+        assert any("did not finish within 0.2s of shutdown" in message for message in warnings)
+        assert any("claim lease is the retry" in message for message in warnings)
+    finally:
+        hold.set()
+        signal.signal(signal.SIGTERM, previous_term)
+        signal.signal(signal.SIGINT, previous_int)
+        for thread in _live_webhook_threads():
+            thread.join(timeout=2)
+
+
+def test_job_abort_stops_the_webhook_thread(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("AUTH_MODE", "dev")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://unused/unused")
+    monkeypatch.setenv("QUEUE_BACKEND", "memory")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("STORAGE_BACKEND", "filesystem")
+    monkeypatch.setenv("MEDIA_ROOT", str(tmp_path))
+    store = MemoryJobStore()
+    queue = MemoryJobQueue()
+    storage = FileSystemStorage(tmp_path)
+    key = new_object_key("user_dev", "clip.mp4")
+    storage.put(key, b"clip-bytes", "video/mp4")
+    job = store.create(
+        user_id="user_dev",
+        filename="clip.mp4",
+        content_type="video/mp4",
+        byte_size=len(b"clip-bytes"),
+        object_key=key,
+    )
+    queue.publish(job.id)
+    monkeypatch.setattr("worker.__main__.PostgresJobStore", lambda url: store)
+    monkeypatch.setattr("worker.__main__.build_queue", lambda settings: queue)
+    monkeypatch.setattr("worker.__main__.build_storage", lambda settings: storage)
+
+    def boom(*args: object, **kwargs: object) -> None:
+        del args, kwargs
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr("worker.__main__.process_job", boom)
+    try:
+        assert run(["--poll-seconds", "0.05"]) == 2
+        assert _live_webhook_threads() == []
+    finally:
+        for thread in _live_webhook_threads():
+            thread.join(timeout=2)

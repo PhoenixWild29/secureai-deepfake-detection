@@ -39,20 +39,29 @@ DEFAULT_POLL_SECONDS = 5.0
 SENTRY_FLUSH_SECONDS = 2.0
 # Claim, object download, and the row write are outside the detector timer.
 DRAIN_MARGIN_SECONDS = 8.0
+# post_webhook can spend the timeout on TCP, then the same timeout again
+# on TLS and the HTTP response. These seconds cover the delivery row write.
+WEBHOOK_JOIN_MARGIN_SECONDS = 2.0
 
 
 def shutdown_drain_seconds() -> int:
     """Seconds the platform must wait after SIGTERM before SIGKILL.
 
     The handler only sets a flag. ``run`` reads that flag after the current
-    Redis wait and after the job that wait already popped. ``main`` then
-    flushes error reporting. A shorter drain ends the process with SIGKILL
-    and leaves that job leased until ``STUCK_JOB_SECONDS``.
+    Redis wait and after the job that wait already popped. It then joins
+    the webhook POST already in progress. ``main`` flushes error reporting.
+    A shorter drain ends the process with SIGKILL and leaves that job leased
+    until ``STUCK_JOB_SECONDS``.
 
     The sum uses the default poll, the default detector timeout, and the
     default Sentry flush. It does not read ``DETECTOR_TIMEOUT_SECONDS``.
     A larger timeout needs a larger platform drain. ``run`` warns once at
     startup when the configured timeout is greater than this default.
+
+    Keep the webhook join out of this sum. The POST runs while a popped job
+    is scored, and an idle shutdown is the poll plus
+    ``webhook_shutdown_join_seconds`` plus the Sentry flush. Both fit here
+    for the default webhook timeout and for the maximum of 30 seconds.
     """
 
     total = (
@@ -62,6 +71,18 @@ def shutdown_drain_seconds() -> int:
         + DRAIN_MARGIN_SECONDS
     )
     return math.ceil(total)
+
+
+def webhook_shutdown_join_seconds(timeout_seconds: float) -> float:
+    """How long shutdown waits for the webhook POST already in progress.
+
+    ``post_webhook`` uses ``timeout_seconds`` once for every TCP attempt,
+    then sets the socket timeout back to that same value for TLS and the
+    response. The margin covers the row write after the socket returns.
+    The join is bounded so a hung DNS lookup still lets ``main`` flush Sentry.
+    """
+
+    return timeout_seconds * 2 + WEBHOOK_JOIN_MARGIN_SECONDS
 
 
 def warn_if_detector_timeout_exceeds_drain(timeout_seconds: float) -> None:
@@ -142,8 +163,9 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     def request_stop(signum: int, _frame: object) -> None:
         # A flag, not SystemExit. Raising here would drop the id this process
         # already popped and leave its lease until STUCK_JOB_SECONDS. The
-        # loop scores that job, then returns. shutdown_drain_seconds() is
-        # how long the platform has to wait before SIGKILL.
+        # loop scores that job, then returns. The webhook thread is joined
+        # before that return. shutdown_drain_seconds() is how long the
+        # platform has to wait before SIGKILL.
         logger.info("shutdown signal=%s", signum)
         stop["flag"] = True
 
@@ -151,63 +173,96 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
         signal.signal(signal.SIGTERM, request_stop)
         signal.signal(signal.SIGINT, request_stop)
 
-    if not args.once:
-        threading.Thread(
-            target=_serve_webhooks,
-            name="secureai-webhooks",
-            args=(stop, webhooks, webhook_queue, settings),
-            daemon=True,
-        ).start()
+    # Daemon so a join that hits its limit can still return and flush Sentry.
+    # A non-daemon thread would keep the process up after that limit.
+    webhook_thread: threading.Thread | None = None
+    try:
+        if not args.once:
+            webhook_thread = threading.Thread(
+                target=_serve_webhooks,
+                name="secureai-webhooks",
+                args=(stop, webhooks, webhook_queue, settings),
+                daemon=True,
+            )
+            webhook_thread.start()
 
-    announced_idle = False
-    while not stop["flag"]:
-        try:
-            sweep_stuck(
-                store,
-                queue,
-                lease_seconds=settings.stuck_job_seconds,
-                max_attempts=settings.job_max_attempts,
-                on_terminal=note_terminal,
-            )
-            job_id = queue.consume(timeout=0 if args.once else args.poll_seconds)
-        except Exception:
-            logger.exception("queue read failed")
-            return 2
-        if job_id is None:
-            if args.once:
-                logger.info("no queued jobs")
-                return 0
-            if not announced_idle:
-                logger.info("idle: waiting for job ids on %s", settings.queue_key)
-                announced_idle = True
-            continue
         announced_idle = False
-        try:
-            finished = process_job(
-                store,
-                storage,
-                job_id,
-                timeout_seconds=settings.detector_timeout_seconds,
-                max_upload_bytes=settings.max_upload_bytes,
-            )
-        except Exception:
-            logger.exception("job aborted job_id=%s", job_id)
+        while not stop["flag"]:
             try:
-                rescue_popped(store, queue, job_id, on_terminal=note_terminal)
+                sweep_stuck(
+                    store,
+                    queue,
+                    lease_seconds=settings.stuck_job_seconds,
+                    max_attempts=settings.job_max_attempts,
+                    on_terminal=note_terminal,
+                )
+                job_id = queue.consume(timeout=0 if args.once else args.poll_seconds)
             except Exception:
-                logger.exception("could not rescue job_id=%s", job_id)
-            return 2
-        if finished is None:
-            logger.info("job not owned after pop job_id=%s", job_id)
-        else:
-            note_terminal(finished)
-        # Drop only the lease this pop created. A newer claim keeps its lease.
-        queue.ack(job_id, attempt=queue.held_attempt(job_id))
-        if args.once:
-            return 0
-        if args.poll_seconds <= 0:
-            time.sleep(0.1)
-    return 0
+                logger.exception("queue read failed")
+                return 2
+            if job_id is None:
+                if args.once:
+                    logger.info("no queued jobs")
+                    return 0
+                if not announced_idle:
+                    logger.info("idle: waiting for job ids on %s", settings.queue_key)
+                    announced_idle = True
+                continue
+            announced_idle = False
+            try:
+                finished = process_job(
+                    store,
+                    storage,
+                    job_id,
+                    timeout_seconds=settings.detector_timeout_seconds,
+                    max_upload_bytes=settings.max_upload_bytes,
+                )
+            except Exception:
+                logger.exception("job aborted job_id=%s", job_id)
+                try:
+                    rescue_popped(store, queue, job_id, on_terminal=note_terminal)
+                except Exception:
+                    logger.exception("could not rescue job_id=%s", job_id)
+                return 2
+            if finished is None:
+                logger.info("job not owned after pop job_id=%s", job_id)
+            else:
+                note_terminal(finished)
+            # Drop only the lease this pop created. A newer claim keeps its lease.
+            queue.ack(job_id, attempt=queue.held_attempt(job_id))
+            if args.once:
+                return 0
+            if args.poll_seconds <= 0:
+                time.sleep(0.1)
+        return 0
+    finally:
+        _join_webhook_thread(webhook_thread, stop, settings.webhook_timeout_seconds)
+
+
+def _join_webhook_thread(
+    thread: threading.Thread | None,
+    stop: dict[str, bool],
+    timeout_seconds: float,
+) -> None:
+    """Finish the POST already claimed, then let the process exit.
+
+    The flag stops the thread from claiming another id. The join covers
+    the POST ``deliver_once`` is already inside. A thread that was never
+    started (tests replace ``Thread.start``) is left alone.
+    """
+
+    stop["flag"] = True
+    if thread is None or not thread.is_alive():
+        return
+    join_for = webhook_shutdown_join_seconds(timeout_seconds)
+    logger.info("shutdown finishing in-flight webhook delivery (join %gs)", join_for)
+    thread.join(timeout=join_for)
+    if thread.is_alive():
+        logger.warning(
+            "in-flight webhook delivery did not finish within %gs of shutdown; "
+            "the claim lease is the retry",
+            join_for,
+        )
 
 
 def _serve_webhooks(
@@ -216,7 +271,12 @@ def _serve_webhooks(
     webhook_queue: WebhookQueue,
     settings: Settings,
 ) -> None:
-    """POST due deliveries. This thread is the only place the worker does webhook I/O."""
+    """POST due deliveries. This thread is the only place the worker does webhook I/O.
+
+    ``run`` sets the stop flag and joins this thread on the way out. The
+    flag is read between deliveries, so the POST already inside
+    ``deliver_once`` can store its result, and the next id stays queued.
+    """
 
     while not stop["flag"]:
         try:
