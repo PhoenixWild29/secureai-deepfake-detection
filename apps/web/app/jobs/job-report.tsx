@@ -34,7 +34,7 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
   const [waiting, setWaiting] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
-  const [pdfState, setPdfState] = useState<"ready" | "hidden">("ready");
+  const [pdfState, setPdfState] = useState<"ready" | "hidden" | "denied">("ready");
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [attestationState, setAttestationState] = useState<"unknown" | "ready" | "unavailable">("unknown");
@@ -175,6 +175,11 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
         setPdfState("hidden");
         return;
       }
+      if (caught instanceof ApiRequestError && caught.status === 402) {
+        setPdfState("denied");
+        setPdfError(caught.message);
+        return;
+      }
       setPdfError(caught instanceof Error ? caught.message : "Could not download the PDF.");
     } finally {
       setExportingPdf(false);
@@ -283,6 +288,11 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
           {pdfState === "ready" ? (
             <button type="button" className="secondary" onClick={() => void downloadPdf()} disabled={exportingPdf}>
               {exportingPdf ? "Preparing PDF…" : "Download PDF"}
+            </button>
+          ) : null}
+          {pdfState === "denied" ? (
+            <button type="button" className="secondary" disabled>
+              Download PDF
             </button>
           ) : null}
           {attestationState === "unavailable" ? null : (

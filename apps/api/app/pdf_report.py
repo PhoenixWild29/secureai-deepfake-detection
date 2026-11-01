@@ -1,8 +1,9 @@
 """One-page PDF for a completed detection report.
 
 fpdf2 writes the page with the built-in Helvetica font. There is no browser
-and no chart. Characters outside Windows-1252 become ``?`` so an unusual
-filename cannot fail the download.
+and no chart. ``core_fonts_encoding`` is Windows-1252, matching ``_pdf_text``.
+Characters outside that set become ``?`` so an unusual filename cannot fail
+the download. At most ``_MAX_SIGNALS`` signals are listed.
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from fpdf import FPDF
 
 PDF_PLAN_REQUIRED = "PDF export requires a Pro or Team plan."
 
+_MAX_SIGNALS = 12
 _SIGNAL_ORDER = ("texture", "motion", "temporal", "region")
 _SIGNAL_LABELS = {
     "texture": "Texture",
@@ -41,10 +43,11 @@ def render_job_report_pdf(
     """Render the JSON report fields. A typical job stays on one page."""
 
     pdf = FPDF(format="A4")
+    pdf.core_fonts_encoding = "cp1252"
     pdf.set_title("SecureAI Detection Report")
     pdf.set_author("SecureAI")
     pdf.set_creator("SecureAI")
-    pdf.set_subject(job_id)
+    pdf.set_subject(_pdf_text(job_id))
     pdf.set_margins(18, 18, 18)
     pdf.set_auto_page_break(auto=True, margin=18)
     pdf.add_page()
@@ -71,12 +74,23 @@ def render_job_report_pdf(
     pdf.set_font("Helvetica", "B", 12)
     pdf.cell(0, 8, "Signals", new_x="LMARGIN", new_y="NEXT")
     ordered = _ordered_signals(signals)
-    if not ordered:
+    shown = ordered[:_MAX_SIGNALS]
+    if not shown:
         pdf.set_font("Helvetica", "", 11)
         pdf.cell(0, 7, "No signals stored.", new_x="LMARGIN", new_y="NEXT")
     else:
-        for name in ordered:
+        for name in shown:
             _row(pdf, _signal_label(name), _number(signals[name]))
+        omitted = len(ordered) - len(shown)
+        if omitted:
+            pdf.set_font("Helvetica", "", 11)
+            pdf.cell(
+                0,
+                7,
+                _pdf_text(f"{omitted} additional signals omitted."),
+                new_x="LMARGIN",
+                new_y="NEXT",
+            )
 
     pdf.ln(2)
     pdf.set_font("Helvetica", "B", 12)

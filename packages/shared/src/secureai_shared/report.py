@@ -14,6 +14,8 @@ import json
 import math
 from collections.abc import Mapping
 
+from secureai_shared.attestation import may_issue_attestation
+
 REPORT_VERSION = 1
 
 LIMITATIONS = (
@@ -41,16 +43,15 @@ def dump_report_detail(model: str, signals: Mapping[str, float]) -> str:
 
 
 def may_export_pdf(*, auth_mode: str, quota_mode: str, plan: str) -> bool:
-    """Pro and Team can download a PDF. A private dev workstation with unlimited quota can too.
+    """Pro and Team can download a PDF. A free plan cannot.
 
-    This is the same rule as ``may_issue_attestation``. ``AUTH_MODE=clerk`` stays
-    on the plan check even when quotas are unlimited. ``past_due`` is already
+    This is ``may_issue_attestation``, including the private dev workstation
+    with unlimited quota. ``AUTH_MODE=clerk`` stays on the plan check even
+    when quotas are unlimited, so Free cannot export. ``past_due`` is already
     folded into ``plan`` by ``effective_plan``.
     """
 
-    if plan in {"pro", "team"}:
-        return True
-    return auth_mode == "dev" and quota_mode == "unlimited"
+    return may_issue_attestation(auth_mode=auth_mode, quota_mode=quota_mode, plan=plan)
 
 
 def load_report_detail(detail: str | None) -> tuple[str | None, dict[str, float]]:
