@@ -27,4 +27,9 @@ USER appuser
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT:-8000}"]
+# docker_entrypoint.py execs uvicorn, so the server is PID 1 and receives
+# SIGTERM. The check is public liveness only. start-period covers Alembic
+# before the process listens.
+HEALTHCHECK --interval=15s --timeout=5s --start-period=40s --retries=3 CMD ["python", "-c", "import os,urllib.request; port=os.environ.get('PORT','8000').strip() or '8000'; urllib.request.urlopen('http://127.0.0.1:%s/health' % port, timeout=4)"]
+
+CMD ["python", "docker_entrypoint.py"]
