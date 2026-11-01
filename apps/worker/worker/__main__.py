@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import math
 import signal
 import tempfile
 import threading
@@ -31,6 +32,36 @@ from worker.recovery import rescue_popped, sweep_stuck
 
 logger = logging.getLogger("secureai.worker")
 
+# argparse default. The Redis wait uses this unless the process is started
+# with --poll-seconds. Railway uses the image command, so it is 5.
+DEFAULT_POLL_SECONDS = 5.0
+# main() calls flush_error_reporting() with no arguments.
+SENTRY_FLUSH_SECONDS = 2.0
+# Claim, object download, and the row write are outside the detector timer.
+DRAIN_MARGIN_SECONDS = 8.0
+
+
+def shutdown_drain_seconds() -> int:
+    """Seconds the platform must wait after SIGTERM before SIGKILL.
+
+    The handler only sets a flag. ``run`` reads that flag after the current
+    Redis wait and after the job that wait already popped. ``main`` then
+    flushes error reporting. A shorter drain ends the process with SIGKILL
+    and leaves that job leased until ``STUCK_JOB_SECONDS``.
+
+    The sum uses the default poll, the default detector timeout, and the
+    default Sentry flush. It does not read ``DETECTOR_TIMEOUT_SECONDS``.
+    A larger timeout needs a larger platform drain.
+    """
+
+    total = (
+        DEFAULT_POLL_SECONDS
+        + Settings.detector_timeout_seconds
+        + SENTRY_FLUSH_SECONDS
+        + DRAIN_MARGIN_SECONDS
+    )
+    return math.ceil(total)
+
 
 def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False) -> int:
     parser = argparse.ArgumentParser(description="SecureAI CPU detection worker")
@@ -43,7 +74,7 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     parser.add_argument(
         "--poll-seconds",
         type=float,
-        default=5.0,
+        default=DEFAULT_POLL_SECONDS,
         help="BRPOP timeout between empty reads",
     )
     args = parser.parse_args(argv)
@@ -81,6 +112,10 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     stop = {"flag": False}
 
     def request_stop(signum: int, _frame: object) -> None:
+        # A flag, not SystemExit. Raising here would drop the id this process
+        # already popped and leave its lease until STUCK_JOB_SECONDS. The
+        # loop scores that job, then returns. shutdown_drain_seconds() is
+        # how long the platform has to wait before SIGKILL.
         logger.info("shutdown signal=%s", signum)
         stop["flag"] = True
 
