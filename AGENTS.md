@@ -142,7 +142,7 @@ Start the API before the worker the first time. The worker reads rows; it does n
 
 ### Environment names
 
-Values stay out of git. Local placeholders are in `apps/api/.env.example` and `apps/web/.env.example`.
+Values stay out of git. The names in this section are non-exhaustive. `apps/api/.env.example` is the source of truth for API variables, including quota, seat, rate-limit, timeout, and attempt keys. Web placeholders are in `apps/web/.env.example`.
 
 Clerk, API: `AUTH_MODE` (default `clerk`; `dev` accepts only `Authorization: Bearer dev` and is a private-workstation bypass), `CLERK_ISSUER`, `CLERK_JWKS_URL` (optional), `CLERK_AUTHORIZED_PARTIES`, `DEV_AUTH_SUBJECT`. The API refuses to start in clerk mode until `CLERK_ISSUER` is set. An empty `CLERK_AUTHORIZED_PARTIES` skips the `azp` check and is only for local Clerk.
 
