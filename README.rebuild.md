@@ -361,6 +361,26 @@ A non-2xx response or a network error stays `pending` and is retried. The waits 
 
 `WEBHOOK_MAX_ATTEMPTS` and `WEBHOOK_TIMEOUT_SECONDS` are read by the worker. Empty values use the defaults.
 
+## Errors and admin health
+
+`SENTRY_DSN` turns on Sentry for the API and the worker. Leave it empty and neither process imports the SDK or sends events. Set the same DSN on both Railway services, or only on the one you want to watch. `SENTRY_ENVIRONMENT` labels the event (`production`, `staging`, `development`). When it is empty, a dev workstation (`AUTH_MODE=dev`) is labeled `development` and a Clerk deploy is labeled `production` by the SDK. `SENTRY_RELEASE` is optional. The SDK reads it when it is set.
+
+Events do not include auth headers, cookies, request bodies, or local variables. A database or Redis URL in an exception message is sent with the userinfo replaced. Do not put media bytes or secrets into log messages. The API captures unhandled exceptions. The worker captures `ERROR` logs, which is how a failed job is already recorded.
+
+`GET /health` stays public and shallow (`status`, `service`, `auth`). Railway's healthcheck stays on `/health`. Do not point it at the admin route. A down dependency must not restart the API, and that route requires a session.
+
+`GET /v1/admin/health` requires `Authorization: Bearer <session>` and a subject listed in `ADMIN_USER_IDS` (comma-separated Clerk user ids, the same `sub` the API already stores). An empty list allows nobody. Anyone else gets 401 or 403 and no dependency details. An allowlisted caller gets Postgres, Redis, and object storage as `ok` or `error`, plus `storage_backend` (`filesystem` or `s3`). `200` means all three answered. `503` means the caller is an admin and at least one did not. The body has no URL, bucket, key, or exception text.
+
+Local dev, with the API on port 8000 and `ADMIN_USER_IDS` including `DEV_AUTH_SUBJECT`:
+
+```bash
+curl -s http://localhost:8000/health
+curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8000/v1/admin/health
+curl -s -H 'Authorization: Bearer dev' http://localhost:8000/v1/admin/health
+```
+
+There is no Guardian admin page. Call the route with a Clerk session token.
+
 ## Still later
 
 The legacy GPU ensemble and Docker image builds in CI. Solana stays deferred. Signed attestation does not replace that. The legacy Flask tree stays in the repo.

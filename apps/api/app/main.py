@@ -13,9 +13,13 @@ import time
 import urllib.request
 from collections.abc import Callable
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.responses import Response
 
+from app.admin_routes import router as admin_router
 from app.attestation_routes import router as attestation_router
 from app.billing_routes import router as billing_router
 from app.migrate import run_migrations
@@ -32,6 +36,7 @@ from secureai_shared.attestation import (
 )
 from secureai_shared.billing import BillingStore, MemoryBillingStore, PostgresBillingStore
 from secureai_shared.limits import RateLimiter, build_limiter
+from secureai_shared.reporting import capture_exception, init_error_reporting
 from secureai_shared.queue import JobQueue, build_queue
 from secureai_shared.settings import Settings, assert_explicit_origins, load_settings
 from secureai_shared.storage import FileSystemStorage, S3Storage, build_storage
@@ -58,6 +63,9 @@ def create_app(
     """Build the API. Real Postgres, Redis, and storage are created only when omitted."""
 
     resolved = settings if settings is not None else load_settings(role="api")
+    # Before FastAPI() so the Starlette integration patches ExceptionMiddleware
+    # before this app builds it. An empty DSN does not import the SDK.
+    init_error_reporting(resolved, service="secureai-api")
     assert_explicit_origins(resolved.cors_origins)
     if resolved.auth_mode == "clerk" and not resolved.clerk_authorized_parties:
         logger.warning(
@@ -81,9 +89,11 @@ def create_app(
 
     app = FastAPI(
         title="SecureAI API",
-        version="0.7.0",
+        version="0.8.0",
         description=(
             "Detection jobs require a verified Clerk session JWT. "
+            "GET /v1/admin/health reports Postgres, Redis, and object storage "
+            "for callers listed in ADMIN_USER_IDS. "
             "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
             "bypass. Do not expose that mode on a public host. "
             "POST /v1/jobs/batch queues several stored objects in one request. "
@@ -127,10 +137,23 @@ def create_app(
         allow_headers=["Authorization", "Content-Type", "X-Org-Id"],
     )
     app.include_router(router)
+    app.include_router(admin_router)
     app.include_router(billing_router)
     app.include_router(webhook_router)
     app.include_router(attestation_router)
+    app.add_exception_handler(Exception, _unhandled_exception)
     return app
+
+
+async def _unhandled_exception(request: Request, exc: Exception) -> Response:
+    """Capture bugs. Deliberate HTTP responses keep their own handler."""
+
+    if isinstance(exc, HTTPException):
+        return await http_exception_handler(request, exc)
+    capture_exception(exc)
+    # The type only. The message can hold a token, and the server already logs the traceback.
+    logger.error("unhandled error type=%s", type(exc).__name__)
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 def _attestation_key(settings: Settings) -> AttestationKey | None:

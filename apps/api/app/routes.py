@@ -1,6 +1,7 @@
 """Health, media upload, and job routes.
 
-Job routes require a verified caller. Health stays public for platform checks.
+Job routes require a verified caller. ``GET /health`` stays a public liveness
+check for the platform. Dependency details are on ``GET /v1/admin/health``.
 """
 
 from __future__ import annotations

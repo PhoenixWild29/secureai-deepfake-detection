@@ -12,3 +12,5 @@ cryptography==41.0.7
 boto3==1.43.123
 stripe==16.1.0
 fpdf2==2.9.0
+# Error reporting. No-op when SENTRY_DSN is empty. Pinned 2026-11-01.
+sentry-sdk==2.73.0
