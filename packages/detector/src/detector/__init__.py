@@ -1,6 +1,7 @@
 """Public detection API.
 
-DETECTOR_MODE=cpu (default) samples frames on CPU.
+DETECTOR_MODE=cpu (default) scores texture, motion, temporal stability, and a
+face or skin-region cue on CPU. It does not download weights.
 DETECTOR_MODE=stub hashes the path and does not open the file.
 """
 

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { fetchJob, type JobResponse, type TokenSource } from "../../lib/api";
+import { Fragment, useEffect, useState } from "react";
+import { fetchJob, fetchJobReport, type JobResponse, type TokenSource } from "../../lib/api";
 import { useWorkspace } from "../workspace";
 
 type JobReportProps = {
@@ -22,6 +22,8 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
   const [loadedScope, setLoadedScope] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!ready) {
@@ -74,6 +76,28 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
     };
   }, [apiUrl, jobId, token, getToken, orgId, ready, scope]);
 
+  async function downloadReport(): Promise<void> {
+    setExporting(true);
+    setExportError(null);
+    try {
+      const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
+      const report = await fetchJobReport({ apiUrl, jobId, getToken: source, orgId });
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${jobId}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (caught) {
+      setExportError(caught instanceof Error ? caught.message : "Could not download the report.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   const currentJob = loadedScope === scope ? job : null;
   const currentError = loadedScope === scope ? error : null;
   if (currentError && !currentJob) {
@@ -87,6 +111,7 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
     return <p className="note">Loading report…</p>;
   }
   const terminal = currentJob.status === "completed" || currentJob.status === "failed";
+  const signals = readSignals(currentJob.detail);
   return (
     <section className="card" aria-live="polite">
       <p className={`status status-${currentJob.status}`}>{currentJob.status}</p>
@@ -104,8 +129,18 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
         <dt>Updated</dt>
         <dd>{formatWhen(currentJob.updated_at)}</dd>
         <dt>Detail</dt>
-        <dd>{currentJob.detail ?? "—"}</dd>
+        <dd>{signals ? signalSummary(signals.model) : (currentJob.detail ?? "—")}</dd>
       </dl>
+      {signals ? (
+        <dl className="report">
+          {Object.entries(signals.signals).map(([name, value]) => (
+            <Fragment key={name}>
+              <dt>{signalLabel(name)}</dt>
+              <dd>{confidenceLabel(value)}</dd>
+            </Fragment>
+          ))}
+        </dl>
+      ) : null}
       {waiting && !terminal ? <p className="note">Still {currentJob.status}. Checking again…</p> : null}
       {!waiting && !terminal ? (
         <p className="note">Still {currentJob.status}. Refresh this page to keep watching.</p>
@@ -115,11 +150,73 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
           {currentError}
         </p>
       ) : null}
+      {currentJob.status === "completed" ? (
+        <div className="actions">
+          <button type="button" className="secondary" onClick={() => void downloadReport()} disabled={exporting}>
+            {exporting ? "Preparing JSON…" : "Download JSON"}
+          </button>
+        </div>
+      ) : null}
+      {currentJob.status === "completed" ? (
+        <p className="note">PDF export is not available yet. The JSON file is the report you can keep.</p>
+      ) : null}
+      {exportError ? (
+        <p className="error" role="alert">
+          {exportError}
+        </p>
+      ) : null}
       <p className="note">
         <Link href="/jobs">Back to history</Link>
       </p>
     </section>
   );
+}
+
+type StoredSignals = {
+  model: string;
+  signals: Record<string, number>;
+};
+
+function readSignals(detail: string | null): StoredSignals | null {
+  if (!detail || !detail.startsWith("{")) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(detail) as { v?: unknown; model?: unknown; signals?: unknown };
+    if (parsed.v !== 1 || typeof parsed.model !== "string" || !isSignalMap(parsed.signals)) {
+      return null;
+    }
+    return { model: parsed.model, signals: parsed.signals };
+  } catch {
+    return null;
+  }
+}
+
+function isSignalMap(value: unknown): value is Record<string, number> {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  return Object.values(value).every((item) => typeof item === "number");
+}
+
+function signalSummary(model: string): string {
+  return `CPU heuristic (${model}). Higher signal values look more synthetic. This is not a certified score.`;
+}
+
+function signalLabel(name: string): string {
+  if (name === "texture") {
+    return "Texture";
+  }
+  if (name === "motion") {
+    return "Motion";
+  }
+  if (name === "temporal") {
+    return "Temporal";
+  }
+  if (name === "region") {
+    return "Region";
+  }
+  return name;
 }
 
 function confidenceLabel(value: number | null): string {

@@ -10,6 +10,7 @@ from collections.abc import Callable
 
 from detector import detect_video
 from secureai_shared.models import JobRecord
+from secureai_shared.report import dump_report_detail
 from secureai_shared.storage import FileSystemStorage, ObjectStat, S3Storage
 from secureai_shared.store import JobStore
 from worker.detect_limit import DetectionTimeout, call_detect
@@ -59,6 +60,7 @@ def process_job(
                 prediction=str(prediction),
                 confidence=confidence,
                 attempt=job.attempt,
+                detail=_report_detail(result),
             )
     except DetectionTimeout:
         logger.error("detector timed out job_id=%s", job_id)
@@ -79,6 +81,23 @@ def process_job(
         finished.prediction,
     )
     return finished
+
+
+def _report_detail(result: dict[str, object]) -> str | None:
+    """Persist CPU signals. Stub mode has no signals, so the detail stays empty."""
+
+    raw = result.get("signals")
+    model = result.get("model")
+    if not isinstance(raw, dict) or not raw or not isinstance(model, str):
+        return None
+    signals: dict[str, float] = {}
+    for key, value in raw.items():
+        if not isinstance(key, str) or isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("unexpected signal")
+        signals[key] = float(value)
+    if not signals:
+        return None
+    return dump_report_detail(model, signals)
 
 
 def _object_ok(stat: ObjectStat | None, job: JobRecord, max_upload_bytes: int) -> bool:

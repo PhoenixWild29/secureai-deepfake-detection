@@ -1,3 +1,17 @@
+export type JobReportExport = {
+  job_id: string;
+  filename: string;
+  status: string;
+  prediction: string | null;
+  confidence: number | null;
+  model: string | null;
+  signals: Record<string, number>;
+  limitations: string;
+  pdf_available: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type JobResponse = {
   id: string;
   status: string;
@@ -174,6 +188,25 @@ export async function submitDetection(options: {
     options.onUpdate?.(job);
   }
   throw new JobStillRunning(job);
+}
+
+export async function fetchJobReport(options: {
+  apiUrl: string;
+  jobId: string;
+  getToken: TokenSource;
+  orgId?: string | null;
+}): Promise<JobReportExport> {
+  const base = options.apiUrl.replace(/\/$/, "");
+  const fetched = await fetch(`${base}/v1/jobs/${options.jobId}/report`, {
+    headers: {
+      Authorization: `Bearer ${await authorized(options.getToken)}`,
+      ...orgHeaders(options.orgId),
+    },
+  });
+  if (!fetched.ok) {
+    throw new Error(await errorText(fetched));
+  }
+  return (await fetched.json()) as JobReportExport;
 }
 
 export async function fetchJob(options: {
