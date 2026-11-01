@@ -23,6 +23,27 @@ _URL_USERINFO = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)([^/\s@]+)@")
 _BEARER = re.compile(r"(?i)\bBearer\s+\S+")
 # Full secrets are sai_ plus at least 16 token characters. A 12-character prefix stays visible.
 _API_KEY = re.compile(r"\bsai_[A-Za-z0-9_-]{16,}\b")
+# A URL whose query carries a signature or an AWS credential is a presigned
+# URL. Keep the object URL and drop the whole query string.
+_PRESIGNED_QUERY = re.compile(
+    r"(?i)(https?://[^\s?\"'<>]+)\?[^\s\"'<>]*"
+    r"(?:x-amz-signature|x-amz-credential|x-amz-security-token|awsaccesskeyid|signature)="
+    r"[^\s\"'<>]*"
+)
+# Other sensitive query values. The parameter name stays, matching the sai_
+# style of keeping a short non-secret prefix and filtering the secret.
+# A leading ``?`` or ``&`` is not consumed, so ``?token=secret`` stays readable
+# as ``?token=[Filtered]``.
+_SENSITIVE_QUERY = re.compile(
+    r"(?im)((?:^|(?<=[?&\s]))"
+    r"(?:"
+    r"[a-z0-9_.-]*"
+    r"(?:password|passwd|secret|token|signature|credential|session|authorization|dsn|"
+    r"access[-_]?key|api[-_]?key)"
+    r"[a-z0-9_.-]*)=)"
+    r"([^&#\s\"']*)"
+)
+_SQL_PARAMETERS = "[parameters:"
 _SECRET_KEY_PARTS = (
     "password",
     "passwd",
@@ -181,9 +202,79 @@ def scrub_event(event: dict[str, Any], hint: dict[str, Any]) -> dict[str, Any]:
 
 
 def redact_text(value: str) -> str:
+    """Remove secrets from a log line or a Sentry string.
+
+    A full ``sai_`` secret becomes ``sai_[Filtered]``. A shorter prefix, such
+    as the 12-character value stored on the key row, stays visible. Query
+    parameters keep their names and lose their values. A presigned S3 URL
+    keeps the scheme, host, and path only.
+    """
+
     value = _URL_USERINFO.sub(r"\1" + _FILTERED + "@", value)
     value = _BEARER.sub("Bearer " + _FILTERED, value)
-    return _API_KEY.sub("sai_" + _FILTERED, value)
+    value = _API_KEY.sub("sai_" + _FILTERED, value)
+    value = _PRESIGNED_QUERY.sub(lambda match: match.group(1) + "?" + _FILTERED, value)
+    value = _SENSITIVE_QUERY.sub(lambda match: match.group(1) + _FILTERED, value)
+    return _redact_sql_parameters(value)
+
+
+def install_error_log_redaction(target: logging.Logger | None = None) -> None:
+    """Redact ERROR records before they are written.
+
+    With no argument this attaches to ``secureai.worker``, so a failed job
+    cannot log a presigned URL. Passing a logger also covers that logger's
+    current handlers. Handler filters run for records that propagate from
+    child loggers; a filter on the root logger itself does not.
+    """
+
+    log = logging.getLogger("secureai.worker") if target is None else target
+    _ensure_redacting_filter(log)
+    for handler in list(log.handlers):
+        _ensure_redacting_filter(handler)
+
+
+class _ErrorRedactingFilter(logging.Filter):
+    """Apply ``redact_text`` to ERROR records, including traceback text."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.levelno < logging.ERROR:
+            return True
+        if isinstance(record.msg, str):
+            record.msg = redact_text(record.msg)
+        record.args = _redact_log_args(record.args)
+        if record.exc_info and not record.exc_text:
+            record.exc_text = redact_text(logging.Formatter().formatException(record.exc_info))
+        elif isinstance(record.exc_text, str):
+            record.exc_text = redact_text(record.exc_text)
+        return True
+
+
+def _ensure_redacting_filter(target: logging.Logger | logging.Handler) -> None:
+    if any(isinstance(item, _ErrorRedactingFilter) for item in target.filters):
+        return
+    target.addFilter(_ErrorRedactingFilter())
+
+
+def _redact_log_args(args: object) -> object:
+    if isinstance(args, tuple):
+        return tuple(redact_text(item) if isinstance(item, str) else item for item in args)
+    if isinstance(args, dict):
+        return {key: redact_text(item) if isinstance(item, str) else item for key, item in args.items()}
+    return args
+
+
+def _redact_sql_parameters(value: str) -> str:
+    """Drop SQLAlchemy ``[parameters: ...]`` blocks.
+
+    The block is last, and a secret may contain ``]``, so everything from the
+    marker to the end of the string goes. ``hide_parameters=True`` on the
+    engine avoids putting the values in the exception in the first place.
+    """
+
+    start = value.find(_SQL_PARAMETERS)
+    if start < 0:
+        return value
+    return value[:start] + "[parameters: " + _FILTERED + "]"
 
 
 def _environment(settings: Settings) -> str | None:

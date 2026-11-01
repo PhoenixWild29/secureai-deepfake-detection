@@ -20,7 +20,7 @@ from pathlib import Path
 
 from secureai_shared.models import JobRecord
 from secureai_shared.queue import build_queue
-from secureai_shared.reporting import init_error_reporting
+from secureai_shared.reporting import init_error_reporting, install_error_log_redaction
 from secureai_shared.settings import Settings, load_settings
 from secureai_shared.storage import build_storage, new_object_key
 from secureai_shared.store import PostgresJobStore
@@ -48,6 +48,9 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
     )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
+    # Handler filters cover library ERROR logs that propagate to the root
+    # handler, including a presigned URL inside a storage exception.
+    install_error_log_redaction(logging.getLogger())
 
     try:
         settings = load_settings(role="worker")

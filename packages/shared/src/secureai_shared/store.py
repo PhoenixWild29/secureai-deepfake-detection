@@ -355,7 +355,7 @@ class MemoryJobStore:
 
 class PostgresJobStore:
     def __init__(self, database_url: str) -> None:
-        self.engine = create_engine(database_url, pool_pre_ping=True)
+        self.engine = create_engine(database_url, pool_pre_ping=True, hide_parameters=True)
         self._session_factory = sessionmaker(self.engine, expire_on_commit=False)
 
     def create(
