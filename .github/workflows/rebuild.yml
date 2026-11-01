@@ -1,6 +1,6 @@
 name: Rebuild
 
-# Lint, typecheck via next build, and pytest, then build the API and worker
+# Lint, the web upload tests, typecheck via next build, and pytest, then build the API and worker
 # images. Image jobs are validation only: they do not log in or push.
 # Redis and Postgres are service containers. REQUIRE_SERVICES=1 fails the job
 # when those tests cannot reach them. S3 is covered with a fake client in
@@ -39,6 +39,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Test
+        run: npm test
 
       - name: Build
         run: npm run build

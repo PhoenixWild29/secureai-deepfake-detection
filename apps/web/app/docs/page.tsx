@@ -55,7 +55,9 @@ export default function DocsPage() {
       </p>
       <p>
         <code>POST /v1/jobs/batch</code> accepts up to 10 stored object keys, charges the same jobs rate
-        limit once per item, and checks the same quota before inserting rows. If the queue stops after
+        limit once per item, and checks the same quota before inserting rows. Guardian&apos;s upload page
+        uses that route when you add more than one video, and <code>POST /v1/jobs</code> when you add
+        one. The form is ready for another batch as soon as the jobs are queued. If the queue stops after
         some ids are accepted, the 202 response lists those jobs and the ids that did not queue. Those
         ids do not spend the monthly cap. If nothing was queued, the response is 503 and the detail is{" "}
         <code>Could not queue the job.</code>{" "}
