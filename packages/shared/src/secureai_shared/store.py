@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import and_, create_engine, func, not_, or_, select
+from sqlalchemy import and_, create_engine, func, not_, select, tuple_
 from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.db import JobRow
@@ -70,16 +70,18 @@ def _now() -> datetime:
 def _before_clause(created_at: datetime, job_id: str):
     """Rows strictly older than the keyset ``(created_at, job_id)``.
 
-    ``created_at`` is newest-first. ``job_id`` breaks ties so two rows written
-    in one batch, which share a timestamp, stay on a stable page boundary.
-    ``id < job_id`` uses the column collation. Ids are ``job_`` plus lowercase
-    hex, which sorts the same as the in-memory code-point order.
+    Newest-first order is ``created_at DESC, id DESC``. ``id`` breaks ties so
+    two rows written in one batch, which share a timestamp, stay on a stable
+    page boundary. The predicate is one row comparison, which is the same as
+    ``created_at < cursor OR (created_at = cursor AND id < cursor_id)`` when
+    both columns are non-null. Postgres can seek that form on
+    ``ix_jobs_personal_created_id`` and ``ix_jobs_org_created_id``. An ``OR``
+    walks every newer row before the limit. ``id`` uses the column collation.
+    Ids are ``job_`` plus lowercase hex, which sorts the same as the in-memory
+    code-point order.
     """
 
-    return or_(
-        JobRow.created_at < created_at,
-        and_(JobRow.created_at == created_at, JobRow.id < job_id),
-    )
+    return tuple_(JobRow.created_at, JobRow.id) < tuple_(created_at, job_id)
 
 
 def _page(

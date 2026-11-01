@@ -2,7 +2,20 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    desc,
+    text,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -11,11 +24,35 @@ class Base(DeclarativeBase):
 
 
 class JobRow(Base):
+    """One detection job.
+
+    History lists personal rows (``org_id`` null) or one workspace, newest
+    ``created_at`` then ``id``. Those two indexes are the page seek. Alembic
+    ``20261101_0009`` creates the same definitions and drops the single-column
+    ``user_id`` and ``org_id`` indexes.
+    """
+
     __tablename__ = "jobs"
+    __table_args__ = (
+        Index(
+            "ix_jobs_personal_created_id",
+            "user_id",
+            desc("created_at"),
+            desc("id"),
+            postgresql_where=text("org_id IS NULL"),
+        ),
+        Index(
+            "ix_jobs_org_created_id",
+            "org_id",
+            desc("created_at"),
+            desc("id"),
+            postgresql_where=text("org_id IS NOT NULL"),
+        ),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True)
-    user_id: Mapped[str] = mapped_column(String(255), index=True)
-    org_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    user_id: Mapped[str] = mapped_column(String(255))
+    org_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
     filename: Mapped[str] = mapped_column(String(255))
     content_type: Mapped[str | None] = mapped_column(String(128), nullable=True)
     byte_size: Mapped[int | None] = mapped_column(BigInteger, nullable=True)

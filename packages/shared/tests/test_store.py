@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import pytest
-from sqlalchemy import update
+from sqlalchemy import event, update
 from sqlalchemy.exc import IntegrityError
 
 from secureai_shared.db import JobRow
@@ -264,3 +264,104 @@ def test_postgres_list_pages_past_a_shared_timestamp(monkeypatch: pytest.MonkeyP
     )
     monkeypatch.setattr("secureai_shared.store._new_id", lambda: next(ids))
     _assert_history_pages(store, _stamp_postgres)
+
+
+def _explain(store: PostgresJobStore, call) -> str:
+    """Run ``call`` and return ``EXPLAIN ANALYZE`` of the SELECT it issued."""
+
+    captured: list[tuple[str, object]] = []
+
+    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):  # noqa: ARG001
+        if statement.lstrip().upper().startswith("SELECT"):
+            captured.append((statement, parameters))
+
+    event.listen(store.engine, "before_cursor_execute", before_cursor_execute)
+    try:
+        call()
+    finally:
+        event.remove(store.engine, "before_cursor_execute", before_cursor_execute)
+    assert captured, "expected a SELECT"
+    statement, parameters = captured[-1]
+    with store.engine.connect() as connection:
+        raw = connection.connection.driver_connection
+        with raw.cursor() as cursor:
+            cursor.execute("EXPLAIN (ANALYZE, FORMAT TEXT) " + statement, parameters)
+            lines = [row[0] for row in cursor.fetchall()]
+    return "\n".join(lines)
+
+
+def _assert_index_seek(plan: str, index: str, *, keyset: bool) -> None:
+    assert index in plan
+    assert "Index Cond" in plan
+    assert "Sort Key" not in plan
+    assert "Filter:" not in plan
+    assert "Rows Removed by Filter" not in plan
+    if keyset:
+        assert "ROW(" in plan
+
+
+def test_postgres_history_page_seeks_the_keyset_index() -> None:
+    """A later page starts at the cursor. It does not sort every older row.
+
+    About 8_000 rows is enough for Postgres 16 to prefer the composite index
+    over a sequential scan. The cursor sits half an hour in, so a plan that
+    filters from the newest row would drop thousands of index entries.
+    """
+
+    store = _postgres_store()
+    with store.engine.begin() as connection:
+        connection.exec_driver_sql(
+            """
+            INSERT INTO jobs (
+                id, user_id, org_id, filename, content_type, byte_size, object_key,
+                status, attempt, created_at, updated_at
+            )
+            SELECT
+                'job_' || lpad(to_hex(i), 12, '0'),
+                'user_page',
+                CASE WHEN mod(i, 5) = 0 THEN 'org_0123456789ab' ELSE NULL END,
+                'clip.mp4',
+                'video/mp4',
+                1,
+                'media/user_page/' || i::text,
+                'queued',
+                0,
+                timestamptz '2026-01-01 00:00:00+00' + (i || ' seconds')::interval,
+                timestamptz '2026-01-01 00:00:00+00'
+            FROM generate_series(1, 8000) AS s(i)
+            """
+        )
+        connection.exec_driver_sql("ANALYZE jobs")
+
+    personal_anchor = store.get_any(f"job_{1801:012x}")
+    assert personal_anchor is not None
+    assert personal_anchor.org_id is None
+    personal_before = (personal_anchor.created_at, personal_anchor.id)
+    personal_plan = _explain(
+        store,
+        lambda: store.list_for_user("user_page", limit=50, before=personal_before),
+    )
+    _assert_index_seek(personal_plan, "ix_jobs_personal_created_id", keyset=True)
+    personal = store.list_for_user("user_page", limit=50, before=personal_before)
+    assert len(personal) == 50
+    assert all(job.org_id is None for job in personal)
+    assert all((job.created_at, job.id) < personal_before for job in personal)
+    assert personal == sorted(personal, key=lambda job: (job.created_at, job.id), reverse=True)
+
+    first_plan = _explain(store, lambda: store.list_for_user("user_page", limit=50))
+    _assert_index_seek(first_plan, "ix_jobs_personal_created_id", keyset=False)
+
+    org_anchor = store.get_any(f"job_{4000:012x}")
+    assert org_anchor is not None
+    assert org_anchor.org_id == "org_0123456789ab"
+    org_before = (org_anchor.created_at, org_anchor.id)
+    org_plan = _explain(
+        store,
+        lambda: store.list_for_org("org_0123456789ab", limit=50, before=org_before),
+    )
+    _assert_index_seek(org_plan, "ix_jobs_org_created_id", keyset=True)
+    org_page = store.list_for_org("org_0123456789ab", limit=50, before=org_before)
+    assert len(org_page) == 50
+    assert all(job.org_id == "org_0123456789ab" for job in org_page)
+    assert all((job.created_at, job.id) < org_before for job in org_page)
+    assert org_page == sorted(org_page, key=lambda job: (job.created_at, job.id), reverse=True)
