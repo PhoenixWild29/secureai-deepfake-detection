@@ -25,6 +25,7 @@ from typing import Protocol
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.db import JobAttestationRow
@@ -274,7 +275,7 @@ class PostgresAttestationStore:
                 raise RuntimeError("PostgresAttestationStore requires a database url or an engine")
             from sqlalchemy import create_engine
 
-            engine = create_engine(database_url, pool_pre_ping=True)
+            engine = create_engine(database_url, pool_pre_ping=True, hide_parameters=True)
         self.engine = engine
         self._session_factory = sessionmaker(engine, expire_on_commit=False)  # type: ignore[arg-type]
 
@@ -284,9 +285,33 @@ class PostgresAttestationStore:
             return None if row is None else _record(row)
 
     def save(self, record: AttestationRecord) -> AttestationRecord:
+        """Insert or update. A concurrent first insert returns the stored row.
+
+        Two requests can both observe a missing row and insert. ``job_id`` is
+        the primary key, so the loser raises ``IntegrityError`` on commit.
+        The same payload and key keep the winner, including its ``created_at``.
+        A different signature takes the normal update path. This does not
+        surface as an unhandled 500.
+        """
+
+        try:
+            return self._write(record)
+        except IntegrityError:
+            existing = self.get(record.job_id)
+            if existing is not None and _same(existing, record):
+                return existing
+            try:
+                return self._write(record)
+            except IntegrityError:
+                existing = self.get(record.job_id)
+                if existing is None:
+                    raise
+                return existing
+
+    def _write(self, record: AttestationRecord) -> AttestationRecord:
         digest = payload_digest(record.payload)
         with self._session() as session:
-            row = session.get(JobAttestationRow, record.job_id)
+            row = self._find(session, record.job_id)
             if row is None:
                 session.add(
                     JobAttestationRow(
@@ -310,6 +335,9 @@ class PostgresAttestationStore:
             row.signature = record.signature
             row.created_at = record.created_at
             return record
+
+    def _find(self, session: Session, job_id: str) -> JobAttestationRow | None:
+        return session.get(JobAttestationRow, job_id)
 
     @contextmanager
     def _session(self) -> Iterator[Session]:
