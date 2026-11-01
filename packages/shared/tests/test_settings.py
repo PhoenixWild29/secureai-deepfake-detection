@@ -184,6 +184,38 @@ def test_sentry_and_admin_allowlist_are_read() -> None:
     assert settings.admin_user_ids == ("user_a", "user_b")
 
 
+def test_api_key_create_limit_defaults_and_rejects_negative() -> None:
+    settings = load_settings(
+        {
+            "AUTH_MODE": "dev",
+            "DATABASE_URL": "postgresql+psycopg://db",
+            "REDIS_URL": "redis://localhost:6379/0",
+        },
+        role="api",
+    )
+    assert settings.rate_limit_api_keys == 10
+    disabled = load_settings(
+        {
+            "AUTH_MODE": "dev",
+            "DATABASE_URL": "postgresql+psycopg://db",
+            "REDIS_URL": "redis://localhost:6379/0",
+            "RATE_LIMIT_API_KEYS": "0",
+        },
+        role="api",
+    )
+    assert disabled.rate_limit_api_keys == 0
+    with pytest.raises(RuntimeError, match="RATE_LIMIT_API_KEYS"):
+        load_settings(
+            {
+                "AUTH_MODE": "dev",
+                "DATABASE_URL": "postgresql+psycopg://db",
+                "REDIS_URL": "redis://localhost:6379/0",
+                "RATE_LIMIT_API_KEYS": "-1",
+            },
+            role="api",
+        )
+
+
 def test_redis_backend_requires_url() -> None:
     with pytest.raises(RuntimeError, match="REDIS_URL"):
         load_settings({"AUTH_MODE": "dev", "DATABASE_URL": "postgresql+psycopg://db"}, role="worker")

@@ -82,9 +82,12 @@ export default function DocsPage() {
         Checking a signature does not require a plan or an account.
       </p>
       <p>
-        Pro API keys are not issued yet. TODO: mint scoped keys for Pro and Team workspaces. Until then,
-        sign in with Clerk (or the private dev bypass on a workstation) and call the job routes with the
-        session token.
+        Pro and Team can mint a key from the <Link href="/keys">API keys</Link> page. The secret starts
+        with <code>sai_</code>, is shown once, and is stored only as a SHA-256 hash. Send{" "}
+        <code>Authorization: Bearer sai_…</code>. A personal key follows the same <code>X-Org-Id</code> rules
+        as a Clerk session. A workspace key stays inside that workspace. Free plans cannot create or use a
+        key, including on a private workstation. Revoking a key rejects it on the next request. Clerk
+        session tokens still work, and <code>AUTH_MODE=dev</code> still accepts <code>Bearer dev</code>.
       </p>
       <p>
         A workspace owner can register one HTTPS URL. The worker POSTs the job id, status, prediction,

@@ -20,12 +20,14 @@ from fastapi.responses import JSONResponse
 from starlette.responses import Response
 
 from app.admin_routes import router as admin_router
+from app.api_key_routes import router as api_key_router
 from app.attestation_routes import router as attestation_router
 from app.billing_routes import router as billing_router
 from app.migrate import run_migrations
 from app.routes import router
 from app.stripe_client import StripeBilling
 from app.webhook_routes import router as webhook_router
+from secureai_shared.api_keys import ApiKeyStore, MemoryApiKeyStore, PostgresApiKeyStore
 from secureai_shared.attestation import (
     AttestationKey,
     AttestationKeyError,
@@ -59,6 +61,7 @@ def create_app(
     webhooks: WebhookStore | None = None,
     webhook_queue: WebhookQueue | None = None,
     attestations: AttestationStore | None = None,
+    api_keys: ApiKeyStore | None = None,
 ) -> FastAPI:
     """Build the API. Real Postgres, Redis, and storage are created only when omitted."""
 
@@ -91,10 +94,14 @@ def create_app(
         title="SecureAI API",
         version="0.8.0",
         description=(
-            "Detection jobs require a verified Clerk session JWT. "
+            "Detection jobs require a verified Clerk session JWT or a Pro/Team "
+            "API key (Authorization: Bearer sai_…). "
+            "POST /v1/api-keys mints a key for the personal account or the "
+            "workspace in X-Org-Id. The secret is returned once and stored as "
+            "a SHA-256 hash. Free plans cannot create or use a key. "
             "GET /v1/admin/health reports Postgres, Redis, and object storage "
             "for callers listed in ADMIN_USER_IDS. "
-            "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
+            "AUTH_MODE=dev accepts Bearer dev and is a private-workstation "
             "bypass. Do not expose that mode on a public host. "
             "POST /v1/jobs/batch queues several stored objects in one request. "
             "If the queue stops after some ids are accepted, the 202 body "
@@ -129,6 +136,12 @@ def create_app(
         else:
             attestations = MemoryAttestationStore()
     app.state.attestations = attestations
+    if api_keys is None:
+        if isinstance(store, PostgresJobStore):
+            api_keys = PostgresApiKeyStore(engine=store.engine)
+        else:
+            api_keys = MemoryApiKeyStore()
+    app.state.api_keys = api_keys
     app.state.fetch_jwks = fetch_jwks or _jwks_fetcher(resolved)
     app.add_middleware(
         CORSMiddleware,
@@ -137,6 +150,7 @@ def create_app(
         allow_headers=["Authorization", "Content-Type", "X-Org-Id"],
     )
     app.include_router(router)
+    app.include_router(api_key_router)
     app.include_router(admin_router)
     app.include_router(billing_router)
     app.include_router(webhook_router)

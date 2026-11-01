@@ -1,4 +1,9 @@
-"""Verify Clerk session JWTs. AUTH_MODE=dev accepts only the literal bearer `dev`."""
+"""Verify Clerk session JWTs and Pro/Team API keys.
+
+AUTH_MODE=dev accepts the literal bearer ``dev``. A bearer that starts with
+``sai_`` is an API key in every mode, including dev. Other bearers in dev
+mode are rejected. Clerk verification is unchanged.
+"""
 
 from __future__ import annotations
 
@@ -8,10 +13,14 @@ from typing import Annotated, Callable
 import jwt
 from fastapi import Depends, Header, HTTPException, Request, status
 
+from app.tenancy import resolved_plan
+from secureai_shared.api_keys import may_use_api_key
 from secureai_shared.models import AuthContext
 from secureai_shared.settings import Settings
 
 logger = logging.getLogger("secureai.api.auth")
+
+API_KEY_PLAN_REQUIRED = "API keys require a Pro or Team plan."
 
 
 class AuthError(Exception):
@@ -92,6 +101,10 @@ def require_user(
 
     settings: Settings = request.app.state.settings
     token = _bearer(authorization)
+    if token.startswith("sai_"):
+        user = _user_from_api_key(request, token)
+        logger.debug("auth subject=%s mode=%s", user.subject, user.mode)
+        return user
     if settings.auth_mode == "dev":
         if token != "dev":
             raise HTTPException(
@@ -119,6 +132,19 @@ def require_user(
     return user
 
 
+def require_session(
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> AuthContext:
+    """Clerk session or the dev bypass. An API key cannot mint or revoke keys."""
+
+    if user.mode == "api_key":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sign in to manage API keys.",
+        )
+    return user
+
+
 def require_admin(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
@@ -135,6 +161,40 @@ def require_admin(
             detail="Admin access required",
         )
     return user
+
+
+def _user_from_api_key(request: Request, token: str) -> AuthContext:
+    """Resolve a ``sai_`` bearer to the same subject the key was minted for.
+
+    Unknown and revoked secrets are 401. A live key whose personal or
+    workspace plan is free is 402. The secret is not logged.
+    """
+
+    record = request.app.state.api_keys.authenticate(token)
+    if record is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    org_id = record.org_id
+    if org_id is not None and request.app.state.billing.membership(org_id, record.user_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+    plan = resolved_plan(request.app.state.billing, record.user_id, org_id)
+    if plan is None or not may_use_api_key(plan):
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail=API_KEY_PLAN_REQUIRED,
+        )
+    request.app.state.api_keys.mark_used(record.id)
+    return AuthContext(
+        subject=record.user_id,
+        mode="api_key",
+        api_key_id=record.id,
+        api_key_org_id=org_id,
+    )
 
 
 def _key_list(jwks: object) -> list[object] | None:

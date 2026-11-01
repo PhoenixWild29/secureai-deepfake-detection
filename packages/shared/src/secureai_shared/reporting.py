@@ -21,6 +21,8 @@ _SERVICE_WORKER = "secureai-worker"
 # Userinfo in a URL is a secret (database passwords, Redis passwords, Sentry DSNs).
 _URL_USERINFO = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)([^/\s@]+)@")
 _BEARER = re.compile(r"(?i)\bBearer\s+\S+")
+# Full secrets are sai_ plus at least 16 token characters. A 12-character prefix stays visible.
+_API_KEY = re.compile(r"\bsai_[A-Za-z0-9_-]{16,}\b")
 _SECRET_KEY_PARTS = (
     "password",
     "passwd",
@@ -180,7 +182,8 @@ def scrub_event(event: dict[str, Any], hint: dict[str, Any]) -> dict[str, Any]:
 
 def redact_text(value: str) -> str:
     value = _URL_USERINFO.sub(r"\1" + _FILTERED + "@", value)
-    return _BEARER.sub("Bearer " + _FILTERED, value)
+    value = _BEARER.sub("Bearer " + _FILTERED, value)
+    return _API_KEY.sub("sai_" + _FILTERED, value)
 
 
 def _environment(settings: Settings) -> str | None:

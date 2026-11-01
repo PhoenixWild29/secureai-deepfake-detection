@@ -36,9 +36,15 @@ class JobRecord(BaseModel):
 
 
 class AuthContext(BaseModel):
-    """Caller identity from a verified Clerk session JWT, or the local dev bypass."""
+    """Caller identity from a Clerk session JWT, an API key, or the local dev bypass.
+
+    ``api_key_org_id`` is set only for a workspace key. A personal key leaves
+    it empty so ``X-Org-Id`` still selects the workspace, the same as a session.
+    """
 
     model_config = ConfigDict(frozen=True)
 
     subject: str
-    mode: str = Field(pattern="^(clerk|dev)$")
+    mode: str = Field(pattern="^(clerk|dev|api_key)$")
+    api_key_id: str | None = None
+    api_key_org_id: str | None = None
