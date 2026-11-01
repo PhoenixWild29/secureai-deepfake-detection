@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
-import { fetchJob, fetchJobReport, type JobResponse, type TokenSource } from "../../lib/api";
+import {
+  ApiRequestError,
+  fetchAttestationKeys,
+  fetchJob,
+  fetchJobAttestation,
+  fetchJobReport,
+  type JobAttestation,
+  type JobResponse,
+  type TokenSource,
+} from "../../lib/api";
 import { useWorkspace } from "../workspace";
 
 type JobReportProps = {
@@ -24,6 +33,11 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
   const [waiting, setWaiting] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [attestationState, setAttestationState] = useState<"unknown" | "ready" | "unavailable">("unknown");
+  const [attestation, setAttestation] = useState<JobAttestation | null>(null);
+  const [attesting, setAttesting] = useState(false);
+  const [attestationError, setAttestationError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!ready) {
@@ -76,6 +90,44 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
     };
   }, [apiUrl, jobId, token, getToken, orgId, ready, scope]);
 
+  const attestationKey = `${scope}:${jobId}`;
+  const [trackedAttestationKey, setTrackedAttestationKey] = useState(attestationKey);
+  if (trackedAttestationKey !== attestationKey) {
+    setTrackedAttestationKey(attestationKey);
+    setAttestation(null);
+    setAttestationError(null);
+    setAttestationState("unknown");
+    setCopied(false);
+  }
+
+  const reportStatus = loadedScope === scope ? job?.status : null;
+  useEffect(() => {
+    if (!ready || reportStatus !== "completed") {
+      return;
+    }
+    let cancelled = false;
+    void fetchAttestationKeys(apiUrl).then(
+      () => {
+        if (!cancelled) {
+          setAttestationState("ready");
+        }
+      },
+      (caught: unknown) => {
+        if (cancelled) {
+          return;
+        }
+        if (caught instanceof ApiRequestError && caught.status === 503) {
+          setAttestationState("unavailable");
+          return;
+        }
+        setAttestationState("ready");
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [apiUrl, ready, reportStatus, attestationKey]);
+
   async function downloadReport(): Promise<void> {
     setExporting(true);
     setExportError(null);
@@ -95,6 +147,48 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
       setExportError(caught instanceof Error ? caught.message : "Could not download the report.");
     } finally {
       setExporting(false);
+    }
+  }
+
+  async function downloadAttestation(): Promise<void> {
+    setAttesting(true);
+    setAttestationError(null);
+    setCopied(false);
+    try {
+      const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
+      const issued = await fetchJobAttestation({ apiUrl, jobId, getToken: source, orgId });
+      setAttestation(issued);
+      setAttestationState("ready");
+      const blob = new Blob([JSON.stringify(issued, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${jobId}.attestation.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (caught) {
+      if (caught instanceof ApiRequestError && caught.status === 503) {
+        setAttestation(null);
+        setAttestationState("unavailable");
+        return;
+      }
+      setAttestationError(caught instanceof Error ? caught.message : "Could not sign this report.");
+    } finally {
+      setAttesting(false);
+    }
+  }
+
+  async function copySignature(): Promise<void> {
+    if (!attestation) {
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(attestation.signature);
+      setCopied(true);
+    } catch {
+      setAttestationError("Could not copy the signature.");
     }
   }
 
@@ -155,6 +249,38 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
           <button type="button" className="secondary" onClick={() => void downloadReport()} disabled={exporting}>
             {exporting ? "Preparing JSON…" : "Download JSON"}
           </button>
+          {attestationState === "unavailable" ? null : (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => void downloadAttestation()}
+              disabled={attesting}
+            >
+              {attesting ? "Signing report…" : "Download attestation"}
+            </button>
+          )}
+        </div>
+      ) : null}
+      {currentJob.status === "completed" && attestationState === "unavailable" ? (
+        <p className="note">Signed attestation is not available on this server.</p>
+      ) : null}
+      {attestation ? (
+        <div className="result">
+          <p>
+            Signature ({attestation.algorithm}, key {attestation.key_id})
+          </p>
+          <code className="signature">{attestation.signature}</code>
+          <p className="note">
+            This file is the body for <code>POST {apiUrl}/v1/attestations/verify</code>. Use the payload string
+            as-is. Public keys are <code>GET {apiUrl}/v1/attestations/keys</code>. The signature shows SecureAI
+            issued this result. It is not legal evidence.{" "}
+            <Link href="/docs#attestation">What this proves</Link>
+          </p>
+          <div className="actions">
+            <button type="button" className="secondary" onClick={() => void copySignature()}>
+              {copied ? "Copied" : "Copy signature"}
+            </button>
+          </div>
         </div>
       ) : null}
       {currentJob.status === "completed" ? (
@@ -163,6 +289,11 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
       {exportError ? (
         <p className="error" role="alert">
           {exportError}
+        </p>
+      ) : null}
+      {attestationError ? (
+        <p className="error" role="alert">
+          {attestationError}
         </p>
       ) : null}
       <p className="note">

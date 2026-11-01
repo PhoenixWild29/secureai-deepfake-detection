@@ -41,7 +41,7 @@ export default function DocsPage() {
         <li>A noisy real video can score as fake. A careful synthetic video can score as real.</li>
         <li>Sharp cutouts and ordinary edges can raise the region cue. Absence of a face is not a verdict.</li>
         <li>Do not use the score as legal evidence or as the only reason to publish, accuse, or remove a clip.</li>
-        <li>The legacy GPU ensemble, attestation, and Solana anchoring are not in this product yet.</li>
+        <li>The legacy GPU ensemble and Solana anchoring are not in this product.</li>
       </ul>
       <h2>API access</h2>
       <p>
@@ -54,7 +54,29 @@ export default function DocsPage() {
         limit once per item, and checks the same quota before inserting rows. If the queue stops after
         some ids are accepted, the 202 response lists those jobs and the ids that did not queue. Those
         ids do not spend the monthly cap. If nothing was queued, the response is 503.{" "}
-        <code>GET /v1/jobs/{"{id}"}/report</code> downloads a completed job as JSON.
+        <code>GET /v1/jobs/{"{id}"}/report</code> downloads a completed job as JSON.{" "}
+        <code>POST /v1/jobs/{"{id}"}/attest</code> signs that completed report for a Pro or Team plan.
+      </p>
+      <h2 id="attestation">Signed attestation</h2>
+      <p>
+        A completed report can be signed with the API&apos;s Ed25519 key. The signature covers one compact JSON
+        string: job id, organization id (null for a personal job), status, prediction, confidence, model, signals,
+        updated time, and the same limitations text as the report. Guardian downloads that document from a completed
+        report.
+      </p>
+      <p>
+        The signature shows that this API issued those bytes. It does not show that the clip is real or synthetic,
+        and it is not legal evidence. The detector limits above still apply. SecureAI does not put the signature
+        on Solana or any other chain.
+      </p>
+      <p>
+        Anyone can check it without an account. <code>POST /v1/attestations/verify</code> takes the exact{" "}
+        <code>payload</code> string, the standard base64 <code>signature</code>, and an optional <code>key_id</code>.
+        Do not parse the payload and encode it again. <code>GET /v1/attestations/keys</code> returns the public
+        key. A valid verify response includes that public key too. If the server has no attestation key, these
+        routes answer 503 and Guardian shows a short note instead of the download. Issuing requires Pro or
+        Team. A private workstation in dev mode with quotas left unlimited can issue on the free plan.
+        Checking a signature does not require a plan or an account.
       </p>
       <p>
         Pro API keys are not issued yet. TODO: mint scoped keys for Pro and Team workspaces. Until then,

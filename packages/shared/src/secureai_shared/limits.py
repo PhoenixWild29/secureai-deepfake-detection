@@ -85,6 +85,7 @@ def build_limiter(settings: Settings) -> RateLimiter:
     limits = {
         "jobs": settings.rate_limit_jobs,
         "uploads": settings.rate_limit_uploads,
+        "attestations": settings.rate_limit_attestations,
     }
     if settings.queue_backend == "redis" and settings.redis_url:
         return RedisRateLimiter(

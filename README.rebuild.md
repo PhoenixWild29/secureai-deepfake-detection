@@ -7,11 +7,11 @@ Source for review is `main`.
 ## Layout
 
 ```
-apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON, opens billing, and sets a workspace webhook.
+apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON and a signed attestation, opens billing, and sets a workspace webhook.
 apps/api/             FastAPI. Clerk JWT (or a private dev bypass), Postgres, Redis.
 apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API. A background thread delivers webhooks.
 packages/detector/    DETECTOR_MODE=cpu scores texture, motion, temporal stability, and a face or skin-region cue. DETECTOR_MODE=stub hashes the path.
-packages/shared/      Job models, Postgres store, Redis queue, object storage.
+packages/shared/      Job models, Postgres store, Redis queue, object storage, report attestation.
 deploy/railway/       Reference service settings. Not auto-loaded. See that README.
 deploy/vercel/        Notes for the apps/web Vercel project.
 deploy/local/         Optional Redis, Postgres, and MinIO compose file.
@@ -158,7 +158,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. A completed report can show the four CPU signals and download JSON. PDF is not available yet. `/docs`, `/privacy`, and `/terms` are public. `/.well-known/security.txt` is a static file. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
+Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. A completed report can show the four CPU signals, download JSON, and download a signed attestation when the API has a key. PDF is not available yet. `/docs`, `/privacy`, and `/terms` are public. `/.well-known/security.txt` is a static file. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
 
 Private workstation, matching the API dev bypass:
 
@@ -264,6 +264,43 @@ curl -s -X POST http://localhost:8000/v1/jobs/batch \
 
 PDF is not implemented. TODO: render the same payload to PDF when a small dependency is worth adding. `pdf_available` is false until then.
 
+## Report attestation
+
+Phase 4c signs a completed report with Ed25519. It is not Solana and not a chain anchor. The signature shows that this API's attestation key issued one canonical JSON payload. It does not show that the clip is real or synthetic, and it is not legal evidence. The detector limitations in the payload are the same text as the JSON report.
+
+Set `ATTESTATION_PRIVATE_KEY` to an unencrypted PKCS8 Ed25519 PEM. A one-line env value may use `\n` between the PEM lines. `ATTESTATION_KEY_ID` defaults to `v1`. Change that id when you rotate the key. Only the current key verifies. If the private key is unset, `POST /v1/jobs/{id}/attest`, `POST /v1/attestations/verify`, and `GET /v1/attestations/keys` return 503 with `Attestation is not configured`.
+
+Generate a key for a private workstation and do not commit it:
+
+```bash
+python -c 'from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey; from cryptography.hazmat.primitives import serialization; print(Ed25519PrivateKey.generate().private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()).decode().replace(chr(10), "\\n"))'
+```
+
+Put that single line in `ATTESTATION_PRIVATE_KEY`.
+
+Issuing uses the same caller and `X-Org-Id` rules as the JSON report. A queued, processing, or failed job is 409. Pro and Team can issue. The plan is the workspace plan when `X-Org-Id` is set, and the personal plan otherwise. `past_due` still counts as paid. A free plan is 402 with `Attestation requires a Pro or Team plan.` `AUTH_MODE=dev` with `QUOTA_MODE=unlimited` (the workstation default when Stripe is unset) can issue on the free plan. `AUTH_MODE=clerk` always requires Pro or Team, including when `QUOTA_MODE=unlimited`.
+
+```bash
+curl -s -X POST http://localhost:8000/v1/jobs/job_.../attest \
+  -H 'Authorization: Bearer dev' \
+  -o attestation.json
+```
+
+The response is the verify body. `payload` is a string of compact JSON, not a nested object. The signature is standard base64 over those exact UTF-8 bytes. `algorithm` is `Ed25519`. The same payload and key return the stored signature. The row is `job_attestations` (`job_id`, `key_id`, `signature`, `created_at`).
+
+Verify does not use Clerk. `RATE_LIMIT_ATTESTATIONS` defaults to 60 per window per client address. `0` disables it.
+
+```bash
+curl -s -X POST http://localhost:8000/v1/attestations/verify \
+  -H 'Content-Type: application/json' \
+  --data-binary @attestation.json
+curl -s http://localhost:8000/v1/attestations/keys
+```
+
+A matching signature returns `{"valid":true,"key_id":"v1","algorithm":"Ed25519","public_key":"-----BEGIN PUBLIC KEY-----\\n..."}`. A wrong signature, a wrong `key_id`, or a payload that was parsed and encoded again returns `{"valid":false}`. Check the public key from `GET /v1/attestations/keys` or from a valid verify response. Do not trust a key that arrived only inside an email attachment.
+
+Guardian's report page downloads `job_<id>.attestation.json`, shows the signature, and links to `/docs#attestation`. If the API returns 503, the page keeps the JSON download and shows a short note that attestation is not available.
+
 Pro API keys are not issued. TODO: mint scoped keys for Pro and Team. Until then, job routes use the Clerk session token (or `Bearer dev` on a private workstation).
 
 Public pages: `/docs` (how detection works and its limits), `/privacy`, `/terms`, and `/.well-known/security.txt`.
@@ -314,4 +351,4 @@ A non-2xx response or a network error stays `pending` and is retried. The waits 
 
 ## Still later
 
-The legacy GPU ensemble and Docker image builds in CI. Solana stays deferred. The legacy Flask tree stays in the repo.
+The legacy GPU ensemble and Docker image builds in CI. Solana stays deferred. Signed attestation does not replace that. The legacy Flask tree stays in the repo.

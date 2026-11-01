@@ -56,6 +56,23 @@ export class JobStillRunning extends Error {
   }
 }
 
+export class ApiRequestError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.status = status;
+  }
+}
+
+export type JobAttestation = {
+  payload: string;
+  signature: string;
+  key_id: string;
+  algorithm: string;
+};
+
 async function errorText(response: Response): Promise<string> {
   try {
     const body = (await response.json()) as { detail?: unknown };
@@ -207,6 +224,34 @@ export async function fetchJobReport(options: {
     throw new Error(await errorText(fetched));
   }
   return (await fetched.json()) as JobReportExport;
+}
+
+export async function fetchJobAttestation(options: {
+  apiUrl: string;
+  jobId: string;
+  getToken: TokenSource;
+  orgId?: string | null;
+}): Promise<JobAttestation> {
+  const base = options.apiUrl.replace(/\/$/, "");
+  const fetched = await fetch(`${base}/v1/jobs/${options.jobId}/attest`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${await authorized(options.getToken)}`,
+      ...orgHeaders(options.orgId),
+    },
+  });
+  if (!fetched.ok) {
+    throw new ApiRequestError(fetched.status, await errorText(fetched));
+  }
+  return (await fetched.json()) as JobAttestation;
+}
+
+export async function fetchAttestationKeys(apiUrl: string): Promise<void> {
+  const base = apiUrl.replace(/\/$/, "");
+  const fetched = await fetch(`${base}/v1/attestations/keys`);
+  if (!fetched.ok) {
+    throw new ApiRequestError(fetched.status, await errorText(fetched));
+  }
 }
 
 export async function fetchJob(options: {

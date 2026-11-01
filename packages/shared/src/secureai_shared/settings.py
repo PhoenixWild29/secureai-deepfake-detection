@@ -6,6 +6,8 @@ import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 
+from secureai_shared.attestation import AttestationKeyError, load_attestation_key, normalize_pem, validate_key_id
+
 
 def _csv(value: str) -> tuple[str, ...]:
     return tuple(part.strip() for part in value.split(",") if part.strip())
@@ -51,6 +53,9 @@ class Settings:
     seat_limit_team: int = 25
     webhook_max_attempts: int = 5
     webhook_timeout_seconds: float = 10.0
+    attestation_private_key: str = ""
+    attestation_key_id: str = "v1"
+    rate_limit_attestations: int = 60
 
 
 def assert_explicit_origins(origins: tuple[str, ...]) -> None:
@@ -137,6 +142,14 @@ def load_settings(
         "yes",
     }
 
+    try:
+        attestation_pem = normalize_pem(env.get("ATTESTATION_PRIVATE_KEY", ""))
+        attestation_key_id = validate_key_id(env.get("ATTESTATION_KEY_ID", ""))
+        if attestation_pem:
+            load_attestation_key(attestation_pem, attestation_key_id)
+    except AttestationKeyError as exc:
+        raise RuntimeError(str(exc)) from exc
+
     stripe_secret = env.get("STRIPE_SECRET_KEY", "").strip()
     public_app = env.get("PUBLIC_APP_URL", "http://localhost:3000").strip().rstrip("/")
     public_app = public_app or "http://localhost:3000"
@@ -182,6 +195,9 @@ def load_settings(
         seat_limit_team=_positive_int(env, "SEAT_LIMIT_TEAM", 25),
         webhook_max_attempts=_bounded_int(env, "WEBHOOK_MAX_ATTEMPTS", 5, upper=10),
         webhook_timeout_seconds=_bounded_float(env, "WEBHOOK_TIMEOUT_SECONDS", 10.0, upper=30.0),
+        attestation_private_key=attestation_pem,
+        attestation_key_id=attestation_key_id,
+        rate_limit_attestations=_nonnegative_int(env, "RATE_LIMIT_ATTESTATIONS", 60),
     )
 
 
