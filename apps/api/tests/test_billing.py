@@ -15,6 +15,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from app.stripe_client import StartedCheckout
 from conftest import make_settings
 from secureai_shared.billing import MemoryBillingStore, PlanUpdate
 from secureai_shared.queue import MemoryJobQueue
@@ -215,7 +216,10 @@ def test_checkout_and_portal_use_the_stripe_client(tmp_path: Path) -> None:
 
         stripe = client.app.state.stripe
         stripe.ensure_customer = lambda **_kwargs: "cus_test"  # type: ignore[method-assign]
-        stripe.checkout_url = lambda **_kwargs: "https://checkout.stripe.test/c/pay"  # type: ignore[method-assign]
+        stripe.checkout_url = lambda **_kwargs: StartedCheckout(  # type: ignore[method-assign]
+            url="https://checkout.stripe.test/c/pay",
+            session_id="cs_test_mock",
+        )
         stripe.portal_url = lambda **_kwargs: "https://billing.stripe.test/p/session"  # type: ignore[method-assign]
 
         created = client.post("/v1/orgs", headers=AUTH, json={"name": "Studio"})
@@ -269,7 +273,8 @@ def test_webhook_happy_path_and_bad_signature(tmp_path: Path) -> None:
             "subscription": "sub_123",
             "payment_status": "paid",
             "status": "complete",
-            "metadata": {"user_id": "user_dev", "plan": "pro", "org_id": ""},
+            "metadata": {"user_id": "user_dev", "plan": "team", "org_id": ""},
+            "line_items": {"data": [{"price": {"id": "price_pro"}}]},
         },
     )
     paid = _event(
@@ -375,7 +380,8 @@ def test_late_update_after_delete_does_not_restore_the_plan(tmp_path: Path) -> N
             "customer": "cus_order",
             "subscription": "sub_old",
             "payment_status": "paid",
-            "metadata": {"user_id": "user_dev", "plan": "pro", "org_id": ""},
+            "metadata": {"user_id": "user_dev", "plan": "team", "org_id": ""},
+            "line_items": {"data": [{"price": {"id": "price_pro"}}]},
         },
         created=100,
     )
@@ -429,7 +435,8 @@ def test_old_subscription_delete_after_replacement_keeps_the_new_plan(tmp_path: 
                 "customer": "cus_replace",
                 "subscription": subscription_id,
                 "payment_status": "paid",
-                "metadata": {"user_id": "user_dev", "plan": "pro", "org_id": ""},
+                "metadata": {"user_id": "user_dev", "plan": "team", "org_id": ""},
+                "line_items": {"data": [{"price": {"id": "price_pro"}}]},
             },
             created=created,
         )
@@ -541,10 +548,147 @@ def test_checkout_refuses_an_active_subscription(tmp_path: Path) -> None:
                 event_created=40,
             ),
         )
-        stripe.checkout_url = lambda **_kwargs: "https://checkout.stripe.test/c/pay"  # type: ignore[method-assign]
+        stripe.checkout_url = lambda **_kwargs: StartedCheckout(  # type: ignore[method-assign]
+            url="https://checkout.stripe.test/c/pay",
+            session_id="cs_test_mock",
+        )
         allowed = client.post("/v1/billing/checkout", headers=AUTH, json={"plan": "pro"})
         assert allowed.status_code == 200
         assert allowed.json()["url"] == "https://checkout.stripe.test/c/pay"
+
+
+def test_late_invoice_keeps_a_terminal_status_and_checkout_can_open(tmp_path: Path) -> None:
+    """subscription.deleted, then a newer invoice, must not block resubscribe."""
+
+    client, _store, billing, _storage = _stack(
+        tmp_path,
+        stripe_secret_key="sk_test_example",
+        stripe_webhook_secret=SECRET,
+        stripe_price_pro="price_pro",
+    )
+
+    def invoice(event_id: str, event_type: str, created: int) -> bytes:
+        return _event(
+            event_id,
+            event_type,
+            {
+                "customer": "cus_terminal",
+                "subscription": "sub_terminal",
+                "metadata": {"user_id": "user_dev", "plan": "pro", "org_id": ""},
+            },
+            created=created,
+        )
+
+    checkout = _event(
+        "evt_terminal_checkout",
+        "checkout.session.completed",
+        {
+            "customer": "cus_terminal",
+            "subscription": "sub_terminal",
+            "payment_status": "paid",
+            "metadata": {"user_id": "user_dev", "plan": "team", "org_id": ""},
+            "line_items": {"data": [{"price": {"id": "price_pro"}}]},
+        },
+        created=100,
+    )
+    deleted = _event(
+        "evt_terminal_deleted",
+        "customer.subscription.deleted",
+        {
+            "id": "sub_terminal",
+            "customer": "cus_terminal",
+            "status": "canceled",
+            "metadata": {"user_id": "user_dev", "plan": "pro", "org_id": ""},
+        },
+        created=200,
+    )
+    with client:
+        stripe = client.app.state.stripe
+        stripe.ensure_customer = lambda **_kwargs: "cus_terminal"  # type: ignore[method-assign]
+        stripe.checkout_url = lambda **_kwargs: StartedCheckout(  # type: ignore[method-assign]
+            url="https://checkout.stripe.test/c/pay",
+            session_id="cs_resubscribe",
+        )
+        assert _post_event(client, checkout).status_code == 200
+        assert client.get("/v1/billing", headers=AUTH).json()["plan"] == "pro"
+        assert _post_event(client, deleted).status_code == 200
+        assert _post_event(client, invoice("evt_late_paid", "invoice.paid", 300)).status_code == 200
+        assert _post_event(client, invoice("evt_late_failed", "invoice.payment_failed", 400)).status_code == 200
+        canceled = client.get("/v1/billing", headers=AUTH).json()
+        assert canceled["plan"] == "free"
+        assert canceled["subscription_status"] == "canceled"
+        opened = client.post("/v1/billing/checkout", headers=AUTH, json={"plan": "pro"})
+        assert opened.status_code == 200
+        assert opened.json()["url"] == "https://checkout.stripe.test/c/pay"
+
+        unpaid = _event(
+            "evt_mark_unpaid",
+            "customer.subscription.updated",
+            {
+                "id": "sub_terminal",
+                "customer": "cus_terminal",
+                "status": "unpaid",
+                "metadata": {"user_id": "user_dev", "plan": "pro", "org_id": ""},
+                "items": {"data": [{"price": {"id": "price_pro"}}]},
+            },
+            created=500,
+        )
+        assert _post_event(client, unpaid).status_code == 200
+        assert _post_event(client, invoice("evt_unpaid_paid", "invoice.paid", 600)).status_code == 200
+        assert _post_event(client, invoice("evt_unpaid_failed", "invoice.payment_failed", 700)).status_code == 200
+        body = client.get("/v1/billing", headers=AUTH).json()
+        assert body["subscription_status"] == "unpaid"
+        assert body["plan"] == "free"
+        again = client.post("/v1/billing/checkout", headers=AUTH, json={"plan": "pro"})
+        assert again.status_code == 200
+    assert billing.user_account("user_dev").subscription_status == "unpaid"
+
+
+def test_checkout_without_a_price_uses_the_recorded_plan_not_metadata(tmp_path: Path) -> None:
+    client, _store, billing, _storage = _stack(
+        tmp_path,
+        stripe_secret_key="sk_test_example",
+        stripe_webhook_secret=SECRET,
+        stripe_price_pro="price_pro",
+        stripe_price_team="price_team",
+    )
+    billing.remember_checkout(session_id="cs_recorded", plan="pro", price_id="price_pro")
+    recorded = _event(
+        "evt_recorded_checkout",
+        "checkout.session.completed",
+        {
+            "id": "cs_recorded",
+            "customer": "cus_recorded",
+            "subscription": "sub_recorded",
+            "payment_status": "paid",
+            "metadata": {"user_id": "user_dev", "plan": "team", "org_id": ""},
+        },
+        created=100,
+    )
+    unknown = _event(
+        "evt_unknown_checkout_price",
+        "checkout.session.completed",
+        {
+            "id": "cs_other",
+            "customer": "cus_recorded",
+            "subscription": "sub_other",
+            "payment_status": "paid",
+            "metadata": {"user_id": "user_dev", "plan": "team", "org_id": ""},
+            "line_items": {"data": [{"price": {"id": "price_not_configured"}}]},
+        },
+        created=200,
+    )
+    with client:
+        assert _post_event(client, recorded).status_code == 200
+        body = client.get("/v1/billing", headers=AUTH).json()
+        assert body["plan"] == "pro"
+        assert body["subscription_status"] == "active"
+        assert _post_event(client, unknown).status_code == 200
+        # Unknown price must not fall back to metadata.plan or the earlier intent.
+        stayed = client.get("/v1/billing", headers=AUTH).json()
+    assert stayed["plan"] == "pro"
+    assert stayed["subscription_status"] == "active"
+    assert billing.user_account("user_dev").stripe_subscription_id == "sub_recorded"
 
 
 def test_unknown_price_does_not_upgrade_from_metadata(tmp_path: Path) -> None:
@@ -594,7 +738,8 @@ def test_team_downgrade_clamps_seats_to_the_free_limit(tmp_path: Path) -> None:
                 "customer": "cus_team",
                 "subscription": "sub_team",
                 "payment_status": "paid",
-                "metadata": {"user_id": "user_dev", "org_id": org_id, "plan": "team"},
+                "metadata": {"user_id": "user_dev", "org_id": org_id, "plan": "pro"},
+                "line_items": {"data": [{"price": {"id": "price_team"}}]},
             },
             created=100,
         )
@@ -619,12 +764,38 @@ def test_team_downgrade_clamps_seats_to_the_free_limit(tmp_path: Path) -> None:
         )
         assert _post_event(client, deleted).status_code == 200
         view = client.get("/v1/billing", headers={**AUTH, "X-Org-Id": org_id}).json()
-    assert view["plan"] == "free"
-    assert view["subscription_status"] == "canceled"
-    assert view["seats_used"] == 2
-    assert view["seats_limit"] == 2
-    member_ids = {row["user_id"] for row in view["members"]}
-    assert member_ids == {"user_dev", "user_a"}
+        assert view["plan"] == "free"
+        assert view["subscription_status"] == "canceled"
+        assert view["seats_used"] == 2
+        assert view["seats_limit"] == 2
+        member_ids = {row["user_id"] for row in view["members"]}
+        assert member_ids == {"user_dev", "user_a"}
+        # Hard-deleted, not hidden. A later Team upgrade does not restore them.
+        assert _billing.membership(org_id, "user_b") is None
+        assert _billing.membership(org_id, "user_c") is None
+        assert _billing.list_orgs("user_b") == []
+        upgraded = _event(
+            "evt_team_again",
+            "customer.subscription.updated",
+            {
+                "id": "sub_team",
+                "customer": "cus_team",
+                "status": "active",
+                "metadata": {"user_id": "user_dev", "org_id": org_id, "plan": "free"},
+                "items": {"data": [{"price": {"id": "price_team"}}]},
+            },
+            created=300,
+        )
+        assert _post_event(client, upgraded).status_code == 200
+        again = client.get("/v1/billing", headers={**AUTH, "X-Org-Id": org_id}).json()
+        assert again["plan"] == "team"
+        assert {row["user_id"] for row in again["members"]} == {"user_dev", "user_a"}
+        restored = client.post(
+            f"/v1/orgs/{org_id}/members",
+            headers=AUTH,
+            json={"user_id": "user_c"},
+        )
+        assert restored.status_code == 201
 
 
 def test_concurrent_quota_check_and_insert_do_not_overlap(tmp_path: Path) -> None:

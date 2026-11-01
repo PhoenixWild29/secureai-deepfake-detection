@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.db import (
     BillingAccountRow,
+    CheckoutIntentRow,
     OrganizationMemberRow,
     OrganizationRow,
     StripeEventRow,
@@ -98,6 +99,8 @@ class PlanUpdate:
     # checkout.session.completed may replace the stored subscription id.
     # Update, delete, and invoice events for a different subscription must not.
     replaces_subscription: bool = False
+    # invoice.paid and invoice.payment_failed must not leave a terminal status.
+    invoice: bool = False
 
 
 def effective_plan(plan: str, status: str | None) -> str:
@@ -156,6 +159,9 @@ def subscription_block_reason(
     Event.created (or by current_period_end when the event has no created).
     A delete or update for a previous subscription id cannot change the
     account after a replacement Checkout stored a new subscription id.
+    Invoice events never move `canceled`, `unpaid`, or `incomplete_expired`,
+    even when the invoice's Event.created is newer. That keeps Checkout
+    from sticking on 409 after a late `invoice.paid` or `invoice.payment_failed`.
     """
 
     if not _touches_subscription(update):
@@ -173,6 +179,8 @@ def subscription_block_reason(
         if stored_event_created is not None and update.event_created is None:
             return "checkout-without-timestamp"
         return None
+    if _invoice_leaves_terminal(stored_status, update):
+        return "terminal-invoice"
     if stored_event_created is not None and update.event_created is not None:
         if update.event_created < stored_event_created:
             return "stale-event"
@@ -194,8 +202,25 @@ def subscription_block_reason(
     return None
 
 
-def plan_update_from_event(event: Mapping[str, object], prices: Mapping[str, str]) -> PlanUpdate | None:
-    """Map a verified Stripe event into a billing write. Unknown types return None."""
+def _invoice_leaves_terminal(stored_status: str | None, update: PlanUpdate) -> bool:
+    """True when an invoice would overwrite a terminal subscription status."""
+
+    if not update.invoice or stored_status not in _TERMINAL_STATUSES:
+        return False
+    return update.status is not None and update.status != stored_status
+
+
+def plan_update_from_event(
+    event: Mapping[str, object],
+    prices: Mapping[str, str],
+    *,
+    checkout_intents: Mapping[str, str] | None = None,
+) -> PlanUpdate | None:
+    """Map a verified Stripe event into a billing write. Unknown types return None.
+
+    `checkout_intents` maps a Checkout session id to the plan recorded when
+    that session was created. It is used only when the event has no price id.
+    """
 
     kind = event.get("type")
     data = event.get("data")
@@ -205,7 +230,7 @@ def plan_update_from_event(event: Mapping[str, object], prices: Mapping[str, str
     if not isinstance(obj, dict):
         return None
     if kind == "checkout.session.completed":
-        update = _from_checkout(obj)
+        update = _from_checkout(obj, prices, checkout_intents or {})
     elif kind == "customer.subscription.updated":
         update = _from_subscription(obj, prices, deleted=False)
     elif kind == "customer.subscription.deleted":
@@ -244,7 +269,12 @@ class BillingStore(Protocol):
         user_id: str | None,
         org_id: str | None,
         customer_id: str,
+        free_seat_limit: int = 3,
     ) -> None: ...
+
+    def remember_checkout(self, *, session_id: str, plan: str, price_id: str) -> None: ...
+
+    def checkout_plan(self, session_id: str, *, prices: Mapping[str, str]) -> str | None: ...
 
     def apply_stripe_event(
         self,
@@ -380,20 +410,86 @@ def _target(user_id: str | None, org_id: str | None) -> tuple[str | None, str | 
     return user_id, None
 
 
-def _from_checkout(obj: Mapping[str, object]) -> PlanUpdate | None:
+def _price_from_value(price: object) -> str | None:
+    if isinstance(price, str) and price:
+        return price
+    if isinstance(price, dict):
+        pid = price.get("id")
+        if isinstance(pid, str) and pid:
+            return pid
+    return None
+
+
+def _checkout_price_id(obj: Mapping[str, object]) -> str | None:
+    """Price id on the Checkout session, when Stripe included line items."""
+
+    line_items = obj.get("line_items")
+    data = line_items.get("data") if isinstance(line_items, dict) else None
+    if isinstance(data, list):
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            price_id = _price_from_value(item.get("price"))
+            if price_id:
+                return price_id
+    display = obj.get("display_items")
+    if isinstance(display, list):
+        for item in display:
+            if not isinstance(item, dict):
+                continue
+            price_id = _price_from_value(item.get("price"))
+            if price_id:
+                return price_id
+    return None
+
+
+def _known_plan(price_id: str | None, prices: Mapping[str, str]) -> str | None:
+    if not price_id:
+        return None
+    mapped = prices.get(price_id)
+    if mapped in {"pro", "team"}:
+        return mapped
+    return None
+
+
+def _checkout_plan(
+    obj: Mapping[str, object],
+    prices: Mapping[str, str],
+    checkout_intents: Mapping[str, str],
+) -> str | None:
+    """Plan from a known price id, or from the plan recorded at Checkout creation.
+
+    metadata.plan is not a source. An unknown price id does not upgrade the account.
+    """
+
+    price_id = _checkout_price_id(obj)
+    if price_id:
+        plan = _known_plan(price_id, prices)
+        if plan is None:
+            logger.warning("checkout price id is not a configured pro or team price; not using metadata.plan")
+        return plan
+    session_id = obj.get("id") if isinstance(obj.get("id"), str) else None
+    remembered = checkout_intents.get(session_id) if session_id else None
+    if remembered in {"pro", "team"}:
+        return remembered
+    logger.warning("checkout has no known price id; not using metadata.plan")
+    return None
+
+
+def _from_checkout(
+    obj: Mapping[str, object],
+    prices: Mapping[str, str],
+    checkout_intents: Mapping[str, str],
+) -> PlanUpdate | None:
     user_id, org_id = _scope(obj)
     user_id, org_id = _target(user_id, org_id)
     if user_id is None and org_id is None:
         return None
     paid = obj.get("payment_status") in {"paid", "no_payment_required"}
-    plan = None
-    status = "incomplete"
-    if paid:
-        meta = obj.get("metadata")
-        named = meta.get("plan") if isinstance(meta, dict) else None
-        if named in {"pro", "team"}:
-            plan = named
-        status = "active"
+    plan = _checkout_plan(obj, prices, checkout_intents) if paid else None
+    # A paid session we cannot name must not become an entitled status.
+    # That would leave the account on the free plan and make Checkout return 409.
+    status = "active" if plan is not None else ("incomplete" if not paid else None)
     return PlanUpdate(
         user_id=user_id,
         org_id=org_id,
@@ -401,7 +497,7 @@ def _from_checkout(obj: Mapping[str, object]) -> PlanUpdate | None:
         subscription_id=_subscription_id(obj),
         plan=plan,
         status=status,
-        replaces_subscription=True,
+        replaces_subscription=plan is not None or not paid,
     )
 
 
@@ -469,6 +565,7 @@ def _from_invoice(obj: Mapping[str, object], *, failed: bool) -> PlanUpdate | No
         status="past_due" if failed else "active",
         period_start=start,
         period_end=end,
+        invoice=True,
     )
 
 
@@ -504,6 +601,7 @@ class MemoryBillingStore:
         self._members: dict[str, dict[str, str]] = {}
         self._customers: dict[str, tuple[str, str]] = {}
         self._events: set[str] = set()
+        self._checkout_intents: dict[str, tuple[str, str]] = {}
         self._lock = threading.Lock()
         self._quota_guards: dict[str, threading.Lock] = {}
 
@@ -576,12 +674,35 @@ class MemoryBillingStore:
                 raise OwnerRequired(user_id)
             del members[user_id]
 
-    def attach_customer(self, *, user_id: str | None, org_id: str | None, customer_id: str) -> None:
+    def attach_customer(
+        self,
+        *,
+        user_id: str | None,
+        org_id: str | None,
+        customer_id: str,
+        free_seat_limit: int = 3,
+    ) -> None:
         with self._lock:
             self._apply_locked(
                 PlanUpdate(user_id=user_id, org_id=org_id, customer_id=customer_id),
-                free_seat_limit=3,
+                free_seat_limit=free_seat_limit,
             )
+
+    def remember_checkout(self, *, session_id: str, plan: str, price_id: str) -> None:
+        if not session_id or plan not in {"pro", "team"} or not price_id:
+            return
+        with self._lock:
+            self._checkout_intents[session_id] = (plan, price_id)
+
+    def checkout_plan(self, session_id: str, *, prices: Mapping[str, str]) -> str | None:
+        with self._lock:
+            stored = self._checkout_intents.get(session_id)
+        if stored is None:
+            return None
+        plan, price_id = stored
+        if _known_plan(price_id, prices) != plan:
+            return None
+        return plan
 
     def apply_stripe_event(
         self,
@@ -891,14 +1012,52 @@ class PostgresBillingStore:
             session.delete(row)
             session.commit()
 
-    def attach_customer(self, *, user_id: str | None, org_id: str | None, customer_id: str) -> None:
+    def attach_customer(
+        self,
+        *,
+        user_id: str | None,
+        org_id: str | None,
+        customer_id: str,
+        free_seat_limit: int = 3,
+    ) -> None:
         with self._session() as session:
             self._apply(
                 session,
                 PlanUpdate(user_id=user_id, org_id=org_id, customer_id=customer_id),
-                free_seat_limit=3,
+                free_seat_limit=free_seat_limit,
             )
             session.commit()
+
+    def remember_checkout(self, *, session_id: str, plan: str, price_id: str) -> None:
+        if not session_id or plan not in {"pro", "team"} or not price_id:
+            return
+        now = _now()
+        with self._session() as session:
+            row = session.get(CheckoutIntentRow, session_id)
+            if row is None:
+                session.add(
+                    CheckoutIntentRow(
+                        session_id=session_id,
+                        plan=plan,
+                        price_id=price_id,
+                        created_at=now,
+                    )
+                )
+            else:
+                row.plan = plan
+                row.price_id = price_id
+                row.created_at = now
+            session.commit()
+
+    def checkout_plan(self, session_id: str, *, prices: Mapping[str, str]) -> str | None:
+        with self._session() as session:
+            row = session.get(CheckoutIntentRow, session_id)
+            if row is None:
+                return None
+            plan, price_id = row.plan, row.price_id
+        if _known_plan(price_id, prices) != plan:
+            return None
+        return plan
 
     def apply_stripe_event(
         self,
@@ -1067,7 +1226,10 @@ class PostgresBillingStore:
         rows = session.scalars(
             select(OrganizationMemberRow)
             .where(OrganizationMemberRow.org_id == org.id)
-            .order_by(OrganizationMemberRow.created_at.desc())
+            .order_by(
+                OrganizationMemberRow.created_at.desc(),
+                OrganizationMemberRow.user_id.desc(),
+            )
         ).all()
         overflow = len(rows) - limit
         if overflow <= 0:

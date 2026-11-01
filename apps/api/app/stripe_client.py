@@ -6,6 +6,7 @@ Calls stay in this module so tests can replace them without hitting Stripe.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 
 from secureai_shared.settings import Settings
 
@@ -22,6 +23,12 @@ class StripeSignatureError(Exception):
 
 class StripeProviderError(Exception):
     """Stripe returned an error or an incomplete object."""
+
+
+@dataclass(frozen=True)
+class StartedCheckout:
+    url: str
+    session_id: str
 
 
 class StripeBilling:
@@ -70,12 +77,15 @@ class StripeBilling:
         user_id: str,
         org_id: str | None,
         plan: str,
-    ) -> str:
+    ) -> StartedCheckout:
         if not self.settings.stripe_secret_key or not price_id:
             raise StripeNotConfigured("checkout")
+        if plan not in {"pro", "team"}:
+            raise StripeProviderError("plan")
         import stripe
 
-        metadata = {"user_id": user_id, "org_id": org_id or "", "plan": plan}
+        # The plan is recorded on our Checkout intent, not read back from metadata.
+        metadata = {"user_id": user_id, "org_id": org_id or ""}
         try:
             session = stripe.checkout.Session.create(
                 mode="subscription",
@@ -91,9 +101,12 @@ class StripeBilling:
         except stripe.StripeError as exc:
             raise StripeProviderError("checkout") from exc
         url = session["url"]
+        session_id = session["id"]
         if not isinstance(url, str) or not url:
             raise StripeProviderError("checkout url")
-        return url
+        if not isinstance(session_id, str) or not session_id:
+            raise StripeProviderError("checkout session")
+        return StartedCheckout(url=url, session_id=session_id)
 
     def portal_url(self, *, customer_id: str) -> str:
         if not self.settings.stripe_secret_key:

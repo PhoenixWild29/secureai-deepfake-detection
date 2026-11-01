@@ -209,13 +209,23 @@ def create_checkout(
             user_id=user.subject,
             org_id=org_id,
         )
-        billing.attach_customer(user_id=None if org_id else user.subject, org_id=org_id, customer_id=customer_id)
-        url = stripe.checkout_url(
+        billing.attach_customer(
+            user_id=None if org_id else user.subject,
+            org_id=org_id,
+            customer_id=customer_id,
+            free_seat_limit=settings.seat_limit_free,
+        )
+        opened = stripe.checkout_url(
             customer_id=customer_id,
             price_id=stripe.price_for(body.plan),
             user_id=user.subject,
             org_id=org_id,
             plan=body.plan,
+        )
+        billing.remember_checkout(
+            session_id=opened.session_id,
+            plan=body.plan,
+            price_id=stripe.price_for(body.plan),
         )
     except StripeNotConfigured as exc:
         raise HTTPException(status_code=503, detail="Billing is not configured") from exc
@@ -223,7 +233,7 @@ def create_checkout(
         logger.exception("stripe checkout failed")
         raise HTTPException(status_code=502, detail="Billing provider unavailable") from exc
     logger.info("checkout started subject=%s plan=%s org=%s", user.subject, body.plan, org_id or "-")
-    return CheckoutLink(url=url)
+    return CheckoutLink(url=opened.url)
 
 
 @router.post("/v1/billing/portal", response_model=CheckoutLink)
@@ -276,7 +286,11 @@ async def stripe_webhook(request: Request) -> WebhookResult:
 
     settings: Settings = request.app.state.settings
     prices = _price_map(settings)
-    update = plan_update_from_event(event, prices)
+    update = plan_update_from_event(
+        event,
+        prices,
+        checkout_intents=_checkout_intents(request, event, prices),
+    )
     fresh = request.app.state.billing.apply_stripe_event(
         event_id,
         event_type,
@@ -396,6 +410,22 @@ def _require_owner(request: Request, org_id: str, user_id: str) -> None:
         raise HTTPException(status_code=404, detail="Organization not found")
     if role != "owner":
         raise HTTPException(status_code=403, detail="Only the workspace owner can do that.")
+
+
+def _checkout_intents(request: Request, event: dict[str, object], prices: dict[str, str]) -> dict[str, str]:
+    """Plan recorded for this Checkout session, when the payload has no price id."""
+
+    if event.get("type") != "checkout.session.completed":
+        return {}
+    data = event.get("data")
+    obj = data.get("object") if isinstance(data, dict) else None
+    session_id = obj.get("id") if isinstance(obj, dict) else None
+    if not isinstance(session_id, str) or not session_id:
+        return {}
+    plan = request.app.state.billing.checkout_plan(session_id, prices=prices)
+    if plan not in {"pro", "team"}:
+        return {}
+    return {session_id: plan}
 
 
 def _price_map(settings: Settings) -> dict[str, str]:
