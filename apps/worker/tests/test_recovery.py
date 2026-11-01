@@ -32,6 +32,27 @@ def test_sweep_requeues_a_processing_job_inside_the_attempt_budget() -> None:
     assert queue.consume() == job_id
 
 
+def test_sweep_does_not_duplicate_a_requeue_that_is_still_waiting() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.claim(job_id) is not None
+    queue._inflight[job_id] = (1_000.0, 1)  # noqa: SLF001
+    assert sweep_stuck(store, queue, lease_seconds=10, max_attempts=3, now=2_000) == [job_id]
+    job = store.get_any(job_id)
+    assert job is not None
+    assert job.status is JobStatus.queued
+    queue.publish(job_id)
+    assert sweep_stuck(store, queue, lease_seconds=10, max_attempts=3, now=3_000) == []
+    assert queue.consume() == job_id
+    assert queue.held_attempt(job_id) == 2
+    assert queue.consume() is None
+    claimed = store.claim(job_id)
+    assert claimed is not None
+    assert claimed.attempt == 2
+    assert queue.ack(job_id, attempt=1) is False
+    assert queue.ack(job_id, attempt=2) is True
+
+
 def test_sweep_fails_a_job_that_exhausted_attempts() -> None:
     store, queue, job_id = _queued()
     assert queue.consume() == job_id

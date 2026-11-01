@@ -77,6 +77,7 @@ def test_pop_and_stale_claim_are_single_scripts() -> None:
     assert "RPOP" in pop and "HSET" in pop
     assert "BLMOVE" not in pop
     assert "HSET" in claim and "LPUSH" in claim
+    assert "LPOS" in claim and "LREM" in claim
     assert "ARGV[2]" in claim
     assert "generation" in claim
     assert "HDEL" in ack and "ARGV[2]" in ack
@@ -108,6 +109,59 @@ def test_slow_worker_ack_after_claim_stale_does_not_reset_attempts() -> None:
     _assert_slow_ack_keeps_the_requeued_lease(MemoryJobQueue())
 
 
+def _assert_aged_requeue_stays_single(queue) -> None:
+    """A lease that ages out while the id is still queued must not push a second copy.
+
+    The original pop still cannot ack. The next pop is the only one. Its
+    attempt is the next count, and it is consumed before work published later.
+    """
+
+    queue.publish("job_wait")
+    assert queue.consume() == "job_wait"
+    first = queue.held_attempt("job_wait")
+    assert first == 1
+    later = time.time() + 30
+    assert queue.claim_stale("job_wait", first, now=later, lease_seconds=10) is True
+    queue.publish("job_newer")
+    assert queue.claim_stale("job_wait", first, now=later + 10, lease_seconds=10) is False
+    assert queue.claim_stale("job_wait", first, now=later + 20, lease_seconds=10) is False
+    assert queue.ack("job_wait", attempt=first) is False
+    assert queue.consume() == "job_wait"
+    assert queue.held_attempt("job_wait") == 2
+    assert queue.consume() == "job_newer"
+    assert queue.consume() is None
+    assert queue.ack("job_wait", attempt=first) is False
+    assert queue.ack("job_wait", attempt=2) is True
+
+
+def _assert_extra_copies_collapse_to_one(queue) -> None:
+    """Copies already on the list collapse to one before another worker can pop them."""
+
+    queue.publish("job_dup")
+    assert queue.consume() == "job_dup"
+    first = queue.held_attempt("job_dup")
+    later = time.time() + 80
+    assert queue.claim_stale("job_dup", first, now=later, lease_seconds=10) is True
+    queue.publish("job_after")
+    queue.publish("job_dup")
+    queue.publish("job_dup")
+    assert queue.claim_stale("job_dup", first, now=later + 10, lease_seconds=10) is False
+    assert queue.consume() == "job_dup"
+    assert queue.held_attempt("job_dup") == first + 1
+    assert queue.consume() == "job_after"
+    assert queue.consume() is None
+    assert queue.ack("job_dup", attempt=first) is False
+    assert queue.ack("job_dup", attempt=first + 1) is True
+
+
+def test_aged_requeue_does_not_duplicate_the_waiting_id() -> None:
+    _assert_aged_requeue_stays_single(MemoryJobQueue())
+
+
+def test_extra_waiting_copies_collapse_to_one() -> None:
+    _assert_extra_copies_collapse_to_one(MemoryJobQueue())
+
+
 def test_build_queue_defaults_to_memory_when_configured() -> None:
     queue = build_queue(_settings())
     assert isinstance(queue, MemoryJobQueue)
@@ -135,6 +189,8 @@ def test_redis_publish_and_consume() -> None:
     assert queue._held == {}  # noqa: SLF001
     assert queue.consume(timeout=0) is None
     _assert_slow_ack_keeps_the_requeued_lease(RedisJobQueue(url, key=key))
+    _assert_aged_requeue_stays_single(RedisJobQueue(url, key=key))
+    _assert_extra_copies_collapse_to_one(RedisJobQueue(url, key=key))
     assert queue.consume(timeout=1) is None
     client.delete(key)
     client.delete(f"{key}:inflight")
