@@ -73,7 +73,7 @@ Worker, same virtualenv and the same `DATABASE_URL`, `REDIS_URL`, and storage se
 python -m worker
 ```
 
-`python -m worker --once` scores one job and exits. `python -m worker --demo --once` generates a clip, stores it, and scores it. `DETECTOR_MODE` defaults to `cpu`. `DETECTOR_MODE=stub` hashes the path and does not open the file. `apps/worker/pyproject.toml` marks dependencies dynamic; the editable install above passes `--no-deps` so pip does not install `packages/shared` and `packages/detector` a second time. `pip install ./apps/worker` (what CI does) installs both.
+`python -m worker --once` scores one job and exits. `python -m worker --demo --once` generates a clip, stores it, and scores it. The worker image runs `python -m worker` as PID 1. SIGTERM finishes the job already popped and the webhook POST already in progress. `deploy/railway/worker.railway.json` waits 75 seconds before SIGKILL. `DETECTOR_MODE` defaults to `cpu`. `DETECTOR_MODE=stub` hashes the path and does not open the file. `apps/worker/pyproject.toml` marks dependencies dynamic; the editable install above passes `--no-deps` so pip does not install `packages/shared` and `packages/detector` a second time. `pip install ./apps/worker` (what CI does) installs both.
 
 Web app. Node.js 20.9 or newer. CI uses Node 22. `apps/web/package-lock.json` is committed.
 
