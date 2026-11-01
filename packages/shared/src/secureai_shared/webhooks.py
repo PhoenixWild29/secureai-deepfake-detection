@@ -26,7 +26,13 @@ share one deadline of the original timeout. Time spent in the handshake
 is not available for the response, and each later read or write waits
 only for the time still left. A response that asks the connection to
 close still has its body read. The socket stays open until that reader
-finishes. TLS and the Host header still use the
+finishes. The status line is the delivery result. At most 2048 bytes of
+the body are read, and only so the response can finish. A chunked body
+that ends early raises IncompleteRead after that status is known. The
+status still stands, so a 2xx is delivered and a non-2xx is retried as
+that code. A short Content-Length body does not raise. A timeout, or a
+close before the status line, is still a failed attempt. TLS and the
+Host header still use the
 original hostname, so a DNS answer that changes
 between the check and the connect cannot move the socket onto a private
 address. A TLS failure does not try another address. Any TCP port is
@@ -326,8 +332,58 @@ def deliver_once(
     return True
 
 
+# Enough of the response to let the socket finish. The bytes are not the
+# delivery result, and a receiver must not be able to hold the worker by
+# sending an unbounded body.
+_RESPONSE_READ_LIMIT = 2048
+
+
+def _send_webhook(
+    connection: http_client.HTTPConnection,
+    path: str,
+    body: bytes,
+    headers: Mapping[str, str],
+) -> int:
+    """POST ``body`` and return the status that was already parsed.
+
+    ``Connection: close`` makes ``getresponse`` close the socket before
+    the body is read from the makefile reader. Closing the response
+    releases that reader. ``http.client`` raises ``IncompleteRead`` when
+    a chunked body ends early. The status line was parsed before that
+    read, and it is the delivery result: a 2xx has been accepted, so
+    raising here would send the same event again. A non-2xx is returned
+    as that code so the caller records it instead of a transport error.
+    ``read`` of a fixed length does not raise ``IncompleteRead`` for a
+    short ``Content-Length`` body; the bytes that arrived are enough.
+    A timeout or any other error still propagates. A close before the
+    status line never produces a status, so that attempt fails.
+    """
+
+    try:
+        connection.request("POST", path, body=body, headers=dict(headers))
+        response = connection.getresponse()
+        try:
+            status = int(response.status)
+            try:
+                response.read(_RESPONSE_READ_LIMIT)
+            except http_client.IncompleteRead:
+                # The status was parsed before the body. Keep it.
+                pass
+            return status
+        finally:
+            # Drop the makefile reader before returning. On Connection: close,
+            # getresponse already handed the socket to that reader, so this
+            # is what releases the file descriptor.
+            response.close()
+    finally:
+        connection.close()
+
+
 def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: float) -> int:
-    """POST JSON and return the status code. Redirects are not followed."""
+    """POST JSON and return the status code. Redirects are not followed.
+
+    A truncated body does not replace the status. See ``_send_webhook``.
+    """
 
     parts = urlsplit(url)
     host = parts.hostname
@@ -353,19 +409,7 @@ def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: flo
         context=ssl.create_default_context(),
     )
     connection._connect_timeout = remaining
-    try:
-        connection.request("POST", path, body=body, headers=dict(headers))
-        response = connection.getresponse()
-        try:
-            response.read(2048)
-            return int(response.status)
-        finally:
-            # Drop the makefile reader before returning. On Connection: close,
-            # getresponse already handed the socket to that reader, so this
-            # is what releases the file descriptor.
-            response.close()
-    finally:
-        connection.close()
+    return _send_webhook(connection, path, body, headers)
 
 
 def open_webhook_store(job_store: object) -> WebhookStore:

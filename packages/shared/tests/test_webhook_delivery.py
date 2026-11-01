@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import os
+import socket
+import threading
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -1274,9 +1276,11 @@ def test_redis_webhook_queue_claims_only_due_ids() -> None:
 def _webhook_tls_contexts(tmp_path: object) -> tuple[object, object]:
     """Server and non-verifying client contexts for a loopback handshake.
 
-    The certificate is only here so TLS can finish. These tests call
-    ``_PinnedHTTPSConnection`` directly. ``post_webhook`` still rejects a
-    private address before it connects.
+    The certificate is only here so TLS can finish. Deadline tests connect
+    through ``_post_on_loopback``, which pins 127.0.0.1. ``post_webhook``
+    still rejects a private address before it connects. The tests that
+    call ``post_webhook`` replace name lookup and the trust store for
+    that one call.
     """
 
     import ssl
@@ -1321,9 +1325,15 @@ def _webhook_tls_contexts(tmp_path: object) -> tuple[object, object]:
 
 
 def _post_on_loopback(port: int, timeout: float, client_context: object) -> int:
-    import ssl
+    """Deadline tests pin loopback and skip certificate checks.
 
-    from secureai_shared.webhooks import _PinnedHTTPSConnection
+    ``post_webhook`` rejects a private address and uses the default trust
+    store, so these tests cannot call it. The POST, the body read, and
+    both closes are ``_send_webhook``, the same function ``post_webhook``
+    calls. The Connection: close test calls ``post_webhook`` itself.
+    """
+
+    from secureai_shared.webhooks import _PinnedHTTPSConnection, _send_webhook
 
     connection = _PinnedHTTPSConnection(
         "webhook.test",
@@ -1333,21 +1343,124 @@ def _post_on_loopback(port: int, timeout: float, client_context: object) -> int:
         context=client_context,  # type: ignore[arg-type]
     )
     connection._connect_timeout = timeout
-    try:
-        connection.request(
-            "POST",
-            "/",
-            body=b"{}",
-            headers={"Content-Type": "application/json"},
-        )
-        response = connection.getresponse()
+    return _send_webhook(connection, "/", b"{}", {"Content-Type": "application/json"})
+
+
+def _pin_loopback_webhook(monkeypatch: pytest.MonkeyPatch, client_context: object) -> None:
+    """Dial the loopback peer through ``post_webhook`` for one test.
+
+    Production still rejects a private address. Replacing the lookup and
+    the trust store leaves the POST, the body read, and both closes on
+    the production path.
+    """
+
+    def resolve(host: str, *, timeout: float) -> list[str]:
+        del host, timeout
+        return ["127.0.0.1"]
+
+    monkeypatch.setattr("secureai_shared.webhooks._resolve_public_addresses", resolve)
+    monkeypatch.setattr(
+        "secureai_shared.webhooks.ssl.create_default_context",
+        lambda *args, **kwargs: client_context,
+    )
+
+
+def _count_incomplete_reads(monkeypatch: pytest.MonkeyPatch) -> dict[str, int]:
+    """Count ``IncompleteRead`` from the real ``HTTPResponse.read``."""
+
+    import http.client
+
+    seen = {"n": 0}
+    original = http.client.HTTPResponse.read
+
+    def read(self: http.client.HTTPResponse, amt: int | None = None) -> bytes:
         try:
-            response.read(2048)
-            return int(response.status)
-        finally:
-            response.close()
-    finally:
-        connection.close()
+            return original(self, amt)
+        except http.client.IncompleteRead:
+            seen["n"] += 1
+            raise
+
+    monkeypatch.setattr(http.client.HTTPResponse, "read", read)
+    return seen
+
+
+class _TlsPeer:
+    """One loopback TLS listener and the thread serving a single request."""
+
+    def __init__(
+        self,
+        port: int,
+        client_context: object,
+        listener: socket.socket,
+        thread: threading.Thread,
+    ) -> None:
+        self.port = port
+        self.client_context = client_context
+        self._listener = listener
+        self._thread = thread
+
+    def close(self) -> None:
+        self._listener.close()
+        self._thread.join(3)
+
+
+def _serve_tls_response(tmp_path: object, payload: bytes) -> _TlsPeer:
+    """One loopback TLS request, then ``payload``, then the socket closes."""
+
+    server_context, client_context = _webhook_tls_contexts(tmp_path)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    listener.settimeout(5)
+    port = listener.getsockname()[1]
+
+    def serve() -> None:
+        try:
+            conn, _addr = listener.accept()
+        except OSError:
+            return
+        try:
+            conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            tls = server_context.wrap_socket(conn, server_side=True)  # type: ignore[attr-defined]
+            try:
+                tls.settimeout(5)
+                tls.recv(65536)
+                if payload:
+                    tls.sendall(payload)
+            finally:
+                tls.close()
+        except OSError:
+            conn.close()
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    return _TlsPeer(port, client_context, listener, thread)
+
+
+def _deliver_post_webhook(
+    monkeypatch: pytest.MonkeyPatch,
+    port: int,
+    client_context: object,
+):
+    """Run one real ``post_webhook`` delivery against ``port``."""
+
+    _pin_loopback_webhook(monkeypatch, client_context)
+    store = MemoryWebhookStore()
+    queue = MemoryWebhookQueue()
+    store.upsert_endpoint(
+        org_id=ORG,
+        url=f"https://webhook.test:{port}/hooks",
+        secret=None,
+        keep_secret=False,
+        notify_failures=True,
+    )
+    job = _terminal(JobStatus.completed)
+    assert schedule_terminal(store, queue, job, now=WHEN) is not None
+    assert deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=5, now=WHEN) is True
+    saved = store.delivery_for_job(job.id)
+    assert saved is not None
+    return saved
 
 
 def test_tls_and_http_share_one_request_deadline(tmp_path: object) -> None:
@@ -1570,10 +1683,15 @@ def test_connection_close_reads_a_body_that_arrives_after_the_headers(
     ``Connection: close`` makes ``getresponse`` close the socket before
     ``response.read``. The body is sent only after that ``close``. Dropping
     the SSL socket there raises ``EBADF`` and a delivered event is retried.
+
+    The call is ``post_webhook``. Name lookup is replaced with 127.0.0.1
+    and the trust store is the test context, because production rejects a
+    private address and checks the certificate. The body bytes have to
+    come back from ``HTTPResponse.read``. A 200 returned after a swallowed
+    read error would not contain ``ok``.
     """
 
-    import socket
-    import threading
+    import http.client
 
     from secureai_shared.webhooks import _DeadlineSocket
 
@@ -1586,13 +1704,22 @@ def test_connection_close_reads_a_body_that_arrives_after_the_headers(
     port = listener.getsockname()[1]
     handed_off = threading.Event()
     body_sent = threading.Event()
+    read_bodies: list[bytes] = []
     original_close = _DeadlineSocket.close
+    original_read = http.client.HTTPResponse.read
 
     def close_and_signal(self: _DeadlineSocket) -> None:
         original_close(self)
         handed_off.set()
 
+    def read(self: http.client.HTTPResponse, amt: int | None = None) -> bytes:
+        data = original_read(self, amt)
+        read_bodies.append(data)
+        return data
+
     monkeypatch.setattr(_DeadlineSocket, "close", close_and_signal)
+    monkeypatch.setattr(http.client.HTTPResponse, "read", read)
+    _pin_loopback_webhook(monkeypatch, client_context)
 
     def serve() -> None:
         try:
@@ -1620,11 +1747,120 @@ def test_connection_close_reads_a_body_that_arrives_after_the_headers(
     thread = threading.Thread(target=serve, daemon=True)
     thread.start()
     try:
-        assert _post_on_loopback(port, 5.0, client_context) == 200
+        assert (
+            post_webhook(
+                f"https://webhook.test:{port}/",
+                b"{}",
+                {"Content-Type": "application/json"},
+                5.0,
+            )
+            == 200
+        )
     finally:
         listener.close()
         thread.join(3)
     assert body_sent.is_set()
+    assert b"".join(read_bodies) == b"ok"
+
+
+def test_truncated_chunked_2xx_is_delivered(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A 200 whose chunked body ends early is delivered.
+
+    ``read`` raises ``IncompleteRead`` for a chunk that closes before its
+    declared size. The receiver already sent 200. Retrying would deliver
+    the same event again. The row is succeeded and stores that code.
+    """
+
+    incomplete = _count_incomplete_reads(monkeypatch)
+    payload = (
+        b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n5\r\nok"
+    )
+    peer = _serve_tls_response(tmp_path, payload)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert incomplete["n"] == 1
+    assert saved.status == "succeeded"
+    assert saved.attempt == 1
+    assert saved.last_status_code == 200
+    assert saved.last_error is None
+
+
+def test_truncated_chunked_non_2xx_keeps_that_status(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A short chunked body does not hide a non-2xx status.
+
+    The attempt still fails, and the row stores HTTP 500 rather than
+    ``IncompleteRead``. The next try uses the normal retry wait.
+    """
+
+    incomplete = _count_incomplete_reads(monkeypatch)
+    payload = (
+        b"HTTP/1.1 500 Internal Server Error\r\n"
+        b"Transfer-Encoding: chunked\r\nConnection: close\r\n\r\n5\r\nok"
+    )
+    peer = _serve_tls_response(tmp_path, payload)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert incomplete["n"] == 1
+    assert saved.status == "pending"
+    assert saved.attempt == 1
+    assert saved.last_status_code == 500
+    assert saved.last_error == "HTTP 500"
+    assert saved.next_attempt_at == WHEN + timedelta(seconds=retry_delay_seconds(1))
+
+
+def test_short_content_length_2xx_is_delivered_without_incomplete_read(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A short Content-Length body is already a successful delivery.
+
+    ``HTTPResponse.read`` of a fixed length does not raise
+    ``IncompleteRead`` when the peer closes early. It returns the bytes
+    it got. That 200 is delivered. This pins the path that does not go
+    through the chunked exception.
+    """
+
+    incomplete = _count_incomplete_reads(monkeypatch)
+    payload = b"HTTP/1.1 200 OK\r\nContent-Length: 4\r\nConnection: close\r\n\r\n"
+    peer = _serve_tls_response(tmp_path, payload)
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert incomplete["n"] == 0
+    assert saved.status == "succeeded"
+    assert saved.last_status_code == 200
+    assert saved.last_error is None
+
+
+def test_close_before_the_status_line_is_still_a_failure(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No status line is a network error, including after the body change.
+
+    A peer that accepts the POST and closes without a response has not
+    accepted the event. The row stays pending with no status code.
+    """
+
+    incomplete = _count_incomplete_reads(monkeypatch)
+    peer = _serve_tls_response(tmp_path, b"")
+    try:
+        saved = _deliver_post_webhook(monkeypatch, peer.port, peer.client_context)
+    finally:
+        peer.close()
+    assert incomplete["n"] == 0
+    assert saved.status == "pending"
+    assert saved.attempt == 1
+    assert saved.last_status_code is None
+    assert saved.last_error is not None
+    assert "IncompleteRead" not in saved.last_error
 
 
 def test_postgres_endpoint_round_trip() -> None:
