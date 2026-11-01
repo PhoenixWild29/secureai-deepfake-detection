@@ -207,6 +207,25 @@ export async function submitDetection(options: {
   throw new JobStillRunning(job);
 }
 
+export async function fetchJobReportPdf(options: {
+  apiUrl: string;
+  jobId: string;
+  getToken: TokenSource;
+  orgId?: string | null;
+}): Promise<Blob> {
+  const base = options.apiUrl.replace(/\/$/, "");
+  const fetched = await fetch(`${base}/v1/jobs/${options.jobId}/report.pdf`, {
+    headers: {
+      Authorization: `Bearer ${await authorized(options.getToken)}`,
+      ...orgHeaders(options.orgId),
+    },
+  });
+  if (!fetched.ok) {
+    throw new ApiRequestError(fetched.status, await errorText(fetched));
+  }
+  return fetched.blob();
+}
+
 export async function fetchJobReport(options: {
   apiUrl: string;
   jobId: string;

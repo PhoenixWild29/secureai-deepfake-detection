@@ -2,10 +2,10 @@
 
 The worker writes a short JSON document into ``detail`` when the detector
 returns signals. Failure text stays the fixed public message and does not
-parse as a report. PDF rendering is not included.
+parse as a report.
 
-TODO: render this payload to PDF once a small dependency is chosen. Do not
-add a PDF library for that until the layout is settled.
+The API renders those fields to PDF with fpdf2 (``app.pdf_report``). This
+package does not import a PDF library, so the worker does not install one.
 """
 
 from __future__ import annotations
@@ -38,6 +38,19 @@ def dump_report_detail(model: str, signals: Mapping[str, float]) -> str:
         cleaned[key] = round(number, 4)
     payload = {"model": model, "signals": cleaned, "v": REPORT_VERSION}
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def may_export_pdf(*, auth_mode: str, quota_mode: str, plan: str) -> bool:
+    """Pro and Team can download a PDF. A private dev workstation with unlimited quota can too.
+
+    This is the same rule as ``may_issue_attestation``. ``AUTH_MODE=clerk`` stays
+    on the plan check even when quotas are unlimited. ``past_due`` is already
+    folded into ``plan`` by ``effective_plan``.
+    """
+
+    if plan in {"pro", "team"}:
+        return True
+    return auth_mode == "dev" and quota_mode == "unlimited"
 
 
 def load_report_detail(detail: str | None) -> tuple[str | None, dict[str, float]]:

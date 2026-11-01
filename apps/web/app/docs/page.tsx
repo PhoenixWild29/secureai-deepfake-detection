@@ -55,7 +55,10 @@ export default function DocsPage() {
         some ids are accepted, the 202 response lists those jobs and the ids that did not queue. Those
         ids do not spend the monthly cap. If nothing was queued, the response is 503.{" "}
         <code>GET /v1/jobs/{"{id}"}/report</code> downloads a completed job as JSON.{" "}
+        <code>GET /v1/jobs/{"{id}"}/report.pdf</code> downloads the same fields as a one-page PDF.{" "}
         <code>POST /v1/jobs/{"{id}"}/attest</code> signs that completed report for a Pro or Team plan.
+        PDF uses that same plan rule. A private workstation in dev mode with quotas left unlimited can
+        download the PDF on the free plan. The file repeats the limitations above and is not legal evidence.
       </p>
       <h2 id="attestation">Signed attestation</h2>
       <p>
@@ -86,12 +89,7 @@ export default function DocsPage() {
       <p>
         A workspace owner can register one HTTPS URL. The worker POSTs the job id, status, prediction,
         confidence, organization id, and timestamp when that workspace&apos;s job finishes. An optional
-        secret adds <code>X-SecureAI-Signature</code>. Personal jobs do not fire it. PDF is still not
-        available.
-      </p>
-      <p>
-        PDF export is not available yet. TODO: render the same JSON report to PDF without adding a heavy
-        dependency first.
+        secret adds <code>X-SecureAI-Signature</code>. Personal jobs do not fire it.
       </p>
       <p>
         <Link href="/privacy">Privacy</Link>

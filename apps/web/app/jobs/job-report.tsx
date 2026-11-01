@@ -8,6 +8,7 @@ import {
   fetchJob,
   fetchJobAttestation,
   fetchJobReport,
+  fetchJobReportPdf,
   type JobAttestation,
   type JobResponse,
   type TokenSource,
@@ -33,6 +34,9 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
   const [waiting, setWaiting] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [pdfState, setPdfState] = useState<"ready" | "hidden">("ready");
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const [attestationState, setAttestationState] = useState<"unknown" | "ready" | "unavailable">("unknown");
   const [attestation, setAttestation] = useState<JobAttestation | null>(null);
   const [attesting, setAttesting] = useState(false);
@@ -98,6 +102,8 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
     setAttestationError(null);
     setAttestationState("unknown");
     setCopied(false);
+    setPdfState("ready");
+    setPdfError(null);
   }
 
   const reportStatus = loadedScope === scope ? job?.status : null;
@@ -147,6 +153,31 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
       setExportError(caught instanceof Error ? caught.message : "Could not download the report.");
     } finally {
       setExporting(false);
+    }
+  }
+
+  async function downloadPdf(): Promise<void> {
+    setExportingPdf(true);
+    setPdfError(null);
+    try {
+      const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
+      const blob = await fetchJobReportPdf({ apiUrl, jobId, getToken: source, orgId });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${jobId}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (caught) {
+      if (caught instanceof ApiRequestError && (caught.status === 409 || caught.status === 404)) {
+        setPdfState("hidden");
+        return;
+      }
+      setPdfError(caught instanceof Error ? caught.message : "Could not download the PDF.");
+    } finally {
+      setExportingPdf(false);
     }
   }
 
@@ -249,6 +280,11 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
           <button type="button" className="secondary" onClick={() => void downloadReport()} disabled={exporting}>
             {exporting ? "Preparing JSON…" : "Download JSON"}
           </button>
+          {pdfState === "ready" ? (
+            <button type="button" className="secondary" onClick={() => void downloadPdf()} disabled={exportingPdf}>
+              {exportingPdf ? "Preparing PDF…" : "Download PDF"}
+            </button>
+          ) : null}
           {attestationState === "unavailable" ? null : (
             <button
               type="button"
@@ -283,12 +319,17 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
           </div>
         </div>
       ) : null}
-      {currentJob.status === "completed" ? (
-        <p className="note">PDF export is not available yet. The JSON file is the report you can keep.</p>
+      {currentJob.status === "completed" && pdfState === "hidden" ? (
+        <p className="note">PDF export is not available for this job.</p>
       ) : null}
       {exportError ? (
         <p className="error" role="alert">
           {exportError}
+        </p>
+      ) : null}
+      {pdfError ? (
+        <p className="error" role="alert">
+          {pdfError}
         </p>
       ) : null}
       {attestationError ? (

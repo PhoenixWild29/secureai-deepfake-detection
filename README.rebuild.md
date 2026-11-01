@@ -7,7 +7,7 @@ Source for review is `main`.
 ## Layout
 
 ```
-apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON and a signed attestation, opens billing, and sets a workspace webhook.
+apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON, a PDF, and a signed attestation, opens billing, and sets a workspace webhook.
 apps/api/             FastAPI. Clerk JWT (or a private dev bypass), Postgres, Redis.
 apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API. A background thread delivers webhooks.
 packages/detector/    DETECTOR_MODE=cpu scores texture, motion, temporal stability, and a face or skin-region cue. DETECTOR_MODE=stub hashes the path.
@@ -158,7 +158,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. A completed report can show the four CPU signals, download JSON, and download a signed attestation when the API has a key. PDF is not available yet. `/docs`, `/privacy`, and `/terms` are public. `/.well-known/security.txt` is a static file. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
+Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. A completed report can show the four CPU signals, download JSON, download a PDF, and download a signed attestation when the API has a key. `/docs`, `/privacy`, and `/terms` are public. `/.well-known/security.txt` is a static file. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
 
 Private workstation, matching the API dev bypass:
 
@@ -260,9 +260,21 @@ curl -s -X POST http://localhost:8000/v1/jobs/batch \
   -d '{"items":[{"object_key":"<key>","filename":"clip.mp4","content_type":"video/mp4"}]}'
 ```
 
-`GET /v1/jobs/{id}/report` returns JSON for a completed job: prediction, confidence, model, signals, and a limitations string. The body is also `Content-Disposition: attachment`. A job that is still queued, processing, or failed returns 409. Guardian's report page shows the signals and downloads that JSON.
+`GET /v1/jobs/{id}/report` returns JSON for a completed job: prediction, confidence, model, signals, and a limitations string. The body is also `Content-Disposition: attachment`. A job that is still queued, processing, or failed returns 409. `pdf_available` is true. That flag means this API can render a PDF. It does not mean the caller's plan is entitled to download one. Guardian's report page shows the signals and downloads that JSON.
 
-PDF is not implemented. TODO: render the same payload to PDF when a small dependency is worth adding. `pdf_available` is false until then.
+`GET /v1/jobs/{id}/report.pdf` returns the same completed job as `application/pdf` with `Content-Disposition: attachment; filename="<job id>.pdf"`. The page is titled SecureAI Detection Report. It includes the job id, organization id when the job has one (`n/a` for a personal job), file name, status, prediction, confidence, model, signals, created and updated timestamps, and the same limitations text as the JSON report. It is not legal evidence. A job that is not complete returns 409. A missing session is 401. A job the caller cannot read is 404, the same as the JSON report.
+
+PDF uses the same plan rule as attestation. Pro and Team can download. The plan is the workspace plan when `X-Org-Id` is set, and the personal plan otherwise. `past_due` still counts as paid. A free plan is 402 with `PDF export requires a Pro or Team plan.` `AUTH_MODE=dev` with `QUOTA_MODE=unlimited` (the workstation default when Stripe is unset) can download on the free plan. `AUTH_MODE=clerk` always requires Pro or Team, including when `QUOTA_MODE=unlimited`.
+
+The renderer is [fpdf2](https://pypi.org/project/fpdf2/) 2.9.0, pinned in `apps/api/requirements.txt`. It writes text with the built-in Helvetica font and does not launch a browser. Characters outside Windows-1252 are replaced with `?`.
+
+```bash
+curl -s http://localhost:8000/v1/jobs/job_.../report.pdf \
+  -H 'Authorization: Bearer dev' \
+  -o report.pdf
+```
+
+Guardian's completed report page puts Download PDF next to the JSON and the attestation. If that route returns 409 or 404, the page hides the PDF button and keeps the rest of the report. A plan rejection shows the error and leaves the page usable.
 
 ## Report attestation
 
