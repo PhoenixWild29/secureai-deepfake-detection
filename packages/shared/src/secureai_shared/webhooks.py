@@ -11,9 +11,14 @@ that order. Name lookup and TCP share the caller's timeout. Time spent
 resolving is time later addresses do not get. A lookup that does not
 finish in the time left does not open a socket. The lookup runs on a
 daemon thread, so a stuck resolver cannot hold the delivery thread past
-that timeout. Two lookups may be in flight. While both are still
-running, the next attempt waits one second and does not count. A connect
-failure falls through to the next address while time remains. That
+that timeout. Two lookups may be in flight. One organization holds at
+most one of those slots, so a stuck lookup cannot take both. A caller
+with no organization is limited the same way, by hostname. While this
+attempt cannot take a slot, it waits one second and does not count.
+After ``_DNS_BUSY_DEFERRAL_LIMIT`` of those waits, further busy results
+count as failed attempts, so a lookup that never returns cannot defer
+the delivery forever. A connect failure falls through to the next
+address while time remains. That
 remaining time is one budget for every TCP attempt, not a fresh timeout
 per address. When that budget is spent, later addresses are not tried.
 After a TCP connection succeeds, the socket timeout is the original value
@@ -26,6 +31,7 @@ accepted. A public address that proxies elsewhere is outside this check.
 
 from __future__ import annotations
 
+import contextvars
 import errno
 import hashlib
 import hmac
@@ -73,14 +79,34 @@ class WebhookConfigError(ValueError):
 
 
 class WebhookResolverBusy(Exception):
-    """Every DNS slot is still in a lookup. Retry this attempt without counting it."""
+    """This attempt cannot take a DNS slot.
+
+    Every process slot is still in a lookup, or this organization (or the
+    hostname, when delivery has no organization) already has one in flight.
+    The delivery retries without counting until the busy cap.
+    """
 
 
 # libc getaddrinfo cannot be cancelled. A stuck lookup keeps its slot until
 # it returns, on a daemon thread, and the delivery thread moves on.
+# The process cap bounds how many of those threads exist. The per-key cap
+# is one, so one organization cannot occupy both process slots. A third
+# organization still waits when two lookups are already stuck. That wait
+# is the busy deferral, and the deferral cap stops it from looping forever.
 _DNS_LOOKUP_SLOTS = 2
+_DNS_PER_KEY_SLOTS = 1
 _DNS_BUSY_DELAY_SECONDS = 1.0
+# Uncounted one-second waits recorded on the row. The next busy result counts.
+# README.rebuild.md describes this number.
+_DNS_BUSY_DEFERRAL_LIMIT = 30
+_DNS_BUSY_ERROR = "DNS resolver is busy"
 _DNS_SLOTS = threading.BoundedSemaphore(_DNS_LOOKUP_SLOTS)
+_DNS_KEY_LOCK = threading.Lock()
+_DNS_KEY_IN_FLIGHT: dict[str, int] = {}
+_DNS_TENANT: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "secureai_webhook_dns_tenant",
+    default="",
+)
 
 
 @dataclass(frozen=True)
@@ -730,10 +756,19 @@ def _deliver_claimed(
     if endpoint.secret:
         headers[TIMESTAMP_HEADER] = str(timestamp)
         headers[SIGNATURE_HEADER] = signature_header(endpoint.secret, timestamp, body)
+    # post_webhook reads this. The DNS daemon thread does not. The key is
+    # the organization, so one workspace cannot hold both process slots.
+    tenant_token = _DNS_TENANT.set(claimed.org_id)
     try:
         code = post(endpoint.url, body, headers, timeout)
     except WebhookResolverBusy:
-        _defer_busy(store, queue, claimed, now=now)
+        _defer_busy(
+            store,
+            queue,
+            claimed,
+            now=now,
+            max_attempts=max_attempts,
+        )
         return
     except Exception as exc:
         logger.info("webhook post failed delivery_id=%s", claimed.id)
@@ -747,6 +782,8 @@ def _deliver_claimed(
             error=_clip(f"{type(exc).__name__}: {exc}") or type(exc).__name__,
         )
         return
+    finally:
+        _DNS_TENANT.reset(tenant_token)
     if isinstance(code, int) and 200 <= code < 300:
         store.record_result(
             claimed.id,
@@ -773,22 +810,66 @@ def _deliver_claimed(
     )
 
 
+def _busy_error(deferrals: int) -> str:
+    return f"{_DNS_BUSY_ERROR} ({deferrals})"
+
+
+def _busy_deferrals_used(last_error: str | None) -> int:
+    """How many uncounted busy waits this row has already stored.
+
+    The count is the integer in ``DNS resolver is busy (N)``. Any other
+    ``last_error``, including a counted network failure, starts again at
+    zero. A worker restart keeps the count because it lives on the row.
+    """
+
+    if last_error is None:
+        return 0
+    prefix = f"{_DNS_BUSY_ERROR} ("
+    if not last_error.startswith(prefix) or not last_error.endswith(")"):
+        return 0
+    number = last_error[len(prefix):-1]
+    if not number.isdigit():
+        return 0
+    return int(number)
+
+
 def _defer_busy(
     store: WebhookStore,
     queue: WebhookQueue,
     claimed: WebhookDelivery,
     *,
     now: datetime,
+    max_attempts: int,
 ) -> None:
-    """Put the row back without counting an attempt.
+    """Put the row back without counting, until the busy cap.
 
-    The resolver slots are full, so this delivery did not look up a name
-    and did not open a socket. Counting it would burn ``max_attempts``
-    while two other lookups are stuck. The next try waits one second.
+    This delivery did not look up a name and did not open a socket. The
+    next try waits one second. That wait does not count, up to
+    ``_DNS_BUSY_DEFERRAL_LIMIT`` times, and the count stays in
+    ``last_error``. The next busy result counts as a failed attempt and
+    uses the normal retry wait. Further busy results keep counting, so a
+    resolver that never returns reaches ``max_attempts`` and the row fails.
     """
 
     token = claimed.claim_token
     if token is None:
+        return
+    used = _busy_deferrals_used(claimed.last_error)
+    if used >= _DNS_BUSY_DEFERRAL_LIMIT:
+        logger.warning(
+            "webhook dns busy counted delivery_id=%s deferrals=%s",
+            claimed.id,
+            used,
+        )
+        _finish_failure(
+            store,
+            queue,
+            claimed,
+            now=now,
+            max_attempts=max_attempts,
+            code=None,
+            error=_busy_error(used),
+        )
         return
     nxt = now + timedelta(seconds=_DNS_BUSY_DELAY_SECONDS)
     stored = store.record_result(
@@ -797,14 +878,14 @@ def _defer_busy(
         status="pending",
         attempt=claimed.attempt,
         last_status_code=None,
-        last_error="DNS resolver is busy",
+        last_error=_busy_error(used + 1),
         next_attempt_at=nxt,
         now=now,
     )
     if stored is None:
         return
     queue.publish(claimed.id, available_at=nxt.timestamp())
-    logger.info("webhook dns busy delivery_id=%s", claimed.id)
+    logger.info("webhook dns busy delivery_id=%s deferrals=%s", claimed.id, used + 1)
 
 
 def _finish_failure(
@@ -969,21 +1050,69 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
         raise TimeoutError("webhook connect timed out")
 
 
+def _dns_slot_key(host: str) -> str:
+    """Organization when delivery set one, otherwise the hostname.
+
+    Delivery sets ``_DNS_TENANT`` around ``post``. A direct ``post_webhook``
+    call has no organization, so the hostname is the fairness key. One key
+    holds at most ``_DNS_PER_KEY_SLOTS`` lookups.
+    """
+
+    tenant = _DNS_TENANT.get()
+    if tenant:
+        return "org:" + tenant
+    return "host:" + host.lower().rstrip(".")
+
+
+def _release_dns_key(key: str) -> None:
+    with _DNS_KEY_LOCK:
+        held = _DNS_KEY_IN_FLIGHT.get(key, 0) - 1
+        if held <= 0:
+            _DNS_KEY_IN_FLIGHT.pop(key, None)
+        else:
+            _DNS_KEY_IN_FLIGHT[key] = held
+
+
+def _acquire_dns_slot(key: str) -> None:
+    """Reserve one process slot and one slot for ``key``, or raise busy.
+
+    The key is reserved first. A second caller for the same key loses
+    even when a process slot is still free. If the process cap is full,
+    the key reservation is rolled back so it does not leak.
+    """
+
+    with _DNS_KEY_LOCK:
+        held = _DNS_KEY_IN_FLIGHT.get(key, 0)
+        if held >= _DNS_PER_KEY_SLOTS:
+            raise WebhookResolverBusy("webhook DNS resolver is busy")
+        _DNS_KEY_IN_FLIGHT[key] = held + 1
+    try:
+        if not _DNS_SLOTS.acquire(blocking=False):
+            raise WebhookResolverBusy("webhook DNS resolver is busy")
+    except BaseException:
+        _release_dns_key(key)
+        raise
+
+
+def _release_dns_slot(key: str) -> None:
+    _release_dns_key(key)
+    _DNS_SLOTS.release()
+
+
 def _getaddrinfo_bounded(host: str, timeout: float) -> list:
     """Resolve ``host`` without holding the caller past ``timeout``.
 
     ``getaddrinfo`` has no deadline. It runs on a daemon thread that keeps
-    one of ``_DNS_LOOKUP_SLOTS`` until it returns. The caller raises
-    ``TimeoutError`` when the wait expires and leaves that thread alone.
-    A full set of slots raises ``WebhookResolverBusy`` immediately.
-    The slot is released before the caller is woken, so the next lookup
-    can take it.
+    its slot until it returns. The caller raises ``TimeoutError`` when the
+    wait expires and leaves that thread alone. No free slot for this key
+    raises ``WebhookResolverBusy`` immediately. The slot is released before
+    the caller is woken, so the next lookup can take it.
     """
 
     if timeout <= 0:
         raise TimeoutError("webhook connect timed out")
-    if not _DNS_SLOTS.acquire(blocking=False):
-        raise WebhookResolverBusy("webhook DNS resolver is busy")
+    key = _dns_slot_key(host)
+    _acquire_dns_slot(key)
     done = threading.Event()
     outcome_infos: list | None = None
     outcome_error: Exception | None = None
@@ -995,14 +1124,16 @@ def _getaddrinfo_bounded(host: str, timeout: float) -> list:
         except Exception as exc:
             outcome_error = exc
         finally:
-            _DNS_SLOTS.release()
-            done.set()
+            try:
+                _release_dns_slot(key)
+            finally:
+                done.set()
 
     thread = threading.Thread(target=run, name="secureai-webhook-dns", daemon=True)
     try:
         thread.start()
     except Exception:
-        _DNS_SLOTS.release()
+        _release_dns_slot(key)
         raise
     if not done.wait(timeout):
         raise TimeoutError("webhook DNS timed out")
