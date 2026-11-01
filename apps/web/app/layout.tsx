@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { AuthButtons } from "./auth-buttons";
-import { clerkEnabled } from "../lib/clerk-config";
+import { apiUrl, clerkEnabled } from "../lib/clerk-config";
+import { WorkspaceProvider, WorkspaceSwitcher } from "./workspace";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,24 +12,40 @@ export const metadata: Metadata = {
   description: "Upload a short video and read a CPU detection result.",
 };
 
-function Shell({ children, showAuth }: { children: ReactNode; showAuth: boolean }) {
+function Shell({
+  children,
+  mode,
+  api,
+}: {
+  children: ReactNode;
+  mode: "clerk" | "dev" | "off";
+  api: string;
+}) {
   return (
-    <>
+    <WorkspaceProvider>
       <nav className="nav">
         <strong>SecureAI</strong>
         <Link href="/">Home</Link>
         <Link href="/upload">Upload</Link>
         <Link href="/jobs">History</Link>
-        {showAuth ? <AuthButtons /> : null}
+        <Link href="/billing">Billing</Link>
+        {mode === "off" ? null : <WorkspaceSwitcher mode={mode} apiUrl={api} />}
+        {mode === "clerk" ? <AuthButtons /> : null}
       </nav>
       {children}
-    </>
+    </WorkspaceProvider>
   );
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const enabled = clerkEnabled();
-  const shell = <Shell showAuth={enabled}>{children}</Shell>;
+  const dev = process.env.NEXT_PUBLIC_AUTH_MODE === "dev";
+  const mode = enabled ? "clerk" : dev ? "dev" : "off";
+  const shell = (
+    <Shell mode={mode} api={apiUrl()}>
+      {children}
+    </Shell>
+  );
   return (
     <html lang="en">
       <body>

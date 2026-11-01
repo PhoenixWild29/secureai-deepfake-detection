@@ -16,8 +16,11 @@ from collections.abc import Callable
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.billing_routes import router as billing_router
 from app.migrate import run_migrations
 from app.routes import router
+from app.stripe_client import StripeBilling
+from secureai_shared.billing import BillingStore, MemoryBillingStore, PostgresBillingStore
 from secureai_shared.limits import RateLimiter, build_limiter
 from secureai_shared.queue import JobQueue, build_queue
 from secureai_shared.settings import Settings, assert_explicit_origins, load_settings
@@ -34,6 +37,8 @@ def create_app(
     storage: FileSystemStorage | S3Storage | None = None,
     fetch_jwks: Callable[[], dict[str, object]] | None = None,
     limiter: RateLimiter | None = None,
+    billing: BillingStore | None = None,
+    stripe: StripeBilling | None = None,
 ) -> FastAPI:
     """Build the API. Real Postgres, Redis, and storage are created only when omitted."""
 
@@ -52,14 +57,21 @@ def create_app(
         queue = build_queue(resolved)
     if storage is None:
         storage = build_storage(resolved)
+    if billing is None:
+        if isinstance(store, PostgresJobStore):
+            billing = PostgresBillingStore(engine=store.engine)
+        else:
+            billing = MemoryBillingStore()
+    _warn_billing(resolved)
 
     app = FastAPI(
         title="SecureAI API",
-        version="0.2.0",
+        version="0.3.0",
         description=(
             "Detection jobs require a verified Clerk session JWT. "
             "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
-            "bypass. Do not expose that mode on a public host."
+            "bypass. Do not expose that mode on a public host. "
+            "Plan quotas apply unless QUOTA_MODE=unlimited."
         ),
     )
     app.state.settings = resolved
@@ -67,15 +79,38 @@ def create_app(
     app.state.queue = queue
     app.state.storage = storage
     app.state.limiter = limiter if limiter is not None else build_limiter(resolved)
+    app.state.billing = billing
+    app.state.stripe = stripe if stripe is not None else StripeBilling(resolved)
     app.state.fetch_jwks = fetch_jwks or _jwks_fetcher(resolved)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(resolved.cors_origins),
-        allow_methods=["GET", "POST", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Org-Id"],
     )
     app.include_router(router)
+    app.include_router(billing_router)
     return app
+
+
+def _warn_billing(settings: Settings) -> None:
+    if not settings.stripe_secret_key:
+        if settings.quota_mode == "unlimited":
+            logger.warning(
+                "STRIPE_SECRET_KEY is empty and quotas are unlimited. "
+                "Set STRIPE_SECRET_KEY for Checkout, or QUOTA_MODE=enforce to apply the free trial."
+            )
+        else:
+            logger.warning(
+                "STRIPE_SECRET_KEY is empty. Checkout and the Customer Portal are disabled. "
+                "Callers stay on the free trial quota."
+            )
+        return
+    if not settings.stripe_webhook_secret:
+        logger.warning(
+            "STRIPE_WEBHOOK_SECRET is empty. Checkout can start, but subscription "
+            "updates will be rejected until the webhook secret is set."
+        )
 
 
 def _jwks_fetcher(settings: Settings) -> Callable[[], dict[str, object]]:

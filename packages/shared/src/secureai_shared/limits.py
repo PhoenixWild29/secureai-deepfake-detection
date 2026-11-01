@@ -36,23 +36,48 @@ class MemoryRateLimiter:
             return True
 
 
-class RedisRateLimiter:
-    def __init__(self, url: str, limits: dict[str, int], window_seconds: int, *, prefix: str) -> None:
-        import redis
+# INCR and EXPIRE must be one script. A crash between the two commands leaves
+# a counter that never expires, and the next requests stay limited forever.
+_INCR_WITH_EXPIRE = """
+local current = redis.call('INCR', KEYS[1])
+if current == 1 then
+  redis.call('EXPIRE', KEYS[1], ARGV[1])
+else
+  local ttl = redis.call('TTL', KEYS[1])
+  if ttl < 0 then
+    redis.call('EXPIRE', KEYS[1], ARGV[1])
+  end
+end
+return current
+"""
 
-        self.redis = redis.Redis.from_url(url, decode_responses=True)
+
+class RedisRateLimiter:
+    def __init__(
+        self,
+        url: str,
+        limits: dict[str, int],
+        window_seconds: int,
+        *,
+        prefix: str,
+        client: object | None = None,
+    ) -> None:
+        if client is None:
+            import redis
+
+            client = redis.Redis.from_url(url, decode_responses=True)
+        self.redis = client
         self.limits = limits
         self.window_seconds = window_seconds
         self.prefix = prefix
+        self._allow = client.register_script(_INCR_WITH_EXPIRE)  # type: ignore[attr-defined]
 
     def allow(self, bucket: str, subject: str) -> bool:
         limit = self.limits.get(bucket, 0)
         if limit <= 0:
             return True
         key = f"{self.prefix}:{bucket}:{subject}"
-        count = int(self.redis.incr(key))
-        if count == 1:
-            self.redis.expire(key, self.window_seconds)
+        count = int(self._allow(keys=[key], args=[self.window_seconds]))
         return count <= limit
 
 

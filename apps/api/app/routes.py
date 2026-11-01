@@ -13,6 +13,8 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
 from app.auth import require_user
+from app.quota import enforce_job_quota
+from app.tenancy import active_org
 from secureai_shared.models import AuthContext, JobRecord
 from secureai_shared.storage import clean_filename, is_owned_key, new_object_key
 
@@ -158,6 +160,8 @@ def create_job(
     if stat.size < 1 or stat.size > settings.max_upload_bytes:
         raise HTTPException(status_code=413, detail="Upload exceeds the size limit")
 
+    org_id = active_org(request, user)
+    enforce_job_quota(request, user.subject, org_id)
     job = request.app.state.store.create(
         user_id=user.subject,
         filename=filename,
@@ -165,6 +169,7 @@ def create_job(
         byte_size=stat.size,
         object_key=body.object_key,
         object_etag=stat.etag,
+        org_id=org_id,
     )
     _publish_or_fail(request, job)
     logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
@@ -176,6 +181,9 @@ def list_jobs(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> list[JobRecord]:
+    org_id = active_org(request, user)
+    if org_id is not None:
+        return request.app.state.store.list_for_org(org_id, limit=50)
     return request.app.state.store.list_for_user(user.subject, limit=50)
 
 
@@ -187,7 +195,8 @@ def get_job(
 ) -> JobRecord:
     if JOB_ID.fullmatch(job_id) is None:
         raise HTTPException(status_code=404, detail="Job not found")
-    job = request.app.state.store.get(job_id, user_id=user.subject)
+    org_id = active_org(request, user)
+    job = request.app.state.store.get(job_id, user_id=user.subject, org_id=org_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return job

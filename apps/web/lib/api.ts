@@ -62,10 +62,18 @@ async function authorized(source: TokenSource): Promise<string> {
   return token;
 }
 
+function orgHeaders(orgId?: string | null): Record<string, string> {
+  if (!orgId) {
+    return {};
+  }
+  return { "X-Org-Id": orgId };
+}
+
 export async function submitDetection(options: {
   apiUrl: string;
   file: File;
   getToken: TokenSource;
+  orgId?: string | null;
   onUpdate?: (job: JobResponse) => void;
 }): Promise<JobResponse> {
   const base = options.apiUrl.replace(/\/$/, "");
@@ -76,6 +84,7 @@ export async function submitDetection(options: {
     headers: {
       Authorization: `Bearer ${await authorized(options.getToken)}`,
       "Content-Type": "application/json",
+      ...orgHeaders(options.orgId),
     },
     body: JSON.stringify({
       filename: options.file.name,
@@ -98,7 +107,10 @@ export async function submitDetection(options: {
     body.append("file", options.file);
     const stored = await fetch(`${base}${ticket.upload_url}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${await authorized(options.getToken)}` },
+      headers: {
+        Authorization: `Bearer ${await authorized(options.getToken)}`,
+        ...orgHeaders(options.orgId),
+      },
       body,
     });
     if (!stored.ok) {
@@ -130,6 +142,7 @@ export async function submitDetection(options: {
     headers: {
       Authorization: `Bearer ${await authorized(options.getToken)}`,
       "Content-Type": "application/json",
+      ...orgHeaders(options.orgId),
     },
     body: JSON.stringify({
       object_key: objectKey,
@@ -156,6 +169,7 @@ export async function submitDetection(options: {
       apiUrl: base,
       jobId: job.id,
       getToken: options.getToken,
+      orgId: options.orgId,
     });
     options.onUpdate?.(job);
   }
@@ -166,10 +180,14 @@ export async function fetchJob(options: {
   apiUrl: string;
   jobId: string;
   getToken: TokenSource;
+  orgId?: string | null;
 }): Promise<JobResponse> {
   const base = options.apiUrl.replace(/\/$/, "");
   const fetched = await fetch(`${base}/v1/jobs/${options.jobId}`, {
-    headers: { Authorization: `Bearer ${await authorized(options.getToken)}` },
+    headers: {
+      Authorization: `Bearer ${await authorized(options.getToken)}`,
+      ...orgHeaders(options.orgId),
+    },
   });
   if (!fetched.ok) {
     throw new Error(await errorText(fetched));
@@ -180,10 +198,14 @@ export async function fetchJob(options: {
 export async function listJobs(options: {
   apiUrl: string;
   getToken: TokenSource;
+  orgId?: string | null;
 }): Promise<JobResponse[]> {
   const base = options.apiUrl.replace(/\/$/, "");
   const fetched = await fetch(`${base}/v1/jobs`, {
-    headers: { Authorization: `Bearer ${await authorized(options.getToken)}` },
+    headers: {
+      Authorization: `Bearer ${await authorized(options.getToken)}`,
+      ...orgHeaders(options.orgId),
+    },
   });
   if (!fetched.ok) {
     throw new Error(await errorText(fetched));

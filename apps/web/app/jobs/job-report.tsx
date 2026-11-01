@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchJob, type JobResponse, type TokenSource } from "../../lib/api";
+import { useWorkspace } from "../workspace";
 
 type JobReportProps = {
   apiUrl: string;
@@ -15,28 +16,36 @@ const POLL_MS = 2000;
 const POLL_BUDGET_MS = 180_000;
 
 export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
+  const { orgId, ready } = useWorkspace();
+  const scope = orgId ?? "";
   const [job, setJob] = useState<JobResponse | null>(null);
+  const [loadedScope, setLoadedScope] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(true);
 
   useEffect(() => {
+    if (!ready) {
+      return;
+    }
     let cancelled = false;
     const started = Date.now();
     const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
 
     async function load(): Promise<boolean> {
       try {
-        const next = await fetchJob({ apiUrl, jobId, getToken: source });
+        const next = await fetchJob({ apiUrl, jobId, getToken: source, orgId });
         if (cancelled) {
           return true;
         }
         setJob(next);
+        setLoadedScope(scope);
         setError(null);
         const done = next.status === "completed" || next.status === "failed";
         setWaiting(!done);
         return done;
       } catch (caught) {
         if (!cancelled) {
+          setLoadedScope(scope);
           setError(caught instanceof Error ? caught.message : "Could not load this job.");
           setWaiting(false);
         }
@@ -63,45 +72,47 @@ export function JobReport({ apiUrl, jobId, token, getToken }: JobReportProps) {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [apiUrl, jobId, token, getToken]);
+  }, [apiUrl, jobId, token, getToken, orgId, ready, scope]);
 
-  if (error && !job) {
+  const currentJob = loadedScope === scope ? job : null;
+  const currentError = loadedScope === scope ? error : null;
+  if (currentError && !currentJob) {
     return (
       <p className="error" role="alert">
-        {error}
+        {currentError}
       </p>
     );
   }
-  if (!job) {
+  if (!currentJob) {
     return <p className="note">Loading report…</p>;
   }
-  const terminal = job.status === "completed" || job.status === "failed";
+  const terminal = currentJob.status === "completed" || currentJob.status === "failed";
   return (
     <section className="card" aria-live="polite">
-      <p className={`status status-${job.status}`}>{job.status}</p>
+      <p className={`status status-${currentJob.status}`}>{currentJob.status}</p>
       <dl className="report">
         <dt>Job</dt>
-        <dd>{job.id}</dd>
+        <dd>{currentJob.id}</dd>
         <dt>File</dt>
-        <dd>{job.filename}</dd>
+        <dd>{currentJob.filename}</dd>
         <dt>Prediction</dt>
-        <dd>{job.prediction ?? "—"}</dd>
+        <dd>{currentJob.prediction ?? "—"}</dd>
         <dt>Confidence</dt>
-        <dd>{confidenceLabel(job.confidence)}</dd>
+        <dd>{confidenceLabel(currentJob.confidence)}</dd>
         <dt>Created</dt>
-        <dd>{formatWhen(job.created_at)}</dd>
+        <dd>{formatWhen(currentJob.created_at)}</dd>
         <dt>Updated</dt>
-        <dd>{formatWhen(job.updated_at)}</dd>
+        <dd>{formatWhen(currentJob.updated_at)}</dd>
         <dt>Detail</dt>
-        <dd>{job.detail ?? "—"}</dd>
+        <dd>{currentJob.detail ?? "—"}</dd>
       </dl>
-      {waiting && !terminal ? <p className="note">Still {job.status}. Checking again…</p> : null}
+      {waiting && !terminal ? <p className="note">Still {currentJob.status}. Checking again…</p> : null}
       {!waiting && !terminal ? (
-        <p className="note">Still {job.status}. Refresh this page to keep watching.</p>
+        <p className="note">Still {currentJob.status}. Refresh this page to keep watching.</p>
       ) : null}
-      {error ? (
+      {currentError ? (
         <p className="error" role="alert">
-          {error}
+          {currentError}
         </p>
       ) : null}
       <p className="note">

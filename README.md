@@ -2,6 +2,12 @@
 
 This project implements a comprehensive deepfake detection system combining AI analysis with blockchain security. It uses advanced ensemble models incorporating SOTA techniques from leading research repositories for superior deepfake detection accuracy.
 
+## Rebuild
+
+The saleable API, worker, and Guardian app live under `apps/`. Phase 3 adds Stripe Checkout, the Customer Portal, plan quotas, and workspaces. Setup and the test-mode walkthrough are in [README.rebuild.md](README.rebuild.md).
+
+API billing variables (test mode, never commit values): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_TEAM`, `PUBLIC_APP_URL`. See `apps/api/.env.example`.
+
 ## Guardian Web Hardening
 
 For the guardian.secureai.dev single-page app, include the following production assets:

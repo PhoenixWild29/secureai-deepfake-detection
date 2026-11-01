@@ -27,7 +27,8 @@ a {
 
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -40,8 +41,9 @@ input:focus-visible {
 
 .nav {
   display: flex;
-  gap: 1.25rem;
-  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+  align-items: center;
   margin-bottom: 2.5rem;
   font-size: 0.95rem;
 }
@@ -103,8 +105,8 @@ button {
 }
 
 button:disabled {
-  opacity: 0.65;
-  cursor: wait;
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .note,
@@ -183,4 +185,70 @@ dl.report dd {
 
 .status-failed {
   color: #8a2b16;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.workspace select,
+input[type="text"] {
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 0.4rem 0.5rem;
+}
+
+.workspace select {
+  font-size: 0.85rem;
+  max-width: 12rem;
+}
+
+input[type="text"] {
+  display: block;
+  width: 100%;
+  margin: 0.4rem 0 0.75rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.field {
+  margin-top: 1.25rem;
+}
+
+h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+}
+
+.members {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.members li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--line);
 }

@@ -38,6 +38,17 @@ class Settings:
     rate_limit_uploads: int = 60
     rate_limit_window_seconds: int = 60
     s3_auto_create_bucket: bool = False
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_price_pro: str = ""
+    stripe_price_team: str = ""
+    public_app_url: str = "http://localhost:3000"
+    quota_mode: str = "enforce"
+    quota_free: int = 10
+    quota_pro: int = 500
+    quota_team: int = 2000
+    seat_limit_free: int = 3
+    seat_limit_team: int = 25
 
 
 def assert_explicit_origins(origins: tuple[str, ...]) -> None:
@@ -124,6 +135,12 @@ def load_settings(
         "yes",
     }
 
+    stripe_secret = env.get("STRIPE_SECRET_KEY", "").strip()
+    public_app = env.get("PUBLIC_APP_URL", "http://localhost:3000").strip().rstrip("/")
+    public_app = public_app or "http://localhost:3000"
+    if not public_app.startswith(("http://", "https://")):
+        raise RuntimeError("PUBLIC_APP_URL must be an http(s) origin")
+
     return Settings(
         auth_mode=auth_mode,
         clerk_issuer=issuer,
@@ -150,7 +167,31 @@ def load_settings(
         rate_limit_uploads=rate_uploads,
         rate_limit_window_seconds=rate_window,
         s3_auto_create_bucket=auto_create,
+        stripe_secret_key=stripe_secret,
+        stripe_webhook_secret=env.get("STRIPE_WEBHOOK_SECRET", "").strip(),
+        stripe_price_pro=env.get("STRIPE_PRICE_PRO", "").strip(),
+        stripe_price_team=env.get("STRIPE_PRICE_TEAM", "").strip(),
+        public_app_url=public_app,
+        quota_mode=_quota_mode(env, auth_mode, stripe_secret),
+        quota_free=_positive_int(env, "QUOTA_FREE", 10),
+        quota_pro=_positive_int(env, "QUOTA_PRO", 500),
+        quota_team=_positive_int(env, "QUOTA_TEAM", 2000),
+        seat_limit_free=_positive_int(env, "SEAT_LIMIT_FREE", 3),
+        seat_limit_team=_positive_int(env, "SEAT_LIMIT_TEAM", 25),
     )
+
+
+def _quota_mode(env: Mapping[str, str], auth_mode: str, stripe_secret: str) -> str:
+    """Dev without Stripe does not enforce quotas. Production stays on the free trial."""
+
+    explicit = env.get("QUOTA_MODE", "").strip().lower()
+    if explicit:
+        if explicit not in {"enforce", "unlimited"}:
+            raise RuntimeError("QUOTA_MODE must be 'enforce' or 'unlimited'")
+        return explicit
+    if not stripe_secret and auth_mode == "dev":
+        return "unlimited"
+    return "enforce"
 
 
 def _positive_float(env: Mapping[str, str], name: str, default: float) -> float:

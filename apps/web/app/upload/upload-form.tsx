@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { JobStillRunning, submitDetection, type JobResponse, type TokenSource } from "../../lib/api";
+import { useWorkspace } from "../workspace";
 
 type UploadFormProps = {
   apiUrl: string;
@@ -21,6 +22,7 @@ function phaseLabel(status: string): string {
 }
 
 export function UploadForm({ apiUrl, token, getToken }: UploadFormProps) {
+  const { orgId, ready } = useWorkspace();
   const [file, setFile] = useState<File | null>(null);
   const [pending, setPending] = useState(false);
   const [phase, setPhase] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export function UploadForm({ apiUrl, token, getToken }: UploadFormProps) {
         apiUrl,
         file,
         getToken: source,
+        orgId,
         onUpdate: (update) => {
           setJob(update);
           setPhase(phaseLabel(update.status));
@@ -83,12 +86,15 @@ export function UploadForm({ apiUrl, token, getToken }: UploadFormProps) {
           setFile(event.target.files?.[0] ?? null);
         }}
       />
-      <button type="submit" disabled={pending}>
+      <button type="submit" disabled={pending || !ready}>
         {pending ? phase ?? "Working…" : "Run detection"}
       </button>
       <p className="note">
         The file is stored, then a worker scores a few frames. This page keeps
-        checking until the job completes or fails.
+        checking until the job completes or fails.{" "}
+        {orgId
+          ? "This job is saved to the selected workspace."
+          : "This job is saved to your personal history."}
       </p>
       {pending && job ? (
         <p className="note" aria-live="polite">
