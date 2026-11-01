@@ -17,6 +17,7 @@ from secureai_shared.webhooks import (
     TIMESTAMP_HEADER,
     MemoryWebhookStore,
     WebhookConfigError,
+    WebhookResolverBusy,
     deliver_once,
     event_body,
     post_webhook,
@@ -895,7 +896,8 @@ def test_busy_resolver_defers_without_counting_an_attempt(monkeypatch: pytest.Mo
         assert saved is not None
         assert saved.attempt == 0
         assert saved.status == "pending"
-        assert saved.last_error == "DNS resolver is busy"
+        assert saved.last_error == "DNS resolver is busy (1)"
+        assert webhook_module._DNS_KEY_IN_FLIGHT == {}
         assert saved.delivering_until is None
         assert saved.next_attempt_at == WHEN + timedelta(seconds=webhook_module._DNS_BUSY_DELAY_SECONDS)
         assert (
@@ -917,6 +919,257 @@ def test_busy_resolver_defers_without_counting_an_attempt(monkeypatch: pytest.Mo
     assert done.status == "succeeded"
     assert done.attempt == 1
     assert done.last_status_code == 204
+
+
+def test_dns_slot_bounds_match_the_delivery_contract() -> None:
+    from secureai_shared import webhooks as webhook_module
+
+    assert webhook_module._DNS_LOOKUP_SLOTS == 2
+    assert webhook_module._DNS_PER_KEY_SLOTS == 1
+    assert webhook_module._DNS_BUSY_DELAY_SECONDS == 1.0
+    assert webhook_module._DNS_BUSY_DEFERRAL_LIMIT == 30
+
+
+def test_busy_deferral_count_ignores_other_errors() -> None:
+    from secureai_shared import webhooks as webhook_module
+
+    assert webhook_module._busy_deferrals_used(None) == 0
+    assert webhook_module._busy_deferrals_used("TimeoutError: webhook DNS timed out") == 0
+    assert webhook_module._busy_deferrals_used("DNS resolver is busy") == 0
+    assert webhook_module._busy_deferrals_used("DNS resolver is busy (2)") == 2
+    assert webhook_module._busy_deferrals_used("DNS resolver is busy (2) extra") == 0
+    assert webhook_module._busy_deferrals_used("DNS resolver is busy ()") == 0
+
+
+def test_busy_deferrals_count_as_attempts_after_the_cap(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A resolver that never frees a slot cannot defer the same row forever."""
+
+    import socket
+
+    from secureai_shared import webhooks as webhook_module
+
+    monkeypatch.setattr(webhook_module, "_DNS_BUSY_DEFERRAL_LIMIT", 2)
+
+    def getaddrinfo(*_args: object, **_kwargs: object) -> list[tuple]:
+        raise AssertionError("resolved while the resolver was busy")
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("connected")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+    store = MemoryWebhookStore()
+    queue = MemoryWebhookQueue()
+    _endpoint(store)
+    job = _terminal(JobStatus.completed)
+    schedule_terminal(store, queue, job, now=WHEN)
+    held = 0
+    try:
+        for _ in range(webhook_module._DNS_LOOKUP_SLOTS):
+            assert webhook_module._DNS_SLOTS.acquire(blocking=False)
+            held += 1
+        clock = WHEN
+        for expected in (1, 2):
+            assert (
+                deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=2, now=clock)
+                is True
+            )
+            saved = store.delivery_for_job(job.id)
+            assert saved is not None
+            assert saved.attempt == 0
+            assert saved.status == "pending"
+            assert saved.last_error == f"DNS resolver is busy ({expected})"
+            assert saved.next_attempt_at == clock + timedelta(seconds=1)
+            clock = saved.next_attempt_at
+        assert (
+            deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=2, now=clock)
+            is True
+        )
+        counted = store.delivery_for_job(job.id)
+        assert counted is not None
+        assert counted.attempt == 1
+        assert counted.status == "pending"
+        assert counted.last_error == "DNS resolver is busy (2)"
+        assert counted.next_attempt_at == clock + timedelta(seconds=retry_delay_seconds(1))
+        clock = counted.next_attempt_at
+        assert (
+            deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=2, now=clock)
+            is True
+        )
+        failed = store.delivery_for_job(job.id)
+        assert failed is not None
+        assert failed.status == "failed"
+        assert failed.attempt == 2
+        assert failed.last_error == "DNS resolver is busy (2)"
+        assert deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=2, now=clock) is False
+    finally:
+        for _ in range(held):
+            webhook_module._DNS_SLOTS.release()
+        assert webhook_module._DNS_KEY_IN_FLIGHT == {}
+
+
+def test_one_org_cannot_hold_both_dns_slots(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A stuck lookup for one workspace leaves the other process slot free."""
+
+    import socket
+    import threading
+
+    from secureai_shared import webhooks as webhook_module
+
+    release = threading.Event()
+    entered: list[str] = []
+    entered_lock = threading.Lock()
+    first = threading.Event()
+    second = threading.Event()
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del port, args, kwargs
+        with entered_lock:
+            entered.append(host)
+            count = len(entered)
+        if count == 1:
+            first.set()
+        if count >= 2:
+            second.set()
+        release.wait()
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+
+    def create_connection(*_args: object, **_kwargs: object) -> object:
+        raise TimeoutError("stopped")
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    monkeypatch.setattr(socket, "create_connection", create_connection)
+
+    store = MemoryWebhookStore()
+    queue = MemoryWebhookQueue()
+    org_a = ORG
+    org_b = "org_bbbbbbbbbbbb"
+    org_c = "org_cccccccccccc"
+    for org_id in (org_a, org_b, org_c):
+        store.upsert_endpoint(
+            org_id=org_id,
+            url="https://customer.example/hooks/secureai",
+            secret=None,
+            keep_secret=False,
+            notify_failures=True,
+        )
+    job_a = _terminal(JobStatus.completed, org_id=org_a)
+    job_a2 = _terminal(JobStatus.completed, org_id=org_a)
+    job_b = _terminal(JobStatus.completed, org_id=org_b)
+    job_c = _terminal(JobStatus.completed, org_id=org_c)
+    schedule_terminal(store, queue, job_a, now=WHEN)
+    errors: list[BaseException] = []
+
+    def deliver() -> None:
+        try:
+            deliver_once(store, queue, post=post_webhook, timeout=0.4, max_attempts=5, now=WHEN)
+        except BaseException as exc:
+            errors.append(exc)
+
+    worker_a = threading.Thread(target=deliver, name="dns-fairness-a")
+    worker_b = threading.Thread(target=deliver, name="dns-fairness-b")
+    try:
+        worker_a.start()
+        assert first.wait(2)
+        assert webhook_module._DNS_KEY_IN_FLIGHT == {f"org:{org_a}": 1}
+        # The process still has a free slot. Org A cannot take it.
+        assert webhook_module._DNS_SLOTS.acquire(blocking=False)
+        webhook_module._DNS_SLOTS.release()
+        schedule_terminal(store, queue, job_a2, now=WHEN)
+        assert deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=5, now=WHEN) is True
+        saved_a2 = store.delivery_for_job(job_a2.id)
+        assert saved_a2 is not None
+        assert saved_a2.attempt == 0
+        assert saved_a2.status == "pending"
+        assert saved_a2.last_error == "DNS resolver is busy (1)"
+        assert entered == ["customer.example"]
+
+        schedule_terminal(store, queue, job_b, now=WHEN)
+        worker_b.start()
+        assert second.wait(2)
+        assert entered == ["customer.example", "customer.example"]
+        assert webhook_module._DNS_KEY_IN_FLIGHT == {f"org:{org_a}": 1, f"org:{org_b}": 1}
+
+        schedule_terminal(store, queue, job_c, now=WHEN)
+        assert deliver_once(store, queue, post=post_webhook, timeout=5, max_attempts=5, now=WHEN) is True
+        saved_c = store.delivery_for_job(job_c.id)
+        assert saved_c is not None
+        assert saved_c.attempt == 0
+        assert saved_c.last_error == "DNS resolver is busy (1)"
+        assert entered == ["customer.example", "customer.example"]
+    finally:
+        release.set()
+        worker_a.join(3)
+        if worker_b.ident is not None:
+            worker_b.join(3)
+        _wait_for_dns_threads()
+    assert errors == []
+    assert webhook_module._DNS_KEY_IN_FLIGHT == {}
+
+
+def test_same_hostname_takes_one_slot_when_there_is_no_org(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Direct posts have no organization, so the hostname is the fairness key."""
+
+    import socket
+    import threading
+    import time
+
+    from secureai_shared import webhooks as webhook_module
+
+    release = threading.Event()
+    entered: list[str] = []
+    entered_lock = threading.Lock()
+    first = threading.Event()
+    second = threading.Event()
+
+    def getaddrinfo(host: str, port: object, *args: object, **kwargs: object) -> list[tuple]:
+        del port, args, kwargs
+        with entered_lock:
+            entered.append(host)
+            count = len(entered)
+        if count == 1:
+            first.set()
+        if count >= 2:
+            second.set()
+        release.wait()
+        return [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("8.8.8.8", 0))]
+
+    monkeypatch.setattr(socket, "getaddrinfo", getaddrinfo)
+    assert webhook_module._DNS_TENANT.get() == ""
+    errors: list[BaseException] = []
+
+    def lookup(host: str, timeout: float) -> None:
+        try:
+            webhook_module._getaddrinfo_bounded(host, timeout)
+        except BaseException as exc:
+            errors.append(exc)
+
+    first_thread = threading.Thread(target=lookup, args=("Customer.Example.", 2))
+    other_thread = threading.Thread(target=lookup, args=("other.example", 2))
+    try:
+        first_thread.start()
+        assert first.wait(2)
+        assert webhook_module._DNS_KEY_IN_FLIGHT == {"host:customer.example": 1}
+        started = time.monotonic()
+        with pytest.raises(WebhookResolverBusy):
+            webhook_module._getaddrinfo_bounded("customer.example", 2)
+        assert time.monotonic() - started < 0.5
+        assert webhook_module._DNS_SLOTS.acquire(blocking=False)
+        webhook_module._DNS_SLOTS.release()
+        other_thread.start()
+        assert second.wait(2)
+        assert entered == ["Customer.Example.", "other.example"]
+        with pytest.raises(WebhookResolverBusy):
+            webhook_module._getaddrinfo_bounded("third.example", 2)
+        assert entered == ["Customer.Example.", "other.example"]
+    finally:
+        release.set()
+        first_thread.join(3)
+        if other_thread.ident is not None:
+            other_thread.join(3)
+        _wait_for_dns_threads()
+    assert errors == []
+    assert webhook_module._DNS_KEY_IN_FLIGHT == {}
 
 
 def test_post_webhook_does_not_resolve_a_public_ip_literal(monkeypatch: pytest.MonkeyPatch) -> None:
