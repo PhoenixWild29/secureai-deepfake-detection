@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureAI Pricing Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .calculator-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .tier-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .tier-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tier-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .tier-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .tier-card .badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .tier-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .tier-card .price {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+        }
+        
+        .tier-card .price small {
+            font-size: 0.5em;
+            color: #999;
+        }
+        
+        .tier-card ul {
+            list-style: none;
+            margin-top: 15px;
+        }
+        
+        .tier-card ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .tier-card ul li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .results-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .results-panel h2 {
+            color: white;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .result-item .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .result-item .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .calculate-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .calculate-btn:hover {
+            background: #5568d3;
+        }
+        
+        .addon-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .addon-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ SecureAI Pricing Calculator</h1>
+            <p>Calculate your investment and ROI</p>
+        </div>
+        
+        <div class="calculator-card">
+            <!-- Organization Information -->
+            <div class="section">
+                <h2>1. Organization Information</h2>
+                
+                <div class="input-group">
+                    <label for="orgName">Organization Name</label>
+                    <input type="text" id="orgName" placeholder="Your Company Name">
+                </div>
+                
+                <div class="input-group">
+                    <label for="industry">Industry</label>
+                    <select id="industry">
+                        <option value="financial_services">Financial Services</option>
+                        <option value="technology">Technology</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="media">Media & Entertainment</option>
+                        <option value="government">Government</option>
+                        <option value="general">General / Other</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="orgSize">Organization Size</label>
+                    <select id="orgSize">
+                        <option value="small">Small (1-50 employees)</option>
+                        <option value="medium">Medium (51-500 employees)</option>
+                        <option value="large">Large (501-5,000 employees)</option>
+                        <option value="enterprise">Enterprise (5,000+ employees)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Usage Requirements -->
+            <div class="section">
+                <h2>2. Usage Requirements</h2>
+                
+                <div class="input-group">
+                    <label for="monthlyAnalyses">Monthly Video Analyses Needed</label>
+                    <input type="number" id="monthlyAnalyses" value="1000" min="0">
+                </div>
+                
+                <div class="input-group">
+                    <label for="users">Number of Users</label>
+                    <input type="number" id="users" value="5" min="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="storage">Storage Needed (GB)</label>
+                    <input type="number" id="storage" value="100" min="0">
+                </div>
+            </div>
+            
+            <!-- Tier Selection -->
+            <div class="section">
+                <h2>3. Select Your Tier</h2>
+                
+                <div class="tier-cards">
+                    <div class="tier-card" data-tier="starter" onclick="selectTier('starter')">
+                        <h3>Starter</h3>
+                        <div class="price">$499<small>/month</small></div>
+                        <ul>
+                            <li>1,000 analyses/month</li>
+                            <li>6 users included</li>
+                            <li>100GB storage</li>
+                            <li>Basic SIEM integration</li>
+                            <li>Email support</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tier-card selected" data-tier="professional" onclick="selectTier('professional')">
+                        <div class="badge">MOST POPULAR</div>
+                        <h3>Professional</h3>
+                        <div class="price">$1,999<small>/month</small></div>
+                        <ul>
+                            <li>5,000 analyses/month</li>
+                            <li>23 users included</li>
+                            <li>500GB storage</li>
+                            <li>Advanced integrations</li>
+                            <li>Priority support</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tier-card" data-tier="enterprise" onclick="selectTier('enterprise')">
+                        <h3>Enterprise</h3>
+                        <div class="price">Custom<small>/month</small></div>
+                        <ul>
+                            <li>Unlimited analyses</li>
+                            <li>Unlimited users</li>
+                            <li>Unlimited storage</li>
+                            <li>All integrations</li>
+                            <li>24/7 support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add-ons -->
+            <div class="section">
+                <h2>4. Add-Ons (Optional)</h2>
+                
+                <div class="addon-section">
+                    <div class="addon-item">
+                        <div>
+                            <strong>Additional Analysis Volume</strong>
+                            <p style="color: #666; font-size: 0.9em;">+1,000 analyses for $99/month</p>
+                        </div>
+                        <input type="checkbox" id="addonAnalysis" onchange="calculate()">
+                    </div>
+                    
+                    <div class="addon-item">
+                        <div>
+                            <strong>Additional Storage</strong>
+                            <p style="color: #666; font-size: 0.9em;">+100GB for $49/month</p>
+                        </div>
+                        <input type="checkbox" id="addonStorage" onchange="calculate()">
+                    </div>
+                    
+                    <div class="addon-item">
+                        <div>
+                            <strong>Advanced AI Models</strong>
+                            <p style="color: #666; font-size: 0.9em;">Custom models for $299/month</p>
+                        </div>
+                        <input type="checkbox" id="addonAI" onchange="calculate()">
+                    </div>
+                    
+                    <div class="addon-item">
+                        <div>
+                            <strong>Premium Support</strong>
+                            <p style="color: #666; font-size: 0.9em;">24/7 support for $999/month</p>
+                        </div>
+                        <input type="checkbox" id="addonSupport" onchange="calculate()">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calculate Button -->
+            <button class="calculate-btn" onclick="calculate()">Calculate Your Investment</button>
+            
+            <!-- Results -->
+            <div class="results-panel" id="results" style="display: none;">
+                <h2>💰 Your Investment Summary</h2>
+                
+                <div class="results-grid">
+                    <div class="result-item">
+                        <div class="label">Monthly Investment</div>
+                        <div class="value" id="monthlyPrice">$1,999</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="label">Annual Investment</div>
+                        <div class="value" id="annualPrice">$19,990</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="label">Annual Savings</div>
+                        <div class="value" id="savings">Save $4,788</div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <div class="label">Estimated ROI</div>
+                        <div class="value" id="roi">4,260%</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+                    <h3 style="margin-bottom: 15px;">📊 What You Get:</h3>
+                    <ul id="features" style="list-style: none; line-height: 2;">
+                        <li>✅ Up to <strong id="analysisLimit">5,000</strong> video analyses per month</li>
+                        <li>✅ <strong id="userLimit">23</strong> user accounts included</li>
+                        <li>✅ <strong id="storageLimit">500GB</strong> secure storage</li>
+                        <li>✅ Advanced SIEM and SOAR integrations</li>
+                        <li>✅ Blockchain audit trail</li>
+                        <li>✅ Compliance reporting (GDPR, CCPA, AI Act)</li>
+                        <li>✅ Priority email and phone support</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <button onclick="requestDemo()" style="background: white; color: #667eea; padding: 15px 40px; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-right: 10px;">
+                        📅 Schedule Demo
+                    </button>
+                    <button onclick="startTrial()" style="background: rgba(255,255,255,0.2); color: white; padding: 15px 40px; border: 2px solid white; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer;">
+                        🚀 Start Free Trial
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; color: white;">
+            <p>Questions? Contact our sales team: <strong>sales@secureai.com</strong> | +1-800-SECURE-AI</p>
+        </div>
+    </div>
+    
+    <script>
+        let selectedTier = 'professional';
+        
+        const tierPricing = {
+            starter: {
+                monthly: 499,
+                annual: 4990,
+                analyses: 1000,
+                users: 6,
+                storage: 100,
+                features: ['Basic SIEM integration', 'Email support', 'Standard audit logging']
+            },
+            professional: {
+                monthly: 1999,
+                annual: 19990,
+                analyses: 5000,
+                users: 23,
+                storage: 500,
+                features: ['Advanced SIEM/SOAR integration', 'Priority support', 'Blockchain audit trail', 'Compliance tools']
+            },
+            enterprise: {
+                monthly: 7500,
+                annual: 75000,
+                analyses: 'Unlimited',
+                users: 'Unlimited',
+                storage: 'Unlimited',
+                features: ['All integrations', '24/7 support', 'Dedicated account manager', 'Custom SLA']
+            }
+        };
+        
+        function selectTier(tier) {
+            // Update selected tier
+            selectedTier = tier;
+            
+            // Update UI
+            document.querySelectorAll('.tier-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-tier="${tier}"]`).classList.add('selected');
+            
+            // Recalculate
+            calculate();
+        }
+        
+        function calculate() {
+            const tier = tierPricing[selectedTier];
+            
+            // Base pricing
+            let monthlyPrice = tier.monthly;
+            let annualPrice = tier.annual;
+            
+            // Add-ons
+            if (document.getElementById('addonAnalysis').checked) {
+                monthlyPrice += 99;
+                annualPrice += 1188;
+            }
+            if (document.getElementById('addonStorage').checked) {
+                monthlyPrice += 49;
+                annualPrice += 588;
+            }
+            if (document.getElementById('addonAI').checked) {
+                monthlyPrice += 299;
+                annualPrice += 3588;
+            }
+            if (document.getElementById('addonSupport').checked) {
+                monthlyPrice += 999;
+                annualPrice += 11988;
+            }
+            
+            // Calculate savings (annual vs monthly)
+            const monthlyTotal = monthlyPrice * 12;
+            const savings = monthlyTotal - annualPrice;
+            
+            // Estimate ROI (simplified calculation)
+            const industry = document.getElementById('industry').value;
+            const estimatedIncidentCost = 250000;
+            const estimatedIncidentsAvoided = 5;
+            const estimatedSavings = estimatedIncidentCost * estimatedIncidentsAvoided * 0.9;
+            const roi = ((estimatedSavings - annualPrice) / annualPrice * 100).toFixed(0);
+            
+            // Update results
+            document.getElementById('monthlyPrice').textContent = `$${monthlyPrice.toLocaleString()}`;
+            document.getElementById('annualPrice').textContent = `$${annualPrice.toLocaleString()}`;
+            document.getElementById('savings').textContent = `Save $${savings.toLocaleString()}`;
+            document.getElementById('roi').textContent = `${roi}%`;
+            
+            // Update features
+            document.getElementById('analysisLimit').textContent = tier.analyses;
+            document.getElementById('userLimit').textContent = tier.users;
+            document.getElementById('storageLimit').textContent = tier.storage === 'Unlimited' ? 'Unlimited' : tier.storage + 'GB';
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+        }
+        
+        function requestDemo() {
+            alert('Demo Request:\n\nThank you for your interest in SecureAI!\n\nIn a production environment, this would open a form or redirect to your scheduling page.\n\nFor now, please contact: sales@secureai.com or call +1-800-SECURE-AI');
+        }
+        
+        function startTrial() {
+            alert('Free Trial Request:\n\nThank you for your interest in SecureAI!\n\nIn a production environment, this would redirect to the trial signup page.\n\nFor now, please contact: sales@secureai.com to start your 14-day free trial!');
+        }
+        
+        // Initial calculation
+        window.onload = function() {
+            calculate();
+        };
+    </script>
+</body>
+</html>
