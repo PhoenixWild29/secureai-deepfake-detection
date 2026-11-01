@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import signal
@@ -24,6 +25,7 @@ from worker.__main__ import (
     SENTRY_FLUSH_SECONDS,
     run,
     shutdown_drain_seconds,
+    warn_if_detector_timeout_exceeds_drain,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -42,6 +44,111 @@ def test_shutdown_drain_covers_poll_detection_and_sentry_flush() -> None:
     )
     # deploy/railway/README.md and worker.railway.json both use this number.
     assert shutdown_drain_seconds() == 75
+
+
+@pytest.mark.parametrize("timeout", [60.0, 59.0, 1.0])
+def test_no_drain_warning_at_or_below_the_default_detector_timeout(
+    timeout: float,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.WARNING, logger="secureai.worker"):
+        warn_if_detector_timeout_exceeds_drain(timeout)
+    assert caplog.records == []
+
+
+@pytest.mark.parametrize(
+    ("timeout", "delta"),
+    [(90.0, "30"), (60.5, "0.5")],
+)
+def test_drain_warning_names_the_delta_above_the_default_timeout(
+    timeout: float,
+    delta: str,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    with caplog.at_level(logging.WARNING, logger="secureai.worker"):
+        warn_if_detector_timeout_exceeds_drain(timeout)
+    assert len(caplog.records) == 1
+    record = caplog.records[0]
+    assert record.levelno == logging.WARNING
+    assert record.name == "secureai.worker"
+    message = record.getMessage()
+    assert f"DETECTOR_TIMEOUT_SECONDS={timeout:g}" in message
+    assert "drain budget may be short" in message
+    assert f"drainingSeconds={shutdown_drain_seconds()}" in message
+    assert f"Raise drainingSeconds by {delta}" in message
+    assert shutdown_drain_seconds() == 75
+
+
+def _prepare_idle_worker(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("AUTH_MODE", "dev")
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://unused/unused")
+    monkeypatch.setenv("QUEUE_BACKEND", "memory")
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("STORAGE_BACKEND", "filesystem")
+    monkeypatch.setenv("MEDIA_ROOT", str(tmp_path))
+    monkeypatch.delenv("SENTRY_DSN", raising=False)
+    monkeypatch.setattr("worker.__main__.PostgresJobStore", lambda url: MemoryJobStore())
+    monkeypatch.setattr("worker.__main__.build_queue", lambda settings: MemoryJobQueue())
+    monkeypatch.setattr(
+        "worker.__main__.build_storage",
+        lambda settings: FileSystemStorage(tmp_path),
+    )
+
+
+@pytest.mark.parametrize("timeout", [None, "60", "60.0"])
+def test_worker_startup_does_not_warn_at_the_default_detector_timeout(
+    timeout: str | None,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    _prepare_idle_worker(monkeypatch, tmp_path)
+    if timeout is None:
+        monkeypatch.delenv("DETECTOR_TIMEOUT_SECONDS", raising=False)
+    else:
+        monkeypatch.setenv("DETECTOR_TIMEOUT_SECONDS", timeout)
+    with caplog.at_level(logging.WARNING, logger="secureai.worker"):
+        assert run(["--once"]) == 0
+    assert shutdown_drain_seconds() == 75
+    assert not any("drain budget may be short" in record.getMessage() for record in caplog.records)
+
+
+def test_worker_startup_warns_once_when_detector_timeout_exceeds_drain(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    _prepare_idle_worker(monkeypatch, tmp_path)
+    monkeypatch.setenv("DETECTOR_TIMEOUT_SECONDS", "90")
+    polls = {"n": 0}
+
+    class StoppingQueue(MemoryJobQueue):
+        def consume(self, timeout: float = 0) -> str | None:
+            del timeout
+            polls["n"] += 1
+            if polls["n"] >= 3:
+                raise RuntimeError("stop-polling")
+            return None
+
+    monkeypatch.setattr("worker.__main__.build_queue", lambda settings: StoppingQueue())
+    # The drain warning is before the poll loop. A warning inside the loop
+    # would fire on each of these empty reads.
+    monkeypatch.setattr("worker.__main__.threading.Thread.start", lambda _self: None)
+    with caplog.at_level(logging.WARNING, logger="secureai.worker"):
+        assert run(["--poll-seconds", "0"]) == 2
+    assert polls["n"] == 3
+    assert shutdown_drain_seconds() == 75
+    warnings = [
+        record
+        for record in caplog.records
+        if record.levelno == logging.WARNING and "drain budget may be short" in record.getMessage()
+    ]
+    assert len(warnings) == 1
+    message = warnings[0].getMessage()
+    assert warnings[0].name == "secureai.worker"
+    assert "DETECTOR_TIMEOUT_SECONDS=90" in message
+    assert "drainingSeconds=75" in message
+    assert "Raise drainingSeconds by 30" in message
 
 
 def test_worker_railway_drain_matches_the_budget_and_has_no_healthcheck() -> None:
