@@ -29,9 +29,11 @@ def sweep_stuck(
     only if the attempt this sweep observed is still the stored attempt. It
     bumps the lease generation and leaves the attempt count unchanged, so the
     worker that popped the old generation cannot ack the new lease or reset
-    the attempt counter. `release` is attempt-aware, so a slow worker cannot
-    move a newer claim back to queued. The database release commits before
-    the republish, so a worker that pops the id can claim the row.
+    the attempt counter. If the id is already on the list, the refresh keeps
+    a single copy and does not publish another. `release` is attempt-aware,
+    so a slow worker cannot move a newer claim back to queued. The database
+    release commits before the republish, so a worker that pops the id can
+    claim the row.
     """
 
     recovered: list[str] = []

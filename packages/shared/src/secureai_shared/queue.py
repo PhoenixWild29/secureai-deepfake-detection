@@ -5,7 +5,8 @@ cannot drop an id that has left the list but is not yet leased. `BLMOVE`
 of the list onto itself only wakes a blocking worker; it does not remove
 the id. `claim_stale` refreshes a stale lease and republishes that id in
 one script, and only when the attempt it observed is still current.
-`ack` and `release` of a lease compare that attempt and its generation,
+If the id is already on the list, the script leaves one copy where it is
+and does not push another. `ack` and `release` of a lease compare that attempt and its generation,
 so a slow worker cannot delete a lease `claim_stale` has already refreshed.
 Claiming a stale lease bumps the generation and keeps the attempt, which
 stops the old ack from clearing the requeued lease and resetting the
@@ -74,10 +75,12 @@ return {job_id, attempts, generation}
 """
 )
 
-# Compare the observed attempt and age, then refresh the lease and LPUSH.
-# Generation changes so the worker that still holds the old one cannot ack
-# this lease. The attempt count stays put until the next pop. A second
-# sweeper sees a fresh timestamp and does not publish again.
+# Compare the observed attempt and age, then refresh the lease. LPUSH only
+# when the id is not already waiting. Generation changes so the worker that
+# still holds the old one cannot ack this lease. The attempt count stays
+# put until the next pop. A second sweeper sees a fresh timestamp and does
+# not publish again. A later sweeper, after this lease ages out, also does
+# not publish again while a copy is still on the list.
 _CLAIM_STALE = (
     _LEASE_PARSE
     + """
@@ -94,8 +97,20 @@ local lease = tonumber(ARGV[4])
 if now - started < lease then
   return 0
 end
+local positions = redis.call('LPOS', KEYS[2], ARGV[1], 'COUNT', 0)
+local waiting = 0
+if type(positions) == 'table' then
+  waiting = #positions
+end
+if waiting > 1 then
+  -- Head-to-tail, so the copy closest to RPOP stays where it is.
+  redis.call('LREM', KEYS[2], waiting - 1, ARGV[1])
+end
 generation = generation + 1
 redis.call('HSET', KEYS[1], ARGV[1], ARGV[3] .. ':' .. attempts .. ':' .. generation)
+if waiting > 0 then
+  return 0
+end
 redis.call('LPUSH', KEYS[2], ARGV[1])
 return 1
 """
@@ -247,9 +262,34 @@ class MemoryJobQueue:
                 return False
             # Keep the attempt. A new generation makes the popped worker's
             # ack a no-op, so it cannot drop this lease or restart the counter.
+            waiting = self._collapse_waiting_locked(job_id)
             self._inflight[job_id] = (clock, seen, generation + 1)
+            if waiting:
+                return False
             self._ids.append(job_id)
             return True
+
+    def _collapse_waiting_locked(self, job_id: str) -> int:
+        """Leave at most one copy of `job_id`. Return how many were waiting.
+
+        One copy stays where it is, so a refresh does not move it behind work
+        published later. Extra copies are dropped. The caller refreshes the
+        lease either way and pushes only when this returns 0.
+        """
+
+        count = sum(1 for item in self._ids if item == job_id)
+        if count <= 1:
+            return count
+        collapsed: deque[str] = deque()
+        kept = False
+        for item in self._ids:
+            if item == job_id:
+                if kept:
+                    continue
+                kept = True
+            collapsed.append(item)
+        self._ids = collapsed
+        return count
 
     def _touch_locked(self, job_id: str, *, now: float | None = None) -> tuple[int, int]:
         clock = time.time() if now is None else now
