@@ -83,10 +83,14 @@ class FileSystemStorage:
     def exists(self, key: str) -> bool:
         return self._path(key).is_file()
 
-    def materialize(self, key: str) -> LocalMedia:
+    def materialize(self, key: str, *, etag: str | None = None) -> LocalMedia:
         path = self._path(key)
         if not path.is_file():
             raise FileNotFoundError(key)
+        if etag is not None:
+            current = hashlib.md5(path.read_bytes()).hexdigest()
+            if current != etag.strip('"'):
+                raise FileNotFoundError(key)
         return LocalMedia(path=path, cleanup=False)
 
     def object_size(self, key: str) -> int | None:
@@ -152,16 +156,24 @@ class S3Storage:
             return False
         return True
 
-    def materialize(self, key: str) -> LocalMedia:
+    def materialize(self, key: str, *, etag: str | None = None) -> LocalMedia:
+        """Download the object. When `etag` is set, S3 must still match it.
+
+        IfMatch rejects a rewrite that landed between the head check and this
+        GET, so the new bytes are not scored.
+        """
+
         self._check(key)
         handle = tempfile.NamedTemporaryFile(suffix=Path(key).suffix, delete=False)
         handle.close()
         dest = Path(handle.name)
+        extra: dict[str, str] | None = None
+        if etag:
+            quoted = etag if etag.startswith('"') else f'"{etag}"'
+            extra = {"IfMatch": quoted}
         try:
-            # TODO: download_file does not send IfMatch=etag (or VersionId). A rewrite
-            # between the head check and this GET can still be scored. Pass the job
-            # etag once object storage is on a public bucket.
-            self.client.download_file(self.bucket, key, str(dest))  # type: ignore[attr-defined]
+            kwargs: dict[str, object] = {"ExtraArgs": extra} if extra else {}
+            self.client.download_file(self.bucket, key, str(dest), **kwargs)  # type: ignore[attr-defined]
         except Exception:
             dest.unlink(missing_ok=True)
             raise

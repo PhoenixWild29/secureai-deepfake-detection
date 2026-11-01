@@ -41,6 +41,8 @@ class BillingAccountRow(Base):
     subscription_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Unix seconds of the last Stripe event applied to this account. Older events are ignored.
+    stripe_event_created: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     current_period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -57,6 +59,8 @@ class OrganizationRow(Base):
     subscription_status: Mapped[str | None] = mapped_column(String(32), nullable=True)
     stripe_customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Unix seconds of the last Stripe event applied to this workspace.
+    stripe_event_created: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     current_period_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

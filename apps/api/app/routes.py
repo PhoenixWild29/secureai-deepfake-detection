@@ -13,10 +13,11 @@ from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel, Field
 
 from app.auth import require_user
-from app.quota import enforce_job_quota
+from app.quota import accept_job
 from app.tenancy import active_org
 from secureai_shared.models import AuthContext, JobRecord
 from secureai_shared.storage import clean_filename, is_owned_key, new_object_key
+from secureai_shared.store import UNQUEUED_FAILURE_DETAIL
 
 logger = logging.getLogger("secureai.api.jobs")
 
@@ -142,7 +143,8 @@ def create_job(
     """Create a Postgres row for an object this caller already stored, then queue its id.
 
     The stored size and etag come from object storage. The client byte_size is ignored.
-    If the queue rejects the id, the row is marked failed so it is not left queued forever.
+    If the queue rejects the id, the row is marked failed and does not count against
+    the monthly quota. It is not left queued with no id in Redis.
     """
 
     _limit(request, "jobs", user.subject)
@@ -161,15 +163,17 @@ def create_job(
         raise HTTPException(status_code=413, detail="Upload exceeds the size limit")
 
     org_id = active_org(request, user)
-    enforce_job_quota(request, user.subject, org_id)
-    job = request.app.state.store.create(
+    job = accept_job(
+        settings=settings,
+        store=request.app.state.store,
+        billing=request.app.state.billing,
         user_id=user.subject,
+        org_id=org_id,
         filename=filename,
         content_type=body.content_type,
         byte_size=stat.size,
         object_key=body.object_key,
         object_etag=stat.etag,
-        org_id=org_id,
     )
     _publish_or_fail(request, job)
     logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
@@ -217,7 +221,9 @@ def _publish_or_fail(request: Request, job: JobRecord) -> None:
             last = exc
     logger.error("enqueue failed job_id=%s", job.id, exc_info=last)
     try:
-        request.app.state.store.fail(job.id)
+        # attempt stays 0. count_started skips this detail, so the 503 does not
+        # spend a monthly job.
+        request.app.state.store.fail(job.id, detail=UNQUEUED_FAILURE_DETAIL)
     except Exception:
         logger.exception("could not fail unqueued job_id=%s", job.id)
     raise HTTPException(status_code=503, detail="Could not queue the job") from last

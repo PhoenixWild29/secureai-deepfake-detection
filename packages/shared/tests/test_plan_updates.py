@@ -54,6 +54,49 @@ def test_team_checkout_targets_the_org() -> None:
     assert update.plan == "team"
 
 
+def test_unknown_price_does_not_fall_back_to_metadata_plan() -> None:
+    update = plan_update_from_event(
+        {
+            "type": "customer.subscription.updated",
+            "created": 50,
+            "data": {
+                "object": {
+                    "id": "sub_x",
+                    "customer": "cus_x",
+                    "status": "active",
+                    "metadata": {"user_id": "user_dev", "plan": "team"},
+                    "items": {"data": [{"price": {"id": "price_other"}}]},
+                }
+            },
+        },
+        {"price_pro": "pro", "price_team": "team"},
+    )
+    assert update is not None
+    assert update.plan is None
+    assert update.status is None
+    assert update.event_created == 50
+
+
+def test_known_price_wins_over_metadata_plan() -> None:
+    update = plan_update_from_event(
+        {
+            "type": "customer.subscription.updated",
+            "data": {
+                "object": {
+                    "id": "sub_x",
+                    "status": "active",
+                    "metadata": {"user_id": "user_dev", "plan": "team"},
+                    "items": {"data": [{"price": {"id": "price_pro"}}]},
+                }
+            },
+        },
+        {"price_pro": "pro"},
+    )
+    assert update is not None
+    assert update.plan == "pro"
+    assert update.status == "active"
+
+
 def test_unpaid_checkout_does_not_grant_pro() -> None:
     update = plan_update_from_event(
         {

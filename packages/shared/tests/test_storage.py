@@ -13,6 +13,7 @@ class FakeS3:
         self.objects: dict[str, tuple[bytes, str]] = {}
         self.conditions: list[object] = []
         self.dest: str | None = None
+        self.extra: dict[str, str] | None = None
 
     def head_bucket(self, **kwargs: object) -> None:
         del kwargs
@@ -45,11 +46,23 @@ class FakeS3:
         body, etag = self.objects[Key]
         return {"ContentLength": len(body), "ETag": f'"{etag}"'}
 
-    def download_file(self, bucket: str, key: str, dest: str) -> None:
-        del bucket, key
+    def download_file(
+        self,
+        bucket: str,
+        key: str,
+        dest: str,
+        ExtraArgs: dict[str, str] | None = None,
+    ) -> None:
+        del bucket
         self.dest = dest
-        Path(dest).write_bytes(b"partial")
-        raise RuntimeError("download failed")
+        self.extra = ExtraArgs
+        body, etag = self.objects.get(key, (b"", ""))
+        if ExtraArgs and "IfMatch" in ExtraArgs and ExtraArgs["IfMatch"].strip('"') != etag:
+            raise RuntimeError("precondition failed")
+        if key not in self.objects:
+            Path(dest).write_bytes(b"partial")
+            raise RuntimeError("download failed")
+        Path(dest).write_bytes(body)
 
 
 def test_presign_caps_content_length_and_skips_bucket_create() -> None:
@@ -78,6 +91,25 @@ def test_object_stat_reads_size_and_etag() -> None:
     assert stat is not None
     assert stat.size == 6
     assert stat.etag == "abc123"
+
+
+def test_materialize_sends_if_match_and_rejects_a_rewrite() -> None:
+    client = FakeS3()
+    storage = S3Storage(client, "secureai")
+    key = new_object_key("user_dev", "clip.mp4")
+    client.objects[key] = (b"rewritten", "new-etag")
+    with pytest.raises(RuntimeError, match="precondition failed"):
+        storage.materialize(key, etag="old-etag")
+    assert client.extra == {"IfMatch": '"old-etag"'}
+    assert client.dest is not None
+    assert not Path(client.dest).exists()
+
+    saved = storage.materialize(key, etag="new-etag")
+    try:
+        assert saved.path.read_bytes() == b"rewritten"
+        assert client.extra == {"IfMatch": '"new-etag"'}
+    finally:
+        saved.path.unlink(missing_ok=True)
 
 
 def test_failed_download_removes_the_temp_file() -> None:

@@ -1,44 +1,95 @@
 """Plan limits for job creation.
 
-Started jobs in the current period count, including ones that later fail.
-Uploads stay on the short rate limit; the monthly cap is the job itself.
+Started jobs in the current period count, including ones that later fail
+during detection. A row that failed before it was published to Redis does
+not count: the client received 503 and the work never started.
+
+The quota read and the job insert run while the billing account or
+organization row is locked (`SELECT … FOR UPDATE` on Postgres, a per-subject
+lock in memory). Two concurrent creates cannot both observe a free slot.
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException
 
-from secureai_shared.billing import effective_plan
+from secureai_shared.billing import BillingStore, OrgNotFound, effective_plan
+from secureai_shared.models import JobRecord
 from secureai_shared.settings import Settings
+from secureai_shared.store import JobStore
 
 
-def enforce_job_quota(request: Request, user_id: str, org_id: str | None) -> None:
-    settings: Settings = request.app.state.settings
+def accept_job(
+    *,
+    settings: Settings,
+    store: JobStore,
+    billing: BillingStore,
+    user_id: str,
+    org_id: str | None,
+    filename: str,
+    content_type: str | None,
+    byte_size: int | None,
+    object_key: str,
+    object_etag: str | None,
+) -> JobRecord:
+    """Insert a queued job if the caller is still under the plan cap."""
+
     if settings.quota_mode == "unlimited":
-        return
+        return store.create(
+            user_id=user_id,
+            filename=filename,
+            content_type=content_type,
+            byte_size=byte_size,
+            object_key=object_key,
+            object_etag=object_etag,
+            org_id=org_id,
+        )
 
-    billing = request.app.state.billing
+    if org_id is not None:
+        summary = billing.org_summary(org_id, user_id=user_id)
+        if summary is None:
+            raise HTTPException(status_code=403, detail="Not a member of this workspace")
+
+    try:
+        with billing.quota_lock(user_id=user_id, org_id=org_id):
+            plan, period_start, period_end = _subject(billing, user_id, org_id)
+            start, _end = active_period(period_start, period_end, utc_now())
+            used = store.count_started(user_id=user_id, org_id=org_id, since=start)
+            limit = job_limit(settings, plan)
+            if used >= limit:
+                _raise_quota(plan, used, limit)
+            return store.create(
+                user_id=user_id,
+                filename=filename,
+                content_type=content_type,
+                byte_size=byte_size,
+                object_key=object_key,
+                object_etag=object_etag,
+                org_id=org_id,
+            )
+    except OrgNotFound as exc:
+        raise HTTPException(status_code=403, detail="Not a member of this workspace") from exc
+
+
+def _subject(
+    billing: BillingStore,
+    user_id: str,
+    org_id: str | None,
+) -> tuple[str, datetime | None, datetime | None]:
     if org_id is not None:
         summary = billing.org_summary(org_id, user_id=user_id)
         if summary is None:
             raise HTTPException(status_code=403, detail="Not a member of this workspace")
         plan = effective_plan(summary.plan, summary.subscription_status)
-        period_start = summary.current_period_start
-        period_end = summary.current_period_end
-    else:
-        account = billing.user_account(user_id)
-        plan = effective_plan(account.plan, account.subscription_status)
-        period_start = account.current_period_start
-        period_end = account.current_period_end
+        return plan, summary.current_period_start, summary.current_period_end
+    account = billing.user_account(user_id)
+    plan = effective_plan(account.plan, account.subscription_status)
+    return plan, account.current_period_start, account.current_period_end
 
-    start, _end = active_period(period_start, period_end, utc_now())
-    used = request.app.state.store.count_started(user_id=user_id, org_id=org_id, since=start)
-    limit = job_limit(settings, plan)
-    if used < limit:
-        return
 
+def _raise_quota(plan: str, used: int, limit: int) -> None:
     if plan == "free":
         raise HTTPException(
             status_code=402,

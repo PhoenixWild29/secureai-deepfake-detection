@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
 
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import and_, create_engine, func, not_, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from secureai_shared.db import JobRow
@@ -15,6 +15,8 @@ from secureai_shared.models import JobRecord, JobStatus
 
 # Client-visible failure text. Never store exception messages or paths here.
 PUBLIC_FAILURE_DETAIL = "Detection failed."
+# Publish failed before the id reached Redis. These rows do not spend quota.
+UNQUEUED_FAILURE_DETAIL = "Could not queue the job."
 
 
 def _visible(job: JobRecord | None, *, user_id: str, org_id: str | None) -> JobRecord | None:
@@ -39,6 +41,26 @@ def _can_finish(job: JobRecord, *, attempt: int | None, require_processing: bool
     if attempt is not None and job.attempt != attempt:
         return False
     return True
+
+
+def _counts_toward_quota(job: JobRecord) -> bool:
+    return not (
+        job.status is JobStatus.failed
+        and job.attempt == 0
+        and job.detail == UNQUEUED_FAILURE_DETAIL
+    )
+
+
+def _quota_clause():
+    """SQL twin of `_counts_toward_quota`."""
+
+    return not_(
+        and_(
+            JobRow.status == JobStatus.failed.value,
+            JobRow.attempt == 0,
+            JobRow.detail == UNQUEUED_FAILURE_DETAIL,
+        )
+    )
 
 
 def _now() -> datetime:
@@ -100,7 +122,7 @@ class JobStore(Protocol):
 
     def claim(self, job_id: str) -> JobRecord | None: ...
 
-    def release(self, job_id: str) -> bool: ...
+    def release(self, job_id: str, *, attempt: int | None = None) -> bool: ...
 
     def complete(
         self,
@@ -111,7 +133,13 @@ class JobStore(Protocol):
         attempt: int | None = None,
     ) -> JobRecord | None: ...
 
-    def fail(self, job_id: str, *, attempt: int | None = None) -> JobRecord | None: ...
+    def fail(
+        self,
+        job_id: str,
+        *,
+        attempt: int | None = None,
+        detail: str | None = None,
+    ) -> JobRecord | None: ...
 
 
 class MemoryJobStore:
@@ -183,7 +211,7 @@ class MemoryJobStore:
                     for job in rows
                     if job.user_id == user_id and job.org_id is None and job.created_at >= since
                 ]
-        return len(matched)
+        return sum(1 for job in matched if _counts_toward_quota(job))
 
     def claim(self, job_id: str) -> JobRecord | None:
         with self._lock:
@@ -200,10 +228,12 @@ class MemoryJobStore:
             self._rows[job_id] = claimed
             return claimed
 
-    def release(self, job_id: str) -> bool:
+    def release(self, job_id: str, *, attempt: int | None = None) -> bool:
         with self._lock:
             job = self._rows.get(job_id)
             if job is None or job.status is not JobStatus.processing:
+                return False
+            if attempt is not None and job.attempt != attempt:
                 return False
             self._rows[job_id] = job.model_copy(
                 update={"status": JobStatus.queued, "updated_at": _now()}
@@ -228,15 +258,23 @@ class MemoryJobStore:
             require_processing=True,
         )
 
-    def fail(self, job_id: str, *, attempt: int | None = None) -> JobRecord | None:
+    def fail(
+        self,
+        job_id: str,
+        *,
+        attempt: int | None = None,
+        detail: str | None = None,
+    ) -> JobRecord | None:
+        # A worker passes the attempt it claimed. That must not fail a job
+        # another worker has since re-queued or re-claimed.
         return self._finish(
             job_id,
             status=JobStatus.failed,
             prediction=None,
             confidence=None,
-            detail=PUBLIC_FAILURE_DETAIL,
+            detail=detail or PUBLIC_FAILURE_DETAIL,
             attempt=attempt,
-            require_processing=False,
+            require_processing=attempt is not None,
         )
 
     def _finish(
@@ -341,7 +379,11 @@ class PostgresJobStore:
 
     def count_started(self, *, user_id: str, org_id: str | None, since: datetime) -> int:
         with self._session() as session:
-            query = select(func.count()).select_from(JobRow).where(JobRow.created_at >= since)
+            query = (
+                select(func.count())
+                .select_from(JobRow)
+                .where(JobRow.created_at >= since, _quota_clause())
+            )
             if org_id is not None:
                 query = query.where(JobRow.org_id == org_id)
             else:
@@ -362,10 +404,12 @@ class PostgresJobStore:
             session.commit()
             return _record_from_row(row)
 
-    def release(self, job_id: str) -> bool:
+    def release(self, job_id: str, *, attempt: int | None = None) -> bool:
         with self._session() as session:
-            row = session.get(JobRow, job_id)
+            row = session.scalar(select(JobRow).where(JobRow.id == job_id).with_for_update())
             if row is None or row.status != JobStatus.processing.value:
+                return False
+            if attempt is not None and row.attempt != attempt:
                 return False
             row.status = JobStatus.queued.value
             row.updated_at = _now()
@@ -390,15 +434,21 @@ class PostgresJobStore:
             require_processing=True,
         )
 
-    def fail(self, job_id: str, *, attempt: int | None = None) -> JobRecord | None:
+    def fail(
+        self,
+        job_id: str,
+        *,
+        attempt: int | None = None,
+        detail: str | None = None,
+    ) -> JobRecord | None:
         return self._finish(
             job_id,
             status=JobStatus.failed.value,
             prediction=None,
             confidence=None,
-            detail=PUBLIC_FAILURE_DETAIL,
+            detail=detail or PUBLIC_FAILURE_DETAIL,
             attempt=attempt,
-            require_processing=False,
+            require_processing=attempt is not None,
         )
 
     def _finish(
