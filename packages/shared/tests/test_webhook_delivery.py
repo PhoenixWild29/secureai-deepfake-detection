@@ -1341,8 +1341,11 @@ def _post_on_loopback(port: int, timeout: float, client_context: object) -> int:
             headers={"Content-Type": "application/json"},
         )
         response = connection.getresponse()
-        response.read(2048)
-        return int(response.status)
+        try:
+            response.read(2048)
+            return int(response.status)
+        finally:
+            response.close()
     finally:
         connection.close()
 
@@ -1506,6 +1509,122 @@ def test_http_reads_share_the_request_deadline(tmp_path: object) -> None:
         listener.close()
         thread.join(3)
     assert not finished.is_set()
+
+
+def test_deadline_socket_close_keeps_the_makefile_reader_open() -> None:
+    """Closing the proxy must not close a reader http.client still owns.
+
+    ``HTTPConnection.getresponse`` closes the socket when the response
+    will close, then the caller reads the body. A real socket stays open
+    until that reader closes.
+    """
+
+    import socket
+    import time
+
+    from secureai_shared.webhooks import _DeadlineSocket
+
+    local, peer = socket.socketpair()
+    local.settimeout(2)
+    peer.settimeout(2)
+    proxy = _DeadlineSocket(local, time.monotonic() + 5)
+    reader = proxy.makefile("rb")
+    try:
+        proxy.close()
+        assert proxy.fileno() >= 0
+        peer.sendall(b"ok")
+        assert reader.read(2) == b"ok"
+        reader.close()
+        assert proxy.fileno() == -1
+        proxy.close()
+        assert proxy.fileno() == -1
+    finally:
+        reader.close()
+        proxy.close()
+        peer.close()
+
+
+def test_deadline_socket_close_without_a_reader_closes_the_socket() -> None:
+    import socket
+    import time
+
+    from secureai_shared.webhooks import _DeadlineSocket
+
+    local, peer = socket.socketpair()
+    proxy = _DeadlineSocket(local, time.monotonic() + 5)
+    try:
+        proxy.close()
+        assert proxy.fileno() == -1
+        proxy.close()
+        assert proxy.fileno() == -1
+    finally:
+        proxy.close()
+        peer.close()
+
+
+def test_connection_close_reads_a_body_that_arrives_after_the_headers(
+    tmp_path: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A 200 whose body follows the headers is a successful delivery.
+
+    ``Connection: close`` makes ``getresponse`` close the socket before
+    ``response.read``. The body is sent only after that ``close``. Dropping
+    the SSL socket there raises ``EBADF`` and a delivered event is retried.
+    """
+
+    import socket
+    import threading
+
+    from secureai_shared.webhooks import _DeadlineSocket
+
+    server_context, client_context = _webhook_tls_contexts(tmp_path)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    listener.settimeout(5)
+    port = listener.getsockname()[1]
+    handed_off = threading.Event()
+    body_sent = threading.Event()
+    original_close = _DeadlineSocket.close
+
+    def close_and_signal(self: _DeadlineSocket) -> None:
+        original_close(self)
+        handed_off.set()
+
+    monkeypatch.setattr(_DeadlineSocket, "close", close_and_signal)
+
+    def serve() -> None:
+        try:
+            conn, _addr = listener.accept()
+        except OSError:
+            return
+        try:
+            conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            tls = server_context.wrap_socket(conn, server_side=True)  # type: ignore[attr-defined]
+            try:
+                tls.settimeout(5)
+                tls.recv(65536)
+                tls.sendall(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n")
+                # getresponse has asked to close. The body is not in the
+                # buffer yet, so the reader has to keep the socket open.
+                if not handed_off.wait(5):
+                    return
+                tls.sendall(b"ok")
+                body_sent.set()
+            finally:
+                tls.close()
+        except OSError:
+            conn.close()
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    try:
+        assert _post_on_loopback(port, 5.0, client_context) == 200
+    finally:
+        listener.close()
+        thread.join(3)
+    assert body_sent.is_set()
 
 
 def test_postgres_endpoint_round_trip() -> None:

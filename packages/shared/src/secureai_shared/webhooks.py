@@ -24,7 +24,9 @@ per address. When that budget is spent, later addresses are not tried.
 After a TCP connection succeeds, the TLS handshake and the HTTP exchange
 share one deadline of the original timeout. Time spent in the handshake
 is not available for the response, and each later read or write waits
-only for the time still left. TLS and the Host header still use the
+only for the time still left. A response that asks the connection to
+close still has its body read. The socket stays open until that reader
+finishes. TLS and the Host header still use the
 original hostname, so a DNS answer that changes
 between the check and the connect cannot move the socket onto a private
 address. A TLS failure does not try another address. Any TCP port is
@@ -354,8 +356,14 @@ def post_webhook(url: str, body: bytes, headers: Mapping[str, str], timeout: flo
     try:
         connection.request("POST", path, body=body, headers=dict(headers))
         response = connection.getresponse()
-        response.read(2048)
-        return int(response.status)
+        try:
+            response.read(2048)
+            return int(response.status)
+        finally:
+            # Drop the makefile reader before returning. On Connection: close,
+            # getresponse already handed the socket to that reader, so this
+            # is what releases the file descriptor.
+            response.close()
     finally:
         connection.close()
 
@@ -978,11 +986,20 @@ class _DeadlineSocket:
     on every handshake, read, and write. Setting that timeout once lets the
     handshake use the full budget and then lets the HTTP response use it
     again. Each call here waits only for the time still left.
+
+    ``makefile`` holds the underlying socket until that reader closes, the
+    same way ``socket.socket`` does. ``http.client`` closes the connection
+    when the status line says the response will close, then reads the body
+    from the reader. Closing the SSL socket at that earlier point drops a
+    body that has not been buffered yet.
     """
 
     def __init__(self, sock: socket.socket, deadline: float) -> None:
         self._sock = sock
         self._deadline = deadline
+        self._io_refs = 0
+        self._closed = False
+        self._released = False
 
     def _arm(self) -> None:
         remaining = self._deadline - time.monotonic()
@@ -1033,6 +1050,10 @@ class _DeadlineSocket:
         if mode != "rb":
             raise ValueError("webhook deadline socket only supports binary reads")
         raw = socket.SocketIO(self, "rb")  # type: ignore[arg-type]
+        # Count the reader before wrapping it. ``SocketIO.close`` drops the
+        # count, and ``http.client`` may close this proxy while the reader
+        # is still open.
+        self._io_refs += 1
         if buffering is None or buffering < 0:
             buffering = io.DEFAULT_BUFFER_SIZE
         return io.BufferedReader(raw, buffering)
@@ -1049,12 +1070,19 @@ class _DeadlineSocket:
         return self._sock.fileno()
 
     def _decref_socketios(self) -> None:
-        # ``socket.SocketIO.close`` drops a makefile reference on the real
-        # socket. Closing the SSL socket is ``close`` below. This proxy has
-        # no reference count of its own.
-        return None
+        # ``socket.SocketIO.close`` calls this. Match ``socket.socket``:
+        # the last reader closes the underlying socket only after ``close``
+        # has already been asked to.
+        if self._io_refs > 0:
+            self._io_refs -= 1
+        if self._closed:
+            self.close()
 
     def close(self) -> None:
+        self._closed = True
+        if self._io_refs > 0 or self._released:
+            return
+        self._released = True
         self._sock.close()
 
 
