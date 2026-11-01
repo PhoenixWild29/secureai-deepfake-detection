@@ -41,7 +41,7 @@ def process_job(
             logger.error("object rejected job_id=%s", job_id)
             finished = store.fail(job_id, attempt=job.attempt)
         else:
-            media = storage.materialize(job.object_key)
+            media = storage.materialize(job.object_key, etag=job.object_etag)
             result = call_detect(
                 detect,
                 str(media.path),

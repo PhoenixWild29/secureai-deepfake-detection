@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import logging
 import threading
-from collections.abc import Mapping
-from dataclasses import dataclass
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Protocol
 from uuid import uuid4
@@ -27,6 +28,10 @@ from secureai_shared.db import (
 
 logger = logging.getLogger("secureai.billing")
 
+# past_due keeps the paid plan for the dunning window. This service does not
+# expire past_due on its own. Stripe billing settings (Smart Retries, then
+# cancel or mark unpaid) must end that window with `unpaid` or `canceled`.
+# Those terminal statuses drop the account to the free plan.
 ENTITLED_STATUSES = frozenset({"active", "trialing", "past_due"})
 _TERMINAL_STATUSES = frozenset({"canceled", "unpaid", "incomplete_expired"})
 
@@ -88,12 +93,19 @@ class PlanUpdate:
     status: str | None = None
     period_start: datetime | None = None
     period_end: datetime | None = None
+    # Stripe Event.created (unix seconds). None when the payload has no timestamp.
+    event_created: int | None = None
+    # checkout.session.completed may replace the stored subscription id.
+    # Update, delete, and invoice events for a different subscription must not.
+    replaces_subscription: bool = False
 
 
 def effective_plan(plan: str, status: str | None) -> str:
     """Paid plans count only while the subscription is entitled.
 
     A paid plan with no status is a manual grant (tests, local seeds).
+    `past_due` is entitled: the paid plan stays until Stripe ends dunning
+    with `unpaid` or `canceled`.
     """
 
     if plan not in {"pro", "team"}:
@@ -101,6 +113,85 @@ def effective_plan(plan: str, status: str | None) -> str:
     if status is None or status in ENTITLED_STATUSES:
         return plan
     return "free"
+
+
+def _event_created(event: Mapping[str, object]) -> int | None:
+    value = event.get("created")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if value <= 0:
+        return None
+    return int(value)
+
+
+def _touches_subscription(update: PlanUpdate) -> bool:
+    return any(
+        value is not None
+        for value in (
+            update.plan,
+            update.status,
+            update.subscription_id,
+            update.period_start,
+            update.period_end,
+            update.event_created,
+        )
+    ) or update.replaces_subscription
+
+
+def _resurrects(stored_status: str | None, incoming_status: str | None) -> bool:
+    return stored_status in _TERMINAL_STATUSES and incoming_status in ENTITLED_STATUSES
+
+
+def subscription_block_reason(
+    *,
+    stored_subscription_id: str | None,
+    stored_status: str | None,
+    stored_event_created: int | None,
+    stored_period_end: datetime | None,
+    update: PlanUpdate,
+) -> str | None:
+    """Return why this write must be ignored. None means apply it.
+
+    A late `customer.subscription.updated` after `deleted` is older by
+    Event.created (or by current_period_end when the event has no created).
+    A delete or update for a previous subscription id cannot change the
+    account after a replacement Checkout stored a new subscription id.
+    """
+
+    if not _touches_subscription(update):
+        return None
+    incoming_sub = update.subscription_id
+    if stored_subscription_id and incoming_sub and incoming_sub != stored_subscription_id:
+        if not update.replaces_subscription:
+            return "subscription-mismatch"
+        if (
+            stored_event_created is not None
+            and update.event_created is not None
+            and update.event_created < stored_event_created
+        ):
+            return "stale-checkout"
+        if stored_event_created is not None and update.event_created is None:
+            return "checkout-without-timestamp"
+        return None
+    if stored_event_created is not None and update.event_created is not None:
+        if update.event_created < stored_event_created:
+            return "stale-event"
+        if update.event_created == stored_event_created and _resurrects(stored_status, update.status):
+            return "stale-resubscribe"
+    elif (
+        stored_period_end is not None
+        and update.period_end is not None
+        and update.period_end < stored_period_end
+    ):
+        return "stale-period"
+    elif _resurrects(stored_status, update.status) and update.event_created is None:
+        if (
+            update.period_end is None
+            or stored_period_end is None
+            or update.period_end <= stored_period_end
+        ):
+            return "stale-resubscribe"
+    return None
 
 
 def plan_update_from_event(event: Mapping[str, object], prices: Mapping[str, str]) -> PlanUpdate | None:
@@ -114,16 +205,20 @@ def plan_update_from_event(event: Mapping[str, object], prices: Mapping[str, str
     if not isinstance(obj, dict):
         return None
     if kind == "checkout.session.completed":
-        return _from_checkout(obj)
-    if kind == "customer.subscription.updated":
-        return _from_subscription(obj, prices, deleted=False)
-    if kind == "customer.subscription.deleted":
-        return _from_subscription(obj, prices, deleted=True)
-    if kind == "invoice.paid":
-        return _from_invoice(obj, failed=False)
-    if kind == "invoice.payment_failed":
-        return _from_invoice(obj, failed=True)
-    return None
+        update = _from_checkout(obj)
+    elif kind == "customer.subscription.updated":
+        update = _from_subscription(obj, prices, deleted=False)
+    elif kind == "customer.subscription.deleted":
+        update = _from_subscription(obj, prices, deleted=True)
+    elif kind == "invoice.paid":
+        update = _from_invoice(obj, failed=False)
+    elif kind == "invoice.payment_failed":
+        update = _from_invoice(obj, failed=True)
+    else:
+        return None
+    if update is None:
+        return None
+    return replace(update, event_created=_event_created(event))
 
 
 class BillingStore(Protocol):
@@ -151,7 +246,16 @@ class BillingStore(Protocol):
         customer_id: str,
     ) -> None: ...
 
-    def apply_stripe_event(self, event_id: str, event_type: str, update: PlanUpdate | None) -> bool: ...
+    def apply_stripe_event(
+        self,
+        event_id: str,
+        event_type: str,
+        update: PlanUpdate | None,
+        *,
+        free_seat_limit: int = 3,
+    ) -> bool: ...
+
+    def quota_lock(self, *, user_id: str, org_id: str | None) -> Iterator[None]: ...
 
 
 def _now() -> datetime:
@@ -249,18 +353,22 @@ def _price_id(obj: Mapping[str, object]) -> str | None:
 
 
 def _plan_from_subscription(obj: Mapping[str, object], prices: Mapping[str, str]) -> str | None:
+    """Map only STRIPE_PRICE_PRO and STRIPE_PRICE_TEAM.
+
+    metadata.plan is not a fallback. An unknown price must not upgrade the account.
+    """
+
     price_id = _price_id(obj)
     if price_id and price_id in prices:
         mapped = prices[price_id]
         if mapped in {"pro", "team"}:
             return mapped
-    user_id, _org_id = _scope(obj)
-    del user_id
-    meta = obj.get("metadata")
-    if isinstance(meta, dict):
-        named = meta.get("plan")
-        if named in {"pro", "team"}:
-            return named
+        logger.warning("configured stripe price id does not map to pro or team")
+        return None
+    if price_id:
+        logger.warning("unknown stripe price id; not using metadata.plan")
+    else:
+        logger.warning("stripe subscription has no price id; not using metadata.plan")
     return None
 
 
@@ -293,6 +401,7 @@ def _from_checkout(obj: Mapping[str, object]) -> PlanUpdate | None:
         subscription_id=_subscription_id(obj),
         plan=plan,
         status=status,
+        replaces_subscription=True,
     )
 
 
@@ -316,6 +425,10 @@ def _from_subscription(
         status = status or "canceled"
     else:
         plan = _plan_from_subscription(obj, prices)
+        if plan is None:
+            # Do not record an entitlement we cannot name, and do not upgrade
+            # from metadata.plan. Leave the stored plan and status alone.
+            status = None
     sub_id = obj.get("id") if isinstance(obj.get("id"), str) else None
     return PlanUpdate(
         user_id=user_id,
@@ -365,6 +478,7 @@ class _UserAccount:
     subscription_status: str | None = None
     stripe_customer_id: str | None = None
     stripe_subscription_id: str | None = None
+    stripe_event_created: int | None = None
     current_period_start: datetime | None = None
     current_period_end: datetime | None = None
 
@@ -378,6 +492,7 @@ class _Org:
     subscription_status: str | None = None
     stripe_customer_id: str | None = None
     stripe_subscription_id: str | None = None
+    stripe_event_created: int | None = None
     current_period_start: datetime | None = None
     current_period_end: datetime | None = None
 
@@ -390,6 +505,7 @@ class MemoryBillingStore:
         self._customers: dict[str, tuple[str, str]] = {}
         self._events: set[str] = set()
         self._lock = threading.Lock()
+        self._quota_guards: dict[str, threading.Lock] = {}
 
     def user_account(self, user_id: str) -> AccountSnapshot:
         with self._lock:
@@ -463,18 +579,39 @@ class MemoryBillingStore:
     def attach_customer(self, *, user_id: str | None, org_id: str | None, customer_id: str) -> None:
         with self._lock:
             self._apply_locked(
-                PlanUpdate(user_id=user_id, org_id=org_id, customer_id=customer_id)
+                PlanUpdate(user_id=user_id, org_id=org_id, customer_id=customer_id),
+                free_seat_limit=3,
             )
 
-    def apply_stripe_event(self, event_id: str, event_type: str, update: PlanUpdate | None) -> bool:
+    def apply_stripe_event(
+        self,
+        event_id: str,
+        event_type: str,
+        update: PlanUpdate | None,
+        *,
+        free_seat_limit: int = 3,
+    ) -> bool:
         del event_type
         with self._lock:
             if event_id in self._events:
                 return False
             if update is not None:
-                self._apply_locked(update)
+                self._apply_locked(update, free_seat_limit=free_seat_limit)
             self._events.add(event_id)
             return True
+
+    @contextmanager
+    def quota_lock(self, *, user_id: str, org_id: str | None) -> Iterator[None]:
+        """Serialize quota check and job insert for one account or workspace."""
+
+        key = f"org:{org_id}" if org_id else f"user:{user_id}"
+        with self._lock:
+            guard = self._quota_guards.get(key)
+            if guard is None:
+                guard = threading.Lock()
+                self._quota_guards[key] = guard
+        with guard:
+            yield
 
     def _summary_locked(self, org_id: str, user_id: str) -> OrgSummary | None:
         org = self._orgs.get(org_id)
@@ -493,13 +630,14 @@ class MemoryBillingStore:
             current_period_end=org.current_period_end,
         )
 
-    def _apply_locked(self, update: PlanUpdate) -> None:
+    def _apply_locked(self, update: PlanUpdate, *, free_seat_limit: int) -> None:
         if update.org_id:
             org = self._orgs.get(update.org_id)
             if org is None:
                 logger.warning("stripe event for unknown org_id=%s", update.org_id)
                 return
-            _merge_org(org, update)
+            if _merge_org(org, update) and _downgraded_to_free(update):
+                self._clamp_org(org.id, free_seat_limit)
             self._reindex("org", org.id, org.stripe_customer_id)
             return
         if update.user_id:
@@ -517,12 +655,24 @@ class MemoryBillingStore:
                 org = self._orgs.get(ident)
                 if org is None:
                     return
-                _merge_org(org, update)
+                if _merge_org(org, update) and _downgraded_to_free(update):
+                    self._clamp_org(org.id, free_seat_limit)
                 self._reindex("org", org.id, org.stripe_customer_id)
                 return
             account = self._users.setdefault(ident, _UserAccount())
             _merge_user(account, update)
             self._reindex("user", ident, account.stripe_customer_id)
+
+    def _clamp_org(self, org_id: str, free_seat_limit: int) -> None:
+        org = self._orgs.get(org_id)
+        if org is None or effective_plan(org.plan, org.subscription_status) != "free":
+            return
+        members = self._members.get(org_id)
+        if members is None:
+            return
+        removed = _drop_newest_members(members, max(1, free_seat_limit))
+        if removed:
+            logger.info("clamped seats org_id=%s removed=%s", org_id, removed)
 
     def _reindex(self, kind: str, ident: str, customer_id: str | None) -> None:
         stale = [key for key, value in self._customers.items() if value == (kind, ident)]
@@ -533,7 +683,38 @@ class MemoryBillingStore:
             self._customers[customer_id] = (kind, ident)
 
 
-def _merge_user(account: _UserAccount, update: PlanUpdate) -> None:
+def _downgraded_to_free(update: PlanUpdate) -> bool:
+    """True when this event ends the paid plan. Customer attaches do not."""
+
+    if update.plan == "free":
+        return True
+    return update.status in _TERMINAL_STATUSES
+
+
+def _drop_newest_members(members: dict[str, str], limit: int) -> int:
+    """Remove the newest non-owners until the workspace fits `limit` seats."""
+
+    removed = 0
+    while len(members) > limit:
+        removable = [user_id for user_id, role in members.items() if role != "owner"]
+        if not removable:
+            break
+        del members[removable[-1]]
+        removed += 1
+    return removed
+
+
+def _merge_user(account: _UserAccount, update: PlanUpdate) -> bool:
+    reason = subscription_block_reason(
+        stored_subscription_id=account.stripe_subscription_id,
+        stored_status=account.subscription_status,
+        stored_event_created=account.stripe_event_created,
+        stored_period_end=account.current_period_end,
+        update=update,
+    )
+    if reason is not None:
+        logger.info("stripe subscription update ignored reason=%s", reason)
+        return False
     if update.customer_id:
         account.stripe_customer_id = update.customer_id
     if update.subscription_id:
@@ -546,9 +727,22 @@ def _merge_user(account: _UserAccount, update: PlanUpdate) -> None:
         account.current_period_start = update.period_start
     if update.period_end is not None:
         account.current_period_end = update.period_end
+    if update.event_created is not None:
+        account.stripe_event_created = update.event_created
+    return True
 
 
-def _merge_org(org: _Org, update: PlanUpdate) -> None:
+def _merge_org(org: _Org, update: PlanUpdate) -> bool:
+    reason = subscription_block_reason(
+        stored_subscription_id=org.stripe_subscription_id,
+        stored_status=org.subscription_status,
+        stored_event_created=org.stripe_event_created,
+        stored_period_end=org.current_period_end,
+        update=update,
+    )
+    if reason is not None:
+        logger.info("stripe subscription update ignored reason=%s", reason)
+        return False
     if update.customer_id:
         org.stripe_customer_id = update.customer_id
     if update.subscription_id:
@@ -561,6 +755,9 @@ def _merge_org(org: _Org, update: PlanUpdate) -> None:
         org.current_period_start = update.period_start
     if update.period_end is not None:
         org.current_period_end = update.period_end
+    if update.event_created is not None:
+        org.stripe_event_created = update.event_created
+    return True
 
 
 def _snapshot_user(account: _UserAccount) -> AccountSnapshot:
@@ -696,10 +893,21 @@ class PostgresBillingStore:
 
     def attach_customer(self, *, user_id: str | None, org_id: str | None, customer_id: str) -> None:
         with self._session() as session:
-            self._apply(session, PlanUpdate(user_id=user_id, org_id=org_id, customer_id=customer_id))
+            self._apply(
+                session,
+                PlanUpdate(user_id=user_id, org_id=org_id, customer_id=customer_id),
+                free_seat_limit=3,
+            )
             session.commit()
 
-    def apply_stripe_event(self, event_id: str, event_type: str, update: PlanUpdate | None) -> bool:
+    def apply_stripe_event(
+        self,
+        event_id: str,
+        event_type: str,
+        update: PlanUpdate | None,
+        *,
+        free_seat_limit: int = 3,
+    ) -> bool:
         with self._session() as session:
             if session.get(StripeEventRow, event_id) is not None:
                 return False
@@ -711,13 +919,69 @@ class PostgresBillingStore:
                 )
             )
             if update is not None:
-                self._apply(session, update)
+                self._apply(session, update, free_seat_limit=free_seat_limit)
             try:
                 session.commit()
             except IntegrityError:
                 session.rollback()
                 return False
             return True
+
+    @contextmanager
+    def quota_lock(self, *, user_id: str, org_id: str | None) -> Iterator[None]:
+        """Hold the account or org row so two job inserts cannot both pass the cap.
+
+        The row lock stays open across the caller's quota count and job insert.
+        A second transaction blocks on `FOR UPDATE` until the first commits.
+        """
+
+        session = self._session()
+        try:
+            self._lock_quota_row(session, user_id, org_id)
+            yield
+        except Exception:
+            session.rollback()
+            raise
+        else:
+            session.commit()
+        finally:
+            session.close()
+
+    def _lock_quota_row(self, session: Session, user_id: str, org_id: str | None) -> None:
+        if org_id:
+            org = session.scalar(
+                select(OrganizationRow).where(OrganizationRow.id == org_id).with_for_update()
+            )
+            if org is None:
+                raise OrgNotFound(org_id)
+            return
+        from sqlalchemy.dialects.postgresql import insert as pg_insert
+
+        now = _now()
+        session.execute(
+            pg_insert(BillingAccountRow)
+            .values(
+                user_id=user_id,
+                plan="free",
+                subscription_status=None,
+                stripe_customer_id=None,
+                stripe_subscription_id=None,
+                stripe_event_created=None,
+                current_period_start=None,
+                current_period_end=None,
+                created_at=now,
+                updated_at=now,
+            )
+            .on_conflict_do_nothing(index_elements=["user_id"])
+        )
+        session.flush()
+        locked = session.scalar(
+            select(BillingAccountRow)
+            .where(BillingAccountRow.user_id == user_id)
+            .with_for_update()
+        )
+        if locked is None:
+            raise RuntimeError("billing account lock failed")
 
     def _summary(self, session: Session, org_id: str, user_id: str) -> OrgSummary | None:
         org = session.get(OrganizationRow, org_id)
@@ -741,16 +1005,23 @@ class PostgresBillingStore:
             current_period_end=org.current_period_end,
         )
 
-    def _apply(self, session: Session, update: PlanUpdate) -> None:
+    def _apply(self, session: Session, update: PlanUpdate, *, free_seat_limit: int) -> None:
         if update.org_id:
-            org = session.get(OrganizationRow, update.org_id)
+            org = session.scalar(
+                select(OrganizationRow).where(OrganizationRow.id == update.org_id).with_for_update()
+            )
             if org is None:
                 logger.warning("stripe event for unknown org_id=%s", update.org_id)
                 return
-            _merge_row(org, update)
+            if _merge_row(org, update) and _downgraded_to_free(update):
+                self._clamp_org(session, org, free_seat_limit)
             return
         if update.user_id:
-            row = session.get(BillingAccountRow, update.user_id)
+            row = session.scalar(
+                select(BillingAccountRow)
+                .where(BillingAccountRow.user_id == update.user_id)
+                .with_for_update()
+            )
             if row is None:
                 now = _now()
                 row = BillingAccountRow(
@@ -759,6 +1030,7 @@ class PostgresBillingStore:
                     subscription_status=None,
                     stripe_customer_id=None,
                     stripe_subscription_id=None,
+                    stripe_event_created=None,
                     current_period_start=None,
                     current_period_end=None,
                     created_at=now,
@@ -770,24 +1042,62 @@ class PostgresBillingStore:
         if not update.customer_id:
             return
         account = session.scalar(
-            select(BillingAccountRow).where(BillingAccountRow.stripe_customer_id == update.customer_id)
+            select(BillingAccountRow)
+            .where(BillingAccountRow.stripe_customer_id == update.customer_id)
+            .with_for_update()
         )
         if account is not None:
             _merge_row(account, update)
             return
         org = session.scalar(
-            select(OrganizationRow).where(OrganizationRow.stripe_customer_id == update.customer_id)
+            select(OrganizationRow)
+            .where(OrganizationRow.stripe_customer_id == update.customer_id)
+            .with_for_update()
         )
         if org is None:
             logger.warning("stripe event for unknown customer")
             return
-        _merge_row(org, update)
+        if _merge_row(org, update) and _downgraded_to_free(update):
+            self._clamp_org(session, org, free_seat_limit)
+
+    def _clamp_org(self, session: Session, org: OrganizationRow, free_seat_limit: int) -> None:
+        if effective_plan(org.plan, org.subscription_status) != "free":
+            return
+        limit = max(1, free_seat_limit)
+        rows = session.scalars(
+            select(OrganizationMemberRow)
+            .where(OrganizationMemberRow.org_id == org.id)
+            .order_by(OrganizationMemberRow.created_at.desc())
+        ).all()
+        overflow = len(rows) - limit
+        if overflow <= 0:
+            return
+        removed = 0
+        for row in rows:
+            if removed >= overflow:
+                break
+            if row.role == "owner":
+                continue
+            session.delete(row)
+            removed += 1
+        if removed:
+            logger.info("clamped seats org_id=%s removed=%s", org.id, removed)
 
     def _session(self) -> Session:
         return self._session_factory()
 
 
-def _merge_row(row: BillingAccountRow | OrganizationRow, update: PlanUpdate) -> None:
+def _merge_row(row: BillingAccountRow | OrganizationRow, update: PlanUpdate) -> bool:
+    reason = subscription_block_reason(
+        stored_subscription_id=row.stripe_subscription_id,
+        stored_status=row.subscription_status,
+        stored_event_created=row.stripe_event_created,
+        stored_period_end=row.current_period_end,
+        update=update,
+    )
+    if reason is not None:
+        logger.info("stripe subscription update ignored reason=%s", reason)
+        return False
     if update.customer_id:
         row.stripe_customer_id = update.customer_id
     if update.subscription_id:
@@ -800,7 +1110,10 @@ def _merge_row(row: BillingAccountRow | OrganizationRow, update: PlanUpdate) -> 
         row.current_period_start = update.period_start
     if update.period_end is not None:
         row.current_period_end = update.period_end
+    if update.event_created is not None:
+        row.stripe_event_created = update.event_created
     row.updated_at = _now()
+    return True
 
 
 def _snapshot_row(row: BillingAccountRow) -> AccountSnapshot:

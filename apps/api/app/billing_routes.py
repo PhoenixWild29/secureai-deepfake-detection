@@ -15,6 +15,7 @@ from app.quota import active_period, job_limit, seat_limit, utc_now
 from app.stripe_client import StripeNotConfigured, StripeProviderError, StripeSignatureError
 from app.tenancy import ORG_ID, active_org
 from secureai_shared.billing import (
+    ENTITLED_STATUSES,
     AlreadyMember,
     OrgNotFound,
     OrgSummary,
@@ -30,6 +31,9 @@ logger = logging.getLogger("secureai.api.billing")
 
 router = APIRouter()
 _USER_ID = re.compile(r"\S{1,255}")
+_ACTIVE_SUBSCRIPTION = (
+    "This account already has a subscription. Open the billing portal to change it."
+)
 
 
 class OrgSummaryView(BaseModel):
@@ -187,9 +191,17 @@ def create_checkout(
         summary = billing.org_summary(org_id, user_id=user.subject)
         if summary is None:
             raise HTTPException(status_code=404, detail="Organization not found")
+        if summary.subscription_status in ENTITLED_STATUSES:
+            raise HTTPException(status_code=409, detail=_ACTIVE_SUBSCRIPTION)
         existing = summary.stripe_customer_id
     else:
-        existing = billing.user_account(user.subject).stripe_customer_id
+        account = billing.user_account(user.subject)
+        # active, trialing, and past_due already have a Stripe subscription.
+        # A second Checkout would create another one. Canceled and unpaid may
+        # start a new subscription. past_due uses the portal to pay the invoice.
+        if account.subscription_status in ENTITLED_STATUSES:
+            raise HTTPException(status_code=409, detail=_ACTIVE_SUBSCRIPTION)
+        existing = account.stripe_customer_id
 
     try:
         customer_id = stripe.ensure_customer(
@@ -265,7 +277,12 @@ async def stripe_webhook(request: Request) -> WebhookResult:
     settings: Settings = request.app.state.settings
     prices = _price_map(settings)
     update = plan_update_from_event(event, prices)
-    fresh = request.app.state.billing.apply_stripe_event(event_id, event_type, update)
+    fresh = request.app.state.billing.apply_stripe_event(
+        event_id,
+        event_type,
+        update,
+        free_seat_limit=settings.seat_limit_free,
+    )
     logger.info("stripe webhook type=%s id=%s duplicate=%s", event_type, event_id, not fresh)
     return WebhookResult(received=True, duplicate=not fresh)
 

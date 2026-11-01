@@ -1,4 +1,5 @@
 import os
+import time
 
 import pytest
 
@@ -40,6 +41,45 @@ def test_memory_queue_is_fifo_and_process_local() -> None:
     assert first.consume() == "job_a"
     assert first.consume() == "job_b"
     assert first.consume() is None
+
+
+def test_pop_and_stale_claim_are_single_scripts() -> None:
+    scripts: list[str] = []
+
+    class Redis:
+        def register_script(self, script: str):
+            scripts.append(script)
+
+            def run(keys, args):  # noqa: ARG001
+                return None
+
+            return run
+
+    RedisJobQueue("redis://unused", client=Redis())
+    pop, claim, ack, renew = scripts
+    assert "RPOP" in pop and "HSET" in pop
+    assert "BLMOVE" not in pop
+    assert "HSET" in claim and "LPUSH" in claim
+    assert "ARGV[2]" in claim
+    assert "HDEL" in ack and "ARGV[2]" in ack
+    assert "HSET" in renew and "ARGV[2]" in renew
+
+
+def test_claim_stale_publishes_once_and_ack_keeps_a_newer_lease() -> None:
+    queue = MemoryJobQueue()
+    queue.publish("job_a")
+    assert queue.consume() == "job_a"
+    first = queue.held_attempt("job_a")
+    assert first == 1
+    later = time.time() + 30
+    assert queue.claim_stale("job_a", first, now=later, lease_seconds=10) is True
+    assert queue.claim_stale("job_a", first, now=later, lease_seconds=10) is False
+    assert queue.consume() == "job_a"
+    assert queue.consume() is None
+    newer = queue.held_attempt("job_a")
+    assert newer == 2
+    assert queue.ack("job_a", attempt=first) is False
+    assert queue.ack("job_a", attempt=newer) is True
 
 
 def test_build_queue_defaults_to_memory_when_configured() -> None:

@@ -8,7 +8,7 @@ from secureai_shared.limits import MemoryRateLimiter
 from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.storage import new_object_key
 from secureai_shared.settings import Settings
-from secureai_shared.store import PUBLIC_FAILURE_DETAIL
+from secureai_shared.store import UNQUEUED_FAILURE_DETAIL
 
 
 def test_import_does_not_connect() -> None:
@@ -253,8 +253,49 @@ def test_failed_enqueue_marks_the_row_failed(tmp_path: Path) -> None:
     rows = list(store._rows.values())  # noqa: SLF001
     assert len(rows) == 1
     assert rows[0].status.value == "failed"
-    assert rows[0].detail == PUBLIC_FAILURE_DETAIL
+    assert rows[0].detail == UNQUEUED_FAILURE_DETAIL
+    assert rows[0].attempt == 0
+    assert store.count_started(user_id="user_dev", org_id=None, since=rows[0].created_at) == 0
     client.close()
+
+
+def test_failed_enqueue_does_not_spend_the_monthly_quota(tmp_path: Path) -> None:
+    class DownQueue(MemoryJobQueue):
+        def publish(self, job_id: str) -> None:
+            del job_id
+            raise RuntimeError("redis down")
+
+    settings = make_settings(tmp_path, quota_free=1, quota_mode="enforce")
+    client, store, _queue, storage = _client(tmp_path, settings)
+    from app.main import create_app as build
+
+    api_app = build(settings=settings, store=store, queue=DownQueue(), storage=storage)
+    key = new_object_key("user_dev", "clip.mp4")
+    storage.put(key, b"video", "video/mp4")
+    with TestClient(api_app) as api:
+        failed = api.post(
+            "/v1/jobs",
+            headers={"Authorization": "Bearer dev"},
+            json={"object_key": key, "filename": "clip.mp4"},
+        )
+        assert failed.status_code == 503
+    client.close()
+
+    again = build(
+        settings=settings,
+        store=store,
+        queue=MemoryJobQueue(),
+        storage=storage,
+    )
+    other = new_object_key("user_dev", "other.mp4")
+    storage.put(other, b"video", "video/mp4")
+    with TestClient(again) as api:
+        created = api.post(
+            "/v1/jobs",
+            headers={"Authorization": "Bearer dev"},
+            json={"object_key": other, "filename": "other.mp4"},
+        )
+    assert created.status_code == 202
 
 
 def test_wildcard_cors_refuses_to_boot(tmp_path: Path) -> None:

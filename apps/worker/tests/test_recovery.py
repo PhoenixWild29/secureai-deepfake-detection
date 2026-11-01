@@ -46,6 +46,37 @@ def test_sweep_fails_a_job_that_exhausted_attempts() -> None:
     assert job_id not in queue._inflight  # noqa: SLF001
 
 
+def test_release_ignores_a_stale_attempt() -> None:
+    store, _queue, job_id = _queued()
+    claimed = store.claim(job_id)
+    assert claimed is not None
+    assert store.release(job_id, attempt=claimed.attempt) is True
+    again = store.claim(job_id)
+    assert again is not None
+    assert store.release(job_id, attempt=claimed.attempt) is False
+    job = store.get_any(job_id)
+    assert job is not None
+    assert job.status is JobStatus.processing
+    assert job.attempt == again.attempt
+    assert store.release(job_id, attempt=again.attempt) is True
+
+
+def test_slow_worker_cannot_fail_a_reclaimed_job() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    first = store.claim(job_id)
+    assert first is not None
+    queue._inflight[job_id] = (0.0, 1)  # noqa: SLF001
+    assert sweep_stuck(store, queue, lease_seconds=10, max_attempts=3, now=1_000) == [job_id]
+    second = store.claim(job_id)
+    assert second is not None
+    assert store.fail(job_id, attempt=first.attempt) is None
+    job = store.get_any(job_id)
+    assert job is not None
+    assert job.status is JobStatus.processing
+    assert job.attempt == second.attempt
+
+
 def test_rescue_republishes_when_claim_never_landed() -> None:
     store, queue, job_id = _queued()
     assert queue.consume() == job_id

@@ -107,8 +107,10 @@ def run(argv: list[str] | None = None, *, install_signal_handlers: bool = False)
             except Exception:
                 logger.exception("could not rescue job_id=%s", job_id)
             return 2
-        if finished is not None:
-            queue.ack(job_id)
+        if finished is None:
+            logger.info("job not owned after pop job_id=%s", job_id)
+        # Drop only the lease this pop created. A newer claim keeps its lease.
+        queue.ack(job_id, attempt=queue.held_attempt(job_id))
         if args.once:
             return 0
         if args.poll_seconds <= 0:
