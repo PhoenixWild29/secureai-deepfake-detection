@@ -35,7 +35,7 @@ def accept_batch(
     if not items:
         return []
     if settings.quota_mode == "unlimited":
-        return _create_all(store, user_id, org_id, items)
+        return store.create_many(user_id=user_id, org_id=org_id, items=items)
 
     if org_id is not None:
         summary = billing.org_summary(org_id, user_id=user_id)
@@ -53,31 +53,9 @@ def accept_batch(
                 if used >= limit:
                     _raise_quota(plan, used, limit)
                 raise _over_quota(plan, used, limit, count)
-            return _create_all(store, user_id, org_id, items)
+            return store.create_many(user_id=user_id, org_id=org_id, items=items)
     except OrgNotFound as exc:
         raise HTTPException(status_code=403, detail="Not a member of this workspace") from exc
-
-
-def _create_all(
-    store: JobStore,
-    user_id: str,
-    org_id: str | None,
-    items: list[tuple[str, str | None, int, str, str | None]],
-) -> list[JobRecord]:
-    jobs: list[JobRecord] = []
-    for filename, content_type, byte_size, object_key, object_etag in items:
-        jobs.append(
-            store.create(
-                user_id=user_id,
-                filename=filename,
-                content_type=content_type,
-                byte_size=byte_size,
-                object_key=object_key,
-                object_etag=object_etag,
-                org_id=org_id,
-            )
-        )
-    return jobs
 
 
 def _over_quota(plan: str, used: int, limit: int, count: int) -> HTTPException:

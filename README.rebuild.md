@@ -251,7 +251,7 @@ The API tests sign fixture events with a test webhook secret and replace Checkou
 
 ## Batch jobs and report export
 
-`POST /v1/jobs/batch` accepts `{"items":[...]}` with 1 to 10 objects. Each item has the same fields as `POST /v1/jobs` (`object_key`, `filename`, and optional `content_type` / `byte_size`). The caller, `X-Org-Id`, and the jobs rate limit match a single create. The rate limit is charged once per item. The monthly quota is the same plan window as `POST /v1/jobs`, checked for the whole batch before any row is inserted. A duplicate key, a missing object, or a foreign key rejects the batch and inserts nothing. The response is `202` and `{"jobs":[...]}`.
+`POST /v1/jobs/batch` accepts `{"items":[...]}` with 1 to 10 objects. Each item has the same fields as `POST /v1/jobs` (`object_key`, `filename`, and optional `content_type` / `byte_size`). The caller and `X-Org-Id` match a single create. The jobs rate limit is charged once per item after the items validate. A duplicate key, a missing object, or a foreign key returns 400 and does not spend that limit. The monthly quota uses the same plan window and lock as `POST /v1/jobs`. The rows for one batch are inserted in one transaction. The response is `202` and `{"jobs":[...]}`. If the queue accepts some ids and then rejects one, `jobs` lists only the ids that were queued. The rest are failed with `Could not queue the job.` and do not count toward the cap.
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/jobs/batch \

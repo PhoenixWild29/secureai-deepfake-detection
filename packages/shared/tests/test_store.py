@@ -7,6 +7,34 @@ from secureai_shared.storage import new_object_key
 from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore, PostgresJobStore
 
 
+def test_memory_create_many_rolls_back_the_batch(monkeypatch: pytest.MonkeyPatch) -> None:
+    store = MemoryJobStore()
+    calls = {"n": 0}
+
+    def new_id() -> str:
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise RuntimeError("insert failed")
+        return f"job_{calls['n']:012x}"
+
+    monkeypatch.setattr("secureai_shared.store._new_id", new_id)
+    key = new_object_key("user_a", "clip.mp4")
+    try:
+        store.create_many(
+            user_id="user_a",
+            org_id=None,
+            items=[
+                ("one.mp4", "video/mp4", 1, key, None),
+                ("two.mp4", "video/mp4", 1, key, None),
+            ],
+        )
+    except RuntimeError as exc:
+        assert "insert failed" in str(exc)
+    else:
+        raise AssertionError("expected RuntimeError")
+    assert store._rows == {}  # noqa: SLF001
+
+
 def test_memory_store_hides_other_users_and_uses_fixed_failure() -> None:
     store = MemoryJobStore()
     key = new_object_key("user_a", "clip.mp4")
@@ -68,3 +96,21 @@ def test_postgres_round_trip() -> None:
     visible = store.get(created.id, user_id="user_pg")
     assert visible is not None
     assert visible.status is JobStatus.completed
+
+    batch_key = new_object_key("user_pg", "batch.mp4")
+    try:
+        store.create_many(
+            user_id="user_pg",
+            org_id=None,
+            items=[
+                ("batch.mp4", "video/mp4", 4, batch_key, "etag-1"),
+                ("x" * 400, "video/mp4", 4, batch_key, "etag-2"),
+            ],
+        )
+    except Exception:
+        rolled_back = True
+    else:
+        rolled_back = False
+    assert rolled_back
+    names = [job.filename for job in store.list_for_user("user_pg")]
+    assert "batch.mp4" not in names

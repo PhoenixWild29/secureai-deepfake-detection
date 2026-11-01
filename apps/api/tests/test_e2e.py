@@ -13,6 +13,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
+from secureai_shared.report import load_report_detail
 
 REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0")
 DATABASE_URL = os.environ.get(
@@ -124,6 +125,9 @@ def test_worker_completes_a_queued_upload(tmp_path: Path, monkeypatch: pytest.Mo
         assert body["status"] == "completed"
         assert body["prediction"] in {"real", "fake"}
         assert 0.0 <= body["confidence"] <= 1.0
-        assert body["detail"] is None
+        model, signals = load_report_detail(body["detail"])
+        assert model == "cpu-multisignal-v1"
+        assert set(signals) == {"texture", "motion", "temporal", "region"}
+        assert all(0.0 <= value <= 1.0 for value in signals.values())
     client.delete(QUEUE_KEY)
     client.delete(f"{QUEUE_KEY}:inflight")

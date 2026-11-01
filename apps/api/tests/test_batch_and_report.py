@@ -11,7 +11,7 @@ from secureai_shared.limits import MemoryRateLimiter
 from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.report import dump_report_detail
 from secureai_shared.storage import FileSystemStorage, new_object_key
-from secureai_shared.store import MemoryJobStore
+from secureai_shared.store import UNQUEUED_FAILURE_DETAIL, MemoryJobStore
 
 AUTH = {"Authorization": "Bearer dev"}
 
@@ -108,6 +108,78 @@ def test_batch_rejects_a_bad_item_without_inserting(stack) -> None:
     assert missing.status_code == 400
     assert store._rows == {}  # noqa: SLF001
     assert queue.consume() is None
+
+
+def test_batch_publish_failure_returns_ids_already_queued(tmp_path: Path) -> None:
+    class FailSecond(MemoryJobQueue):
+        """Reject every publish of the second distinct id. Retries stay down."""
+
+        def __init__(self) -> None:
+            super().__init__()
+            self.seen: list[str] = []
+
+        def publish(self, job_id: str) -> None:
+            if job_id not in self.seen:
+                self.seen.append(job_id)
+            if len(self.seen) >= 2 and job_id == self.seen[1]:
+                raise RuntimeError("redis down")
+            super().publish(job_id)
+
+    settings = make_settings(tmp_path, quota_mode="unlimited")
+    store = MemoryJobStore()
+    queue = FailSecond()
+    storage = FileSystemStorage(tmp_path)
+    items = [
+        _item(storage, "user_dev", "one.mp4"),
+        _item(storage, "user_dev", "two.mp4"),
+        _item(storage, "user_dev", "three.mp4"),
+    ]
+    with TestClient(
+        create_app(settings=settings, store=store, queue=queue, storage=storage)
+    ) as client:
+        created = client.post("/v1/jobs/batch", headers=AUTH, json={"items": items})
+    assert created.status_code == 202
+    jobs = created.json()["jobs"]
+    assert len(jobs) == 1
+    assert jobs[0]["filename"] == "one.mp4"
+    assert jobs[0]["status"] == "queued"
+    assert queue.consume() == jobs[0]["id"]
+    assert queue.consume() is None
+    rows = list(store._rows.values())  # noqa: SLF001
+    failed = [row for row in rows if row.id != jobs[0]["id"]]
+    assert len(failed) == 2
+    assert {row.status.value for row in failed} == {"failed"}
+    assert {row.detail for row in failed} == {UNQUEUED_FAILURE_DETAIL}
+
+
+def test_invalid_batch_does_not_spend_the_rate_limit(tmp_path: Path) -> None:
+    settings = make_settings(tmp_path, quota_mode="unlimited")
+    storage = FileSystemStorage(tmp_path)
+    app = create_app(
+        settings=settings,
+        store=MemoryJobStore(),
+        queue=MemoryJobQueue(),
+        storage=storage,
+        limiter=MemoryRateLimiter({"jobs": 2, "uploads": 10}, 60),
+    )
+    foreign = {
+        "object_key": new_object_key("someone_else", "nope.mp4"),
+        "filename": "nope.mp4",
+    }
+    valid = [
+        _item(storage, "user_dev", "one.mp4"),
+        _item(storage, "user_dev", "two.mp4"),
+    ]
+    with TestClient(app) as client:
+        rejected = client.post(
+            "/v1/jobs/batch",
+            headers=AUTH,
+            json={"items": [foreign, foreign]},
+        )
+        assert rejected.status_code == 400
+        created = client.post("/v1/jobs/batch", headers=AUTH, json={"items": valid})
+    assert created.status_code == 202
+    assert len(created.json()["jobs"]) == 2
 
 
 def test_batch_rate_limit_matches_single_creates(tmp_path: Path) -> None:

@@ -104,6 +104,18 @@ class JobStore(Protocol):
         org_id: str | None = None,
     ) -> JobRecord: ...
 
+    def create_many(
+        self,
+        *,
+        user_id: str,
+        org_id: str | None,
+        items: list[tuple[str, str | None, int | None, str, str | None]],
+    ) -> list[JobRecord]:
+        """Insert every item in one transaction. A failure leaves no new rows.
+
+        Each item is ``(filename, content_type, byte_size, object_key, object_etag)``.
+        """
+
     def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None: ...
 
     def get_any(self, job_id: str) -> JobRecord | None: ...
@@ -177,6 +189,40 @@ class MemoryJobStore:
         with self._lock:
             self._rows[job.id] = job
         return job
+
+    def create_many(
+        self,
+        *,
+        user_id: str,
+        org_id: str | None,
+        items: list[tuple[str, str | None, int | None, str, str | None]],
+    ) -> list[JobRecord]:
+        created: list[JobRecord] = []
+        with self._lock:
+            try:
+                for filename, content_type, byte_size, object_key, object_etag in items:
+                    now = _now()
+                    job = JobRecord(
+                        id=_new_id(),
+                        user_id=user_id,
+                        org_id=org_id,
+                        filename=filename,
+                        content_type=content_type,
+                        byte_size=byte_size,
+                        object_key=object_key,
+                        object_etag=object_etag,
+                        status=JobStatus.queued,
+                        attempt=0,
+                        created_at=now,
+                        updated_at=now,
+                    )
+                    self._rows[job.id] = job
+                    created.append(job)
+            except Exception:
+                for job in created:
+                    self._rows.pop(job.id, None)
+                raise
+        return created
 
     def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None:
         with self._lock:
@@ -345,6 +391,39 @@ class PostgresJobStore:
             session.add(row)
             session.commit()
             return _record_from_row(row)
+
+    def create_many(
+        self,
+        *,
+        user_id: str,
+        org_id: str | None,
+        items: list[tuple[str, str | None, int | None, str, str | None]],
+    ) -> list[JobRecord]:
+        now = _now()
+        rows = [
+            JobRow(
+                id=_new_id(),
+                user_id=user_id,
+                org_id=org_id,
+                filename=filename,
+                content_type=content_type,
+                byte_size=byte_size,
+                object_key=object_key,
+                object_etag=object_etag,
+                status=JobStatus.queued.value,
+                prediction=None,
+                confidence=None,
+                detail=None,
+                attempt=0,
+                created_at=now,
+                updated_at=now,
+            )
+            for filename, content_type, byte_size, object_key, object_etag in items
+        ]
+        with self._session() as session:
+            session.add_all(rows)
+            session.commit()
+            return [_record_from_row(row) for row in rows]
 
     def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None:
         with self._session() as session:

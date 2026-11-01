@@ -206,14 +206,16 @@ def create_job_batch(
 ) -> BatchAccepted:
     """Queue one job per stored object.
 
-    Auth, ``X-Org-Id``, the jobs rate limit, and the monthly quota match
-    ``POST /v1/jobs``. The rate limit is charged once per item. Quota uses
-    the same lock and cap as ``accept_job``, for the whole batch, before any
-    row is inserted. A bad item rejects the batch and inserts nothing.
+    Auth, ``X-Org-Id``, and the monthly quota match ``POST /v1/jobs``. The
+    jobs rate limit is charged once per item after those items validate. Quota
+    uses the same lock and cap as ``accept_job``, and the rows are inserted in
+    one transaction. A bad item rejects the batch and inserts nothing.
+
+    If publishing stops after one or more ids are queued, the response is
+    still 202 and ``jobs`` lists those queued rows. Later rows are marked
+    with the unqueued failure detail and do not spend quota.
     """
 
-    count = len(body.items)
-    _limit_times(request, "jobs", user.subject, count)
     org_id = active_org(request, user)
     prepared: list[tuple[JobCreate, str, ObjectStat]] = []
     seen: set[str] = set()
@@ -223,6 +225,7 @@ def create_job_batch(
         seen.add(item.object_key)
         filename, stat = _stored_upload(request, user, item)
         prepared.append((item, filename, stat))
+    _limit_times(request, "jobs", user.subject, len(prepared))
     jobs = accept_batch(
         settings=request.app.state.settings,
         store=request.app.state.store,
@@ -235,22 +238,27 @@ def create_job_batch(
         ],
     )
     published: list[JobRecord] = []
-    try:
-        for job in jobs:
+    for index, job in enumerate(jobs):
+        try:
             _publish_or_fail(request, job)
-            published.append(job)
-            logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
-    except HTTPException:
-        published_ids = {job.id for job in published}
-        for job in jobs:
-            if job.id in published_ids:
-                continue
-            try:
-                request.app.state.store.fail(job.id, detail=UNQUEUED_FAILURE_DETAIL)
-            except Exception:
-                logger.exception("could not fail unqueued job_id=%s", job.id)
-        raise
-    return BatchAccepted(jobs=jobs)
+        except HTTPException:
+            for pending in jobs[index + 1 :]:
+                try:
+                    request.app.state.store.fail(pending.id, detail=UNQUEUED_FAILURE_DETAIL)
+                except Exception:
+                    logger.exception("could not fail unqueued job_id=%s", pending.id)
+            if published:
+                logger.error(
+                    "batch publish stopped after %s of %s subject=%s",
+                    len(published),
+                    len(jobs),
+                    user.subject,
+                )
+                break
+            raise
+        published.append(job)
+        logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
+    return BatchAccepted(jobs=published)
 
 
 @router.get("/v1/jobs", response_model=list[JobRecord])
