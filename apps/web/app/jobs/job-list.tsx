@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { listJobs, type JobResponse, type TokenSource } from "../../lib/api";
+import { fetchJob, listJobs, type JobResponse, type TokenSource } from "../../lib/api";
+import { applyFirstPage, isOpenJob, listHasOpenJob, overlayJobs } from "../../lib/history";
+import { jobSummary } from "../../lib/uploads";
 import { useWorkspace } from "../workspace";
 
 type JobListProps = {
@@ -18,18 +20,22 @@ type LoadedList = {
   error: string | null;
 };
 
+const POLL_MS = 2000;
+
 export function JobList({ apiUrl, token, getToken }: JobListProps) {
   const { orgId, ready } = useWorkspace();
   const scope = orgId ?? "";
   const [loaded, setLoaded] = useState<LoadedList | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const request = useRef(0);
+  const listRef = useRef<LoadedList | null>(null);
   const scopeKey = ready ? scope : null;
   const [trackedScope, setTrackedScope] = useState<string | null>(scopeKey);
   if (trackedScope !== scopeKey) {
     setTrackedScope(scopeKey);
     setLoadingMore(false);
   }
+  listRef.current = loaded !== null && loaded.scope === scope ? loaded : null;
 
   useEffect(() => {
     if (!ready) {
@@ -62,6 +68,84 @@ export function JobList({ apiUrl, token, getToken }: JobListProps) {
     })();
     return () => {
       cancelled = true;
+    };
+  }, [apiUrl, token, getToken, orgId, ready, scope]);
+
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    let cancelled = false;
+    let inflight = false;
+    const source: TokenSource = async () => token ?? (await getToken?.()) ?? null;
+
+    async function refresh(): Promise<void> {
+      if (inflight || cancelled || document.visibilityState === "hidden") {
+        return;
+      }
+      const snapshot = listRef.current;
+      if (snapshot === null || snapshot.scope !== scope || !listHasOpenJob(snapshot.jobs)) {
+        return;
+      }
+      inflight = true;
+      // Leave request alone. The first-page effect owns that ticket, and
+      // Load older clears its button only while the ticket still matches.
+      const ticket = request.current;
+      try {
+        const page = await listJobs({ apiUrl, getToken: source, orgId });
+        if (cancelled || request.current !== ticket) {
+          return;
+        }
+        const elsewhere = snapshot.jobs.filter(
+          (job) => isOpenJob(job.status) && !page.jobs.some((row) => row.id === job.id),
+        );
+        const extraResults = await Promise.all(
+          elsewhere.map(async (job) => {
+            try {
+              return await fetchJob({ apiUrl, jobId: job.id, getToken: source, orgId });
+            } catch {
+              return null;
+            }
+          }),
+        );
+        if (cancelled || request.current !== ticket) {
+          return;
+        }
+        const extras = extraResults.filter((job): job is JobResponse => job !== null);
+        setLoaded((current) => {
+          if (current === null || current.scope !== scope) {
+            return current;
+          }
+          const merged = applyFirstPage(
+            { jobs: current.jobs, hasMore: current.hasMore },
+            { jobs: page.jobs, hasMore: page.hasMore },
+          );
+          const jobs = overlayJobs(merged.jobs, extras);
+          if (jobs === current.jobs && merged.hasMore === current.hasMore) {
+            return current;
+          }
+          return { ...current, jobs, hasMore: merged.hasMore };
+        });
+      } catch {
+        // Keep the rows on screen. The next tick tries the newest page again.
+      } finally {
+        inflight = false;
+      }
+    }
+
+    const timer = setInterval(() => {
+      void refresh();
+    }, POLL_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refresh();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [apiUrl, token, getToken, orgId, ready, scope]);
 
@@ -132,16 +216,21 @@ export function JobList({ apiUrl, token, getToken }: JobListProps) {
       </p>
     );
   }
+  const watching = current.jobs.some((job) => isOpenJob(job.status));
   return (
     <>
+      {watching ? (
+        <p className="note" aria-live="polite">
+          Updating jobs that are still queued or processing.
+        </p>
+      ) : null}
       <ul className="jobs">
         {current.jobs.map((job) => (
           <li key={job.id}>
             <Link href={`/jobs/${job.id}`}>
               <strong>{job.filename}</strong>
               <span className="meta">
-                {job.status}
-                {job.prediction ? ` · ${job.prediction}` : ""}
+                {jobSummary(job)}
                 {" · "}
                 {formatWhen(job.created_at)}
               </span>
