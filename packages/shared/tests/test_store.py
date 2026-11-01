@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from secureai_shared.models import JobStatus
 from secureai_shared.storage import new_object_key
@@ -57,7 +58,12 @@ def test_memory_store_hides_other_users_and_uses_fixed_failure() -> None:
     assert failed.status is JobStatus.failed
 
 
-def test_postgres_round_trip() -> None:
+def _postgres_store() -> PostgresJobStore:
+    """Open a throwaway schema, or skip when Postgres is not reachable.
+
+    ``REQUIRE_SERVICES=1`` (CI) turns that skip into a failure.
+    """
+
     url = os.environ.get(
         "DATABASE_URL",
         "postgresql+psycopg://secureai:secureai@127.0.0.1:5432/secureai",
@@ -78,7 +84,11 @@ def test_postgres_round_trip() -> None:
         if os.environ.get("REQUIRE_SERVICES") == "1":
             pytest.fail(f"postgres unavailable: {exc}")
         pytest.skip(f"postgres unavailable: {exc}")
+    return store
 
+
+def test_postgres_round_trip() -> None:
+    store = _postgres_store()
     key = new_object_key("user_pg", "clip.mp4")
     created = store.create(
         user_id="user_pg",
@@ -97,20 +107,59 @@ def test_postgres_round_trip() -> None:
     assert visible is not None
     assert visible.status is JobStatus.completed
 
-    batch_key = new_object_key("user_pg", "batch.mp4")
-    try:
+
+def test_postgres_create_many_rolls_back_on_unique_violation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A primary-key collision on a later insert leaves none of the batch.
+
+    The first two ids are new. The third reuses a row that is already
+    committed, so Postgres rejects the statement. The earlier inserts in
+    the same transaction must not remain.
+    """
+
+    store = _postgres_store()
+    seed_key = new_object_key("user_pg", "seed.mp4")
+    seed = store.create(
+        user_id="user_pg",
+        filename="seed.mp4",
+        content_type="video/mp4",
+        byte_size=4,
+        object_key=seed_key,
+        object_etag="etag-seed",
+    )
+    fresh = iter(("job_aa11bb22cc01", "job_aa11bb22cc02"))
+
+    def new_id() -> str:
+        try:
+            return next(fresh)
+        except StopIteration:
+            return seed.id
+
+    monkeypatch.setattr("secureai_shared.store._new_id", new_id)
+    with pytest.raises(IntegrityError):
         store.create_many(
             user_id="user_pg",
             org_id=None,
             items=[
-                ("batch.mp4", "video/mp4", 4, batch_key, "etag-1"),
-                ("x" * 400, "video/mp4", 4, batch_key, "etag-2"),
+                ("one.mp4", "video/mp4", 4, new_object_key("user_pg", "one.mp4"), "etag-1"),
+                ("two.mp4", "video/mp4", 4, new_object_key("user_pg", "two.mp4"), "etag-2"),
+                ("three.mp4", "video/mp4", 4, new_object_key("user_pg", "three.mp4"), "etag-3"),
             ],
         )
-    except Exception:
-        rolled_back = True
-    else:
-        rolled_back = False
-    assert rolled_back
-    names = [job.filename for job in store.list_for_user("user_pg")]
-    assert "batch.mp4" not in names
+
+    with store.engine.connect() as connection:
+        names = [
+            row[0]
+            for row in connection.exec_driver_sql(
+                "SELECT filename FROM jobs WHERE user_id = 'user_pg' ORDER BY filename"
+            ).all()
+        ]
+    assert names == ["seed.mp4"]
+    kept = store.get_any(seed.id)
+    assert kept is not None
+    assert kept.filename == "seed.mp4"
+    assert kept.object_etag == "etag-seed"
+    assert kept.status is JobStatus.queued
+    assert store.get_any("job_aa11bb22cc01") is None
+    assert store.get_any("job_aa11bb22cc02") is None

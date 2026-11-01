@@ -72,6 +72,8 @@ def create_app(
             "AUTH_MODE=dev accepts only Bearer dev and is a private-workstation "
             "bypass. Do not expose that mode on a public host. "
             "POST /v1/jobs/batch queues several stored objects in one request. "
+            "If the queue stops after some ids are accepted, the 202 body "
+            "lists those jobs and the ids that did not queue. "
             "GET /v1/jobs/{id}/report downloads a completed job as JSON. "
             "PDF export is not available yet. "
             "Plan quotas apply unless QUOTA_MODE=unlimited."

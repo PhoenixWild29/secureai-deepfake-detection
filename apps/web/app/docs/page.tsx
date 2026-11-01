@@ -51,7 +51,9 @@ export default function DocsPage() {
       </p>
       <p>
         <code>POST /v1/jobs/batch</code> accepts up to 10 stored object keys, charges the same jobs rate
-        limit once per item, and checks the same quota before inserting rows.{" "}
+        limit once per item, and checks the same quota before inserting rows. If the queue stops after
+        some ids are accepted, the 202 response lists those jobs and the ids that did not queue. Those
+        ids do not spend the monthly cap. If nothing was queued, the response is 503.{" "}
         <code>GET /v1/jobs/{"{id}"}/report</code> downloads a completed job as JSON.
       </p>
       <p>

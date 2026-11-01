@@ -27,7 +27,9 @@ def test_batch_queues_each_object(stack) -> None:
     items = [_item(storage, "user_dev", "one.mp4"), _item(storage, "user_dev", "two.mp4")]
     created = client.post("/v1/jobs/batch", headers=AUTH, json={"items": items})
     assert created.status_code == 202
-    jobs = created.json()["jobs"]
+    body = created.json()
+    assert body["failed"] == []
+    jobs = body["jobs"]
     assert [job["filename"] for job in jobs] == ["one.mp4", "two.mp4"]
     assert [job["status"] for job in jobs] == ["queued", "queued"]
     assert jobs[0]["user_id"] == "user_dev"
@@ -125,7 +127,7 @@ def test_batch_publish_failure_returns_ids_already_queued(tmp_path: Path) -> Non
                 raise RuntimeError("redis down")
             super().publish(job_id)
 
-    settings = make_settings(tmp_path, quota_mode="unlimited")
+    settings = make_settings(tmp_path, quota_free=3, quota_mode="enforce")
     store = MemoryJobStore()
     queue = FailSecond()
     storage = FileSystemStorage(tmp_path)
@@ -134,22 +136,45 @@ def test_batch_publish_failure_returns_ids_already_queued(tmp_path: Path) -> Non
         _item(storage, "user_dev", "two.mp4"),
         _item(storage, "user_dev", "three.mp4"),
     ]
+    later = [
+        _item(storage, "user_dev", "four.mp4"),
+        _item(storage, "user_dev", "five.mp4"),
+        _item(storage, "user_dev", "six.mp4"),
+    ]
     with TestClient(
         create_app(settings=settings, store=store, queue=queue, storage=storage)
     ) as client:
         created = client.post("/v1/jobs/batch", headers=AUTH, json={"items": items})
-    assert created.status_code == 202
-    jobs = created.json()["jobs"]
-    assert len(jobs) == 1
-    assert jobs[0]["filename"] == "one.mp4"
-    assert jobs[0]["status"] == "queued"
-    assert queue.consume() == jobs[0]["id"]
+        assert created.status_code == 202
+        body = created.json()
+        jobs = body["jobs"]
+        assert len(jobs) == 1
+        assert jobs[0]["filename"] == "one.mp4"
+        assert jobs[0]["status"] == "queued"
+        by_name = {row.filename: row for row in store._rows.values()}  # noqa: SLF001
+        failed_rows = [by_name["two.mp4"], by_name["three.mp4"]]
+        assert body["failed"] == [
+            {"id": by_name["two.mp4"].id, "index": 1, "detail": UNQUEUED_FAILURE_DETAIL},
+            {"id": by_name["three.mp4"].id, "index": 2, "detail": UNQUEUED_FAILURE_DETAIL},
+        ]
+        assert {row.status.value for row in failed_rows} == {"failed"}
+        assert {row.detail for row in failed_rows} == {UNQUEUED_FAILURE_DETAIL}
+        assert {row.attempt for row in failed_rows} == {0}
+        started = store.get_any(jobs[0]["id"])
+        assert started is not None
+        assert store.count_started(user_id="user_dev", org_id=None, since=started.created_at) == 1
+        # The two unqueued rows did not spend the cap of 3, so two more jobs fit.
+        # Only the second batch id is rejected, so later creates can publish.
+        fourth = client.post("/v1/jobs", headers=AUTH, json=later[0])
+        fifth = client.post("/v1/jobs", headers=AUTH, json=later[1])
+        blocked = client.post("/v1/jobs", headers=AUTH, json=later[2])
+    assert fourth.status_code == 202
+    assert fifth.status_code == 202
+    assert blocked.status_code == 402
+    assert store.count_started(user_id="user_dev", org_id=None, since=started.created_at) == 3
+    published = [jobs[0]["id"], fourth.json()["id"], fifth.json()["id"]]
+    assert [queue.consume() for _ in published] == published
     assert queue.consume() is None
-    rows = list(store._rows.values())  # noqa: SLF001
-    failed = [row for row in rows if row.id != jobs[0]["id"]]
-    assert len(failed) == 2
-    assert {row.status.value for row in failed} == {"failed"}
-    assert {row.detail for row in failed} == {UNQUEUED_FAILURE_DETAIL}
 
 
 def test_invalid_batch_does_not_spend_the_rate_limit(tmp_path: Path) -> None:

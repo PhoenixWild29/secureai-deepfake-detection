@@ -2,7 +2,8 @@
 
 Started jobs in the current period count, including ones that later fail
 during detection. A row that failed before it was published to Redis does
-not count: the client received 503 and the work never started.
+not count. A single create returns 503 in that case. A batch that already
+queued some ids returns 202 and names the ids that did not queue.
 
 The quota read and the job insert run while the billing account or
 organization row is locked (`SELECT … FOR UPDATE` on Postgres, a per-subject
