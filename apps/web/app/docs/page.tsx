@@ -49,7 +49,8 @@ export default function DocsPage() {
         <code>POST /v1/jobs</code> are rate limited, and the monthly plan cap applies to each job, including
         jobs that later fail. <code>GET /v1/jobs</code> returns the newest 50. Pass <code>before</code> and{" "}
         <code>before_id</code> from the last row for the next older page. The <code>X-Has-More</code> header
-        is <code>true</code> when another page exists. The history page loads that next page.{" "}
+        is <code>true</code> when another page exists. The history page loads that next page, and it
+        refetches the newest page while a listed job is still queued or processing.{" "}
         <code>DELETE /v1/jobs/{"{id}"}</code> removes the video and the score. The monthly count stays. A job
         that is still scoring is refused until it finishes. Guardian does this from the report page.
       </p>
