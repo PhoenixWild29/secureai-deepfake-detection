@@ -28,7 +28,9 @@ docker build -f apps/api/Dockerfile -t secureai-api .
 docker build -f apps/worker/Dockerfile -t secureai-worker .
 ```
 
-The API listens on `$PORT` (default 8000). The worker has no HTTP port. It BRPOPs the shared Redis list. It also delivers workspace webhooks from `{QUEUE_KEY}:webhooks` on a background thread, so detection does not wait on that HTTP call.
+The API listens on `$PORT` (default 8000). `apps/api/docker_entrypoint.py` replaces the process with uvicorn, so the server is PID 1. SIGTERM stops new connections and drains in-flight requests for up to 20 seconds. Keep `python docker_entrypoint.py` as the start command so that signal reaches uvicorn.
+
+The worker has no HTTP port. It BRPOPs the shared Redis list. It also delivers workspace webhooks from `{QUEUE_KEY}:webhooks` on a background thread, so detection does not wait on that HTTP call. The image starts `python -m worker` as PID 1 and that process is the loop that keeps delivering webhooks. `python -m worker --once` scores one job and exits, which stops webhook delivery.
 
 ## Variables
 
@@ -78,7 +80,7 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 
 API startup runs `alembic upgrade head`. Revision `20261101_0008` creates `api_keys` (SHA-256 hashes only). No new required variable. Pro and Team callers mint keys with `POST /v1/api-keys`; Free is 402. A workspace key whose minter is removed or demoted is hard-revoked on the next use (401). Promoting that person later does not restore the secret.
 
-The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session, or `Bearer dev` on a private workstation, whose subject is in `ADMIN_USER_IDS`. An API key is 404 even when that subject is listed, the same as any other signed-in non-admin. Anonymous callers are 401. The route reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text. The S3 probe is `HeadBucket`, which AWS authorizes as `s3:ListBucket`. A key that can write objects but cannot list the bucket shows storage as `error` while uploads still succeed.
+The platform healthcheck stays `GET /health`. The API image `HEALTHCHECK` calls that same path after a 40 second start period, so Alembic can finish before failures count, and a runtime that reads the Dockerfile uses the same route. `GET /v1/admin/health` needs a Clerk session, or `Bearer dev` on a private workstation, whose subject is in `ADMIN_USER_IDS`. An API key is 404 even when that subject is listed, the same as any other signed-in non-admin. Anonymous callers are 401. The route reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text. The S3 probe is `HeadBucket`, which AWS authorizes as `s3:ListBucket`. A key that can write objects but cannot list the bucket shows storage as `error` while uploads still succeed.
 
 The worker flushes Sentry for up to 2 seconds before it exits. Leave `SENTRY_DSN` empty to send nothing. No extra variable is required.
 
