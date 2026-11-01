@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "secureai-detector"
-version = "0.2.0"
-description = "CPU video detector for SecureAI (frame sample plus a fixed baseline)"
+version = "0.3.0"
+description = "CPU video detector for SecureAI (multi-signal heuristic, no GPU weights)"
 requires-python = ">=3.11"
 dependencies = [
   "numpy>=2,<3",

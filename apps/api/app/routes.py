@@ -7,16 +7,19 @@ from __future__ import annotations
 
 import logging
 import re
+from datetime import datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile, status
 from pydantic import BaseModel, Field
 
 from app.auth import require_user
+from app.batch_quota import accept_batch
 from app.quota import accept_job
 from app.tenancy import active_org
-from secureai_shared.models import AuthContext, JobRecord
-from secureai_shared.storage import clean_filename, is_owned_key, new_object_key
+from secureai_shared.models import AuthContext, JobRecord, JobStatus
+from secureai_shared.report import LIMITATIONS, load_report_detail
+from secureai_shared.storage import ObjectStat, clean_filename, is_owned_key, new_object_key
 from secureai_shared.store import UNQUEUED_FAILURE_DETAIL
 
 logger = logging.getLogger("secureai.api.jobs")
@@ -59,6 +62,33 @@ class JobCreate(BaseModel):
     filename: str = Field(min_length=1, max_length=255)
     content_type: str | None = Field(default=None, max_length=128)
     byte_size: int | None = Field(default=None, ge=0, le=50_000_000)
+
+
+BATCH_MAX = 10
+
+
+class BatchJobCreate(BaseModel):
+    items: list[JobCreate] = Field(min_length=1, max_length=BATCH_MAX)
+
+
+class BatchAccepted(BaseModel):
+    jobs: list[JobRecord]
+
+
+class JobReportExport(BaseModel):
+    """JSON download for a completed job. PDF is not generated yet."""
+
+    job_id: str
+    filename: str
+    status: str
+    prediction: str | None
+    confidence: float | None
+    model: str | None
+    signals: dict[str, float]
+    limitations: str
+    pdf_available: bool = False
+    created_at: datetime
+    updated_at: datetime
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -148,21 +178,9 @@ def create_job(
     """
 
     _limit(request, "jobs", user.subject)
-    try:
-        filename = clean_filename(body.filename)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Invalid filename") from exc
-    if not is_owned_key(user.subject, body.object_key):
-        raise HTTPException(status_code=400, detail="Upload not found")
-
-    settings = request.app.state.settings
-    stat = request.app.state.storage.object_stat(body.object_key)
-    if stat is None:
-        raise HTTPException(status_code=400, detail="Upload not found")
-    if stat.size < 1 or stat.size > settings.max_upload_bytes:
-        raise HTTPException(status_code=413, detail="Upload exceeds the size limit")
-
+    filename, stat = _stored_upload(request, user, body)
     org_id = active_org(request, user)
+    settings = request.app.state.settings
     job = accept_job(
         settings=settings,
         store=request.app.state.store,
@@ -178,6 +196,61 @@ def create_job(
     _publish_or_fail(request, job)
     logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
     return job
+
+
+@router.post("/v1/jobs/batch", response_model=BatchAccepted, status_code=status.HTTP_202_ACCEPTED)
+def create_job_batch(
+    body: BatchJobCreate,
+    request: Request,
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> BatchAccepted:
+    """Queue one job per stored object.
+
+    Auth, ``X-Org-Id``, the jobs rate limit, and the monthly quota match
+    ``POST /v1/jobs``. The rate limit is charged once per item. Quota uses
+    the same lock and cap as ``accept_job``, for the whole batch, before any
+    row is inserted. A bad item rejects the batch and inserts nothing.
+    """
+
+    count = len(body.items)
+    _limit_times(request, "jobs", user.subject, count)
+    org_id = active_org(request, user)
+    prepared: list[tuple[JobCreate, str, ObjectStat]] = []
+    seen: set[str] = set()
+    for item in body.items:
+        if item.object_key in seen:
+            raise HTTPException(status_code=400, detail="Duplicate object key")
+        seen.add(item.object_key)
+        filename, stat = _stored_upload(request, user, item)
+        prepared.append((item, filename, stat))
+    jobs = accept_batch(
+        settings=request.app.state.settings,
+        store=request.app.state.store,
+        billing=request.app.state.billing,
+        user_id=user.subject,
+        org_id=org_id,
+        items=[
+            (filename, item.content_type, stat.size, item.object_key, stat.etag)
+            for item, filename, stat in prepared
+        ],
+    )
+    published: list[JobRecord] = []
+    try:
+        for job in jobs:
+            _publish_or_fail(request, job)
+            published.append(job)
+            logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
+    except HTTPException:
+        published_ids = {job.id for job in published}
+        for job in jobs:
+            if job.id in published_ids:
+                continue
+            try:
+                request.app.state.store.fail(job.id, detail=UNQUEUED_FAILURE_DETAIL)
+            except Exception:
+                logger.exception("could not fail unqueued job_id=%s", job.id)
+        raise
+    return BatchAccepted(jobs=jobs)
 
 
 @router.get("/v1/jobs", response_model=list[JobRecord])
@@ -206,9 +279,61 @@ def get_job(
     return job
 
 
+@router.get("/v1/jobs/{job_id}/report", response_model=JobReportExport)
+def export_job_report(
+    job_id: str,
+    request: Request,
+    response: Response,
+    user: Annotated[AuthContext, Depends(require_user)],
+) -> JobReportExport:
+    """Download a completed job as JSON.
+
+    TODO: add a PDF body when a small renderer is chosen. ``pdf_available``
+    stays false until then. The same route will keep returning this JSON.
+    """
+
+    job = get_job(job_id, request, user)
+    if job.status is not JobStatus.completed:
+        raise HTTPException(status_code=409, detail="Job is not complete")
+    model, signals = load_report_detail(job.detail)
+    response.headers["Content-Disposition"] = f'attachment; filename="{job.id}.json"'
+    return JobReportExport(
+        job_id=job.id,
+        filename=job.filename,
+        status=job.status.value,
+        prediction=job.prediction,
+        confidence=job.confidence,
+        model=model,
+        signals=signals,
+        limitations=LIMITATIONS,
+        created_at=job.created_at,
+        updated_at=job.updated_at,
+    )
+
+
+def _stored_upload(request: Request, user: AuthContext, body: JobCreate) -> tuple[str, ObjectStat]:
+    try:
+        filename = clean_filename(body.filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="Invalid filename") from exc
+    if not is_owned_key(user.subject, body.object_key):
+        raise HTTPException(status_code=400, detail="Upload not found")
+    stat = request.app.state.storage.object_stat(body.object_key)
+    if stat is None:
+        raise HTTPException(status_code=400, detail="Upload not found")
+    if stat.size < 1 or stat.size > request.app.state.settings.max_upload_bytes:
+        raise HTTPException(status_code=413, detail="Upload exceeds the size limit")
+    return filename, stat
+
+
 def _limit(request: Request, bucket: str, subject: str) -> None:
     if not request.app.state.limiter.allow(bucket, subject):
         raise HTTPException(status_code=429, detail="Too many requests")
+
+
+def _limit_times(request: Request, bucket: str, subject: str, times: int) -> None:
+    for _index in range(times):
+        _limit(request, bucket, subject)
 
 
 def _publish_or_fail(request: Request, job: JobRecord) -> None:

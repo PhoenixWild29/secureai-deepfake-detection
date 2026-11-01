@@ -1,4 +1,4 @@
-# SecureAI rebuild (Phase 3)
+# SecureAI rebuild (Phase 4)
 
 The legacy Flask API (`api.py`), React Guardian (`secureai-guardian/`), and the repository-root `Dockerfile` stay in place. The saleable product lives under `apps/` and `packages/`.
 
@@ -7,10 +7,10 @@ Source for review is `main`.
 ## Layout
 
 ```
-apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, and opens billing.
+apps/web/             Next.js Guardian. Uploads a video, polls a job, lists history, shows a report, downloads JSON, and opens billing.
 apps/api/             FastAPI. Clerk JWT (or a private dev bypass), Postgres, Redis.
 apps/worker/          CPU worker. Same Redis queue and Postgres rows as the API.
-packages/detector/    DETECTOR_MODE=cpu samples frames. DETECTOR_MODE=stub hashes the path.
+packages/detector/    DETECTOR_MODE=cpu scores texture, motion, temporal stability, and a face or skin-region cue. DETECTOR_MODE=stub hashes the path.
 packages/shared/      Job models, Postgres store, Redis queue, object storage.
 deploy/railway/       Reference service settings. Not auto-loaded. See that README.
 deploy/vercel/        Notes for the apps/web Vercel project.
@@ -139,7 +139,11 @@ Generate a tiny clip, store it, and score it (needs Redis, Postgres, and the sch
 python -m worker --demo --once
 ```
 
-`DETECTOR_MODE` defaults to `cpu` (OpenCV frame sample, no GPU, no downloaded weights). `DETECTOR_MODE=stub` hashes the path and does not open the file. Failed jobs store the fixed detail `Detection failed.` The traceback stays in the worker log. `DETECTOR_TIMEOUT_SECONDS` bounds each `detect_video` call. `STUCK_JOB_SECONDS` and `JOB_MAX_ATTEMPTS` bound crash recovery.
+`DETECTOR_MODE` defaults to `cpu`. That path samples frames and mixes four signals: texture (Laplacian energy), motion (frame-to-frame change), temporal instability (histogram disagreement and uneven motion), and a region cue. The region cue uses OpenCV's bundled Haar cascade when that file is present, and otherwise a skin-tone blob. It rises when the seam around that region is much sharper than the interior. No region scores 0, which means there was no cue. The mix is a fixed formula. It does not download weights and it does not use a GPU.
+
+This is not a measured deepfake detector. It has no published accuracy on a labeled benchmark. High-frequency noise and hard cutouts can look synthetic. A careful fake can look real. A score is not legal evidence and not a guarantee. Do not quote an accuracy percentage for this model.
+
+`DETECTOR_MODE=stub` hashes the path and does not open the file. Use it for tests. Failed jobs store the fixed detail `Detection failed.` A completed CPU job stores a short JSON note in `detail` (`v`, `model` `cpu-multisignal-v1`, and the four signals). The traceback stays in the worker log. `DETECTOR_TIMEOUT_SECONDS` bounds each `detect_video` call. `STUCK_JOB_SECONDS` and `JOB_MAX_ATTEMPTS` bound crash recovery.
 
 `apps/worker/pyproject.toml` marks dependencies as dynamic. `apps/worker/setup.py` points them at `packages/shared` and `packages/detector`, so a clean `pip install ./apps/worker` installs both and the worker imports. The editable checkout command above passes `--no-deps` so pip does not try to install those same paths a second time.
 
@@ -154,7 +158,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
+Open `http://localhost:3000`. With Clerk keys empty and `NEXT_PUBLIC_AUTH_MODE` unset, `/upload`, `/jobs`, and a report page explain how to configure Clerk or the private dev bypass, and they do not call the API. `/jobs` lists the current user's jobs. `/jobs/{id}` shows prediction, confidence, status, detail, and timestamps, and keeps checking while the job is still queued or processing. A completed report can show the four CPU signals and download JSON. PDF is not available yet. `/docs`, `/privacy`, and `/terms` are public. `/.well-known/security.txt` is a static file. The upload page shows progress (`Uploading…`, `Waiting for a worker…`, `Scoring the video…`) and, after about three minutes, links to the report instead of stopping at fifteen seconds.
 
 Private workstation, matching the API dev bypass:
 
@@ -244,6 +248,27 @@ curl -s -X POST http://localhost:8000/v1/billing/checkout \
 The checkout response is a Stripe URL. After the webhook, `GET /v1/billing` shows `"plan":"pro"`. Open Guardian at `/billing` to see the remaining quota, create a workspace, and use Upgrade or Manage billing.
 
 The API tests sign fixture events with a test webhook secret and replace Checkout calls. They do not contact Stripe.
+
+## Batch jobs and report export
+
+`POST /v1/jobs/batch` accepts `{"items":[...]}` with 1 to 10 objects. Each item has the same fields as `POST /v1/jobs` (`object_key`, `filename`, and optional `content_type` / `byte_size`). The caller, `X-Org-Id`, and the jobs rate limit match a single create. The rate limit is charged once per item. The monthly quota is the same plan window as `POST /v1/jobs`, checked for the whole batch before any row is inserted. A duplicate key, a missing object, or a foreign key rejects the batch and inserts nothing. The response is `202` and `{"jobs":[...]}`.
+
+```bash
+curl -s -X POST http://localhost:8000/v1/jobs/batch \
+  -H 'Authorization: Bearer dev' \
+  -H 'Content-Type: application/json' \
+  -d '{"items":[{"object_key":"<key>","filename":"clip.mp4","content_type":"video/mp4"}]}'
+```
+
+`GET /v1/jobs/{id}/report` returns JSON for a completed job: prediction, confidence, model, signals, and a limitations string. The body is also `Content-Disposition: attachment`. A job that is still queued, processing, or failed returns 409. Guardian's report page shows the signals and downloads that JSON.
+
+PDF is not implemented. TODO: render the same payload to PDF when a small dependency is worth adding. `pdf_available` is false until then.
+
+Pro API keys are not issued. TODO: mint scoped keys for Pro and Team. Until then, job routes use the Clerk session token (or `Bearer dev` on a private workstation).
+
+Outbound completion webhooks are deferred. A per-user or per-org URL plus HMAC would need a new table, a secret, and a worker POST.
+
+Public pages: `/docs` (how detection works and its limits), `/privacy`, `/terms`, and `/.well-known/security.txt`.
 
 ## Still later
 

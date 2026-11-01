@@ -131,6 +131,7 @@ class JobStore(Protocol):
         prediction: str,
         confidence: float,
         attempt: int | None = None,
+        detail: str | None = None,
     ) -> JobRecord | None: ...
 
     def fail(
@@ -247,13 +248,14 @@ class MemoryJobStore:
         prediction: str,
         confidence: float,
         attempt: int | None = None,
+        detail: str | None = None,
     ) -> JobRecord | None:
         return self._finish(
             job_id,
             status=JobStatus.completed,
             prediction=prediction,
             confidence=confidence,
-            detail=None,
+            detail=detail,
             attempt=attempt,
             require_processing=True,
         )
@@ -423,13 +425,14 @@ class PostgresJobStore:
         prediction: str,
         confidence: float,
         attempt: int | None = None,
+        detail: str | None = None,
     ) -> JobRecord | None:
         return self._finish(
             job_id,
             status=JobStatus.completed.value,
             prediction=prediction,
             confidence=confidence,
-            detail=None,
+            detail=detail,
             attempt=attempt,
             require_processing=True,
         )

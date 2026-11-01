@@ -22,6 +22,8 @@ export default function HomePage() {
           <Link href="/jobs">Job history</Link>
           {" · "}
           <Link href="/billing">Billing</Link>
+          {" · "}
+          <Link href="/docs">How detection works</Link>
         </p>
       </div>
     </main>

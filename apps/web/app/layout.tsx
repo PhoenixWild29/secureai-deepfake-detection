@@ -29,10 +29,16 @@ function Shell({
         <Link href="/upload">Upload</Link>
         <Link href="/jobs">History</Link>
         <Link href="/billing">Billing</Link>
+        <Link href="/docs">Docs</Link>
         {mode === "off" ? null : <WorkspaceSwitcher mode={mode} apiUrl={api} />}
         {mode === "clerk" ? <AuthButtons /> : null}
       </nav>
       {children}
+      <footer className="footer">
+        <Link href="/docs">How detection works</Link>
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/terms">Terms</Link>
+      </footer>
     </WorkspaceProvider>
   );
 }
