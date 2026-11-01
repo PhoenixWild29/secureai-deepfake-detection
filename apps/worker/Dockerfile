@@ -31,4 +31,7 @@ RUN pip install --no-cache-dir -r /build/apps/worker/requirements.txt \
 
 USER appuser
 
+# PID 1. worker/__main__.py handles SIGTERM and finishes the job already
+# popped. A shell here would ignore that signal. drainingSeconds in
+# deploy/railway/worker.railway.json has to stay at shutdown_drain_seconds().
 CMD ["python", "-m", "worker"]
