@@ -57,6 +57,7 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `RATE_LIMIT_UPLOADS` | api | Optional. Default `60` per window. `0` disables |
 | `RATE_LIMIT_WINDOW_SECONDS` | api | Optional. Default `60` |
 | `RATE_LIMIT_ATTESTATIONS` | api | Optional. Default `60` public verify and key reads per window. `0` disables |
+| `RATE_LIMIT_API_KEYS` | api | Optional. Default `10` API key creates per window per user. `0` disables |
 | `ATTESTATION_PRIVATE_KEY` | api | Unencrypted PKCS8 Ed25519 PEM. Empty disables attestation (503). Do not commit it |
 | `ATTESTATION_KEY_ID` | api | Optional key label. Default `v1`. Change it when you rotate the private key |
 | `MEDIA_ROOT` | api, worker | Only for `STORAGE_BACKEND=filesystem`. Use the same absolute path on both |
@@ -74,6 +75,8 @@ Set these in Railway. Do not commit values. Do not set `AUTH_MODE=dev` on these 
 | `SENTRY_ENVIRONMENT` | api, worker | Optional label such as `production`. Empty uses the SDK default `production` when `AUTH_MODE` is not `dev` |
 | `SENTRY_RELEASE` | api, worker | Optional release name. The SDK reads this env var when it is set |
 | `ADMIN_USER_IDS` | api | Comma-separated Clerk user ids for `GET /v1/admin/health`. Empty allows nobody |
+
+API startup runs `alembic upgrade head`. Revision `20261101_0008` creates `api_keys` (SHA-256 hashes only). No new required variable. Pro and Team callers mint keys with `POST /v1/api-keys`; Free is 402.
 
 The platform healthcheck stays `GET /health`. `GET /v1/admin/health` needs a Clerk session whose `sub` is in `ADMIN_USER_IDS`. It reports Postgres, Redis, and object storage and returns 503 when one of them is down. Do not use it as the Railway healthcheck. A failing dependency would restart the API, and the route is not public. The response has no credentials, bucket name, or exception text.
 

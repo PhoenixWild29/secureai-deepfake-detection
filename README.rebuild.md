@@ -33,7 +33,7 @@ Job routes are not public. `GET /health` is public and reports `auth` as `clerk`
 
 The web app asks Clerk for a session token on every poll. Session tokens last about a minute, and a detection can run longer than that.
 
-`AUTH_MODE=dev` accepts only `Authorization: Bearer dev` and stamps `DEV_AUTH_SUBJECT` (default `user_dev`). It is a private-workstation bypass. Do not put it on a public host. Junk tokens are rejected in this mode too. Anonymous requests are rejected in both modes.
+`AUTH_MODE=dev` accepts `Authorization: Bearer dev` and stamps `DEV_AUTH_SUBJECT` (default `user_dev`). It is a private-workstation bypass. Do not put it on a public host. Junk tokens are rejected in this mode too. Anonymous requests are rejected in both modes. A `sai_` bearer is an API key in clerk mode and in dev mode. See the API keys section below.
 
 ## CORS
 
@@ -313,7 +313,22 @@ A matching signature returns `{"valid":true,"key_id":"v1","algorithm":"Ed25519",
 
 Guardian's report page downloads `job_<id>.attestation.json`, shows the signature, and links to `/docs#attestation`. If the API returns 503, the page keeps the JSON download and shows a short note that attestation is not available.
 
-Pro API keys are not issued. TODO: mint scoped keys for Pro and Team. Until then, job routes use the Clerk session token (or `Bearer dev` on a private workstation).
+Pro and Team API keys authenticate job routes without a Clerk browser session. Mint one with a session (`Bearer dev` on a private workstation, or a Clerk JWT). The response includes `secret` once. Later responses list `prefix` only. Postgres stores SHA-256 in `api_keys.secret_hash` (`20261101_0008`). The API runs `alembic upgrade head` on startup.
+
+```bash
+curl -s -X POST http://localhost:8000/v1/api-keys \
+  -H 'Authorization: Bearer dev' \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"laptop"}'
+curl -s http://localhost:8000/v1/jobs/job_.../report \
+  -H 'Authorization: Bearer sai_...'
+curl -s -X DELETE http://localhost:8000/v1/api-keys/key_... \
+  -H 'Authorization: Bearer dev'
+```
+
+A free plan is 402 with `API keys require a Pro or Team plan.` That includes `AUTH_MODE=dev` with `QUOTA_MODE=unlimited`. `past_due` still counts as paid. Send `X-Org-Id` to mint a workspace key; the caller must be an owner or admin, and the workspace plan must be Pro or Team. A workspace key is limited to that org. A personal key uses `X-Org-Id` the same way a session does. Revoke is immediate. Unknown and revoked secrets are 401. An API key cannot mint another key. `RATE_LIMIT_API_KEYS` defaults to 10 creates per window per user (`0` disables). Each scope can hold 25 live keys. Guardian's `/keys` page follows the workspace selected in the header.
+
+Clerk session checks are unchanged. `AUTH_MODE=dev` still accepts only `Bearer dev` plus `sai_` keys. Other bearers are rejected.
 
 Public pages: `/docs` (how detection works and its limits), `/privacy`, `/terms`, and `/.well-known/security.txt`.
 

@@ -1,4 +1,4 @@
-"""SQLAlchemy models for jobs, workspaces, Stripe billing, and attestations."""
+"""SQLAlchemy models for jobs, workspaces, Stripe billing, attestations, and API keys."""
 
 from datetime import datetime
 
@@ -132,6 +132,27 @@ class WebhookDeliveryRow(Base):
     claim_token: Mapped[str | None] = mapped_column(String(32), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ApiKeyRow(Base):
+    """One Pro or Team API key. The secret is not stored. ``secret_hash`` is SHA-256 hex."""
+
+    __tablename__ = "api_keys"
+    __table_args__ = (UniqueConstraint("secret_hash", name="uq_api_keys_secret_hash"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(255), index=True)
+    org_id: Mapped[str | None] = mapped_column(
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(80), nullable=False)
+    prefix: Mapped[str] = mapped_column(String(16), nullable=False)
+    secret_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class JobAttestationRow(Base):

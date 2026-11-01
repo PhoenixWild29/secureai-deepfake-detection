@@ -172,3 +172,13 @@ def test_redact_text_covers_sentry_dsn_userinfo() -> None:
     assert "abc123def" not in cleaned
     assert "eyJhbGciOi" not in cleaned
     assert "[Filtered]" in cleaned
+
+
+def test_redact_text_hides_api_key_secrets_and_keeps_prefixes() -> None:
+    secret = "sai_" + "a" * 40
+    cleaned = redact_text(f"created {secret} prefix sai_abcd1234")
+    assert secret not in cleaned
+    assert "sai_abcd1234" in cleaned
+    assert "sai_[Filtered]" in cleaned
+    bearer = redact_text("Authorization Bearer " + secret)
+    assert secret not in bearer
