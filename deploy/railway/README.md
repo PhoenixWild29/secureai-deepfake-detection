@@ -28,7 +28,7 @@ docker build -f apps/api/Dockerfile -t secureai-api .
 docker build -f apps/worker/Dockerfile -t secureai-worker .
 ```
 
-The API listens on `$PORT` (default 8000). `apps/api/docker_entrypoint.py` replaces the process with uvicorn, so the server is PID 1. SIGTERM stops new connections and drains in-flight requests for up to 20 seconds. Keep `python docker_entrypoint.py` as the start command so that signal reaches uvicorn.
+The API listens on `$PORT` (default 8000). `apps/api/docker_entrypoint.py` replaces the process with uvicorn, so the server is PID 1. SIGTERM stops new connections and drains in-flight requests for up to 20 seconds. `api.railway.json` sets `drainingSeconds` to 25 and `healthcheckTimeout` to 60 so Railway waits past that drain and the image healthcheck's 40 second start period. Keep `python docker_entrypoint.py` as the start command so that signal reaches uvicorn.
 
 The worker has no HTTP port. It BRPOPs the shared Redis list. It also delivers workspace webhooks from `{QUEUE_KEY}:webhooks` on a background thread, so detection does not wait on that HTTP call. The image starts `python -m worker` as PID 1 and that process is the loop that keeps delivering webhooks. `python -m worker --once` scores one job and exits, which stops webhook delivery.
 
