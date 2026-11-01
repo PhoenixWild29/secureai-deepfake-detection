@@ -6,6 +6,7 @@ import pytest
 
 from detector import detect_video
 from secureai_shared.models import JobStatus
+from secureai_shared.report import load_report_detail
 from secureai_shared.queue import MemoryJobQueue
 from secureai_shared.storage import FileSystemStorage, new_object_key
 from secureai_shared.store import PUBLIC_FAILURE_DETAIL, MemoryJobStore
@@ -42,6 +43,26 @@ def test_process_job_completes_with_stub(tmp_path: Path) -> None:
     assert finished.confidence is not None
     assert finished.detail is None
     assert store.get(job.id, user_id="user_dev") == finished
+
+
+def test_process_job_stores_cpu_signals(tmp_path: Path) -> None:
+    store, storage, job = _job(tmp_path)
+    finished = process_job(
+        store,
+        storage,
+        job.id,
+        detect=lambda path: {
+            "prediction": "fake",
+            "confidence": 0.81,
+            "model": "cpu-multisignal-v1",
+            "signals": {"texture": 0.9, "motion": 0.2, "temporal": 0.4, "region": 0.0},
+            "path": path,
+        },
+    )
+    assert finished is not None
+    model, signals = load_report_detail(finished.detail)
+    assert model == "cpu-multisignal-v1"
+    assert signals == {"texture": 0.9, "motion": 0.2, "temporal": 0.4, "region": 0.0}
 
 
 def test_process_job_stores_a_fixed_failure_detail(
