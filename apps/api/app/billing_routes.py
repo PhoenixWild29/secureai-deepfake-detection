@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from app.auth import require_user
 from app.quota import active_period, job_limit, seat_limit, utc_now
 from app.stripe_client import StripeNotConfigured, StripeProviderError, StripeSignatureError
-from app.tenancy import ORG_ID, active_org
+from app.tenancy import ORG_ID, active_org, ensure_api_key_org
 from secureai_shared.billing import (
     ENTITLED_STATUSES,
     AlreadyMember,
@@ -101,7 +101,7 @@ def get_billing(
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> BillingView:
     org_id = active_org(request, user)
-    return _view(request, user.subject, org_id)
+    return _view(request, user, org_id)
 
 
 @router.get("/v1/orgs", response_model=list[OrgSummaryView])
@@ -109,7 +109,11 @@ def list_orgs(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> list[OrgSummaryView]:
-    return _org_views(request.app.state.billing.list_orgs(user.subject))
+    rows = _org_views(request.app.state.billing.list_orgs(user.subject))
+    bound = user.api_key_org_id
+    if user.mode == "api_key" and bound:
+        return [row for row in rows if row.id == bound]
+    return rows
 
 
 @router.post("/v1/orgs", response_model=OrgSummaryView, status_code=201)
@@ -118,6 +122,7 @@ def create_org(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> OrgSummaryView:
+    ensure_api_key_org(user, None)
     name = _clean_name(body.name)
     created = request.app.state.billing.create_org(name=name, owner_user_id=user.subject)
     return OrgSummaryView(id=created.id, name=created.name, role=created.role, plan=created.plan)
@@ -130,6 +135,7 @@ def add_member(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> MemberView:
+    ensure_api_key_org(user, org_id)
     _require_owner(request, org_id, user.subject)
     member_id = _clean_user_id(body.user_id)
     summary = request.app.state.billing.org_summary(org_id, user_id=user.subject)
@@ -158,6 +164,7 @@ def remove_member(
     request: Request,
     user: Annotated[AuthContext, Depends(require_user)],
 ) -> None:
+    ensure_api_key_org(user, org_id)
     if ORG_ID.fullmatch(org_id) is None:
         raise HTTPException(status_code=404, detail="Organization not found")
     role = request.app.state.billing.membership(org_id, user.subject)
@@ -301,12 +308,16 @@ async def stripe_webhook(request: Request) -> WebhookResult:
     return WebhookResult(received=True, duplicate=not fresh)
 
 
-def _view(request: Request, user_id: str, org_id: str | None) -> BillingView:
+def _view(request: Request, user: AuthContext, org_id: str | None) -> BillingView:
+    user_id = user.subject
     settings: Settings = request.app.state.settings
     billing = request.app.state.billing
     stripe = request.app.state.stripe
     clock = utc_now()
     orgs = _org_views(billing.list_orgs(user_id))
+    bound = user.api_key_org_id
+    if user.mode == "api_key" and bound:
+        orgs = [row for row in orgs if row.id == bound]
     unlimited = settings.quota_mode == "unlimited"
 
     if org_id is None:
@@ -378,12 +389,15 @@ def _org_views(rows: list[OrgSummary]) -> list[OrgSummaryView]:
 
 def _checkout_org(request: Request, user: AuthContext, body: CheckoutRequest) -> str | None:
     if body.plan == "pro":
+        ensure_api_key_org(user, None)
         if body.org_id:
             raise HTTPException(status_code=400, detail="Pro checkout is for the personal account.")
         return None
-    org_id = body.org_id or request.headers.get("x-org-id")
+    # A workspace key with no explicit org bills its bound workspace.
+    org_id = body.org_id or request.headers.get("x-org-id") or user.api_key_org_id
     if not org_id:
         raise HTTPException(status_code=400, detail="Team checkout requires a workspace.")
+    ensure_api_key_org(user, org_id)
     if ORG_ID.fullmatch(org_id) is None:
         raise HTTPException(status_code=400, detail="Invalid organization")
     _require_owner(request, org_id, user.subject)
@@ -391,14 +405,18 @@ def _checkout_org(request: Request, user: AuthContext, body: CheckoutRequest) ->
 
 
 def _portal_org(request: Request, user: AuthContext, body_org: str | None) -> str | None:
+    if body_org:
+        ensure_api_key_org(user, body_org)
     header_org = active_org(request, user)
     if body_org and header_org and body_org != header_org:
         raise HTTPException(status_code=400, detail="Organization does not match the request.")
     org_id = body_org or header_org
     if org_id is None:
+        ensure_api_key_org(user, None)
         return None
     if ORG_ID.fullmatch(org_id) is None:
         raise HTTPException(status_code=400, detail="Invalid organization")
+    ensure_api_key_org(user, org_id)
     return org_id
 
 

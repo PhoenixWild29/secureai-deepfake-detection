@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 
 import jwt
+from httpx2 import Response
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -17,6 +18,7 @@ from fastapi.testclient import TestClient
 from jwt.algorithms import RSAAlgorithm
 
 from app.main import create_app
+from app.stripe_client import StartedCheckout
 from conftest import make_settings
 from secureai_shared.api_keys import MemoryApiKeyStore, secret_hash
 from secureai_shared.billing import MemoryBillingStore, PlanUpdate
@@ -484,6 +486,185 @@ def test_demoted_minter_workspace_key_is_revoked(tmp_path: Path, caplog: pytest.
         assert admin_client.get("/v1/jobs", headers=second_auth).status_code == 401
         billing._members[org_id]["user_admin"] = "owner"
         assert admin_client.get("/v1/jobs", headers=second_auth).status_code == 401
+
+
+def test_workspace_key_cannot_name_another_org(tmp_path: Path) -> None:
+    """A workspace key is limited to its org on path and body ids too.
+
+    ``X-Org-Id`` already rejected a different workspace. Member, webhook,
+    Checkout, and portal routes take the organization from the path or the
+    JSON body, and used to authorize that id from membership alone. A
+    personal key still can, because it is not bound to one workspace.
+    """
+
+    billing = MemoryBillingStore()
+    _grant(billing, user_id="user_dev", plan="pro", status="active")
+    app, _store, _storage = _app(
+        tmp_path,
+        billing=billing,
+        stripe_secret_key="sk_test_example",
+        stripe_price_pro="price_pro",
+        stripe_price_team="price_team",
+    )
+    other_url = "https://customer.example/hooks/secureai"
+    other_secret = "whsec-other-workspace-secret"
+    limit = "API key is limited to its workspace"
+    with TestClient(app) as client:
+        studio = client.post("/v1/orgs", headers=AUTH, json={"name": "Studio"})
+        other = client.post("/v1/orgs", headers=AUTH, json={"name": "Elsewhere"})
+        assert studio.status_code == 201
+        assert other.status_code == 201
+        studio_id = studio.json()["id"]
+        other_id = other.json()["id"]
+        _grant(billing, org_id=studio_id, plan="team", status="active")
+        added = client.post(
+            f"/v1/orgs/{other_id}/members",
+            headers=AUTH,
+            json={"user_id": "user_guest"},
+        )
+        assert added.status_code == 201
+        saved = client.put(
+            f"/v1/orgs/{other_id}/webhook",
+            headers=AUTH,
+            json={"url": other_url, "secret": other_secret},
+        )
+        assert saved.status_code == 200
+
+        minted = client.post(
+            "/v1/api-keys",
+            headers={**AUTH, "X-Org-Id": studio_id},
+            json={"name": "ci"},
+        )
+        assert minted.status_code == 201, minted.text
+        secret = minted.json()["secret"]
+        bearer = {"Authorization": f"Bearer {secret}"}
+        scoped = {**bearer, "X-Org-Id": studio_id}
+        personal = client.post("/v1/api-keys", headers=AUTH, json={"name": "laptop"})
+        assert personal.status_code == 201, personal.text
+        personal_auth = {"Authorization": f"Bearer {personal.json()['secret']}"}
+
+        listed = client.get("/v1/orgs", headers=bearer)
+        assert listed.status_code == 200
+        assert {row["id"] for row in listed.json()} == {studio_id}
+        assert "Elsewhere" not in listed.text
+        billing_view = client.get("/v1/billing", headers=bearer)
+        assert billing_view.status_code == 200
+        assert billing_view.json()["org_id"] == studio_id
+        assert {row["id"] for row in billing_view.json()["orgs"]} == {studio_id}
+        assert "Elsewhere" not in billing_view.text
+        created = client.post("/v1/orgs", headers=bearer, json={"name": "Nope"})
+        assert created.status_code == 403
+        assert created.json()["detail"] == limit
+        assert len(client.get("/v1/orgs", headers=AUTH).json()) == 2
+
+        def denied(response: Response) -> None:
+            assert response.status_code == 403
+            assert response.json()["detail"] == limit
+            assert other_url not in response.text
+            assert other_secret not in response.text
+
+        denied(client.get(f"/v1/orgs/{other_id}/webhook", headers=bearer))
+        denied(
+            client.put(
+                f"/v1/orgs/{other_id}/webhook",
+                headers=scoped,
+                json={"url": "https://evil.example/hook", "secret": other_secret},
+            )
+        )
+        denied(client.delete(f"/v1/orgs/{other_id}/webhook", headers=bearer))
+        denied(client.get(f"/v1/orgs/{other_id}/webhook/deliveries", headers=bearer))
+        denied(client.get("/v1/orgs/not-an-org/webhook", headers=bearer))
+        denied(
+            client.post(
+                f"/v1/orgs/{other_id}/members",
+                headers=bearer,
+                json={"user_id": "user_added"},
+            )
+        )
+        denied(client.delete(f"/v1/orgs/{other_id}/members/user_guest", headers=bearer))
+        endpoint = app.state.webhooks.get_endpoint(other_id)
+        assert endpoint is not None
+        assert endpoint.url == other_url
+        assert endpoint.secret == other_secret
+        assert billing.membership(other_id, "user_guest") == "member"
+        assert billing.membership(other_id, "user_added") is None
+        assert client.get("/v1/orgs/not-an-org/webhook", headers=AUTH).status_code == 404
+
+        own = client.put(
+            f"/v1/orgs/{studio_id}/webhook",
+            headers=bearer,
+            json={"url": "https://studio.example/hooks/secureai", "secret": "studio-signing-secret"},
+        )
+        assert own.status_code == 200
+        assert own.json()["url"] == "https://studio.example/hooks/secureai"
+        assert other_secret not in own.text
+        member = client.post(
+            f"/v1/orgs/{studio_id}/members",
+            headers=bearer,
+            json={"user_id": "user_guest"},
+        )
+        assert member.status_code == 201
+        assert billing.membership(studio_id, "user_guest") == "member"
+
+        calls: list[str | None] = []
+
+        def checkout_url(**kwargs: object) -> StartedCheckout:
+            org = kwargs.get("org_id")
+            calls.append(org if isinstance(org, str) or org is None else str(org))
+            return StartedCheckout(
+                url="https://checkout.stripe.test/c/pay",
+                session_id=f"cs_{len(calls)}",
+            )
+
+        stripe = app.state.stripe
+        stripe.ensure_customer = lambda **_kwargs: "cus_test"  # type: ignore[method-assign]
+        stripe.checkout_url = checkout_url  # type: ignore[method-assign]
+        stripe.portal_url = lambda **_kwargs: "https://billing.stripe.test/p/session"  # type: ignore[method-assign]
+
+        pro = client.post("/v1/billing/checkout", headers=bearer, json={"plan": "pro"})
+        denied(pro)
+        foreign = client.post(
+            "/v1/billing/checkout",
+            headers=bearer,
+            json={"plan": "team", "org_id": other_id},
+        )
+        denied(foreign)
+        portal = client.post("/v1/billing/portal", headers=bearer, json={"org_id": other_id})
+        denied(portal)
+        assert calls == []
+
+        still = client.get(f"/v1/orgs/{other_id}/webhook", headers=personal_auth)
+        assert still.status_code == 200
+        assert still.json()["url"] == other_url
+        personal_orgs = client.get("/v1/orgs", headers=personal_auth)
+        assert {row["id"] for row in personal_orgs.json()} == {studio_id, other_id}
+        personal_checkout = client.post(
+            "/v1/billing/checkout",
+            headers=personal_auth,
+            json={"plan": "team", "org_id": other_id},
+        )
+        assert personal_checkout.status_code == 200
+        assert calls == [other_id]
+
+        # Studio stays entitled, so the bound key can still authenticate.
+        # The personal account does not. Checkout with no org id has to hit
+        # Studio (409) rather than open a personal Checkout (200).
+        _grant(billing, user_id="user_dev", plan="free", status="canceled")
+        billing.attach_customer(
+            user_id=None,
+            org_id=studio_id,
+            customer_id="cus_studio",
+            free_seat_limit=3,
+        )
+        team = client.post("/v1/billing/checkout", headers=bearer, json={"plan": "team"})
+        assert team.status_code == 409, team.text
+        assert "subscription" in team.json()["detail"]
+        assert calls == [other_id]
+        opened = client.post("/v1/billing/portal", headers=bearer, json={})
+        assert opened.status_code == 200
+        assert opened.json()["url"] == "https://billing.stripe.test/p/session"
+        session_missing = client.post("/v1/billing/checkout", headers=AUTH, json={"plan": "team"})
+        assert session_missing.status_code == 400
 
 
 def test_dev_bearer_is_unchanged(tmp_path: Path) -> None:

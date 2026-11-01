@@ -21,6 +21,7 @@ ORG_ID = re.compile(r"org_[a-f0-9]{12}")
 WORKSPACE_MANAGER_ROLES = frozenset({"owner", "admin"})
 
 API_KEY_PLAN_REQUIRED = "API keys require a Pro or Team plan."
+API_KEY_WORKSPACE_LIMIT = "API key is limited to its workspace"
 
 
 def active_org(request: Request, user: AuthContext) -> str | None:
@@ -43,7 +44,7 @@ def _requested_org(request: Request, user: AuthContext) -> str | None:
     bound = user.api_key_org_id
     if bound:
         if raw not in (None, "") and raw != bound:
-            raise HTTPException(status_code=403, detail="API key is limited to its workspace")
+            raise HTTPException(status_code=403, detail=API_KEY_WORKSPACE_LIMIT)
         raw = bound
     if raw is None or raw == "":
         return None
@@ -53,6 +54,22 @@ def _requested_org(request: Request, user: AuthContext) -> str | None:
     if role is None:
         raise HTTPException(status_code=403, detail="Not a member of this workspace")
     return raw
+
+
+def ensure_api_key_org(user: AuthContext, org_id: str | None) -> None:
+    """Refuse a workspace key that names any organization except its own.
+
+    ``X-Org-Id`` is checked in ``_requested_org``. Member routes, webhook
+    routes, Checkout, and the billing portal also take an organization id
+    from the path or the JSON body. A personal key and a session are not
+    limited here. ``org_id`` None is the personal account, which a
+    workspace key cannot act on (including creating another workspace).
+    """
+
+    bound = user.api_key_org_id
+    if user.mode != "api_key" or not bound or org_id == bound:
+        return
+    raise HTTPException(status_code=403, detail=API_KEY_WORKSPACE_LIMIT)
 
 
 def ensure_api_key_plan(billing: object, user_id: str, org_id: str | None) -> None:

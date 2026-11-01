@@ -40,7 +40,8 @@ class AuthContext(BaseModel):
 
     ``api_key_org_id`` is set only for a workspace key. A personal key leaves
     it empty so ``X-Org-Id`` still selects the workspace. That request is
-    gated on the workspace plan, not the personal plan.
+    gated on the workspace plan, not the personal plan. Path and body
+    organization ids are checked against this field as well.
     """
 
     model_config = ConfigDict(frozen=True)
