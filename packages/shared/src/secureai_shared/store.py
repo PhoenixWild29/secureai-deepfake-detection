@@ -421,8 +421,14 @@ class PostgresJobStore:
             for filename, content_type, byte_size, object_key, object_etag in items
         ]
         with self._session() as session:
-            session.add_all(rows)
-            session.commit()
+            try:
+                session.add_all(rows)
+                session.commit()
+            except Exception:
+                # A failed flush leaves Postgres in an aborted transaction.
+                # Roll the whole batch back before the error leaves this method.
+                session.rollback()
+                raise
             return [_record_from_row(row) for row in rows]
 
     def get(self, job_id: str, *, user_id: str, org_id: str | None = None) -> JobRecord | None:

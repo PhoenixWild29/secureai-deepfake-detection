@@ -71,8 +71,22 @@ class BatchJobCreate(BaseModel):
     items: list[JobCreate] = Field(min_length=1, max_length=BATCH_MAX)
 
 
+class BatchItemFailure(BaseModel):
+    """One batch item that was stored but never reached the queue.
+
+    ``index`` is the position in the request ``items`` array. ``detail`` is
+    the same unqueued failure text stored on the row. The row does not spend
+    monthly quota.
+    """
+
+    id: str
+    index: int = Field(ge=0)
+    detail: str
+
+
 class BatchAccepted(BaseModel):
     jobs: list[JobRecord]
+    failed: list[BatchItemFailure] = Field(default_factory=list)
 
 
 class JobReportExport(BaseModel):
@@ -212,8 +226,10 @@ def create_job_batch(
     one transaction. A bad item rejects the batch and inserts nothing.
 
     If publishing stops after one or more ids are queued, the response is
-    still 202 and ``jobs`` lists those queued rows. Later rows are marked
-    with the unqueued failure detail and do not spend quota.
+    still 202. ``jobs`` lists those queued rows. ``failed`` lists the rest,
+    each with its job id, its index in ``items``, and the unqueued failure
+    detail. Those rows do not spend quota. If the queue rejects the first
+    id, nothing is queued and the response is 503.
     """
 
     org_id = active_org(request, user)
@@ -238,15 +254,28 @@ def create_job_batch(
         ],
     )
     published: list[JobRecord] = []
+    failed: list[BatchItemFailure] = []
     for index, job in enumerate(jobs):
         try:
             _publish_or_fail(request, job)
         except HTTPException:
-            for pending in jobs[index + 1 :]:
+            # This id was already marked inside _publish_or_fail. Later rows
+            # never reached Redis, so they get the same unqueued detail.
+            failed.append(
+                BatchItemFailure(id=job.id, index=index, detail=UNQUEUED_FAILURE_DETAIL)
+            )
+            for later_index, pending in enumerate(jobs[index + 1 :], start=index + 1):
                 try:
                     request.app.state.store.fail(pending.id, detail=UNQUEUED_FAILURE_DETAIL)
                 except Exception:
                     logger.exception("could not fail unqueued job_id=%s", pending.id)
+                failed.append(
+                    BatchItemFailure(
+                        id=pending.id,
+                        index=later_index,
+                        detail=UNQUEUED_FAILURE_DETAIL,
+                    )
+                )
             if published:
                 logger.error(
                     "batch publish stopped after %s of %s subject=%s",
@@ -258,7 +287,7 @@ def create_job_batch(
             raise
         published.append(job)
         logger.info("enqueued job_id=%s subject=%s", job.id, user.subject)
-    return BatchAccepted(jobs=published)
+    return BatchAccepted(jobs=published, failed=failed)
 
 
 @router.get("/v1/jobs", response_model=list[JobRecord])
