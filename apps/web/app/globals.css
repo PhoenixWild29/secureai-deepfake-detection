@@ -197,7 +197,9 @@ dl.report dd {
 }
 
 .workspace select,
-input[type="text"] {
+input[type="text"],
+input[type="url"],
+input[type="password"] {
   font: inherit;
   color: var(--ink);
   background: #fff;
@@ -210,10 +212,23 @@ input[type="text"] {
   max-width: 12rem;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="url"],
+input[type="password"] {
   display: block;
   width: 100%;
   margin: 0.4rem 0 0.75rem;
+}
+
+label.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+label.check input {
+  margin: 0;
 }
 
 .actions {

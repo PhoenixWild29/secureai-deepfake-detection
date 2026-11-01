@@ -77,6 +77,36 @@ def test_slow_worker_cannot_fail_a_reclaimed_job() -> None:
     assert job.attempt == second.attempt
 
 
+def test_sweep_notifies_a_terminal_job_and_not_a_requeue() -> None:
+    store, queue, job_id = _queued()
+    assert queue.consume() == job_id
+    assert store.claim(job_id) is not None
+    queue._inflight[job_id] = (1_000.0, 1)  # noqa: SLF001
+    requeued: list[str] = []
+    sweep_stuck(
+        store,
+        queue,
+        lease_seconds=10,
+        max_attempts=3,
+        now=2_000,
+        on_terminal=lambda job: requeued.append(job.status.value),
+    )
+    assert requeued == []
+
+    assert queue.consume() == job_id
+    queue._inflight[job_id] = (0.0, 3)  # noqa: SLF001
+    failed: list[str] = []
+    sweep_stuck(
+        store,
+        queue,
+        lease_seconds=10,
+        max_attempts=3,
+        now=1_000,
+        on_terminal=lambda job: failed.append(job.status.value),
+    )
+    assert failed == ["failed"]
+
+
 def test_rescue_republishes_when_claim_never_landed() -> None:
     store, queue, job_id = _queued()
     assert queue.consume() == job_id

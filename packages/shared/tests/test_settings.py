@@ -74,6 +74,19 @@ def test_s3_bucket_auto_create_stays_off() -> None:
     assert enabled.s3_auto_create_bucket is True
 
 
+def test_webhook_attempts_are_capped() -> None:
+    with pytest.raises(RuntimeError, match="WEBHOOK_MAX_ATTEMPTS"):
+        load_settings(
+            {
+                "AUTH_MODE": "dev",
+                "DATABASE_URL": "postgresql+psycopg://db",
+                "REDIS_URL": "redis://localhost:6379/0",
+                "WEBHOOK_MAX_ATTEMPTS": "11",
+            },
+            role="worker",
+        )
+
+
 def test_stuck_lease_must_outlast_the_detector() -> None:
     with pytest.raises(RuntimeError, match="STUCK_JOB_SECONDS"):
         load_settings(

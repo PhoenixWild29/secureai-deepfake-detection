@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, Float, Integer, String, Text, UniqueConstraint
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -98,3 +98,37 @@ class CheckoutIntentRow(Base):
     plan: Mapped[str] = mapped_column(String(16), nullable=False)
     price_id: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WebhookEndpointRow(Base):
+    """One HTTPS endpoint per workspace. The signing secret stays in this row."""
+
+    __tablename__ = "webhook_endpoints"
+
+    org_id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    secret: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notify_failures: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class WebhookDeliveryRow(Base):
+    """One outbound POST per terminal job. Retries update this row in place."""
+
+    __tablename__ = "webhook_deliveries"
+    __table_args__ = (UniqueConstraint("job_id", name="uq_webhook_deliveries_job_id"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    org_id: Mapped[str] = mapped_column(String(32), index=True)
+    job_id: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    attempt: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    last_status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_error: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)
+    delivering_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    claim_token: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

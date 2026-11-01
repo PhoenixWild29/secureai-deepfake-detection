@@ -49,6 +49,8 @@ class Settings:
     quota_team: int = 2000
     seat_limit_free: int = 3
     seat_limit_team: int = 25
+    webhook_max_attempts: int = 5
+    webhook_timeout_seconds: float = 10.0
 
 
 def assert_explicit_origins(origins: tuple[str, ...]) -> None:
@@ -178,6 +180,8 @@ def load_settings(
         quota_team=_positive_int(env, "QUOTA_TEAM", 2000),
         seat_limit_free=_positive_int(env, "SEAT_LIMIT_FREE", 3),
         seat_limit_team=_positive_int(env, "SEAT_LIMIT_TEAM", 25),
+        webhook_max_attempts=_bounded_int(env, "WEBHOOK_MAX_ATTEMPTS", 5, upper=10),
+        webhook_timeout_seconds=_bounded_float(env, "WEBHOOK_TIMEOUT_SECONDS", 10.0, upper=30.0),
     )
 
 
@@ -211,6 +215,20 @@ def _positive_int(env: Mapping[str, str], name: str, default: int) -> int:
     value = int(_positive_float(env, name, float(default)))
     if value < 1:
         raise RuntimeError(f"{name} must be at least 1")
+    return value
+
+
+def _bounded_int(env: Mapping[str, str], name: str, default: int, *, upper: int) -> int:
+    value = _positive_int(env, name, default)
+    if value > upper:
+        raise RuntimeError(f"{name} must be at most {upper}")
+    return value
+
+
+def _bounded_float(env: Mapping[str, str], name: str, default: float, *, upper: float) -> float:
+    value = _positive_float(env, name, default)
+    if value > upper:
+        raise RuntimeError(f"{name} must be at most {upper}")
     return value
 
 

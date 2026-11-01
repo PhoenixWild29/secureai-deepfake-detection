@@ -29,6 +29,7 @@ function Shell({
         <Link href="/upload">Upload</Link>
         <Link href="/jobs">History</Link>
         <Link href="/billing">Billing</Link>
+        <Link href="/webhooks">Webhooks</Link>
         <Link href="/docs">Docs</Link>
         {mode === "off" ? null : <WorkspaceSwitcher mode={mode} apiUrl={api} />}
         {mode === "clerk" ? <AuthButtons /> : null}

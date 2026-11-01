@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
-from secureai_shared.models import JobStatus
+from secureai_shared.models import JobRecord, JobStatus
 from secureai_shared.queue import JobQueue
 from secureai_shared.store import JobStore
 
 logger = logging.getLogger("secureai.worker")
+
+TerminalHook = Callable[[JobRecord], None]
 
 
 def sweep_stuck(
@@ -18,6 +21,7 @@ def sweep_stuck(
     lease_seconds: float,
     max_attempts: int,
     now: float | None = None,
+    on_terminal: TerminalHook | None = None,
 ) -> list[str]:
     """Requeue leased jobs that outlived the detector timeout, or fail them.
 
@@ -34,6 +38,7 @@ def sweep_stuck(
     for job_id, attempts in queue.stale(lease_seconds, now=now):
         job = store.get_any(job_id)
         if job is None or job.status in {JobStatus.completed, JobStatus.failed}:
+            _notify(on_terminal, job)
             queue.ack(job_id, attempt=attempts)
             continue
         if attempts >= max_attempts:
@@ -41,6 +46,7 @@ def sweep_stuck(
                 failed = store.fail(job_id, attempt=job.attempt)
             else:
                 failed = store.fail(job_id)
+            _notify(on_terminal, failed)
             if failed is not None and queue.ack(job_id, attempt=attempts):
                 logger.error("stuck job failed job_id=%s attempts=%s", job_id, attempts)
                 recovered.append(job_id)
@@ -55,7 +61,13 @@ def sweep_stuck(
     return recovered
 
 
-def rescue_popped(store: JobStore, queue: JobQueue, job_id: str) -> None:
+def rescue_popped(
+    store: JobStore,
+    queue: JobQueue,
+    job_id: str,
+    *,
+    on_terminal: TerminalHook | None = None,
+) -> None:
     """Put a popped id back, or mark the row failed, before the worker exits.
 
     Called when claim or fail raises. A successful terminal write acks the
@@ -74,6 +86,7 @@ def rescue_popped(store: JobStore, queue: JobQueue, job_id: str) -> None:
             queue.publish(job_id)
         return
     if job is None or job.status in {JobStatus.completed, JobStatus.failed}:
+        _notify(on_terminal, job)
         queue.ack(job_id, attempt=lease_attempt)
         return
     if job.status is JobStatus.processing:
@@ -90,8 +103,18 @@ def rescue_popped(store: JobStore, queue: JobQueue, job_id: str) -> None:
                 queue.publish(job_id)
             return
         if failed is not None:
+            _notify(on_terminal, failed)
             queue.ack(job_id, attempt=lease_attempt)
             return
         return
     if queue.renew(job_id, attempt=lease_attempt):
         queue.publish(job_id)
+
+
+def _notify(on_terminal: TerminalHook | None, job: JobRecord | None) -> None:
+    if on_terminal is None or job is None:
+        return
+    try:
+        on_terminal(job)
+    except Exception:
+        logger.exception("terminal hook failed job_id=%s", job.id)
