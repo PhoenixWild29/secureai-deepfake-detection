@@ -1271,6 +1271,243 @@ def test_redis_webhook_queue_claims_only_due_ids() -> None:
     client.delete(key)
 
 
+def _webhook_tls_contexts(tmp_path: object) -> tuple[object, object]:
+    """Server and non-verifying client contexts for a loopback handshake.
+
+    The certificate is only here so TLS can finish. These tests call
+    ``_PinnedHTTPSConnection`` directly. ``post_webhook`` still rejects a
+    private address before it connects.
+    """
+
+    import ssl
+    from datetime import datetime, timedelta, timezone
+    from pathlib import Path
+
+    from cryptography import x509
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.x509.oid import NameOID
+
+    directory = Path(str(tmp_path))
+    key = ec.generate_private_key(ec.SECP256R1())
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "webhook.test")])
+    now = datetime.now(timezone.utc)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now)
+        .not_valid_after(now + timedelta(days=1))
+        .sign(key, hashes.SHA256())
+    )
+    key_path = directory / "key.pem"
+    cert_path = directory / "cert.pem"
+    key_path.write_bytes(
+        key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            serialization.NoEncryption(),
+        )
+    )
+    cert_path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+    server = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server.load_cert_chain(cert_path, key_path)
+    client = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    client.check_hostname = False
+    client.verify_mode = ssl.CERT_NONE
+    return server, client
+
+
+def _post_on_loopback(port: int, timeout: float, client_context: object) -> int:
+    import ssl
+
+    from secureai_shared.webhooks import _PinnedHTTPSConnection
+
+    connection = _PinnedHTTPSConnection(
+        "webhook.test",
+        port,
+        addresses=["127.0.0.1"],
+        timeout=timeout,
+        context=client_context,  # type: ignore[arg-type]
+    )
+    connection._connect_timeout = timeout
+    try:
+        connection.request(
+            "POST",
+            "/",
+            body=b"{}",
+            headers={"Content-Type": "application/json"},
+        )
+        response = connection.getresponse()
+        response.read(2048)
+        return int(response.status)
+    finally:
+        connection.close()
+
+
+def test_tls_and_http_share_one_request_deadline(tmp_path: object) -> None:
+    """A handshake and a response that each fit in the timeout cannot both run.
+
+    The shutdown join is 2t+2 and the delivery lease is 2t+15. DNS and TCP
+    already share the first t. Giving the handshake and the HTTP response
+    a fresh t each let this peer answer 200 after the budget, so SIGTERM
+    could kill the worker before the row was stored and the next worker
+    would send the body again.
+    """
+
+    import socket
+    import threading
+    import time
+
+    server_context, client_context = _webhook_tls_contexts(tmp_path)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    listener.settimeout(5)
+    port = listener.getsockname()[1]
+    # Each delay is under the timeout, and the sum is over it. The extra
+    # room on the handshake keeps a slow runner from failing the TLS
+    # budget on its own.
+    timeout = 2.0
+    handshake_delay = 1.0
+    response_delay = 1.5
+    request_seen = threading.Event()
+
+    def serve() -> None:
+        try:
+            conn, _addr = listener.accept()
+        except OSError:
+            return
+        try:
+            conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            time.sleep(handshake_delay)
+            tls = server_context.wrap_socket(conn, server_side=True)  # type: ignore[attr-defined]
+            try:
+                tls.settimeout(2)
+                tls.recv(65536)
+                request_seen.set()
+                time.sleep(response_delay)
+                tls.sendall(
+                    b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+                )
+            finally:
+                tls.close()
+        except OSError:
+            conn.close()
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(TimeoutError):
+            _post_on_loopback(port, timeout, client_context)
+    finally:
+        listener.close()
+        thread.join(3)
+    # The handshake finished, so this is not the TCP or TLS budget firing
+    # on its own. A fresh timeout for the response would have returned 200.
+    assert request_seen.is_set()
+
+
+def test_request_deadline_allows_a_handshake_and_response_that_fit(tmp_path: object) -> None:
+    import socket
+    import threading
+    import time
+
+    server_context, client_context = _webhook_tls_contexts(tmp_path)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    listener.settimeout(5)
+    port = listener.getsockname()[1]
+
+    def serve() -> None:
+        try:
+            conn, _addr = listener.accept()
+        except OSError:
+            return
+        try:
+            conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            time.sleep(0.2)
+            tls = server_context.wrap_socket(conn, server_side=True)  # type: ignore[attr-defined]
+            try:
+                tls.recv(65536)
+                time.sleep(0.2)
+                tls.sendall(
+                    b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+                )
+            finally:
+                tls.close()
+        except OSError:
+            conn.close()
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    try:
+        assert _post_on_loopback(port, 1.0, client_context) == 200
+    finally:
+        listener.close()
+        thread.join(3)
+
+
+def test_http_reads_share_the_request_deadline(tmp_path: object) -> None:
+    """One byte at a time cannot restart the timeout on every read.
+
+    A socket timeout is per read. A peer that stays under that timeout on
+    each byte would otherwise hold the delivery thread for the whole body
+    after the handshake had already spent none of the budget.
+    """
+
+    import socket
+    import threading
+    import time
+
+    server_context, client_context = _webhook_tls_contexts(tmp_path)
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    listener.settimeout(5)
+    port = listener.getsockname()[1]
+    finished = threading.Event()
+    payload = b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok"
+
+    def serve() -> None:
+        try:
+            conn, _addr = listener.accept()
+        except OSError:
+            return
+        try:
+            conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+            conn.settimeout(5)
+            tls = server_context.wrap_socket(conn, server_side=True)  # type: ignore[attr-defined]
+            try:
+                tls.settimeout(5)
+                tls.recv(65536)
+                for index, byte in enumerate(payload):
+                    if index:
+                        time.sleep(0.08)
+                    tls.send(bytes([byte]))
+                finished.set()
+            finally:
+                tls.close()
+        except OSError:
+            conn.close()
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    try:
+        with pytest.raises(TimeoutError):
+            _post_on_loopback(port, 0.5, client_context)
+    finally:
+        listener.close()
+        thread.join(3)
+    assert not finished.is_set()
+
+
 def test_postgres_endpoint_round_trip() -> None:
     url = os.environ.get(
         "DATABASE_URL",

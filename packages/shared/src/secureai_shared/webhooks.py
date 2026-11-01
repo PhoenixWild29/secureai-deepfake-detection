@@ -21,9 +21,11 @@ the delivery forever. A connect failure falls through to the next
 address while time remains. That
 remaining time is one budget for every TCP attempt, not a fresh timeout
 per address. When that budget is spent, later addresses are not tried.
-After a TCP connection succeeds, the socket timeout is the original value
-again for the TLS handshake and the HTTP exchange. TLS and the Host
-header still use the original hostname, so a DNS answer that changes
+After a TCP connection succeeds, the TLS handshake and the HTTP exchange
+share one deadline of the original timeout. Time spent in the handshake
+is not available for the response, and each later read or write waits
+only for the time still left. TLS and the Host header still use the
+original hostname, so a DNS answer that changes
 between the check and the connect cannot move the socket onto a private
 address. A TLS failure does not try another address. Any TCP port is
 accepted. A public address that proxies elsewhere is outside this check.
@@ -35,6 +37,7 @@ import contextvars
 import errno
 import hashlib
 import hmac
+import io
 import ipaddress
 import json
 import logging
@@ -968,6 +971,93 @@ def _connect_budget(timeout: object) -> float | None:
     return float(timeout)  # type: ignore[arg-type]
 
 
+class _DeadlineSocket:
+    """Socket proxy whose reads and writes share one monotonic deadline.
+
+    ``ssl.SSLSocket`` starts a new deadline from the current socket timeout
+    on every handshake, read, and write. Setting that timeout once lets the
+    handshake use the full budget and then lets the HTTP response use it
+    again. Each call here waits only for the time still left.
+    """
+
+    def __init__(self, sock: socket.socket, deadline: float) -> None:
+        self._sock = sock
+        self._deadline = deadline
+
+    def _arm(self) -> None:
+        remaining = self._deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError("webhook request timed out")
+        self._sock.settimeout(remaining)
+
+    def send(self, data: bytes | bytearray | memoryview, flags: int = 0) -> int:
+        self._arm()
+        return self._sock.send(data, flags)
+
+    def sendall(self, data: bytes | bytearray | memoryview, flags: int = 0) -> None:
+        view = memoryview(data)
+        while view:
+            sent = self.send(view, flags)
+            if sent <= 0:
+                raise ConnectionError("webhook send wrote no bytes")
+            view = view[sent:]
+
+    def recv(self, buflen: int, flags: int = 0) -> bytes:
+        self._arm()
+        return self._sock.recv(buflen, flags)
+
+    def recv_into(
+        self,
+        buffer: bytearray | memoryview,
+        nbytes: int | None = None,
+        flags: int = 0,
+    ) -> int:
+        self._arm()
+        # ``nbytes`` of 0 is a real length for ``ssl.SSLSocket`` only after
+        # it replaces 0 with the buffer size. Pass ``None`` through so the
+        # socket reads the buffer, which is what ``makefile`` asks for.
+        if nbytes is None:
+            return self._sock.recv_into(buffer)
+        return self._sock.recv_into(buffer, nbytes, flags)
+
+    def makefile(
+        self,
+        mode: str = "r",
+        buffering: int | None = None,
+        *,
+        encoding: str | None = None,
+        errors: str | None = None,
+        newline: str | None = None,
+    ) -> io.BufferedReader:
+        del encoding, errors, newline
+        if mode != "rb":
+            raise ValueError("webhook deadline socket only supports binary reads")
+        raw = socket.SocketIO(self, "rb")  # type: ignore[arg-type]
+        if buffering is None or buffering < 0:
+            buffering = io.DEFAULT_BUFFER_SIZE
+        return io.BufferedReader(raw, buffering)
+
+    def settimeout(self, value: object) -> None:
+        # Callers cannot extend the deadline. The next I/O call arms the
+        # time still left.
+        del value
+
+    def gettimeout(self) -> float:
+        return max(0.0, self._deadline - time.monotonic())
+
+    def fileno(self) -> int:
+        return self._sock.fileno()
+
+    def _decref_socketios(self) -> None:
+        # ``socket.SocketIO.close`` drops a makefile reference on the real
+        # socket. Closing the SSL socket is ``close`` below. This proxy has
+        # no reference count of its own.
+        return None
+
+    def close(self) -> None:
+        self._sock.close()
+
+
 class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     """TLS to ``host`` over addresses from one resolution, tried in order.
 
@@ -978,10 +1068,12 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     time still left. When the budget is spent, later addresses are not tried
     and the last connect error is raised. If the budget was already spent
     before any attempt, ``connect`` raises ``TimeoutError``. After TCP
-    connects, the socket timeout is set back to the original ``timeout`` for
-    the TLS handshake and the HTTP exchange, so a later address does not
-    shrink the request. A TLS failure, including a certificate failure, is
-    not caught and does not try another address. The hostname is not resolved
+    connects, one deadline of the original ``timeout`` covers the TLS
+    handshake and the HTTP exchange. A later address does not shrink that
+    deadline: DNS and TCP time stay in ``_connect_timeout``. Time spent in
+    the handshake is not available for the response. A TLS failure,
+    including a certificate failure, is not caught and does not try
+    another address. The hostname is not resolved
     again. ``None`` disables the budget and each attempt blocks.
     ``socket._GLOBAL_DEFAULT_TIMEOUT``, which ``http.client`` stores when
     a connection is built without a timeout, is not a number and is
@@ -1009,8 +1101,9 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
         # treats a per-call timeout as "this attempt may block this long", so
         # passing the original timeout each time would allow N times the budget.
         # ``None`` and ``socket._GLOBAL_DEFAULT_TIMEOUT`` have no deadline.
-        # TLS uses ``self.timeout``, which delivery leaves at the caller's
-        # original timeout after DNS has already reduced ``_connect_timeout``.
+        # The TLS handshake and the HTTP exchange share ``self.timeout`` as
+        # one deadline. Delivery leaves that value at the caller's original
+        # timeout after DNS has already reduced ``_connect_timeout``.
         budget = _connect_budget(self._connect_timeout)
         tls_budget = _connect_budget(self.timeout)
         deadline = None if budget is None else time.monotonic() + budget
@@ -1033,7 +1126,14 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
                 last_error = exc
                 continue
             self.sock = sock
-            if tls_budget is not None:
+            # The handshake and every later HTTP read or write share this
+            # deadline. ``tls_budget`` is its length. It is not restarted
+            # for the response, and a later address does not shorten it.
+            request_deadline: float | None = None
+            if tls_budget is not None and tls_budget > 0:
+                request_deadline = time.monotonic() + tls_budget
+                self.sock.settimeout(tls_budget)
+            elif tls_budget is not None:
                 self.sock.settimeout(tls_budget)
             try:
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -1044,6 +1144,8 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
                 self._tunnel()
             server_hostname = self._tunnel_host or self.host
             self.sock = self._context.wrap_socket(self.sock, server_hostname=server_hostname)
+            if request_deadline is not None:
+                self.sock = _DeadlineSocket(self.sock, request_deadline)  # type: ignore[assignment]
             return
         if last_error is not None:
             raise last_error
