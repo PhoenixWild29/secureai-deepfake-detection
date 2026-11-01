@@ -7,10 +7,15 @@ body with HMAC-SHA256. The secret is stored in plaintext and is never
 returned by the API.
 
 Delivery resolves the hostname once and tries each validated address in
-that order. A connect failure falls through to the next address. TLS and
-the Host header still use the original hostname, so a DNS answer that
-changes between the check and the connect cannot move the socket onto a
-private address. Any TCP port is accepted. A public address that proxies
+that order. A connect failure falls through to the next address while
+time remains. The caller's timeout is one budget for every TCP attempt,
+not a fresh timeout per address. When that budget is spent, later
+addresses are not tried. After a TCP connection succeeds, the socket
+timeout is the original value again for the TLS handshake and the HTTP
+exchange. TLS and the Host header still use the original hostname, so a
+DNS answer that changes between the check and the connect cannot move
+the socket onto a private address. A TLS failure does not try another
+address. Any TCP port is accepted. A public address that proxies
 elsewhere is outside this check.
 """
 
@@ -26,6 +31,7 @@ import socket
 import ssl
 import sys
 import threading
+import time
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
@@ -811,8 +817,17 @@ def _blocked_host(host: str) -> bool:
 class _PinnedHTTPSConnection(http_client.HTTPSConnection):
     """TLS to ``host`` over addresses from one resolution, tried in order.
 
-    Host and SNI stay ``host``. A TCP connect failure tries the next address.
-    A TLS failure does not. The hostname is not resolved again.
+    Host and SNI stay ``host``. A TCP connect failure tries the next address
+    while time remains in ``timeout``. That value is one budget shared by
+    every address attempt. Each attempt receives only the time still left.
+    When the budget is spent, later addresses are not tried and the last
+    connect error is raised. If the budget was already spent before any
+    attempt, ``connect`` raises ``TimeoutError``. After TCP connects, the
+    socket timeout is set back to the original ``timeout`` for the TLS
+    handshake and the HTTP exchange, so a later address does not shrink
+    the request. A TLS failure, including a certificate failure, is not
+    caught and does not try another address. The hostname is not resolved
+    again. ``None`` disables the budget and each attempt blocks.
     """
 
     def __init__(
@@ -828,19 +843,35 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
         self._pinned_addresses = tuple(addresses)
 
     def connect(self) -> None:
+        if not self._pinned_addresses:
+            raise OSError("webhook connect has no pinned address")
         last_error: OSError | None = None
+        timeout = self.timeout
+        # One monotonic deadline for every pinned address. ``create_connection``
+        # treats a per-call timeout as "this attempt may block this long", so
+        # passing the original timeout each time would allow N times the budget.
+        deadline = None if timeout is None else time.monotonic() + float(timeout)
         for address in self._pinned_addresses:
+            if deadline is None:
+                attempt_timeout: float | None = None
+            else:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                attempt_timeout = remaining
             sys.audit("http.client.connect", self, address, self.port)
             try:
                 sock = socket.create_connection(
                     (address, self.port),
-                    self.timeout,
+                    attempt_timeout,
                     self.source_address,
                 )
             except OSError as exc:
                 last_error = exc
                 continue
             self.sock = sock
+            if timeout is not None:
+                self.sock.settimeout(float(timeout))
             try:
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             except OSError as exc:
@@ -853,7 +884,7 @@ class _PinnedHTTPSConnection(http_client.HTTPSConnection):
             return
         if last_error is not None:
             raise last_error
-        raise OSError("webhook host did not resolve")
+        raise TimeoutError("webhook connect timed out")
 
 
 def _resolve_public_addresses(host: str) -> list[str]:
