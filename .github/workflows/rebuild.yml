@@ -18,6 +18,8 @@ jobs:
   web:
     name: Web lint and build
     runs-on: ubuntu-latest
+    # About one minute on recent main runs. 20 minutes covers a cold npm install.
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: apps/web
@@ -44,6 +46,8 @@ jobs:
   api:
     name: API import and tests
     runs-on: ubuntu-latest
+    # About one minute on recent main runs. 20 minutes covers a cold pip install.
+    timeout-minutes: 20
     services:
       redis:
         image: redis:7-alpine
@@ -107,11 +111,17 @@ jobs:
   # Build after the API job so a failing unit or API test does not spend a
   # Docker build. Context is the repository root. The API Dockerfile copies
   # packages/shared. The worker Dockerfile copies packages/ (shared and
-  # detector) and apps/worker. Legacy GHCR workflows publish the repository-root
-  # Dockerfile only, and only on workflow_dispatch. These tags are not pushed.
+  # detector) and apps/worker. Each Dockerfile has a sibling .dockerignore
+  # that replaces the root file, so legacy weights are not uploaded.
+  # Legacy GHCR workflows publish the repository-root Dockerfile only, and
+  # only on workflow_dispatch. These tags are not pushed.
   images:
     name: Build ${{ matrix.image }} image
     runs-on: ubuntu-latest
+    # About one minute on recent main runs. 30 minutes covers a cold apt/pip
+    # install plus the Actions cache export, whose own limit is 10 minutes.
+    # The job does not log in and does not push.
+    timeout-minutes: 30
     needs: api
     strategy:
       fail-fast: false
@@ -127,5 +137,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # docker-container is the driver that can export type=gha without the
+      # containerd image store. No registry credentials.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        with:
+          driver: docker-container
+
+      # type=gha uses the runner cache token. pull_request and push may write
+      # that cache under the default cache-mode. Separate scopes so the two
+      # matrix legs do not replace each other's layers. Workflow permissions
+      # stay contents: read. push stays false.
       - name: Build image
-        run: docker build -f "${{ matrix.dockerfile }}" -t "${{ matrix.tag }}" .
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          tags: ${{ matrix.tag }}
+          push: "false"
+          load: "true"
+          provenance: "false"
+          sbom: "false"
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

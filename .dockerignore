@@ -1,3 +1,6 @@
+# Legacy root image (`docker build .`). BuildKit uses
+# apps/api/Dockerfile.dockerignore or apps/worker/Dockerfile.dockerignore
+# instead of this file when that Dockerfile is the build file.
 # Exclude uploads and results so Docker build context stays small and "no space left on device" is avoided.
 # These dirs are created empty in the image and mounted at runtime.
 uploads/
@@ -9,10 +12,14 @@ benchmark_results/
 training_runs/
 runs/
 
-# Git and IDE
+# Git, IDE, and local virtualenvs (never baked into an image)
 .git/
 .github/
 .cursor/
+.venv/
+venv/
+htmlcov/
+.coverage
 *.pyc
 __pycache__/
 *.pyo

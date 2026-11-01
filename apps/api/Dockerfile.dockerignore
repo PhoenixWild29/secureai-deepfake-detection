@@ -1,0 +1,33 @@
+# Replaces the repository-root .dockerignore for
+# `docker build -f apps/api/Dockerfile .`.
+# The API image copies packages/shared and apps/api. Legacy weights, the web
+# app, git, and docs stay out of the context.
+
+*
+
+!/packages
+!/packages/shared
+!/packages/shared/**
+
+!/apps
+!/apps/api
+!/apps/api/**
+
+# Junk inside the kept trees. Later lines win.
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.egg-info
+**/.venv
+**/venv
+**/node_modules
+**/.env
+**/.env.*
+**/tests
+**/*.md
+/apps/api/Dockerfile
+/apps/api/Dockerfile.dockerignore
+/apps/api/requirements-dev.txt

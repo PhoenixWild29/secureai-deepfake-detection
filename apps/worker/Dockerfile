@@ -1,6 +1,9 @@
 # Build context must be the repository root:
 #   docker build -f apps/worker/Dockerfile -t secureai-worker .
 #
+# apps/worker/Dockerfile.dockerignore replaces the root .dockerignore for this
+# file. The context is packages/ and apps/worker, not the legacy weights.
+#
 # The worker package depends on ../../packages/shared and ../../packages/detector.
 # Those relative paths only resolve when the monorepo layout is preserved.
 FROM python:3.12-slim-bookworm
